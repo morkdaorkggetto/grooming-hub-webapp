@@ -1,0 +1,177 @@
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { onAuthStateChange } from './lib/supabaseClient';
+import LoginForm from './components/Auth/LoginForm';
+import Dashboard from './pages/Dashboard';
+import ClientDetail from './pages/ClientDetail';
+import AddClient from './pages/AddClient';
+import AddVisit from './pages/AddVisit';
+
+/**
+ * ProtectedRoute — Componente wrapper per route protette
+ * Mostra la route se autenticato, altrimenti reindirizza a /login
+ */
+function ProtectedRoute({ isAuthenticated, children }) {
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
+
+/**
+ * App — Componente principale
+ * Gestisce routing e protezione autenticazione
+ */
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  /**
+   * Monitora i cambiamenti di stato autenticazione
+   * Chiamato una sola volta al mount
+   */
+  useEffect(() => {
+    // Iscriviti ai cambiamenti di autenticazione
+    const { data: subscription } = onAuthStateChange((event, currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+
+      // Log per debug
+      if (currentUser) {
+        console.log('✅ Utente autenticato:', currentUser.email);
+      } else {
+        console.log('❌ Utente non autenticato');
+      }
+    });
+
+    // Cleanup subscription
+    return () => {
+      subscription?.unsubscribe?.();
+    };
+  }, []);
+
+  // Loading state iniziale
+  if (loading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: '#faf3f0' }}
+      >
+        <div className="text-center">
+          <div
+            className="animate-spin h-16 w-16 rounded-full border-4 border-solid mx-auto mb-4"
+            style={{
+              borderColor: '#d4a574',
+              borderTopColor: 'transparent',
+            }}
+          ></div>
+          <p style={{ color: '#8b5a3c' }} className="text-lg font-medium">
+            Caricamento...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Router>
+      <Routes>
+        {/* Route pubblica: Login */}
+        <Route
+          path="/login"
+          element={
+            user ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LoginForm
+                onSuccess={() => {
+                  // Callback dopo login riuscito
+                  // L'app si aggiornerà automaticamente tramite onAuthStateChange
+                }}
+              />
+            )
+          }
+        />
+
+        {/* Route protette */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute isAuthenticated={!!user}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client/:clientId"
+          element={
+            <ProtectedRoute isAuthenticated={!!user}>
+              <ClientDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/add-client"
+          element={
+            <ProtectedRoute isAuthenticated={!!user}>
+              <AddClient />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client/:clientId/add-visit"
+          element={
+            <ProtectedRoute isAuthenticated={!!user}>
+              <AddVisit />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Route fallback */}
+        <Route
+          path="/"
+          element={
+            user ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        {/* 404 */}
+        <Route
+          path="*"
+          element={
+            <div
+              className="min-h-screen flex items-center justify-center"
+              style={{ backgroundColor: '#faf3f0' }}
+            >
+              <div className="text-center">
+                <h1
+                  style={{ color: '#5a3a2a' }}
+                  className="text-4xl font-bold mb-4"
+                >
+                  404
+                </h1>
+                <p style={{ color: '#8b5a3c' }} className="mb-6">
+                  Pagina non trovata
+                </p>
+                <a
+                  href="/dashboard"
+                  className="inline-block px-6 py-3 rounded-lg font-bold text-white transition"
+                  style={{ backgroundColor: '#d4a574' }}
+                >
+                  Torna alla home
+                </a>
+              </div>
+            </div>
+          }
+        />
+      </Routes>
+    </Router>
+  );
+}
