@@ -89,6 +89,10 @@ export default function Dashboard() {
     navigate('/add-client');
   };
 
+  const handleOpenCalendar = () => {
+    navigate('/calendar');
+  };
+
   // Stato di caricamento
   if (loading) {
     return (
@@ -125,6 +129,9 @@ export default function Dashboard() {
               </h1>
               <p className="text-sm text-white text-opacity-80">
                 {clients.length} {clients.length === 1 ? 'cliente' : 'clienti'}
+              </p>
+              <p className="text-xs text-white text-opacity-80 mt-1">
+                Blacklist: {clients.filter((client) => client.is_blacklisted).length}
               </p>
             </div>
 
@@ -178,6 +185,14 @@ export default function Dashboard() {
               backgroundColor: '#ffffff',
             }}
           />
+
+          <button
+            onClick={handleOpenCalendar}
+            className="px-6 py-3 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 whitespace-nowrap"
+            style={{ backgroundColor: '#8b5a3c' }}
+          >
+            📅 Calendario
+          </button>
 
           {/* Pulsante Aggiungi */}
           <button

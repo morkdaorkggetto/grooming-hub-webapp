@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addClient } from '../lib/database';
 
@@ -16,11 +16,20 @@ export default function AddClient() {
     owner: '',
     phone: '',
     notes: '',
-    photo: '',
   });
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState('');
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
 
   /**
-   * Gestisce upload foto: legge file e lo converte in base64
+   * Gestisce upload foto cliente
    */
   const handlePhotoSelect = (e) => {
     const file = e.target.files?.[0];
@@ -32,18 +41,12 @@ export default function AddClient() {
       return;
     }
 
-    // Leggi il file come data URL (base64)
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setFormData({
-        ...formData,
-        photo: event.target?.result || '',
-      });
-    };
-    reader.onerror = () => {
-      setError('Errore nel caricamento della foto');
-    };
-    reader.readAsDataURL(file);
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
+    }
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
   };
 
   /**
@@ -66,7 +69,10 @@ export default function AddClient() {
     setLoading(true);
 
     try {
-      await addClient(formData);
+      await addClient({
+        ...formData,
+        photoFile,
+      });
       // Navigazione automatica dopo successo
       navigate('/dashboard');
     } catch (err) {
@@ -265,17 +271,23 @@ export default function AddClient() {
               </label>
 
               {/* Preview foto se caricata */}
-              {formData.photo && (
+              {photoPreview && (
                 <div className="mb-4 relative">
                   <img
-                    src={formData.photo}
+                    src={photoPreview}
                     alt="Preview"
                     className="w-full h-48 object-cover rounded-lg border-2"
                     style={{ borderColor: '#d4a574' }}
                   />
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, photo: '' })}
+                    onClick={() => {
+                      if (photoPreview) {
+                        URL.revokeObjectURL(photoPreview);
+                      }
+                      setPhotoFile(null);
+                      setPhotoPreview('');
+                    }}
                     className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                   >
                     ✕

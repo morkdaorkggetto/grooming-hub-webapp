@@ -7,6 +7,8 @@ import {
   addVisit,
   deleteVisit,
   getClientPromos,
+  updateClientNoShowScore,
+  setClientBlacklistStatus,
 } from '../lib/database';
 import PromoBadge from '../components/PromoBadge';
 import VisitCard from '../components/VisitCard';
@@ -23,6 +25,7 @@ export default function ClientDetail() {
   const [error, setError] = useState('');
   const [showAddVisitModal, setShowAddVisitModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editPhotoPreview, setEditPhotoPreview] = useState('');
 
   // Form aggiunta visita
   const [visitForm, setVisitForm] = useState({
@@ -40,6 +43,8 @@ export default function ClientDetail() {
     phone: '',
     notes: '',
     photo: '',
+    photoFile: null,
+    removePhoto: false,
   });
 
   /**
@@ -48,6 +53,14 @@ export default function ClientDetail() {
   useEffect(() => {
     loadClient();
   }, [clientId]);
+
+  useEffect(() => {
+    return () => {
+      if (editPhotoPreview) {
+        URL.revokeObjectURL(editPhotoPreview);
+      }
+    };
+  }, [editPhotoPreview]);
 
   const loadClient = async () => {
     setLoading(true);
@@ -63,12 +76,42 @@ export default function ClientDetail() {
         phone: data.phone || '',
         notes: data.notes || '',
         photo: data.photo || '',
+        photoFile: null,
+        removePhoto: false,
       });
+      if (editPhotoPreview) {
+        URL.revokeObjectURL(editPhotoPreview);
+      }
+      setEditPhotoPreview('');
     } catch (err) {
       setError(err.message || 'Errore nel caricamento cliente');
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Gestisce upload foto nel form di modifica cliente
+   */
+  const handleEditPhotoSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Seleziona un file immagine valido');
+      return;
+    }
+
+    if (editPhotoPreview) {
+      URL.revokeObjectURL(editPhotoPreview);
+    }
+
+    setEditPhotoPreview(URL.createObjectURL(file));
+    setEditForm((prev) => ({
+      ...prev,
+      photoFile: file,
+      removePhoto: false,
+    }));
   };
 
   /**
@@ -124,11 +167,34 @@ export default function ClientDetail() {
 
     try {
       await updateClient(clientId, editForm);
+      if (editPhotoPreview) {
+        URL.revokeObjectURL(editPhotoPreview);
+      }
+      setEditPhotoPreview('');
       setShowEditModal(false);
       loadClient(); // Ricarica
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const handleOpenEditModal = () => {
+    if (!client) return;
+    if (editPhotoPreview) {
+      URL.revokeObjectURL(editPhotoPreview);
+    }
+    setEditPhotoPreview('');
+    setEditForm({
+      name: client.name,
+      breed: client.breed || '',
+      owner: client.owner,
+      phone: client.phone || '',
+      notes: client.notes || '',
+      photo: client.photo || '',
+      photoFile: null,
+      removePhoto: false,
+    });
+    setShowEditModal(true);
   };
 
   /**
@@ -143,6 +209,24 @@ export default function ClientDetail() {
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleAdjustNoShowScore = async (delta) => {
+    try {
+      await updateClientNoShowScore(clientId, delta);
+      await loadClient();
+    } catch (err) {
+      setError(err.message || 'Errore aggiornamento punteggio');
+    }
+  };
+
+  const handleToggleBlacklist = async () => {
+    try {
+      await setClientBlacklistStatus(clientId, !client.is_blacklisted);
+      await loadClient();
+    } catch (err) {
+      setError(err.message || 'Errore aggiornamento blacklist');
     }
   };
 
@@ -229,10 +313,18 @@ export default function ClientDetail() {
           <div className="flex flex-col sm:flex-row gap-6">
             {/* Foto */}
             <div
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0 overflow-hidden"
               style={{ backgroundColor: '#d4a574' }}
             >
-              {client.photo ? '📸' : '🐕'}
+              {client.photo ? (
+                <img
+                  src={client.photo}
+                  alt={client.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                '🐕'
+              )}
             </div>
 
             {/* Info */}
@@ -258,11 +350,18 @@ export default function ClientDetail() {
               {/* Action buttons */}
               <div className="flex gap-2 flex-wrap">
                 <button
-                  onClick={() => setShowEditModal(true)}
+                  onClick={handleOpenEditModal}
                   className="px-4 py-2 rounded-lg font-medium transition text-white"
                   style={{ backgroundColor: '#d4a574' }}
                 >
                   ✏️ Modifica
+                </button>
+                <button
+                  onClick={() => navigate(`/calendar?clientId=${clientId}`)}
+                  className="px-4 py-2 rounded-lg font-medium transition text-white"
+                  style={{ backgroundColor: '#8b5a3c' }}
+                >
+                  📅 Appuntamento
                 </button>
                 <button
                   onClick={handleDeleteClient}
@@ -289,6 +388,42 @@ export default function ClientDetail() {
             </p>
           </div>
         )}
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-3">
+            ⚖️ Affidabilita appuntamenti
+          </h3>
+          <p style={{ color: '#8b5a3c' }} className="mb-4">
+            Score attuale: <strong>{client.no_show_score ?? 0}</strong> · Stato:{' '}
+            <strong>{client.is_blacklisted ? 'BLACKLIST' : 'Attivo'}</strong>
+          </p>
+          <p style={{ color: '#8b5a3c' }} className="text-sm mb-4">
+            Regola automatica: da -3 in giu il cliente entra in blacklist.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleAdjustNoShowScore(-1)}
+              className="px-4 py-2 rounded-lg font-medium text-white"
+              style={{ backgroundColor: '#e11d48' }}
+            >
+              Segna No-show (-1)
+            </button>
+            <button
+              onClick={() => handleAdjustNoShowScore(1)}
+              className="px-4 py-2 rounded-lg font-medium text-white"
+              style={{ backgroundColor: '#16a34a' }}
+            >
+              Segna Presenza (+1)
+            </button>
+            <button
+              onClick={handleToggleBlacklist}
+              className="px-4 py-2 rounded-lg font-medium text-white"
+              style={{ backgroundColor: client.is_blacklisted ? '#2563eb' : '#b91c1c' }}
+            >
+              {client.is_blacklisted ? 'Rimuovi da blacklist' : 'Inserisci in blacklist'}
+            </button>
+          </div>
+        </div>
 
         {/* Visite */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -529,6 +664,57 @@ export default function ClientDetail() {
                 />
               </div>
 
+              {/* Foto */}
+              <div>
+                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                  Foto del cane
+                </label>
+
+                {(editForm.photo || editPhotoPreview) && (
+                  <div className="mb-3 relative">
+                    <img
+                      src={editPhotoPreview || editForm.photo}
+                      alt="Anteprima foto"
+                      className="w-full h-40 object-cover rounded-lg border-2"
+                      style={{ borderColor: '#d4a574' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (editPhotoPreview) {
+                          URL.revokeObjectURL(editPhotoPreview);
+                        }
+                        setEditPhotoPreview('');
+                        setEditForm((prev) => ({
+                          ...prev,
+                          photo: '',
+                          photoFile: null,
+                          removePhoto: true,
+                        }));
+                      }}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                <label
+                  className="block border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition hover:bg-amber-50"
+                  style={{ borderColor: '#d4a574' }}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEditPhotoSelect}
+                    className="hidden"
+                  />
+                  <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+                    {editForm.photo || editPhotoPreview ? 'Sostituisci foto' : 'Carica foto'}
+                  </p>
+                </label>
+              </div>
+
               {/* Buttons */}
               <div className="flex gap-3 pt-4">
                 <button
@@ -540,7 +726,13 @@ export default function ClientDetail() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowEditModal(false)}
+                  onClick={() => {
+                    if (editPhotoPreview) {
+                      URL.revokeObjectURL(editPhotoPreview);
+                    }
+                    setEditPhotoPreview('');
+                    setShowEditModal(false);
+                  }}
                   className="flex-1 py-3 rounded-lg font-bold border-2 transition"
                   style={{
                     borderColor: '#d4a574',

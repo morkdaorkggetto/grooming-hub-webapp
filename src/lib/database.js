@@ -1,11 +1,80 @@
 import { supabase, getCurrentUser } from './supabaseClient';
 
+const CLIENT_PHOTOS_BUCKET = 'client-photos';
+const BLACKLIST_THRESHOLD = -3;
+const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
+
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
 
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const getFileExtension = (file) => {
+  const nameParts = file?.name?.split('.') || [];
+  const extFromName = nameParts.length > 1 ? nameParts.pop().toLowerCase() : '';
+  if (extFromName) return extFromName;
+
+  const mime = file?.type || '';
+  if (mime === 'image/png') return 'png';
+  if (mime === 'image/webp') return 'webp';
+  if (mime === 'image/gif') return 'gif';
+  return 'jpg';
+};
+
+const getStoragePathFromPublicUrl = (url) => {
+  if (!url || typeof url !== 'string') return null;
+  const marker = `/storage/v1/object/public/${CLIENT_PHOTOS_BUCKET}/`;
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  return decodeURIComponent(url.slice(idx + marker.length));
+};
+
+const uploadClientPhoto = async (userId, clientId, file) => {
+  const ext = getFileExtension(file);
+  const filePath = `${userId}/${clientId}-${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(CLIENT_PHOTOS_BUCKET)
+    .upload(filePath, file, {
+      upsert: false,
+      contentType: file.type || 'image/jpeg',
+    });
+
+  if (uploadError) throw uploadError;
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from(CLIENT_PHOTOS_BUCKET).getPublicUrl(filePath);
+
+  return publicUrl;
+};
+
+const deleteClientPhotoByUrl = async (url) => {
+  const path = getStoragePathFromPublicUrl(url);
+  if (!path) return;
+
+  const { error } = await supabase.storage
+    .from(CLIENT_PHOTOS_BUCKET)
+    .remove([path]);
+
+  if (error) throw error;
+};
+
+const getOwnedClient = async (clientId, userId) => {
+  const { data: client, error } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('id', clientId)
+    .single();
+
+  if (error || client.user_id !== userId) {
+    throw new Error('Accesso negato: questo cliente non ti appartiene');
+  }
+
+  return client;
 };
 
 /**
@@ -15,6 +84,7 @@ const generateId = () => {
  * Tutte le funzioni usano async/await e includono error handling
  * RLS policies assicurano che ogni utente veda solo i propri dati
  */
+export const VALID_APPOINTMENT_STATUSES = [...APPOINTMENT_STATUSES];
 
 /**
  * Carica tutti i clienti dell'utente corrente con le loro visite
@@ -75,6 +145,9 @@ export const addClient = async (clientData) => {
     }
 
     const clientId = generateId();
+    const photoUrl = clientData.photoFile
+      ? await uploadClientPhoto(user.id, clientId, clientData.photoFile)
+      : null;
 
     const { data, error } = await supabase
       .from('clients')
@@ -86,7 +159,7 @@ export const addClient = async (clientData) => {
         owner: clientData.owner,
         phone: clientData.phone || null,
         notes: clientData.notes || null,
-        photo: clientData.photo || null,
+        photo: photoUrl,
       })
       .select('id')
       .single();
@@ -119,12 +192,26 @@ export const updateClient = async (clientId, clientData) => {
     // Verifica che il cliente appartenga all'utente (sicurezza)
     const { data: client, error: checkError } = await supabase
       .from('clients')
-      .select('user_id')
+      .select('user_id, photo')
       .eq('id', clientId)
       .single();
 
     if (checkError || client.user_id !== user.id) {
       throw new Error('Accesso negato: questo cliente non ti appartiene');
+    }
+
+    let nextPhotoUrl = client.photo || null;
+
+    if (clientData.photoFile) {
+      if (client.photo) {
+        await deleteClientPhotoByUrl(client.photo);
+      }
+      nextPhotoUrl = await uploadClientPhoto(user.id, clientId, clientData.photoFile);
+    } else if (clientData.removePhoto || clientData.photo === '') {
+      if (client.photo) {
+        await deleteClientPhotoByUrl(client.photo);
+      }
+      nextPhotoUrl = null;
     }
 
     const { error } = await supabase
@@ -135,7 +222,7 @@ export const updateClient = async (clientId, clientData) => {
         owner: clientData.owner,
         phone: clientData.phone || null,
         notes: clientData.notes || null,
-        photo: clientData.photo || null,
+        photo: nextPhotoUrl,
         updated_at: new Date().toISOString(),
       })
       .eq('id', clientId);
@@ -206,15 +293,7 @@ export const addVisit = async (clientId, visitData) => {
     }
 
     // Verifica che il cliente appartenga all'utente
-    const { data: client, error: checkError } = await supabase
-      .from('clients')
-      .select('user_id')
-      .eq('id', clientId)
-      .single();
-
-    if (checkError || client.user_id !== user.id) {
-      throw new Error('Accesso negato: questo cliente non ti appartiene');
-    }
+    await getOwnedClient(clientId, user.id);
 
     const visitId = generateId();
 
@@ -253,15 +332,7 @@ export const deleteVisit = async (visitId, clientId) => {
     if (!user) throw new Error('Utente non autenticato');
 
     // Verifica ownership del cliente
-    const { data: client, error: checkError } = await supabase
-      .from('clients')
-      .select('user_id')
-      .eq('id', clientId)
-      .single();
-
-    if (checkError || client.user_id !== user.id) {
-      throw new Error('Accesso negato: questa visita non ti appartiene');
-    }
+    await getOwnedClient(clientId, user.id);
 
     const { error } = await supabase
       .from('visits')
@@ -272,6 +343,255 @@ export const deleteVisit = async (visitId, clientId) => {
   } catch (error) {
     console.error('Errore eliminazione visita:', error.message);
     throw new Error(`Non riesco a eliminare la visita: ${error.message}`);
+  }
+};
+
+/**
+ * Aggiorna punteggio no-show del cliente.
+ * La blacklist automatica scatta quando il punteggio arriva a -3 o meno.
+ * @param {string} clientId
+ * @param {number} delta - Valore positivo o negativo da sommare
+ * @returns {Promise<Object>} { id, no_show_score, is_blacklisted }
+ */
+export const updateClientNoShowScore = async (clientId, delta) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    const client = await getOwnedClient(clientId, user.id);
+    const parsedDelta = Number(delta);
+    if (Number.isNaN(parsedDelta)) {
+      throw new Error('Delta punteggio non valido');
+    }
+
+    const nextScore = (Number(client.no_show_score) || 0) + parsedDelta;
+    const nextBlacklisted = nextScore <= BLACKLIST_THRESHOLD;
+
+    const { data, error } = await supabase
+      .from('clients')
+      .update({
+        no_show_score: nextScore,
+        is_blacklisted: nextBlacklisted,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', clientId)
+      .select('id, no_show_score, is_blacklisted')
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Errore aggiornamento no-show score:', error.message);
+    throw new Error(`Non riesco ad aggiornare il punteggio: ${error.message}`);
+  }
+};
+
+/**
+ * Forza manualmente lo stato blacklist di un cliente.
+ * @param {string} clientId
+ * @param {boolean} isBlacklisted
+ * @returns {Promise<Object>} { id, no_show_score, is_blacklisted }
+ */
+export const setClientBlacklistStatus = async (clientId, isBlacklisted) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    await getOwnedClient(clientId, user.id);
+
+    const { data, error } = await supabase
+      .from('clients')
+      .update({
+        is_blacklisted: !!isBlacklisted,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', clientId)
+      .select('id, no_show_score, is_blacklisted')
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Errore aggiornamento blacklist:', error.message);
+    throw new Error(`Non riesco ad aggiornare la blacklist: ${error.message}`);
+  }
+};
+
+/**
+ * Crea un appuntamento in calendario.
+ * @param {Object} appointmentData
+ * @returns {Promise<string>} appointment id
+ */
+export const addAppointment = async (appointmentData) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    const status = appointmentData.status || 'scheduled';
+    if (!APPOINTMENT_STATUSES.includes(status)) {
+      throw new Error('Stato appuntamento non valido');
+    }
+
+    if (!appointmentData.client_id || !appointmentData.scheduled_at) {
+      throw new Error('Cliente e data appuntamento sono obbligatori');
+    }
+
+    await getOwnedClient(appointmentData.client_id, user.id);
+    const appointmentId = generateId();
+
+    const { data, error } = await supabase
+      .from('appointments')
+      .insert({
+        id: appointmentId,
+        user_id: user.id,
+        client_id: appointmentData.client_id,
+        scheduled_at: appointmentData.scheduled_at,
+        duration_minutes: Number(appointmentData.duration_minutes) || 60,
+        status,
+        notes: appointmentData.notes || null,
+        external_calendar: appointmentData.external_calendar || null,
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+
+    if (status === 'no_show') {
+      await updateClientNoShowScore(appointmentData.client_id, -1);
+    }
+
+    return data.id;
+  } catch (error) {
+    console.error('Errore creazione appuntamento:', error.message);
+    throw new Error(`Non riesco a creare l'appuntamento: ${error.message}`);
+  }
+};
+
+/**
+ * Carica appuntamenti dell'utente.
+ * @param {Object} filters - { from?, to? } ISO datetime
+ * @returns {Promise<Array>}
+ */
+export const getAppointments = async (filters = {}) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    let query = supabase
+      .from('appointments')
+      .select(`
+        id,
+        user_id,
+        client_id,
+        scheduled_at,
+        duration_minutes,
+        status,
+        notes,
+        external_calendar,
+        created_at,
+        updated_at,
+        client:clients(id, name, owner, phone, no_show_score, is_blacklisted)
+      `)
+      .eq('user_id', user.id)
+      .order('scheduled_at', { ascending: true });
+
+    if (filters.from) {
+      query = query.gte('scheduled_at', filters.from);
+    }
+    if (filters.to) {
+      query = query.lte('scheduled_at', filters.to);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Errore caricamento appuntamenti:', error.message);
+    throw new Error(`Non riesco a caricare il calendario: ${error.message}`);
+  }
+};
+
+/**
+ * Aggiorna lo stato di un appuntamento.
+ * Se passa a no_show applica penalità automatica cliente.
+ * Se esce da no_show rimuove la penalità.
+ * @param {string} appointmentId
+ * @param {'scheduled'|'completed'|'cancelled'|'no_show'} status
+ */
+export const updateAppointmentStatus = async (appointmentId, status) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!APPOINTMENT_STATUSES.includes(status)) {
+      throw new Error('Stato appuntamento non valido');
+    }
+
+    const { data: appointment, error: appointmentError } = await supabase
+      .from('appointments')
+      .select('id, user_id, client_id, status')
+      .eq('id', appointmentId)
+      .single();
+
+    if (appointmentError || appointment.user_id !== user.id) {
+      throw new Error('Accesso negato: appuntamento non disponibile');
+    }
+
+    const previousStatus = appointment.status;
+    const { data, error } = await supabase
+      .from('appointments')
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', appointmentId)
+      .select('id, client_id, status')
+      .single();
+
+    if (error) throw error;
+
+    if (previousStatus !== 'no_show' && status === 'no_show') {
+      await updateClientNoShowScore(appointment.client_id, -1);
+    }
+
+    if (previousStatus === 'no_show' && status !== 'no_show') {
+      await updateClientNoShowScore(appointment.client_id, 1);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Errore aggiornamento stato appuntamento:', error.message);
+    throw new Error(`Non riesco ad aggiornare lo stato: ${error.message}`);
+  }
+};
+
+/**
+ * Elimina un appuntamento.
+ * @param {string} appointmentId
+ */
+export const deleteAppointment = async (appointmentId) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    const { data: appointment, error: appointmentError } = await supabase
+      .from('appointments')
+      .select('id, user_id')
+      .eq('id', appointmentId)
+      .single();
+
+    if (appointmentError || appointment.user_id !== user.id) {
+      throw new Error('Accesso negato: appuntamento non disponibile');
+    }
+
+    const { error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', appointmentId);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Errore eliminazione appuntamento:', error.message);
+    throw new Error(`Non riesco a eliminare l'appuntamento: ${error.message}`);
   }
 };
 

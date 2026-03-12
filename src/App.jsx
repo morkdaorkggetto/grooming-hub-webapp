@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard';
 import ClientDetail from './pages/ClientDetail';
 import AddClient from './pages/AddClient';
 import AddVisit from './pages/AddVisit';
+import Calendar from './pages/Calendar';
+import ResetPassword from './pages/ResetPassword';
 
 /**
  * ProtectedRoute — Componente wrapper per route protette
@@ -93,6 +95,8 @@ export default function App() {
           }
         />
 
+        <Route path="/reset-password" element={<ResetPassword />} />
+
         {/* Route protette */}
         <Route
           path="/dashboard"
@@ -126,6 +130,15 @@ export default function App() {
           element={
             <ProtectedRoute isAuthenticated={!!user}>
               <AddVisit />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute isAuthenticated={!!user}>
+              <Calendar />
             </ProtectedRoute>
           }
         />

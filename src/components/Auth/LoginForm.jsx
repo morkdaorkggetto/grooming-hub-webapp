@@ -16,6 +16,33 @@ export default function LoginForm({ onSuccess }) {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  const handleForgotPassword = async () => {
+    setError('');
+    setSuccessMessage('');
+
+    if (!email) {
+      setError('Inserisci prima la tua email.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (resetError) {
+        throw new Error(resetError.message);
+      }
+
+      setSuccessMessage('Ti ho inviato il link per reimpostare la password.');
+    } catch (err) {
+      setError(`Errore reset password: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /**
    * Gestisce signup: crea nuovo account + profilo utente
    */
@@ -216,6 +243,20 @@ export default function LoginForm({ onSuccess }) {
                 }}
               />
             </div>
+
+            {!isSignUp && (
+              <div className="text-right -mt-2">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={loading}
+                  className="text-sm underline"
+                  style={{ color: '#8b5a3c' }}
+                >
+                  Password dimenticata?
+                </button>
+              </div>
+            )}
 
             {/* Pulsante Submit */}
             <button

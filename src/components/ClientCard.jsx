@@ -11,6 +11,7 @@ export default function ClientCard({ client }) {
   const visitsCount = client.visits?.length || 0;
   const visitsText =
     visitsCount === 1 ? `${visitsCount} visita` : `${visitsCount} visite`;
+  const noShowScore = client.no_show_score ?? 0;
 
   return (
     <div
@@ -21,10 +22,18 @@ export default function ClientCard({ client }) {
     >
       {/* Header con foto */}
       <div
-        className="h-32 flex items-center justify-center text-5xl"
+        className="h-32 flex items-center justify-center"
         style={{ backgroundColor: '#d4a574' }}
       >
-        {client.photo ? '📸' : '🐕'}
+        {client.photo ? (
+          <img
+            src={client.photo}
+            alt={client.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-5xl">🐕</span>
+        )}
       </div>
 
       {/* Contenuto */}
@@ -54,6 +63,27 @@ export default function ClientCard({ client }) {
             <strong>👤</strong> {client.owner}
           </p>
         )}
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span
+            className="text-xs font-bold px-2 py-1 rounded-full"
+            style={{
+              backgroundColor: noShowScore < 0 ? '#fff1f2' : '#ecfdf5',
+              color: noShowScore < 0 ? '#be123c' : '#166534',
+            }}
+          >
+            Score affidabilita: {noShowScore}
+          </span>
+
+          {client.is_blacklisted && (
+            <span
+              className="text-xs font-bold px-2 py-1 rounded-full"
+              style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}
+            >
+              BLACKLIST
+            </span>
+          )}
+        </div>
 
         {/* Conteggio visite */}
         <div
