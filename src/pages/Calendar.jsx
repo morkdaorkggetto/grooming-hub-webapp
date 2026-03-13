@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   addAppointment,
@@ -204,6 +204,7 @@ const buildAppointmentDraft = (scheduledAt, durationMinutes) => ({
 export default function Calendar() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const createAppointmentRef = useRef(null);
 
   const [clients, setClients] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -363,6 +364,20 @@ export default function Calendar() {
   useEffect(() => {
     loadData();
   }, [fromDate, toDate]);
+
+  useEffect(() => {
+    const clientIdFromQuery = searchParams.get('clientId') || '';
+    if (!clientIdFromQuery) return;
+
+    setForm((current) =>
+      current.clientId === clientIdFromQuery ? current : { ...current, clientId: clientIdFromQuery }
+    );
+    setSelectedAppointment(null);
+
+    requestAnimationFrame(() => {
+      createAppointmentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [searchParams]);
 
   useEffect(() => {
     if (!selectedAppointment) return;
@@ -808,7 +823,7 @@ export default function Calendar() {
           </div>
         )}
 
-        <section className="bg-white rounded-2xl shadow-lg p-6">
+        <section ref={createAppointmentRef} className="bg-white rounded-2xl shadow-lg p-6">
           <h2 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-4">
             Nuovo Appuntamento
           </h2>
@@ -1270,7 +1285,11 @@ export default function Calendar() {
                     Apri cliente
                   </button>
                   <button
-                    onClick={() => navigate(`/calendar?clientId=${selectedAppointment.client_id}`)}
+                    onClick={() =>
+                      navigate(`/calendar?clientId=${selectedAppointment.client_id}`, {
+                        replace: false,
+                      })
+                    }
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#d4a574' }}
                   >
