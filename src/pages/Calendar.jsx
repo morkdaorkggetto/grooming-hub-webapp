@@ -212,6 +212,7 @@ export default function Calendar() {
   const [dragOverDay, setDragOverDay] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [updatingAppointment, setUpdatingAppointment] = useState(false);
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState('week');
 
@@ -224,6 +225,11 @@ export default function Calendar() {
     time: '09:00',
     durationMinutes: DEFAULT_DURATION,
     notes: '',
+  });
+  const [detailForm, setDetailForm] = useState({
+    date: '',
+    time: '',
+    durationMinutes: DEFAULT_DURATION,
   });
 
   const groupedAppointments = useMemo(() => {
@@ -314,6 +320,26 @@ export default function Calendar() {
     [appointments, draggingAppointmentId]
   );
 
+  const findConflictForCandidate = (candidate, excludedAppointmentId = null) =>
+    appointments.find(
+      (appointment) =>
+        appointment.id !== excludedAppointmentId &&
+        isConflictCandidate(appointment) &&
+        appointmentsOverlap(candidate, appointment)
+    ) || null;
+
+  const detailConflict = useMemo(() => {
+    if (!selectedAppointment || !detailForm.date || !detailForm.time) return null;
+
+    const scheduledAt = new Date(`${detailForm.date}T${detailForm.time}`).toISOString();
+    const candidate = buildAppointmentDraft(
+      scheduledAt,
+      detailForm.durationMinutes
+    );
+
+    return findConflictForCandidate(candidate, selectedAppointment.id);
+  }, [appointments, detailForm.date, detailForm.time, detailForm.durationMinutes, selectedAppointment]);
+
   const loadData = async () => {
     setLoading(true);
     setError('');
@@ -337,6 +363,17 @@ export default function Calendar() {
   useEffect(() => {
     loadData();
   }, [fromDate, toDate]);
+
+  useEffect(() => {
+    if (!selectedAppointment) return;
+
+    const date = new Date(selectedAppointment.scheduled_at);
+    setDetailForm({
+      date: toLocalDateString(date),
+      time: formatTimeOnly(selectedAppointment.scheduled_at),
+      durationMinutes: selectedAppointment.duration_minutes || DEFAULT_DURATION,
+    });
+  }, [selectedAppointment]);
 
   const handleAddAppointment = async (e) => {
     e.preventDefault();
@@ -449,14 +486,6 @@ export default function Calendar() {
     setViewMode('week');
   };
 
-  const findConflictForCandidate = (candidate, excludedAppointmentId = null) =>
-    appointments.find(
-      (appointment) =>
-        appointment.id !== excludedAppointmentId &&
-        isConflictCandidate(appointment) &&
-        appointmentsOverlap(candidate, appointment)
-    ) || null;
-
   const handleAppointmentDragStart = (appointment) => {
     setDraggingAppointmentId(appointment.id);
     setDragOverDay('');
@@ -537,6 +566,42 @@ export default function Calendar() {
 
   const openAppointmentDetails = (appointment) => {
     setSelectedAppointment(appointment);
+  };
+
+  const handleUpdateSelectedAppointment = async (e) => {
+    e.preventDefault();
+    if (!selectedAppointment) return;
+
+    if (!detailForm.date || !detailForm.time) {
+      setError('Data e ora appuntamento sono obbligatorie.');
+      return;
+    }
+
+    if (detailConflict) {
+      setError(
+        `Modifica non possibile: conflitto con ${detailConflict.client?.name || 'un altro appuntamento'} (${formatConflictInterval(
+          detailConflict
+        )}).`
+      );
+      return;
+    }
+
+    setUpdatingAppointment(true);
+
+    try {
+      const nextScheduledAt = new Date(`${detailForm.date}T${detailForm.time}`).toISOString();
+      const updated = await updateAppointmentSchedule(selectedAppointment.id, {
+        scheduled_at: nextScheduledAt,
+        duration_minutes: detailForm.durationMinutes,
+      });
+
+      setSelectedAppointment(updated);
+      await loadData();
+    } catch (err) {
+      setError(err.message || 'Errore aggiornamento appuntamento');
+    } finally {
+      setUpdatingAppointment(false);
+    }
   };
 
   const renderAppointmentCard = (appointment, compact = false) => {
@@ -1045,6 +1110,84 @@ export default function Calendar() {
                     Note: {selectedAppointment.notes}
                   </p>
                 )}
+              </div>
+
+              <div>
+                <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-3">
+                  Modifica orario
+                </h3>
+                <form onSubmit={handleUpdateSelectedAppointment} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label style={{ color: '#8b5a3c' }} className="block text-sm font-medium mb-1">
+                        Data
+                      </label>
+                      <input
+                        type="date"
+                        value={detailForm.date}
+                        onChange={(event) =>
+                          setDetailForm((current) => ({ ...current, date: event.target.value }))
+                        }
+                        className="w-full px-3 py-2 rounded-lg border-2"
+                        style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ color: '#8b5a3c' }} className="block text-sm font-medium mb-1">
+                        Ora
+                      </label>
+                      <input
+                        type="time"
+                        value={detailForm.time}
+                        onChange={(event) =>
+                          setDetailForm((current) => ({ ...current, time: event.target.value }))
+                        }
+                        className="w-full px-3 py-2 rounded-lg border-2"
+                        style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ color: '#8b5a3c' }} className="block text-sm font-medium mb-1">
+                        Durata
+                      </label>
+                      <input
+                        type="number"
+                        min="15"
+                        max="480"
+                        step="15"
+                        value={detailForm.durationMinutes}
+                        onChange={(event) =>
+                          setDetailForm((current) => ({
+                            ...current,
+                            durationMinutes: event.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-2 rounded-lg border-2"
+                        style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                      />
+                    </div>
+                  </div>
+
+                  {detailConflict && (
+                    <div
+                      className="p-3 rounded-lg border"
+                      style={{ borderColor: '#fecaca', backgroundColor: '#fff1f2' }}
+                    >
+                      <p style={{ color: '#9f1239' }} className="text-sm font-medium">
+                        Conflitto con {detailConflict.client?.name || 'un altro appuntamento'} ({formatConflictInterval(detailConflict)}).
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={updatingAppointment}
+                    className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-60"
+                    style={{ backgroundColor: '#d4a574' }}
+                  >
+                    {updatingAppointment ? 'Salvataggio...' : 'Salva nuovo orario'}
+                  </button>
+                </form>
               </div>
 
               <div>
