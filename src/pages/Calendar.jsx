@@ -184,6 +184,17 @@ const getStatusStyle = (status) => {
   return { backgroundColor: '#eff6ff', color: '#1d4ed8' };
 };
 
+const formatConflictInterval = (appointment) => {
+  const start = formatTimeOnly(appointment.scheduled_at);
+  const end = formatTimeOnly(getAppointmentEnd(appointment).toISOString());
+  const day = new Date(appointment.scheduled_at).toLocaleDateString('it-IT', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+  });
+  return `${day} ${start}-${end}`;
+};
+
 export default function Calendar() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -325,9 +336,9 @@ export default function Calendar() {
 
     if (draftConflict) {
       setError(
-        `Conflitto orario con ${draftConflict.client?.name || 'un altro appuntamento'} alle ${new Date(
-          draftConflict.scheduled_at
-        ).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}.`
+        `Conflitto con ${draftConflict.client?.name || 'un altro appuntamento'} (${formatConflictInterval(
+          draftConflict
+        )}).`
       );
       return;
     }
@@ -734,12 +745,7 @@ export default function Calendar() {
           {draftConflict && (
             <div className="mt-4 p-4 rounded-xl border" style={{ borderColor: '#fecaca', backgroundColor: '#fff1f2' }}>
               <p style={{ color: '#9f1239' }} className="font-medium">
-                Conflitto rilevato con {draftConflict.client?.name || 'un altro appuntamento'} alle{' '}
-                {new Date(draftConflict.scheduled_at).toLocaleTimeString('it-IT', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-                .
+                Conflitto rilevato con {draftConflict.client?.name || 'un altro appuntamento'} ({formatConflictInterval(draftConflict)}).
               </p>
               <p style={{ color: '#9f1239' }} className="text-sm mt-1">
                 Modifica data, ora o durata prima di salvare.
