@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   getClientById,
@@ -27,6 +27,8 @@ export default function ClientDetail() {
   const [showAddVisitModal, setShowAddVisitModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
+  const editCameraInputRef = useRef(null);
+  const editGalleryInputRef = useRef(null);
 
   // Form aggiunta visita
   const [visitForm, setVisitForm] = useState({
@@ -717,20 +719,49 @@ export default function ClientDetail() {
                   </div>
                 )}
 
-                <label
-                  className="block border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition hover:bg-amber-50"
+                <div
+                  className="border-2 border-dashed rounded-lg p-4 text-center"
                   style={{ borderColor: '#d4a574' }}
                 >
                   <input
+                    ref={editCameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleEditPhotoSelect}
+                    className="hidden"
+                  />
+                  <input
+                    ref={editGalleryInputRef}
                     type="file"
                     accept="image/*"
                     onChange={handleEditPhotoSelect}
                     className="hidden"
                   />
                   <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
-                    {editForm.photo || editPhotoPreview ? 'Sostituisci foto' : 'Carica foto'}
+                    {editForm.photo || editPhotoPreview
+                      ? 'Sostituisci foto del cane'
+                      : 'Aggiungi foto del cane'}
                   </p>
-                </label>
+                  <div className="mt-3 flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                      type="button"
+                      onClick={() => editCameraInputRef.current?.click()}
+                      className="px-4 py-2 rounded-lg font-medium text-white transition"
+                      style={{ backgroundColor: '#d4a574' }}
+                    >
+                      Scatta foto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editGalleryInputRef.current?.click()}
+                      className="px-4 py-2 rounded-lg font-medium border-2 transition"
+                      style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
+                    >
+                      Galleria
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Buttons */}

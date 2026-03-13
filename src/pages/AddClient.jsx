@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addClient } from '../lib/database';
 
@@ -19,6 +19,8 @@ export default function AddClient() {
   });
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -295,13 +297,22 @@ export default function AddClient() {
                 </div>
               )}
 
-              {/* Input file */}
-              <label
-                className="block border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition hover:bg-amber-50"
+              <div
+                className="border-2 border-dashed rounded-lg p-8 text-center"
                 style={{ borderColor: '#d4a574' }}
               >
                 <input
-                  id="photo"
+                  ref={cameraInputRef}
+                  id="photo-camera"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handlePhotoSelect}
+                  className="hidden"
+                />
+                <input
+                  ref={galleryInputRef}
+                  id="photo-gallery"
                   type="file"
                   accept="image/*"
                   onChange={handlePhotoSelect}
@@ -310,13 +321,31 @@ export default function AddClient() {
                 <div>
                   <div className="text-4xl mb-2">📸</div>
                   <p style={{ color: '#5a3a2a' }} className="font-bold">
-                    Scegli una foto
+                    Foto del cane
                   </p>
                   <p style={{ color: '#8b5a3c' }} className="text-sm mt-1">
-                    Clicca o trascina un'immagine
+                    Da smartphone puoi scattarla in diretta oppure scegliere dalla galleria.
                   </p>
                 </div>
-              </label>
+                <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="px-4 py-3 rounded-lg font-bold text-white transition"
+                    style={{ backgroundColor: '#d4a574' }}
+                  >
+                    Scatta foto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="px-4 py-3 rounded-lg font-bold border-2 transition"
+                    style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
+                  >
+                    Scegli dalla galleria
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Buttons */}
