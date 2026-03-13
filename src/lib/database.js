@@ -565,6 +565,63 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
 };
 
 /**
+ * Aggiorna data/ora e durata di un appuntamento esistente.
+ * @param {string} appointmentId
+ * @param {{ scheduled_at: string, duration_minutes?: number }} updates
+ * @returns {Promise<Object>}
+ */
+export const updateAppointmentSchedule = async (appointmentId, updates) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    if (!updates?.scheduled_at) {
+      throw new Error('La nuova data appuntamento è obbligatoria');
+    }
+
+    const { data: appointment, error: appointmentError } = await supabase
+      .from('appointments')
+      .select('id, user_id, scheduled_at, duration_minutes, client_id')
+      .eq('id', appointmentId)
+      .single();
+
+    if (appointmentError || appointment.user_id !== user.id) {
+      throw new Error('Accesso negato: appuntamento non disponibile');
+    }
+
+    const { data, error } = await supabase
+      .from('appointments')
+      .update({
+        scheduled_at: updates.scheduled_at,
+        duration_minutes: Number(updates.duration_minutes) || appointment.duration_minutes,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', appointmentId)
+      .select(`
+        id,
+        user_id,
+        client_id,
+        scheduled_at,
+        duration_minutes,
+        status,
+        notes,
+        external_calendar,
+        created_at,
+        updated_at,
+        client:clients(id, name, owner, phone, no_show_score, is_blacklisted)
+      `)
+      .single();
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.error('Errore aggiornamento orario appuntamento:', error.message);
+    throw new Error(`Non riesco a spostare l'appuntamento: ${error.message}`);
+  }
+};
+
+/**
  * Elimina un appuntamento.
  * @param {string} appointmentId
  */

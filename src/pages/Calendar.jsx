@@ -5,6 +5,7 @@ import {
   deleteAppointment,
   getAllClients,
   getAppointments,
+  updateAppointmentSchedule,
   updateAppointmentStatus,
   VALID_APPOINTMENT_STATUSES,
 } from '../lib/database';
@@ -195,6 +196,11 @@ const formatConflictInterval = (appointment) => {
   return `${day} ${start}-${end}`;
 };
 
+const buildAppointmentDraft = (scheduledAt, durationMinutes) => ({
+  scheduled_at: scheduledAt,
+  duration_minutes: Number(durationMinutes) || DEFAULT_DURATION,
+});
+
 export default function Calendar() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -202,6 +208,8 @@ export default function Calendar() {
   const [clients, setClients] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [draggingAppointmentId, setDraggingAppointmentId] = useState(null);
+  const [dragOverDay, setDragOverDay] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -300,6 +308,11 @@ export default function Calendar() {
       (appointment) => isConflictCandidate(appointment) && appointmentsOverlap(draft, appointment)
     ) || null;
   }, [appointments, form.clientId, form.date, form.time, form.durationMinutes]);
+
+  const draggingAppointment = useMemo(
+    () => appointments.find((appointment) => appointment.id === draggingAppointmentId) || null,
+    [appointments, draggingAppointmentId]
+  );
 
   const loadData = async () => {
     setLoading(true);
@@ -436,6 +449,92 @@ export default function Calendar() {
     setViewMode('week');
   };
 
+  const findConflictForCandidate = (candidate, excludedAppointmentId = null) =>
+    appointments.find(
+      (appointment) =>
+        appointment.id !== excludedAppointmentId &&
+        isConflictCandidate(appointment) &&
+        appointmentsOverlap(candidate, appointment)
+    ) || null;
+
+  const handleAppointmentDragStart = (appointment) => {
+    setDraggingAppointmentId(appointment.id);
+    setDragOverDay('');
+  };
+
+  const handleAppointmentDragEnd = () => {
+    setDraggingAppointmentId(null);
+    setDragOverDay('');
+  };
+
+  const handleTimelineDragOver = (event, day) => {
+    event.preventDefault();
+    if (!draggingAppointmentId) return;
+    setDragOverDay(day);
+  };
+
+  const handleTimelineDragLeave = () => {
+    setDragOverDay('');
+  };
+
+  const handleTimelineDrop = async (event, day) => {
+    event.preventDefault();
+    if (!draggingAppointment) return;
+
+    setDragOverDay('');
+
+    const timelineRect = event.currentTarget.getBoundingClientRect();
+    const offsetY = Math.min(
+      Math.max(event.clientY - timelineRect.top, 0),
+      timelineRect.height
+    );
+    const totalMinutes = Math.round((offsetY / HOUR_ROW_HEIGHT) * 60 / 15) * 15;
+    const clampedMinutes = Math.min(
+      Math.max(totalMinutes, 0),
+      (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60
+    );
+    const nextHour = TIMELINE_START_HOUR + Math.floor(clampedMinutes / 60);
+    const nextMinute = clampedMinutes % 60;
+    const nextDate = new Date(`${day}T00:00:00`);
+    nextDate.setHours(nextHour, nextMinute, 0, 0);
+    const nextScheduledAt = nextDate.toISOString();
+
+    const candidate = buildAppointmentDraft(
+      nextScheduledAt,
+      draggingAppointment.duration_minutes
+    );
+    const conflict = findConflictForCandidate(candidate, draggingAppointment.id);
+
+    if (conflict) {
+      setError(
+        `Spostamento non possibile: conflitto con ${conflict.client?.name || 'un altro appuntamento'} (${formatConflictInterval(
+          conflict
+        )}).`
+      );
+      setDraggingAppointmentId(null);
+      return;
+    }
+
+    try {
+      await updateAppointmentSchedule(draggingAppointment.id, {
+        scheduled_at: nextScheduledAt,
+        duration_minutes: draggingAppointment.duration_minutes,
+      });
+
+      if (selectedAppointment?.id === draggingAppointment.id) {
+        setSelectedAppointment((current) =>
+          current ? { ...current, scheduled_at: nextScheduledAt } : current
+        );
+      }
+
+      await loadData();
+    } catch (err) {
+      setError(err.message || 'Errore spostamento appuntamento');
+    } finally {
+      setDraggingAppointmentId(null);
+    }
+  };
+
   const openAppointmentDetails = (appointment) => {
     setSelectedAppointment(appointment);
   };
@@ -550,10 +649,13 @@ export default function Calendar() {
               key={day}
               className="relative rounded-2xl border overflow-hidden"
               style={{
-                borderColor: '#e8d5c4',
-                backgroundColor: '#fffdfb',
+                borderColor: dragOverDay === day ? '#2563eb' : '#e8d5c4',
+                backgroundColor: dragOverDay === day ? '#eff6ff' : '#fffdfb',
                 height: `${(TIMELINE_END_HOUR - TIMELINE_START_HOUR + 1) * HOUR_ROW_HEIGHT}px`,
               }}
+              onDragOver={(event) => handleTimelineDragOver(event, day)}
+              onDragLeave={handleTimelineDragLeave}
+              onDrop={(event) => handleTimelineDrop(event, day)}
             >
               {hourLabels.map((hour, index) => (
                 <div
@@ -579,6 +681,9 @@ export default function Calendar() {
                   <button
                     key={appointment.id}
                     type="button"
+                    draggable
+                    onDragStart={() => handleAppointmentDragStart(appointment)}
+                    onDragEnd={handleAppointmentDragEnd}
                     onClick={() => openAppointmentDetails(appointment)}
                     className="absolute left-2 right-2 rounded-xl px-3 py-2 text-left shadow-sm transition hover:shadow-md"
                     style={{
