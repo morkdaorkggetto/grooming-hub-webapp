@@ -11,6 +11,7 @@ import {
   setClientBlacklistStatus,
 } from '../lib/database';
 import { getClientWhatsAppUrl } from '../lib/whatsapp';
+import ImageCropModal from '../components/ImageCropModal';
 import PromoBadge from '../components/PromoBadge';
 import VisitCard from '../components/VisitCard';
 
@@ -29,6 +30,7 @@ export default function ClientDetail() {
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
   const editCameraInputRef = useRef(null);
   const editGalleryInputRef = useRef(null);
+  const [pendingEditCropFile, setPendingEditCropFile] = useState(null);
 
   // Form aggiunta visita
   const [visitForm, setVisitForm] = useState({
@@ -98,6 +100,7 @@ export default function ClientDetail() {
    */
   const handleEditPhotoSelect = (e) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -105,16 +108,25 @@ export default function ClientDetail() {
       return;
     }
 
+    setPendingEditCropFile(file);
+  };
+
+  const handleEditCropCancel = () => {
+    setPendingEditCropFile(null);
+  };
+
+  const handleEditCropConfirm = ({ file, previewUrl }) => {
     if (editPhotoPreview) {
       URL.revokeObjectURL(editPhotoPreview);
     }
 
-    setEditPhotoPreview(URL.createObjectURL(file));
+    setEditPhotoPreview(previewUrl);
     setEditForm((prev) => ({
       ...prev,
       photoFile: file,
       removePhoto: false,
     }));
+    setPendingEditCropFile(null);
   };
 
   /**
@@ -795,6 +807,13 @@ export default function ClientDetail() {
           </div>
         </div>
       )}
+
+      <ImageCropModal
+        open={Boolean(pendingEditCropFile)}
+        file={pendingEditCropFile}
+        onCancel={handleEditCropCancel}
+        onConfirm={handleEditCropConfirm}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addClient } from '../lib/database';
+import ImageCropModal from '../components/ImageCropModal';
 
 /**
  * AddClient — Pagina form aggiunta nuovo cliente
@@ -21,6 +22,7 @@ export default function AddClient() {
   const [photoPreview, setPhotoPreview] = useState('');
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
+  const [pendingCropFile, setPendingCropFile] = useState(null);
 
   useEffect(() => {
     return () => {
@@ -35,6 +37,7 @@ export default function AddClient() {
    */
   const handlePhotoSelect = (e) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
 
     // Validazione tipo file
@@ -43,12 +46,21 @@ export default function AddClient() {
       return;
     }
 
+    setPendingCropFile(file);
+  };
+
+  const handleCropCancel = () => {
+    setPendingCropFile(null);
+  };
+
+  const handleCropConfirm = ({ file, previewUrl }) => {
     if (photoPreview) {
       URL.revokeObjectURL(photoPreview);
     }
 
     setPhotoFile(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    setPhotoPreview(previewUrl);
+    setPendingCropFile(null);
   };
 
   /**
@@ -411,6 +423,13 @@ export default function AddClient() {
           </div>
         </div>
       </main>
+
+      <ImageCropModal
+        open={Boolean(pendingCropFile)}
+        file={pendingCropFile}
+        onCancel={handleCropCancel}
+        onConfirm={handleCropConfirm}
+      />
     </div>
   );
 }
