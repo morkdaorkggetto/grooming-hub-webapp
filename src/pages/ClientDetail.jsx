@@ -10,6 +10,7 @@ import {
   updateClientNoShowScore,
   setClientBlacklistStatus,
 } from '../lib/database';
+import { getClientWhatsAppUrl } from '../lib/whatsapp';
 import PromoBadge from '../components/PromoBadge';
 import VisitCard from '../components/VisitCard';
 
@@ -230,6 +231,16 @@ export default function ClientDetail() {
     }
   };
 
+  const handleOpenWhatsApp = () => {
+    const whatsappUrl = getClientWhatsAppUrl(client);
+    if (!whatsappUrl) {
+      setError('Inserisci un numero di telefono per usare WhatsApp.');
+      return;
+    }
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -362,6 +373,13 @@ export default function ClientDetail() {
                   style={{ backgroundColor: '#8b5a3c' }}
                 >
                   📅 Appuntamento
+                </button>
+                <button
+                  onClick={handleOpenWhatsApp}
+                  className="px-4 py-2 rounded-lg font-medium transition text-white"
+                  style={{ backgroundColor: '#16a34a' }}
+                >
+                  WhatsApp
                 </button>
                 <button
                   onClick={handleDeleteClient}

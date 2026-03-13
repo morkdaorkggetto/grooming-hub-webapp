@@ -8,6 +8,7 @@ import {
   updateAppointmentStatus,
   VALID_APPOINTMENT_STATUSES,
 } from '../lib/database';
+import { getAppointmentWhatsAppUrl } from '../lib/whatsapp';
 
 const DEFAULT_DURATION = 60;
 
@@ -244,6 +245,16 @@ export default function Calendar() {
     } catch (err) {
       setError(err.message || 'Errore eliminazione appuntamento');
     }
+  };
+
+  const handleOpenAppointmentWhatsApp = (appointment) => {
+    const whatsappUrl = getAppointmentWhatsAppUrl(appointment);
+    if (!whatsappUrl) {
+      setError('Il cliente non ha un numero di telefono utilizzabile per WhatsApp.');
+      return;
+    }
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -491,6 +502,13 @@ export default function Calendar() {
                             </div>
 
                             <div className="flex flex-wrap gap-2">
+                              <button
+                                onClick={() => handleOpenAppointmentWhatsApp(appointment)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
+                                style={{ backgroundColor: '#16a34a' }}
+                              >
+                                WhatsApp
+                              </button>
                               <a
                                 href={getGoogleCalendarUrl(appointment)}
                                 target="_blank"
