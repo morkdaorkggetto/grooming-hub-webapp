@@ -1,3 +1,6 @@
+const MAX_OUTPUT_SIZE = 960;
+const JPEG_QUALITY = 0.82;
+
 const loadImageElement = (src) =>
   new Promise((resolve, reject) => {
     const image = new Image();
@@ -8,7 +11,7 @@ const loadImageElement = (src) =>
 
 export const cropImageSquare = async (
   file,
-  { zoom = 1, offsetX = 0, offsetY = 0, outputSize = 960 } = {}
+  { zoom = 1, offsetX = 0, offsetY = 0, outputSize = MAX_OUTPUT_SIZE } = {}
 ) => {
   const objectUrl = URL.createObjectURL(file);
 
@@ -37,9 +40,11 @@ export const cropImageSquare = async (
     const clampedSy = Math.min(Math.max(sy, 0), naturalHeight - cropSize);
     const safeCropSize = Math.min(cropSize, naturalWidth, naturalHeight);
 
+    const targetSize = Math.max(320, Math.min(outputSize, Math.round(safeCropSize)));
+
     const canvas = document.createElement('canvas');
-    canvas.width = outputSize;
-    canvas.height = outputSize;
+    canvas.width = targetSize;
+    canvas.height = targetSize;
 
     const context = canvas.getContext('2d');
     context.drawImage(
@@ -50,8 +55,8 @@ export const cropImageSquare = async (
       safeCropSize,
       0,
       0,
-      outputSize,
-      outputSize
+      targetSize,
+      targetSize
     );
 
     const blob = await new Promise((resolve, reject) => {
@@ -63,13 +68,12 @@ export const cropImageSquare = async (
           }
           resolve(result);
         },
-        file.type === 'image/png' ? 'image/png' : 'image/jpeg',
-        0.92
+        'image/jpeg',
+        JPEG_QUALITY
       );
     });
 
-    const extension = file.type === 'image/png' ? 'png' : 'jpg';
-    const croppedFile = new File([blob], `cropped-${Date.now()}.${extension}`, {
+    const croppedFile = new File([blob], `cropped-${Date.now()}.jpg`, {
       type: blob.type,
       lastModified: Date.now(),
     });
@@ -80,6 +84,9 @@ export const cropImageSquare = async (
       meta: {
         naturalWidth,
         naturalHeight,
+        outputSize: targetSize,
+        originalBytes: file.size,
+        compressedBytes: croppedFile.size,
         maxOffsetX,
         maxOffsetY,
       },
