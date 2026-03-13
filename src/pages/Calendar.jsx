@@ -52,6 +52,9 @@ const appointmentsOverlap = (left, right) => {
 };
 
 const isConflictCandidate = (appointment) => appointment.status !== 'cancelled';
+const TIMELINE_START_HOUR = 8;
+const TIMELINE_END_HOUR = 20;
+const HOUR_ROW_HEIGHT = 72;
 
 const formatWeekdayShort = (dateStr) =>
   new Date(`${dateStr}T00:00:00`).toLocaleDateString('it-IT', {
@@ -59,6 +62,22 @@ const formatWeekdayShort = (dateStr) =>
     day: '2-digit',
     month: '2-digit',
   });
+
+const formatTimeOnly = (iso) =>
+  new Date(iso).toLocaleTimeString('it-IT', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+const minutesFromTimelineStart = (iso) => {
+  const date = new Date(iso);
+  return (date.getHours() - TIMELINE_START_HOUR) * 60 + date.getMinutes();
+};
+
+const hourLabels = Array.from(
+  { length: TIMELINE_END_HOUR - TIMELINE_START_HOUR + 1 },
+  (_, index) => TIMELINE_START_HOUR + index
+);
 
 const toIsoDateRange = (fromDate, toDate) => {
   const fromIso = fromDate ? new Date(`${fromDate}T00:00:00`).toISOString() : null;
@@ -171,6 +190,7 @@ export default function Calendar() {
 
   const [clients, setClients] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -343,6 +363,9 @@ export default function Calendar() {
 
     try {
       await updateAppointmentStatus(appointmentId, status);
+      if (selectedAppointment?.id === appointmentId) {
+        setSelectedAppointment((current) => (current ? { ...current, status } : current));
+      }
       await loadData();
     } catch (err) {
       setError(err.message || 'Errore aggiornamento stato');
@@ -354,6 +377,9 @@ export default function Calendar() {
 
     try {
       await deleteAppointment(appointmentId);
+      if (selectedAppointment?.id === appointmentId) {
+        setSelectedAppointment(null);
+      }
       await loadData();
     } catch (err) {
       setError(err.message || 'Errore eliminazione appuntamento');
@@ -399,26 +425,56 @@ export default function Calendar() {
     setViewMode('week');
   };
 
+  const openAppointmentDetails = (appointment) => {
+    setSelectedAppointment(appointment);
+  };
+
   const renderAppointmentCard = (appointment, compact = false) => {
     const hasConflict = conflictIds.has(appointment.id);
 
     return (
       <div
         key={appointment.id}
-        className="rounded-xl border p-4"
+        role="button"
+        tabIndex={0}
+        onClick={() => openAppointmentDetails(appointment)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openAppointmentDetails(appointment);
+          }
+        }}
+        className="rounded-xl border p-4 cursor-pointer transition hover:shadow-md"
         style={{
           borderColor: hasConflict ? '#ef4444' : '#e8d5c4',
           backgroundColor: hasConflict ? '#fff7f7' : '#fffdfb',
         }}
       >
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p
+                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold mb-2"
+                style={{ backgroundColor: '#f5eadf', color: '#8b5a3c' }}
+              >
+                {formatTimeOnly(appointment.scheduled_at)} - {formatTimeOnly(getAppointmentEnd(appointment).toISOString())}
+              </p>
+              <p style={{ color: '#5a3a2a' }} className={`font-bold ${compact ? 'text-base' : 'text-lg'}`}>
+                {appointment.client?.name || 'Cliente non trovato'}
+              </p>
+              <p style={{ color: '#8b5a3c' }} className="text-sm">
+                {appointment.client?.owner || '-'}
+              </p>
+            </div>
+            <span
+              className="px-3 py-1 rounded-full text-xs font-bold shrink-0"
+              style={getStatusStyle(appointment.status)}
+            >
+              {getStatusLabel(appointment.status)}
+            </span>
+          </div>
+
           <div>
-            <p style={{ color: '#5a3a2a' }} className={`font-bold ${compact ? 'text-base' : 'text-lg'}`}>
-              {appointment.client?.name || 'Cliente non trovato'}
-            </p>
-            <p style={{ color: '#8b5a3c' }} className="text-sm mb-1">
-              {appointment.client?.owner || '-'} · {formatDateTime(appointment.scheduled_at)}
-            </p>
             <p style={{ color: '#8b5a3c' }} className="text-sm">
               Durata: {appointment.duration_minutes} min
             </p>
@@ -438,79 +494,107 @@ export default function Calendar() {
               </p>
             )}
           </div>
-
-          <div className="flex flex-col items-start lg:items-end gap-2">
-            <span
-              className="px-3 py-1 rounded-full text-xs font-bold"
-              style={getStatusStyle(appointment.status)}
-            >
-              {getStatusLabel(appointment.status)}
-            </span>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => handleStatusChange(appointment.id, 'completed')}
-                disabled={appointment.status === 'completed'}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
-                style={{ backgroundColor: '#16a34a' }}
-              >
-                Completato
-              </button>
-              <button
-                onClick={() => handleStatusChange(appointment.id, 'no_show')}
-                disabled={appointment.status === 'no_show'}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
-                style={{ backgroundColor: '#e11d48' }}
-              >
-                No-show (-1)
-              </button>
-              <button
-                onClick={() => handleStatusChange(appointment.id, 'cancelled')}
-                disabled={appointment.status === 'cancelled'}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
-                style={{ backgroundColor: '#9ca3af' }}
-              >
-                Annulla
-              </button>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => handleOpenAppointmentWhatsApp(appointment)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                style={{ backgroundColor: '#16a34a' }}
-              >
-                Promemoria WhatsApp
-              </button>
-              <a
-                href={getGoogleCalendarUrl(appointment)}
-                target="_blank"
-                rel="noreferrer"
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                style={{ backgroundColor: '#2563eb' }}
-              >
-                Google
-              </a>
-              <button
-                onClick={() => downloadIcs(appointment)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                style={{ backgroundColor: '#7c3aed' }}
-              >
-                iCloud / Apple
-              </button>
-              <button
-                onClick={() => handleDeleteAppointment(appointment.id)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                style={{ backgroundColor: '#dc2626' }}
-              >
-                Elimina
-              </button>
-            </div>
-          </div>
+          <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            Apri dettagli →
+          </p>
         </div>
       </div>
     );
   };
+
+  const renderWeekTimeline = () => (
+    <div className="overflow-x-auto">
+      <div className="min-w-[980px]">
+        <div className="grid gap-4" style={{ gridTemplateColumns: '72px repeat(7, minmax(120px, 1fr))' }}>
+          <div />
+          {weekDays.map((day) => (
+            <div
+              key={day}
+              className="rounded-2xl border px-3 py-3"
+              style={{ borderColor: '#e8d5c4', backgroundColor: '#fffaf6' }}
+            >
+              <h3 style={{ color: '#5a3a2a' }} className="font-bold capitalize">
+                {formatWeekdayShort(day)}
+              </h3>
+              <p style={{ color: '#8b5a3c' }} className="text-sm">
+                {weeklyAppointments[day]?.length || 0} appuntamenti
+              </p>
+            </div>
+          ))}
+
+          <div className="relative">
+            {hourLabels.map((hour) => (
+              <div
+                key={hour}
+                className="text-xs flex items-start justify-end pr-2"
+                style={{ height: `${HOUR_ROW_HEIGHT}px`, color: '#8b5a3c' }}
+              >
+                {`${hour}`.padStart(2, '0')}:00
+              </div>
+            ))}
+          </div>
+
+          {weekDays.map((day) => (
+            <div
+              key={day}
+              className="relative rounded-2xl border overflow-hidden"
+              style={{
+                borderColor: '#e8d5c4',
+                backgroundColor: '#fffdfb',
+                height: `${(TIMELINE_END_HOUR - TIMELINE_START_HOUR + 1) * HOUR_ROW_HEIGHT}px`,
+              }}
+            >
+              {hourLabels.map((hour, index) => (
+                <div
+                  key={`${day}-${hour}`}
+                  className="absolute inset-x-0 border-t"
+                  style={{
+                    top: `${index * HOUR_ROW_HEIGHT}px`,
+                    borderColor: '#f3e7da',
+                  }}
+                />
+              ))}
+
+              {(weeklyAppointments[day] || []).map((appointment) => {
+                const startOffset = Math.max(0, minutesFromTimelineStart(appointment.scheduled_at));
+                const top = (startOffset / 60) * HOUR_ROW_HEIGHT;
+                const height = Math.max(
+                  44,
+                  (appointment.duration_minutes / 60) * HOUR_ROW_HEIGHT
+                );
+                const hasConflict = conflictIds.has(appointment.id);
+
+                return (
+                  <button
+                    key={appointment.id}
+                    type="button"
+                    onClick={() => openAppointmentDetails(appointment)}
+                    className="absolute left-2 right-2 rounded-xl px-3 py-2 text-left shadow-sm transition hover:shadow-md"
+                    style={{
+                      top: `${top}px`,
+                      height: `${height}px`,
+                      backgroundColor: hasConflict ? '#ffe4e6' : '#f5eadf',
+                      border: `1px solid ${hasConflict ? '#fb7185' : '#d4a574'}`,
+                    }}
+                  >
+                    <p style={{ color: '#5a3a2a' }} className="text-xs font-bold">
+                      {formatTimeOnly(appointment.scheduled_at)}
+                    </p>
+                    <p style={{ color: '#5a3a2a' }} className="text-sm font-bold truncate">
+                      {appointment.client?.name || 'Cliente'}
+                    </p>
+                    <p style={{ color: '#8b5a3c' }} className="text-xs truncate">
+                      {appointment.client?.owner || '-'}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen">
@@ -767,34 +851,7 @@ export default function Calendar() {
               Nessun appuntamento nel periodo selezionato.
             </p>
           ) : viewMode === 'week' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
-              {weekDays.map((day) => (
-                <div
-                  key={day}
-                  className="rounded-2xl border p-4 min-h-[240px]"
-                  style={{ borderColor: '#e8d5c4', backgroundColor: '#fffdfb' }}
-                >
-                  <div className="mb-4 pb-3 border-b" style={{ borderColor: '#f1e4d8' }}>
-                    <h3 style={{ color: '#5a3a2a' }} className="font-bold capitalize">
-                      {formatWeekdayShort(day)}
-                    </h3>
-                    <p style={{ color: '#8b5a3c' }} className="text-sm">
-                      {weeklyAppointments[day]?.length || 0} appuntamenti
-                    </p>
-                  </div>
-
-                  {weeklyAppointments[day]?.length ? (
-                    <div className="space-y-3">
-                      {weeklyAppointments[day].map((appointment) => renderAppointmentCard(appointment, true))}
-                    </div>
-                  ) : (
-                    <p style={{ color: '#8b5a3c' }} className="text-sm italic">
-                      Nessun appuntamento
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+            renderWeekTimeline()
           ) : (
             <div className="space-y-8">
               {groupedAppointments.map(([dayLabel, dayAppointments]) => (
@@ -812,6 +869,168 @@ export default function Calendar() {
           )}
         </section>
       </main>
+
+      {selectedAppointment && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-end">
+          <div className="w-full max-w-lg h-full overflow-y-auto bg-white shadow-2xl p-6">
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+                  {formatDateTime(selectedAppointment.scheduled_at)}
+                </p>
+                <h2 style={{ color: '#5a3a2a' }} className="text-2xl font-bold">
+                  {selectedAppointment.client?.name || 'Cliente non trovato'}
+                </h2>
+                <p style={{ color: '#8b5a3c' }}>
+                  {selectedAppointment.client?.owner || '-'}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedAppointment(null)}
+                className="px-3 py-2 rounded-lg text-white font-medium"
+                style={{ backgroundColor: '#8b5a3c' }}
+              >
+                Chiudi
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="rounded-2xl p-4" style={{ backgroundColor: '#faf3f0' }}>
+                <div className="flex flex-wrap gap-3 items-center mb-3">
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-bold"
+                    style={getStatusStyle(selectedAppointment.status)}
+                  >
+                    {getStatusLabel(selectedAppointment.status)}
+                  </span>
+                  {conflictIds.has(selectedAppointment.id) && (
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-bold"
+                      style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}
+                    >
+                      Conflitto orario
+                    </span>
+                  )}
+                  {selectedAppointment.client?.is_blacklisted && (
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-bold"
+                      style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}
+                    >
+                      Blacklist
+                    </span>
+                  )}
+                </div>
+                <p style={{ color: '#8b5a3c' }} className="text-sm">
+                  Durata: {selectedAppointment.duration_minutes} minuti
+                </p>
+                <p style={{ color: '#8b5a3c' }} className="text-sm">
+                  Telefono: {selectedAppointment.client?.phone || 'non disponibile'}
+                </p>
+                <p style={{ color: '#8b5a3c' }} className="text-sm">
+                  Score affidabilita: {selectedAppointment.client?.no_show_score ?? 0}
+                </p>
+                {selectedAppointment.notes && (
+                  <p style={{ color: '#8b5a3c' }} className="text-sm mt-3 whitespace-pre-wrap">
+                    Note: {selectedAppointment.notes}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-3">
+                  Comunicazione
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleOpenAppointmentWhatsApp(selectedAppointment)}
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#16a34a' }}
+                  >
+                    Promemoria WhatsApp
+                  </button>
+                  <a
+                    href={getGoogleCalendarUrl(selectedAppointment)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#2563eb' }}
+                  >
+                    Google Calendar
+                  </a>
+                  <button
+                    onClick={() => downloadIcs(selectedAppointment)}
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#7c3aed' }}
+                  >
+                    File iCloud / Apple
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-3">
+                  Gestione appuntamento
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleStatusChange(selectedAppointment.id, 'completed')}
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#16a34a' }}
+                  >
+                    Segna completato
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange(selectedAppointment.id, 'no_show')}
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#e11d48' }}
+                  >
+                    Segna no-show
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange(selectedAppointment.id, 'cancelled')}
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#9ca3af' }}
+                  >
+                    Annulla
+                  </button>
+                  <button
+                    onClick={() => handleDeleteAppointment(selectedAppointment.id)}
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#dc2626' }}
+                  >
+                    Elimina
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-3">
+                  Scheda cliente
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => navigate(`/client/${selectedAppointment.client_id}`)}
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#8b5a3c' }}
+                  >
+                    Apri cliente
+                  </button>
+                  <button
+                    onClick={() => navigate(`/calendar?clientId=${selectedAppointment.client_id}`)}
+                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#d4a574' }}
+                  >
+                    Nuovo appuntamento per questo cliente
+                  </button>
+                </div>
+                <p style={{ color: '#8b5a3c' }} className="text-sm mt-3">
+                  Dalla scheda cliente puoi gestire punteggio affidabilita, blacklist, note e storico visite.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
