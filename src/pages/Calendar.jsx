@@ -23,6 +23,36 @@ const addDays = (dateStr, days) => {
   return date.toISOString().split('T')[0];
 };
 
+const startOfWeek = (dateStr) => {
+  const date = new Date(`${dateStr}T00:00:00`);
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  date.setDate(date.getDate() + diff);
+  return date.toISOString().split('T')[0];
+};
+
+const getAppointmentEnd = (appointment) => {
+  const start = new Date(appointment.scheduled_at);
+  return new Date(start.getTime() + appointment.duration_minutes * 60000);
+};
+
+const appointmentsOverlap = (left, right) => {
+  const leftStart = new Date(left.scheduled_at).getTime();
+  const leftEnd = getAppointmentEnd(left).getTime();
+  const rightStart = new Date(right.scheduled_at).getTime();
+  const rightEnd = getAppointmentEnd(right).getTime();
+  return leftStart < rightEnd && rightStart < leftEnd;
+};
+
+const isConflictCandidate = (appointment) => appointment.status !== 'cancelled';
+
+const formatWeekdayShort = (dateStr) =>
+  new Date(`${dateStr}T00:00:00`).toLocaleDateString('it-IT', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+  });
+
 const toIsoDateRange = (fromDate, toDate) => {
   const fromIso = fromDate ? new Date(`${fromDate}T00:00:00`).toISOString() : null;
   const toIso = toDate ? new Date(`${toDate}T23:59:59`).toISOString() : null;
@@ -137,6 +167,7 @@ export default function Calendar() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [viewMode, setViewMode] = useState('week');
 
   const [fromDate, setFromDate] = useState(getToday());
   const [toDate, setToDate] = useState(addDays(getToday(), 14));
@@ -169,10 +200,68 @@ export default function Calendar() {
     return Object.entries(groups);
   }, [appointments]);
 
+  const weekStart = useMemo(() => startOfWeek(fromDate), [fromDate]);
+
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, index) => addDays(weekStart, index)),
+    [weekStart]
+  );
+
   const selectedClient = useMemo(
     () => clients.find((client) => client.id === form.clientId) || null,
     [clients, form.clientId]
   );
+
+  const conflictIds = useMemo(() => {
+    const ids = new Set();
+    const candidates = appointments.filter(isConflictCandidate);
+
+    for (let index = 0; index < candidates.length; index += 1) {
+      for (let inner = index + 1; inner < candidates.length; inner += 1) {
+        if (appointmentsOverlap(candidates[index], candidates[inner])) {
+          ids.add(candidates[index].id);
+          ids.add(candidates[inner].id);
+        }
+      }
+    }
+
+    return ids;
+  }, [appointments]);
+
+  const weeklyAppointments = useMemo(() => {
+    const byDay = Object.fromEntries(weekDays.map((day) => [day, []]));
+
+    appointments.forEach((appointment) => {
+      const dayKey = appointment.scheduled_at.split('T')[0];
+      if (byDay[dayKey]) {
+        byDay[dayKey].push(appointment);
+      }
+    });
+
+    weekDays.forEach((day) => {
+      byDay[day].sort(
+        (left, right) => new Date(left.scheduled_at).getTime() - new Date(right.scheduled_at).getTime()
+      );
+    });
+
+    return byDay;
+  }, [appointments, weekDays]);
+
+  const draftConflict = useMemo(() => {
+    if (!form.clientId || !form.date || !form.time) return null;
+
+    const draftStart = new Date(`${form.date}T${form.time}`);
+    if (Number.isNaN(draftStart.getTime())) return null;
+
+    const draft = {
+      scheduled_at: draftStart.toISOString(),
+      duration_minutes: Number(form.durationMinutes) || DEFAULT_DURATION,
+    };
+
+    return appointments.find(
+      (appointment) => isConflictCandidate(appointment) && appointmentsOverlap(draft, appointment)
+    ) || null;
+  }, [appointments, form.clientId, form.date, form.time, form.durationMinutes]);
 
   const loadData = async () => {
     setLoading(true);
@@ -204,6 +293,15 @@ export default function Calendar() {
 
     if (!form.clientId || !form.date || !form.time) {
       setError('Cliente, data e orario sono obbligatori');
+      return;
+    }
+
+    if (draftConflict) {
+      setError(
+        `Conflitto orario con ${draftConflict.client?.name || 'un altro appuntamento'} alle ${new Date(
+          draftConflict.scheduled_at
+        ).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}.`
+      );
       return;
     }
 
@@ -278,6 +376,133 @@ export default function Calendar() {
     }
 
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleSetCurrentWeek = () => {
+    const start = startOfWeek(getToday());
+    setFromDate(start);
+    setToDate(addDays(start, 6));
+    setViewMode('week');
+  };
+
+  const handleShiftWeek = (days) => {
+    const nextStart = addDays(weekStart, days);
+    setFromDate(nextStart);
+    setToDate(addDays(nextStart, 6));
+    setViewMode('week');
+  };
+
+  const renderAppointmentCard = (appointment, compact = false) => {
+    const hasConflict = conflictIds.has(appointment.id);
+
+    return (
+      <div
+        key={appointment.id}
+        className="rounded-xl border p-4"
+        style={{
+          borderColor: hasConflict ? '#ef4444' : '#e8d5c4',
+          backgroundColor: hasConflict ? '#fff7f7' : '#fffdfb',
+        }}
+      >
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+          <div>
+            <p style={{ color: '#5a3a2a' }} className={`font-bold ${compact ? 'text-base' : 'text-lg'}`}>
+              {appointment.client?.name || 'Cliente non trovato'}
+            </p>
+            <p style={{ color: '#8b5a3c' }} className="text-sm mb-1">
+              {appointment.client?.owner || '-'} · {formatDateTime(appointment.scheduled_at)}
+            </p>
+            <p style={{ color: '#8b5a3c' }} className="text-sm">
+              Durata: {appointment.duration_minutes} min
+            </p>
+            {appointment.notes && (
+              <p style={{ color: '#8b5a3c' }} className="text-sm mt-2">
+                Note: {appointment.notes}
+              </p>
+            )}
+            {appointment.client?.is_blacklisted && (
+              <p className="text-sm mt-2" style={{ color: '#b91c1c' }}>
+                Cliente in blacklist (score: {appointment.client.no_show_score ?? 0})
+              </p>
+            )}
+            {hasConflict && (
+              <p className="text-sm mt-2 font-medium" style={{ color: '#b91c1c' }}>
+                Conflitto orario da verificare
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col items-start lg:items-end gap-2">
+            <span
+              className="px-3 py-1 rounded-full text-xs font-bold"
+              style={getStatusStyle(appointment.status)}
+            >
+              {getStatusLabel(appointment.status)}
+            </span>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleStatusChange(appointment.id, 'completed')}
+                disabled={appointment.status === 'completed'}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
+                style={{ backgroundColor: '#16a34a' }}
+              >
+                Completato
+              </button>
+              <button
+                onClick={() => handleStatusChange(appointment.id, 'no_show')}
+                disabled={appointment.status === 'no_show'}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
+                style={{ backgroundColor: '#e11d48' }}
+              >
+                No-show (-1)
+              </button>
+              <button
+                onClick={() => handleStatusChange(appointment.id, 'cancelled')}
+                disabled={appointment.status === 'cancelled'}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
+                style={{ backgroundColor: '#9ca3af' }}
+              >
+                Annulla
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleOpenAppointmentWhatsApp(appointment)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
+                style={{ backgroundColor: '#16a34a' }}
+              >
+                Promemoria WhatsApp
+              </button>
+              <a
+                href={getGoogleCalendarUrl(appointment)}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
+                style={{ backgroundColor: '#2563eb' }}
+              >
+                Google
+              </a>
+              <button
+                onClick={() => downloadIcs(appointment)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
+                style={{ backgroundColor: '#7c3aed' }}
+              >
+                iCloud / Apple
+              </button>
+              <button
+                onClick={() => handleDeleteAppointment(appointment.id)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
+                style={{ backgroundColor: '#dc2626' }}
+              >
+                Elimina
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -414,44 +639,119 @@ export default function Calendar() {
               </button>
             </div>
           </form>
+
+          {draftConflict && (
+            <div className="mt-4 p-4 rounded-xl border" style={{ borderColor: '#fecaca', backgroundColor: '#fff1f2' }}>
+              <p style={{ color: '#9f1239' }} className="font-medium">
+                Conflitto rilevato con {draftConflict.client?.name || 'un altro appuntamento'} alle{' '}
+                {new Date(draftConflict.scheduled_at).toLocaleTimeString('it-IT', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+                .
+              </p>
+              <p style={{ color: '#9f1239' }} className="text-sm mt-1">
+                Modifica data, ora o durata prima di salvare.
+              </p>
+            </div>
+          )}
         </section>
 
         <section className="bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex flex-col md:flex-row gap-4 md:items-end mb-6">
-            <div>
-              <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
-                Dal
-              </label>
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="px-3 py-2 rounded-lg border-2"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
-              />
+          <div className="flex flex-col xl:flex-row gap-4 xl:items-end xl:justify-between mb-6">
+            <div className="flex flex-col md:flex-row gap-4 md:items-end">
+              <div>
+                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                  Dal
+                </label>
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="px-3 py-2 rounded-lg border-2"
+                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                  Al
+                </label>
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="px-3 py-2 rounded-lg border-2"
+                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                />
+              </div>
+
+              <button
+                onClick={loadData}
+                className="px-4 py-2 rounded-lg font-medium text-white"
+                style={{ backgroundColor: '#8b5a3c' }}
+              >
+                Aggiorna
+              </button>
             </div>
 
-            <div>
-              <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
-                Al
-              </label>
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="px-3 py-2 rounded-lg border-2"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
-              />
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setViewMode('list')}
+                className="px-4 py-2 rounded-lg font-medium text-white"
+                style={{ backgroundColor: viewMode === 'list' ? '#8b5a3c' : '#caa07a' }}
+              >
+                Elenco
+              </button>
+              <button
+                onClick={() => setViewMode('week')}
+                className="px-4 py-2 rounded-lg font-medium text-white"
+                style={{ backgroundColor: viewMode === 'week' ? '#8b5a3c' : '#caa07a' }}
+              >
+                Settimana
+              </button>
+              <button
+                onClick={handleSetCurrentWeek}
+                className="px-4 py-2 rounded-lg font-medium text-white"
+                style={{ backgroundColor: '#2563eb' }}
+              >
+                Questa settimana
+              </button>
             </div>
-
-            <button
-              onClick={loadData}
-              className="px-4 py-2 rounded-lg font-medium text-white"
-              style={{ backgroundColor: '#8b5a3c' }}
-            >
-              Aggiorna
-            </button>
           </div>
+
+          {viewMode === 'week' && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button
+                onClick={() => handleShiftWeek(-7)}
+                className="px-4 py-2 rounded-lg font-medium text-white"
+                style={{ backgroundColor: '#8b5a3c' }}
+              >
+                ← Settimana prima
+              </button>
+              <button
+                onClick={() => handleShiftWeek(7)}
+                className="px-4 py-2 rounded-lg font-medium text-white"
+                style={{ backgroundColor: '#8b5a3c' }}
+              >
+                Settimana dopo →
+              </button>
+              <div className="px-4 py-2 rounded-lg" style={{ backgroundColor: '#faf3f0', color: '#8b5a3c' }}>
+                {formatWeekdayShort(weekDays[0])} - {formatWeekdayShort(weekDays[6])}
+              </div>
+            </div>
+          )}
+
+          {conflictIds.size > 0 && (
+            <div className="mb-6 p-4 rounded-xl border" style={{ borderColor: '#fecaca', backgroundColor: '#fff7f7' }}>
+              <p style={{ color: '#b91c1c' }} className="font-medium">
+                Sono presenti {conflictIds.size} appuntamenti in sovrapposizione.
+              </p>
+              <p style={{ color: '#b91c1c' }} className="text-sm mt-1">
+                Li trovi evidenziati in rosso nella vista elenco e nella vista settimanale.
+              </p>
+            </div>
+          )}
 
           {loading ? (
             <p style={{ color: '#8b5a3c' }}>Caricamento appuntamenti...</p>
@@ -459,6 +759,35 @@ export default function Calendar() {
             <p style={{ color: '#8b5a3c' }} className="italic">
               Nessun appuntamento nel periodo selezionato.
             </p>
+          ) : viewMode === 'week' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
+              {weekDays.map((day) => (
+                <div
+                  key={day}
+                  className="rounded-2xl border p-4 min-h-[240px]"
+                  style={{ borderColor: '#e8d5c4', backgroundColor: '#fffdfb' }}
+                >
+                  <div className="mb-4 pb-3 border-b" style={{ borderColor: '#f1e4d8' }}>
+                    <h3 style={{ color: '#5a3a2a' }} className="font-bold capitalize">
+                      {formatWeekdayShort(day)}
+                    </h3>
+                    <p style={{ color: '#8b5a3c' }} className="text-sm">
+                      {weeklyAppointments[day]?.length || 0} appuntamenti
+                    </p>
+                  </div>
+
+                  {weeklyAppointments[day]?.length ? (
+                    <div className="space-y-3">
+                      {weeklyAppointments[day].map((appointment) => renderAppointmentCard(appointment, true))}
+                    </div>
+                  ) : (
+                    <p style={{ color: '#8b5a3c' }} className="text-sm italic">
+                      Nessun appuntamento
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="space-y-8">
               {groupedAppointments.map(([dayLabel, dayAppointments]) => (
@@ -468,106 +797,7 @@ export default function Calendar() {
                   </h3>
 
                   <div className="space-y-3">
-                    {dayAppointments.map((appointment) => (
-                      <div
-                        key={appointment.id}
-                        className="rounded-xl border p-4"
-                        style={{ borderColor: '#e8d5c4', backgroundColor: '#fffdfb' }}
-                      >
-                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-                          <div>
-                            <p style={{ color: '#5a3a2a' }} className="font-bold text-lg">
-                              {appointment.client?.name || 'Cliente non trovato'}
-                            </p>
-                            <p style={{ color: '#8b5a3c' }} className="text-sm mb-1">
-                              {appointment.client?.owner || '-'} · {formatDateTime(appointment.scheduled_at)}
-                            </p>
-                            <p style={{ color: '#8b5a3c' }} className="text-sm">
-                              Durata: {appointment.duration_minutes} min
-                            </p>
-                            {appointment.notes && (
-                              <p style={{ color: '#8b5a3c' }} className="text-sm mt-2">
-                                Note: {appointment.notes}
-                              </p>
-                            )}
-                            {appointment.client?.is_blacklisted && (
-                              <p className="text-sm mt-2" style={{ color: '#b91c1c' }}>
-                                Cliente in blacklist (score: {appointment.client.no_show_score ?? 0})
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="flex flex-col items-start lg:items-end gap-2">
-                            <span
-                              className="px-3 py-1 rounded-full text-xs font-bold"
-                              style={getStatusStyle(appointment.status)}
-                            >
-                              {getStatusLabel(appointment.status)}
-                            </span>
-
-                            <div className="flex flex-wrap gap-2">
-                              <button
-                                onClick={() => handleStatusChange(appointment.id, 'completed')}
-                                disabled={appointment.status === 'completed'}
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
-                                style={{ backgroundColor: '#16a34a' }}
-                              >
-                                Completato
-                              </button>
-                              <button
-                                onClick={() => handleStatusChange(appointment.id, 'no_show')}
-                                disabled={appointment.status === 'no_show'}
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
-                                style={{ backgroundColor: '#e11d48' }}
-                              >
-                                No-show (-1)
-                              </button>
-                              <button
-                                onClick={() => handleStatusChange(appointment.id, 'cancelled')}
-                                disabled={appointment.status === 'cancelled'}
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
-                                style={{ backgroundColor: '#9ca3af' }}
-                              >
-                                Annulla
-                              </button>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                              <button
-                                onClick={() => handleOpenAppointmentWhatsApp(appointment)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                                style={{ backgroundColor: '#16a34a' }}
-                              >
-                                Promemoria WhatsApp
-                              </button>
-                              <a
-                                href={getGoogleCalendarUrl(appointment)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                                style={{ backgroundColor: '#2563eb' }}
-                              >
-                                Google
-                              </a>
-                              <button
-                                onClick={() => downloadIcs(appointment)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                                style={{ backgroundColor: '#7c3aed' }}
-                              >
-                                iCloud / Apple
-                              </button>
-                              <button
-                                onClick={() => handleDeleteAppointment(appointment.id)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-                                style={{ backgroundColor: '#dc2626' }}
-                              >
-                                Elimina
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                    {dayAppointments.map((appointment) => renderAppointmentCard(appointment))}
                   </div>
                 </div>
               ))}
