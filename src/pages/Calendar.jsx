@@ -8,7 +8,10 @@ import {
   updateAppointmentStatus,
   VALID_APPOINTMENT_STATUSES,
 } from '../lib/database';
-import { getAppointmentWhatsAppUrl } from '../lib/whatsapp';
+import {
+  getAppointmentWhatsAppUrl,
+  getDraftAppointmentWhatsAppUrl,
+} from '../lib/whatsapp';
 
 const DEFAULT_DURATION = 60;
 
@@ -166,6 +169,11 @@ export default function Calendar() {
     return Object.entries(groups);
   }, [appointments]);
 
+  const selectedClient = useMemo(
+    () => clients.find((client) => client.id === form.clientId) || null,
+    [clients, form.clientId]
+  );
+
   const loadData = async () => {
     setLoading(true);
     setError('');
@@ -251,6 +259,21 @@ export default function Calendar() {
     const whatsappUrl = getAppointmentWhatsAppUrl(appointment);
     if (!whatsappUrl) {
       setError('Il cliente non ha un numero di telefono utilizzabile per WhatsApp.');
+      return;
+    }
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleOpenDraftAppointmentWhatsApp = () => {
+    const whatsappUrl = getDraftAppointmentWhatsAppUrl({
+      client: selectedClient,
+      date: form.date,
+      time: form.time,
+    });
+
+    if (!whatsappUrl) {
+      setError('Seleziona un cliente con numero di telefono per aprire WhatsApp.');
       return;
     }
 
@@ -372,7 +395,7 @@ export default function Calendar() {
               />
             </div>
 
-            <div>
+            <div className="flex flex-col gap-2">
               <button
                 type="submit"
                 disabled={saving}
@@ -380,6 +403,14 @@ export default function Calendar() {
                 style={{ backgroundColor: '#d4a574' }}
               >
                 {saving ? 'Salvataggio...' : 'Aggiungi'}
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenDraftAppointmentWhatsApp}
+                className="w-full px-4 py-3 rounded-lg font-bold text-white transition"
+                style={{ backgroundColor: '#16a34a' }}
+              >
+                WhatsApp cliente
               </button>
             </div>
           </form>
@@ -507,7 +538,7 @@ export default function Calendar() {
                                 className="px-3 py-1.5 rounded-lg text-xs font-medium text-white"
                                 style={{ backgroundColor: '#16a34a' }}
                               >
-                                WhatsApp
+                                Promemoria WhatsApp
                               </button>
                               <a
                                 href={getGoogleCalendarUrl(appointment)}

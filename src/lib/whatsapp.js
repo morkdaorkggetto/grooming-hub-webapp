@@ -51,3 +51,23 @@ export const getAppointmentWhatsAppUrl = (appointment) => {
 
   return buildWhatsAppUrl(appointment?.client?.phone, message);
 };
+
+export const getDraftAppointmentWhatsAppUrl = ({ client, date, time }) => {
+  const clientName = client?.name || 'il tuo cane';
+  const ownerName = client?.owner || 'cliente';
+  const when = date && time
+    ? new Date(`${date}T${time}`).toLocaleString('it-IT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '';
+
+  const message = when
+    ? `Buongiorno ${ownerName}, ti propongo l'appuntamento per ${clientName} il ${when}. Fammi sapere se va bene.`
+    : `Buongiorno ${ownerName}, ti contatto da Grooming Hub per fissare un appuntamento per ${clientName}.`;
+
+  return buildWhatsAppUrl(client?.phone, message);
+};
