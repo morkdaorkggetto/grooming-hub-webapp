@@ -15,12 +15,19 @@ import {
 
 const DEFAULT_DURATION = 60;
 
-const getToday = () => new Date().toISOString().split('T')[0];
+const toLocalDateString = (date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getToday = () => toLocalDateString(new Date());
 
 const addDays = (dateStr, days) => {
   const date = new Date(`${dateStr}T00:00:00`);
   date.setDate(date.getDate() + days);
-  return date.toISOString().split('T')[0];
+  return toLocalDateString(date);
 };
 
 const startOfWeek = (dateStr) => {
@@ -28,7 +35,7 @@ const startOfWeek = (dateStr) => {
   const day = date.getDay();
   const diff = day === 0 ? -6 : 1 - day;
   date.setDate(date.getDate() + diff);
-  return date.toISOString().split('T')[0];
+  return toLocalDateString(date);
 };
 
 const getAppointmentEnd = (appointment) => {
