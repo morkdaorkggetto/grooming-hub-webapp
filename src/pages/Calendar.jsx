@@ -185,6 +185,59 @@ const getStatusStyle = (status) => {
   return { backgroundColor: '#eff6ff', color: '#1d4ed8' };
 };
 
+const isImminentAppointment = (appointment) => {
+  if (appointment.status !== 'scheduled') return false;
+
+  const now = Date.now();
+  const start = new Date(appointment.scheduled_at).getTime();
+  const diff = start - now;
+
+  return diff >= 0 && diff <= 24 * 60 * 60 * 1000;
+};
+
+const getTimelineAppointmentStyle = (appointment, hasConflict) => {
+  let palette = {
+    backgroundColor: '#ffedd5',
+    borderColor: '#f59e0b',
+    textColor: '#7c2d12',
+    ownerColor: '#9a3412',
+  };
+
+  if (appointment.status === 'completed') {
+    palette = {
+      backgroundColor: '#dcfce7',
+      borderColor: '#22c55e',
+      textColor: '#166534',
+      ownerColor: '#15803d',
+    };
+  } else if (isImminentAppointment(appointment)) {
+    palette = {
+      backgroundColor: '#fee2e2',
+      borderColor: '#ef4444',
+      textColor: '#991b1b',
+      ownerColor: '#b91c1c',
+    };
+  }
+
+  if (hasConflict) {
+    return {
+      ...palette,
+      borderColor: '#be123c',
+      boxShadow: '0 0 0 2px rgba(190, 24, 93, 0.15)',
+    };
+  }
+
+  return palette;
+};
+
+const getTimelineStatusDescription = (appointment) => {
+  if (appointment.status === 'completed') return 'Completato';
+  if (appointment.status === 'cancelled') return 'Annullato';
+  if (appointment.status === 'no_show') return 'No-show';
+  if (isImminentAppointment(appointment)) return 'Imminente';
+  return 'Programmato';
+};
+
 const formatConflictInterval = (appointment) => {
   const start = formatTimeOnly(appointment.scheduled_at);
   const end = formatTimeOnly(getAppointmentEnd(appointment).toISOString());
@@ -809,12 +862,18 @@ export default function Calendar() {
                   (appointment.duration_minutes / 60) * HOUR_ROW_HEIGHT
                 );
                 const hasConflict = conflictIds.has(appointment.id);
+                const timelineStyle = getTimelineAppointmentStyle(appointment, hasConflict);
 
                 return (
                   <button
                     key={appointment.id}
                     type="button"
                     draggable
+                    title={`${appointment.client?.name || 'Cliente'} · ${getTimelineStatusDescription(
+                      appointment
+                    )} · ${formatTimeOnly(appointment.scheduled_at)}-${formatTimeOnly(
+                      getAppointmentEnd(appointment).toISOString()
+                    )}`}
                     onDragStart={() => handleAppointmentDragStart(appointment)}
                     onDragEnd={handleAppointmentDragEnd}
                     onClick={() => openAppointmentDetails(appointment)}
@@ -822,17 +881,18 @@ export default function Calendar() {
                     style={{
                       top: `${top}px`,
                       height: `${height}px`,
-                      backgroundColor: hasConflict ? '#ffe4e6' : '#f5eadf',
-                      border: `1px solid ${hasConflict ? '#fb7185' : '#d4a574'}`,
+                      backgroundColor: timelineStyle.backgroundColor,
+                      border: `1px solid ${timelineStyle.borderColor}`,
+                      boxShadow: timelineStyle.boxShadow || undefined,
                     }}
                   >
-                    <p style={{ color: '#5a3a2a' }} className="text-xs font-bold">
+                    <p style={{ color: timelineStyle.textColor }} className="text-xs font-bold">
                       {formatTimeOnly(appointment.scheduled_at)}
                     </p>
-                    <p style={{ color: '#5a3a2a' }} className="text-sm font-bold truncate">
+                    <p style={{ color: timelineStyle.textColor }} className="text-sm font-bold truncate">
                       {appointment.client?.name || 'Cliente'}
                     </p>
-                    <p style={{ color: '#8b5a3c' }} className="text-xs truncate">
+                    <p style={{ color: timelineStyle.ownerColor }} className="text-xs truncate">
                       {appointment.client?.owner || '-'}
                     </p>
                   </button>
