@@ -201,6 +201,39 @@ const buildAppointmentDraft = (scheduledAt, durationMinutes) => ({
   duration_minutes: Number(durationMinutes) || DEFAULT_DURATION,
 });
 
+const toLocalTimeString = (date) =>
+  `${`${date.getHours()}`.padStart(2, '0')}:${`${date.getMinutes()}`.padStart(2, '0')}`;
+
+const findNextAvailableTime = ({
+  date,
+  startTime,
+  durationMinutes,
+  appointments,
+}) => {
+  const startDate = new Date(`${date}T${startTime}`);
+  if (Number.isNaN(startDate.getTime())) return startTime;
+
+  const stepMinutes = 15;
+  const duration = Number(durationMinutes) || DEFAULT_DURATION;
+  const endOfDay = new Date(`${date}T23:45:00`);
+  let candidateStart = new Date(startDate.getTime() + duration * 60000);
+
+  while (candidateStart <= endOfDay) {
+    const candidate = buildAppointmentDraft(candidateStart.toISOString(), duration);
+    const hasConflict = appointments.some(
+      (appointment) => isConflictCandidate(appointment) && appointmentsOverlap(candidate, appointment)
+    );
+
+    if (!hasConflict) {
+      return toLocalTimeString(candidateStart);
+    }
+
+    candidateStart = new Date(candidateStart.getTime() + stepMinutes * 60000);
+  }
+
+  return startTime;
+};
+
 export default function Calendar() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -215,6 +248,7 @@ export default function Calendar() {
   const [saving, setSaving] = useState(false);
   const [updatingAppointment, setUpdatingAppointment] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [viewMode, setViewMode] = useState('week');
 
   const [fromDate, setFromDate] = useState(getToday());
@@ -393,6 +427,7 @@ export default function Calendar() {
   const handleAddAppointment = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (!form.clientId || !form.date || !form.time) {
       setError('Cliente, data e orario sono obbligatori');
@@ -412,19 +447,37 @@ export default function Calendar() {
 
     try {
       const scheduledAt = new Date(`${form.date}T${form.time}`).toISOString();
+      const createdDuration = Number(form.durationMinutes) || DEFAULT_DURATION;
+
       await addAppointment({
         client_id: form.clientId,
         scheduled_at: scheduledAt,
-        duration_minutes: Number(form.durationMinutes) || DEFAULT_DURATION,
+        duration_minutes: createdDuration,
         status: 'scheduled',
         notes: form.notes,
       });
 
+      const nextTime = findNextAvailableTime({
+        date: form.date,
+        startTime: form.time,
+        durationMinutes: createdDuration,
+        appointments: [
+          ...appointments,
+          {
+            id: 'draft-created',
+            scheduled_at: scheduledAt,
+            duration_minutes: createdDuration,
+            status: 'scheduled',
+          },
+        ],
+      });
+
       setForm((prev) => ({
         ...prev,
-        time: prev.time,
+        time: nextTime,
         notes: '',
       }));
+      setSuccess('Appuntamento creato correttamente.');
 
       await loadData();
     } catch (err) {
@@ -823,6 +876,14 @@ export default function Calendar() {
           </div>
         )}
 
+        {success && (
+          <div className="p-4 rounded-lg border" style={{ backgroundColor: '#ecfdf5', borderColor: '#bbf7d0' }}>
+            <p style={{ color: '#166534' }} className="font-medium">
+              {success}
+            </p>
+          </div>
+        )}
+
         <section ref={createAppointmentRef} className="bg-white rounded-2xl shadow-lg p-6">
           <h2 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-4">
             Nuovo Appuntamento
@@ -835,7 +896,10 @@ export default function Calendar() {
               </label>
               <select
                 value={form.clientId}
-                onChange={(e) => setForm((prev) => ({ ...prev, clientId: e.target.value }))}
+                onChange={(e) => {
+                  setSuccess('');
+                  setForm((prev) => ({ ...prev, clientId: e.target.value }));
+                }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
                 required
@@ -856,7 +920,10 @@ export default function Calendar() {
               <input
                 type="date"
                 value={form.date}
-                onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
+                onChange={(e) => {
+                  setSuccess('');
+                  setForm((prev) => ({ ...prev, date: e.target.value }));
+                }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
                 required
@@ -870,7 +937,10 @@ export default function Calendar() {
               <input
                 type="time"
                 value={form.time}
-                onChange={(e) => setForm((prev) => ({ ...prev, time: e.target.value }))}
+                onChange={(e) => {
+                  setSuccess('');
+                  setForm((prev) => ({ ...prev, time: e.target.value }));
+                }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
                 required
@@ -887,7 +957,10 @@ export default function Calendar() {
                 max="480"
                 step="15"
                 value={form.durationMinutes}
-                onChange={(e) => setForm((prev) => ({ ...prev, durationMinutes: e.target.value }))}
+                onChange={(e) => {
+                  setSuccess('');
+                  setForm((prev) => ({ ...prev, durationMinutes: e.target.value }));
+                }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
               />
@@ -900,7 +973,10 @@ export default function Calendar() {
               <input
                 type="text"
                 value={form.notes}
-                onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
+                onChange={(e) => {
+                  setSuccess('');
+                  setForm((prev) => ({ ...prev, notes: e.target.value }));
+                }}
                 placeholder="Es. solo bagno, taglio unghie, richieste particolari"
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
