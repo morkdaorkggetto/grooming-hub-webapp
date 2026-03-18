@@ -1,4 +1,9 @@
 import React from 'react';
+import {
+  getFidelityBadgeStyle,
+  getFidelityLabel,
+  getFidelityTierSnapshot,
+} from '../lib/fidelity';
 
 /**
  * ClientCard — Componente card cliente
@@ -12,6 +17,9 @@ export default function ClientCard({ client }) {
   const visitsText =
     visitsCount === 1 ? `${visitsCount} visita` : `${visitsCount} visite`;
   const noShowScore = client.no_show_score ?? 0;
+  const fidelity = getFidelityTierSnapshot(client);
+  const currentTierKey = fidelity.currentTier?.key || 'none';
+  const fidelityBadgeStyle = getFidelityBadgeStyle(currentTierKey);
 
   return (
     <div
@@ -45,6 +53,15 @@ export default function ClientCard({ client }) {
         >
           {client.name}
         </h3>
+
+        <div className="mb-3">
+          <span
+            className="text-xs font-bold px-2 py-1 rounded-full"
+            style={fidelityBadgeStyle}
+          >
+            Fidelity {getFidelityLabel(currentTierKey)}
+          </span>
+        </div>
 
         {/* Razza */}
         <p

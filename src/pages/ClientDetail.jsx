@@ -17,6 +17,7 @@ import {
   getClientCardUrl,
   getClientQrImageUrl,
 } from '../lib/qrCode';
+import { getFidelityTierSnapshot } from '../lib/fidelity';
 import ImageCropModal from '../components/ImageCropModal';
 import PromoBadge from '../components/PromoBadge';
 import VisitCard from '../components/VisitCard';
@@ -321,6 +322,7 @@ export default function ClientDetail() {
   }
 
   const promo = getClientPromos(client);
+  const fidelity = getFidelityTierSnapshot(client);
 
   return (
     <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen pb-20">
@@ -439,6 +441,58 @@ export default function ClientDetail() {
 
         {/* Promozione */}
         {promo.count > 0 && <PromoBadge promo={promo} />}
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-3">
+            🏅 Fidelity cliente
+          </h3>
+          <p style={{ color: '#8b5a3c' }} className="mb-5">
+            Livello attuale:{' '}
+            <strong>
+              {fidelity.currentTier ? fidelity.currentTier.label : 'Base'}
+            </strong>
+            {fidelity.nextTier && (
+              <>
+                {' '}· Mancano <strong>{fidelity.nextTier.remainingVisits}</strong> visite per{' '}
+                <strong>{fidelity.nextTier.label}</strong>
+              </>
+            )}
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {fidelity.tiers.map((tier) => (
+              <div
+                key={tier.key}
+                className="rounded-2xl border p-5"
+                style={{
+                  backgroundColor: tier.style.backgroundColor,
+                  borderColor: tier.style.borderColor,
+                }}
+              >
+                <p
+                  className="text-lg font-bold mb-2"
+                  style={{ color: tier.style.textColor }}
+                >
+                  {tier.label}
+                </p>
+                <p style={{ color: tier.style.textColor }} className="text-sm">
+                  {tier.visitsRequired} visite in {tier.monthsWindow} mesi
+                </p>
+                <p
+                  style={{ color: tier.style.textColor }}
+                  className="text-2xl font-bold mt-3"
+                >
+                  {tier.visitsInWindow}
+                </p>
+                <p style={{ color: tier.style.textColor }} className="text-sm mt-1">
+                  {tier.achieved
+                    ? 'Obiettivo raggiunto'
+                    : `${tier.remainingVisits} visite mancanti`}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Note */}
         {client.notes && (
