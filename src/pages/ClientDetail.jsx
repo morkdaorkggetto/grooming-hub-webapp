@@ -14,6 +14,7 @@ import { getClientWhatsAppUrl } from '../lib/whatsapp';
 import {
   getClientCardCode,
   getClientCardPath,
+  getClientCardUrl,
   getClientQrImageUrl,
 } from '../lib/qrCode';
 import ImageCropModal from '../components/ImageCropModal';
@@ -275,7 +276,7 @@ export default function ClientDetail() {
       return;
     }
 
-    window.open(getClientCardPath(client.qr_token, { print: true }), '_blank', 'noopener,noreferrer');
+    window.open(getClientCardUrl(client.qr_token, { print: true }), '_blank', 'noopener,noreferrer');
   };
 
   // Loading state
