@@ -11,6 +11,11 @@ import {
   setClientBlacklistStatus,
 } from '../lib/database';
 import { getClientWhatsAppUrl } from '../lib/whatsapp';
+import {
+  getClientCardCode,
+  getClientCardPath,
+  getClientQrImageUrl,
+} from '../lib/qrCode';
 import ImageCropModal from '../components/ImageCropModal';
 import PromoBadge from '../components/PromoBadge';
 import VisitCard from '../components/VisitCard';
@@ -255,6 +260,24 @@ export default function ClientDetail() {
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
+  const handleOpenClientCard = () => {
+    if (!client?.qr_token) {
+      setError('QR cliente non disponibile. Applica prima la migration dedicata.');
+      return;
+    }
+
+    navigate(getClientCardPath(client.qr_token));
+  };
+
+  const handlePrintClientCard = () => {
+    if (!client?.qr_token) {
+      setError('QR cliente non disponibile. Applica prima la migration dedicata.');
+      return;
+    }
+
+    window.open(getClientCardPath(client.qr_token, { print: true }), '_blank', 'noopener,noreferrer');
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -396,6 +419,13 @@ export default function ClientDetail() {
                   WhatsApp
                 </button>
                 <button
+                  onClick={handleOpenClientCard}
+                  className="px-4 py-2 rounded-lg font-medium transition text-white"
+                  style={{ backgroundColor: '#2563eb' }}
+                >
+                  QR Card
+                </button>
+                <button
                   onClick={handleDeleteClient}
                   className="px-4 py-2 rounded-lg font-medium transition text-white bg-red-500 hover:bg-red-600"
                 >
@@ -420,6 +450,51 @@ export default function ClientDetail() {
             </p>
           </div>
         )}
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="flex-1">
+              <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-3">
+                🪪 Card identificativa QR
+              </h3>
+              <p style={{ color: '#8b5a3c' }} className="mb-2">
+                Codice card: <strong>{getClientCardCode(client.qr_token)}</strong>
+              </p>
+              <p style={{ color: '#8b5a3c' }} className="text-sm mb-4">
+                Usa questa card per riconoscere il cliente e aprire rapidamente la sua scheda interna.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={handleOpenClientCard}
+                  className="px-4 py-2 rounded-lg font-medium text-white"
+                  style={{ backgroundColor: '#2563eb' }}
+                >
+                  Apri card
+                </button>
+                <button
+                  onClick={handlePrintClientCard}
+                  className="px-4 py-2 rounded-lg font-medium text-white"
+                  style={{ backgroundColor: '#8b5a3c' }}
+                >
+                  Stampa card
+                </button>
+              </div>
+            </div>
+
+            {client.qr_token && (
+              <div
+                className="rounded-2xl border p-4 bg-white shadow-sm"
+                style={{ borderColor: '#ead7c5' }}
+              >
+                <img
+                  src={getClientQrImageUrl(client.qr_token, 180)}
+                  alt={`QR ${client.name}`}
+                  className="w-40 h-40 bg-white rounded-xl"
+                />
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-3">

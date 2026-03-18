@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 
 /**
@@ -9,6 +10,8 @@ import { supabase } from '../../lib/supabaseClient';
  * - onSuccess: callback dopo autenticazione riuscita
  */
 export default function LoginForm({ onSuccess }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -123,6 +126,8 @@ export default function LoginForm({ onSuccess }) {
     setLoading(true);
 
     try {
+      const redirectTo = searchParams.get('redirect') || '/dashboard';
+
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -138,6 +143,7 @@ export default function LoginForm({ onSuccess }) {
 
       // Chiama callback dopo login
       if (onSuccess) onSuccess();
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       setError(`Errore login: ${error.message}`);
     } finally {

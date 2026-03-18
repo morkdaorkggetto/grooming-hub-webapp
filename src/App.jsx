@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { onAuthStateChange } from './lib/supabaseClient';
 import LoginForm from './components/Auth/LoginForm';
 import Dashboard from './pages/Dashboard';
@@ -8,14 +8,18 @@ import AddClient from './pages/AddClient';
 import AddVisit from './pages/AddVisit';
 import Calendar from './pages/Calendar';
 import ResetPassword from './pages/ResetPassword';
+import ClientCard from './pages/ClientCard';
 
 /**
  * ProtectedRoute — Componente wrapper per route protette
  * Mostra la route se autenticato, altrimenti reindirizza a /login
  */
 function ProtectedRoute({ isAuthenticated, children }) {
+  const location = useLocation();
+
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    const redirect = `${location.pathname}${location.search}`;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(redirect)}`} replace />;
   }
   return children;
 }
@@ -139,6 +143,15 @@ export default function App() {
           element={
             <ProtectedRoute isAuthenticated={!!user}>
               <Calendar />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/client-card/:qrToken"
+          element={
+            <ProtectedRoute isAuthenticated={!!user}>
+              <ClientCard />
             </ProtectedRoute>
           }
         />

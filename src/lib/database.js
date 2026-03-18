@@ -12,6 +12,15 @@ const generateId = () => {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
+const generateQrToken = () => {
+  const randomPart =
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID().replace(/-/g, '').slice(0, 18)
+      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+
+  return `ghc_${randomPart}`;
+};
+
 const getFileExtension = (file) => {
   const nameParts = file?.name?.split('.') || [];
   const extFromName = nameParts.length > 1 ? nameParts.pop().toLowerCase() : '';
@@ -153,6 +162,7 @@ export const addClient = async (clientData) => {
       .from('clients')
       .insert({
         id: clientId,
+        qr_token: generateQrToken(),
         user_id: user.id,
         name: clientData.name,
         breed: clientData.breed || null,
@@ -730,5 +740,65 @@ export const getClientById = async (clientId) => {
   } catch (error) {
     console.error('Errore caricamento cliente:', error.message);
     throw new Error(`Non riesco a caricare il cliente: ${error.message}`);
+  }
+};
+
+/**
+ * Ottiene i dati rapidi di una card cliente tramite qr_token.
+ * Accessibile solo all'utente autenticato proprietario del cliente.
+ * @param {string} qrToken
+ * @returns {Promise<Object>}
+ */
+export const getClientCardByToken = async (qrToken) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!qrToken) throw new Error('QR token non valido');
+
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('qr_token', qrToken)
+      .eq('user_id', user.id)
+      .single();
+
+    if (clientError) throw clientError;
+
+    const nowIso = new Date().toISOString();
+
+    const [{ data: nextAppointment }, { data: lastVisit }, { count: visitsCount, error: visitsCountError }] =
+      await Promise.all([
+        supabase
+          .from('appointments')
+          .select('id, scheduled_at, duration_minutes, status, notes', { head: false })
+          .eq('client_id', client.id)
+          .gte('scheduled_at', nowIso)
+          .order('scheduled_at', { ascending: true })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('visits')
+          .select('id, date, treatments, issues, cost')
+          .eq('client_id', client.id)
+          .order('date', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('visits')
+          .select('id', { count: 'exact', head: true })
+          .eq('client_id', client.id),
+      ]);
+
+    if (visitsCountError) throw visitsCountError;
+
+    return {
+      ...client,
+      nextAppointment: nextAppointment || null,
+      lastVisit: lastVisit || null,
+      visitsCount: visitsCount || 0,
+    };
+  } catch (error) {
+    console.error('Errore caricamento card cliente:', error.message);
+    throw new Error(`Non riesco a caricare la card cliente: ${error.message}`);
   }
 };

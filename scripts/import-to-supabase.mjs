@@ -53,6 +53,10 @@ function applyPrefix(id) {
   return IMPORT_ID_PREFIX ? `${IMPORT_ID_PREFIX}${id}` : id;
 }
 
+function generateQrToken() {
+  return `ghc_${randomUUID().replace(/-/g, '').slice(0, 18)}`;
+}
+
 function resolveFilePath(explicitPath) {
   if (explicitPath) return path.resolve(process.cwd(), explicitPath);
   if (!fs.existsSync(DATA_DIR)) {
@@ -108,6 +112,7 @@ function buildClientRows(clients, userId) {
 
     return {
       id: targetId,
+      qr_token: client.qr_token || client.qrToken || generateQrToken(),
       user_id: userId,
       name: client.name || 'Senza nome',
       breed: client.breed || null,
