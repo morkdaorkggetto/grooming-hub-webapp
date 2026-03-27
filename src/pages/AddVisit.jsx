@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getClientById, addVisit } from '../lib/database';
+import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
 
 /**
  * AddVisit — Pagina form aggiunta visita per un cliente
@@ -126,6 +127,15 @@ export default function AddVisit() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
+        {DEMO_MODE && (
+          <div
+            className="mb-6 p-4 rounded-lg border"
+            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+          >
+            <p className="font-medium">{DEMO_WRITE_BLOCK_MESSAGE}</p>
+          </div>
+        )}
+
         {/* Errore globale */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
@@ -179,6 +189,7 @@ export default function AddVisit() {
                 onChange={(e) =>
                   setFormData({ ...formData, date: e.target.value })
                 }
+                disabled={DEMO_MODE || submitting}
                 required
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
@@ -207,6 +218,7 @@ export default function AddVisit() {
                 onChange={(e) =>
                   setFormData({ ...formData, treatments: e.target.value })
                 }
+                disabled={DEMO_MODE || submitting}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition resize-none"
                 style={{
                   borderColor: '#e8d5c4',
@@ -235,6 +247,7 @@ export default function AddVisit() {
                 onChange={(e) =>
                   setFormData({ ...formData, issues: e.target.value })
                 }
+                disabled={DEMO_MODE || submitting}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition resize-none"
                 style={{
                   borderColor: '#e8d5c4',
@@ -270,6 +283,7 @@ export default function AddVisit() {
                   onChange={(e) =>
                     setFormData({ ...formData, cost: e.target.value })
                   }
+                  disabled={DEMO_MODE || submitting}
                   required
                   className="flex-1 px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                   style={{
@@ -287,7 +301,8 @@ export default function AddVisit() {
             <div className="flex gap-4 pt-6">
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={DEMO_MODE || submitting}
+                title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Salva visita'}
                 className="flex-1 py-4 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: '#d4a574' }}
               >

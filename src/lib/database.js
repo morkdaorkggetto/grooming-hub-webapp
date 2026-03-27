@@ -1,4 +1,5 @@
 import { supabase, getCurrentUser } from './supabaseClient';
+import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from './demoMode';
 
 const CLIENT_PHOTOS_BUCKET = 'client-photos';
 const BLACKLIST_THRESHOLD = -3;
@@ -19,6 +20,12 @@ const generateQrToken = () => {
       : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
 
   return `ghc_${randomPart}`;
+};
+
+const assertDemoWriteAllowed = () => {
+  if (DEMO_MODE) {
+    throw new Error(DEMO_WRITE_BLOCK_MESSAGE);
+  }
 };
 
 const getFileExtension = (file) => {
@@ -145,6 +152,7 @@ export const getAllClients = async () => {
  */
 export const addClient = async (clientData) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -191,6 +199,7 @@ export const addClient = async (clientData) => {
  */
 export const updateClient = async (clientId, clientData) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -251,6 +260,7 @@ export const updateClient = async (clientId, clientData) => {
  */
 export const deleteClient = async (clientId) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -294,6 +304,7 @@ export const deleteClient = async (clientId) => {
  */
 export const addVisit = async (clientId, visitData) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -338,6 +349,7 @@ export const addVisit = async (clientId, visitData) => {
  */
 export const deleteVisit = async (visitId, clientId) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -365,6 +377,7 @@ export const deleteVisit = async (visitId, clientId) => {
  */
 export const updateClientNoShowScore = async (clientId, delta) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -404,6 +417,7 @@ export const updateClientNoShowScore = async (clientId, delta) => {
  */
 export const setClientBlacklistStatus = async (clientId, isBlacklisted) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -434,6 +448,7 @@ export const setClientBlacklistStatus = async (clientId, isBlacklisted) => {
  */
 export const addAppointment = async (appointmentData) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -530,6 +545,7 @@ export const getAppointments = async (filters = {}) => {
  */
 export const updateAppointmentStatus = async (appointmentId, status) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
     if (!APPOINTMENT_STATUSES.includes(status)) {
@@ -582,6 +598,7 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
  */
 export const updateAppointmentSchedule = async (appointmentId, updates) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 
@@ -637,6 +654,7 @@ export const updateAppointmentSchedule = async (appointmentId, updates) => {
  */
 export const deleteAppointment = async (appointmentId) => {
   try {
+    assertDemoWriteAllowed();
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
 

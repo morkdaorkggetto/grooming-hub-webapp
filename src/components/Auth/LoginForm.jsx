@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
+import { DEMO_MODE } from '../../lib/demoMode';
 
 /**
  * LoginForm — Componente autenticazione
@@ -178,6 +179,17 @@ export default function LoginForm({ onSuccess }) {
             {isSignUp ? 'Crea Account' : 'Accedi'}
           </h2>
 
+          {DEMO_MODE && (
+            <div
+              className="mb-4 p-4 rounded-lg border"
+              style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+            >
+              <p className="text-sm font-medium">
+                Ambiente demo: accesso consentito solo agli account che hai creato tu. Le modifiche nell'app sono disattivate.
+              </p>
+            </div>
+          )}
+
           {/* Messaggio di errore */}
           {error && (
             <div
@@ -304,25 +316,27 @@ export default function LoginForm({ onSuccess }) {
           </form>
 
           {/* Toggle tra SignUp e SignIn */}
-          <div className="mt-6 text-center">
-            <p style={{ color: '#8b5a3c' }} className="text-sm">
-              {isSignUp
-                ? 'Hai già un account? '
-                : 'Non hai un account? '}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setError('');
-                  setSuccessMessage('');
-                }}
-                className="font-bold underline hover:opacity-80 transition"
-                style={{ color: '#d4a574' }}
-              >
-                {isSignUp ? 'Accedi' : 'Registrati'}
-              </button>
-            </p>
-          </div>
+          {!DEMO_MODE && (
+            <div className="mt-6 text-center">
+              <p style={{ color: '#8b5a3c' }} className="text-sm">
+                {isSignUp
+                  ? 'Hai già un account? '
+                  : 'Non hai un account? '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setError('');
+                    setSuccessMessage('');
+                  }}
+                  className="font-bold underline hover:opacity-80 transition"
+                  style={{ color: '#d4a574' }}
+                >
+                  {isSignUp ? 'Accedi' : 'Registrati'}
+                </button>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Footer info */}

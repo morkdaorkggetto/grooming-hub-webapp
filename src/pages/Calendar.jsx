@@ -13,6 +13,7 @@ import {
   getAppointmentWhatsAppUrl,
   getDraftAppointmentWhatsAppUrl,
 } from '../lib/whatsapp';
+import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
 
 const DEFAULT_DURATION = 60;
 
@@ -608,6 +609,10 @@ export default function Calendar() {
   };
 
   const handleAppointmentDragStart = (appointment) => {
+    if (DEMO_MODE) {
+      setError(DEMO_WRITE_BLOCK_MESSAGE);
+      return;
+    }
     setDraggingAppointmentId(appointment.id);
     setDragOverDay('');
   };
@@ -868,7 +873,7 @@ export default function Calendar() {
                   <button
                     key={appointment.id}
                     type="button"
-                    draggable
+                    draggable={!DEMO_MODE}
                     title={`${appointment.client?.name || 'Cliente'} · ${getTimelineStatusDescription(
                       appointment
                     )} · ${formatTimeOnly(appointment.scheduled_at)}-${formatTimeOnly(
@@ -928,6 +933,17 @@ export default function Calendar() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+        {DEMO_MODE && (
+          <div
+            className="p-4 rounded-lg border"
+            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+          >
+            <p className="font-medium">
+              Demo in sola lettura: calendario consultabile, comunicazioni attive, ma creazione e modifiche appuntamenti disattivate.
+            </p>
+          </div>
+        )}
+
         {error && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200">
             <p style={{ color: '#991b1b' }} className="font-medium">
@@ -962,6 +978,7 @@ export default function Calendar() {
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                disabled={DEMO_MODE}
                 required
               >
                 <option value="">Seleziona cliente</option>
@@ -986,6 +1003,7 @@ export default function Calendar() {
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                disabled={DEMO_MODE}
                 required
               />
             </div>
@@ -1003,6 +1021,7 @@ export default function Calendar() {
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                disabled={DEMO_MODE}
                 required
               />
             </div>
@@ -1023,6 +1042,7 @@ export default function Calendar() {
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                disabled={DEMO_MODE}
               />
             </div>
 
@@ -1040,13 +1060,15 @@ export default function Calendar() {
                 placeholder="Es. solo bagno, taglio unghie, richieste particolari"
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                disabled={DEMO_MODE}
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={DEMO_MODE || saving}
+                title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi appuntamento'}
                 className="w-full px-4 py-3 rounded-lg font-bold text-white transition disabled:opacity-70"
                 style={{ backgroundColor: '#d4a574' }}
               >
@@ -1281,6 +1303,7 @@ export default function Calendar() {
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
                         style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                        disabled={DEMO_MODE}
                       />
                     </div>
                     <div>
@@ -1295,6 +1318,7 @@ export default function Calendar() {
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
                         style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                        disabled={DEMO_MODE}
                       />
                     </div>
                     <div>
@@ -1315,6 +1339,7 @@ export default function Calendar() {
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
                         style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                        disabled={DEMO_MODE}
                       />
                     </div>
                   </div>
@@ -1332,7 +1357,8 @@ export default function Calendar() {
 
                   <button
                     type="submit"
-                    disabled={updatingAppointment}
+                    disabled={DEMO_MODE || updatingAppointment}
+                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Salva nuovo orario'}
                     className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-60"
                     style={{ backgroundColor: '#d4a574' }}
                   >
@@ -1379,6 +1405,8 @@ export default function Calendar() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleStatusChange(selectedAppointment.id, 'completed')}
+                    disabled={DEMO_MODE}
+                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Segna completato'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#16a34a' }}
                   >
@@ -1386,6 +1414,8 @@ export default function Calendar() {
                   </button>
                   <button
                     onClick={() => handleStatusChange(selectedAppointment.id, 'no_show')}
+                    disabled={DEMO_MODE}
+                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Segna no-show'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#e11d48' }}
                   >
@@ -1393,6 +1423,8 @@ export default function Calendar() {
                   </button>
                   <button
                     onClick={() => handleStatusChange(selectedAppointment.id, 'cancelled')}
+                    disabled={DEMO_MODE}
+                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Annulla appuntamento'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#9ca3af' }}
                   >
@@ -1400,6 +1432,8 @@ export default function Calendar() {
                   </button>
                   <button
                     onClick={() => handleDeleteAppointment(selectedAppointment.id)}
+                    disabled={DEMO_MODE}
+                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Elimina appuntamento'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#dc2626' }}
                   >
@@ -1426,6 +1460,8 @@ export default function Calendar() {
                         replace: false,
                       })
                     }
+                    disabled={DEMO_MODE}
+                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Nuovo appuntamento per questo cliente'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#d4a574' }}
                   >

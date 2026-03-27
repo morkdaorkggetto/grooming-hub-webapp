@@ -1,0 +1,712 @@
+{
+  "exportDate": "2026-03-27T13:25:42.983Z",
+  "data": [
+    {
+      "id": "demo-fido",
+      "name": "Fido",
+      "breed": "Bracco",
+      "owner": "Luigi Rossi",
+      "phone": "3384332863",
+      "notes": "Cliente demo fedele, ottimo per mostrare il livello Bronzo.",
+      "no_show_score": 1,
+      "is_blacklisted": false,
+      "visits": [
+        {
+          "id": "visit-5izwdyqo",
+          "date": "2025-04-05",
+          "treatments": "Bagno e asciugatura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 35
+        },
+        {
+          "id": "visit-2ymgfkwn",
+          "date": "2025-05-03",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-nwj5l39e",
+          "date": "2025-05-31",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-c89rxuku",
+          "date": "2025-06-28",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 35
+        },
+        {
+          "id": "visit-7a55cb1p",
+          "date": "2025-07-26",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-a5g6f862",
+          "date": "2025-08-23",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 45
+        },
+        {
+          "id": "visit-t29dousw",
+          "date": "2025-09-20",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 35
+        },
+        {
+          "id": "visit-n24zv75u",
+          "date": "2025-10-18",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-444hlswd",
+          "date": "2025-11-15",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-h8evmn7a",
+          "date": "2025-12-13",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 35
+        },
+        {
+          "id": "visit-hxpsoiua",
+          "date": "2026-01-10",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 40
+        },
+        {
+          "id": "visit-mewislas",
+          "date": "2026-02-07",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 45
+        }
+      ],
+      "appointments": [
+        {
+          "id": "appt-fido-1",
+          "scheduled_at": "2026-03-31T07:00:00.000Z",
+          "duration_minutes": 60,
+          "status": "scheduled",
+          "notes": "Bagno stagionale e controllo cute"
+        },
+        {
+          "id": "appt-fido-2",
+          "scheduled_at": "2026-04-14T08:30:00.000Z",
+          "duration_minutes": 60,
+          "status": "scheduled",
+          "notes": "Richiesta foto finale per i social"
+        }
+      ]
+    },
+    {
+      "id": "demo-luna",
+      "name": "Luna",
+      "breed": "Barboncino",
+      "owner": "Martina Bianchi",
+      "phone": "3475551122",
+      "notes": "Cliente demo ideale per mostrare il livello Argento e le promozioni future.",
+      "no_show_score": 3,
+      "is_blacklisted": false,
+      "visits": [
+        {
+          "id": "visit-1i1fdh33",
+          "date": "2024-04-02",
+          "treatments": "Bagno e asciugatura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 40
+        },
+        {
+          "id": "visit-rwl1htit",
+          "date": "2024-05-02",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-lrtfe8il",
+          "date": "2024-06-01",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-z8jweqnq",
+          "date": "2024-07-01",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-slqqjd2a",
+          "date": "2024-07-31",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-dlyjg8mx",
+          "date": "2024-08-30",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 50
+        },
+        {
+          "id": "visit-5qggably",
+          "date": "2024-09-29",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-h0pk1xpl",
+          "date": "2024-10-29",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-0tvzcrdj",
+          "date": "2024-11-28",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-fw4wpvks",
+          "date": "2024-12-28",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-na9wozum",
+          "date": "2025-01-27",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 45
+        },
+        {
+          "id": "visit-n5yfazi9",
+          "date": "2025-02-26",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-wx06jext",
+          "date": "2025-03-28",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-ilwdyx1r",
+          "date": "2025-04-27",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-t9wyhj4r",
+          "date": "2025-05-27",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-4ff4hjty",
+          "date": "2025-06-26",
+          "treatments": "Bagno e asciugatura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 40
+        },
+        {
+          "id": "visit-zdkm9b75",
+          "date": "2025-07-26",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-3fp8tc3y",
+          "date": "2025-08-25",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-nkymszn7",
+          "date": "2025-09-24",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-a1q4c73z",
+          "date": "2025-10-24",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-kv490s5n",
+          "date": "2025-11-23",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 50
+        },
+        {
+          "id": "visit-t4mr1c0n",
+          "date": "2025-12-23",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-5gyvm2im",
+          "date": "2026-01-22",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-a67o1348",
+          "date": "2026-02-21",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 50
+        }
+      ],
+      "appointments": [
+        {
+          "id": "appt-luna-1",
+          "scheduled_at": "2026-03-29T13:00:00.000Z",
+          "duration_minutes": 90,
+          "status": "scheduled",
+          "notes": "Toelettatura completa con rifinitura"
+        },
+        {
+          "id": "appt-luna-2",
+          "scheduled_at": "2026-04-19T09:00:00.000Z",
+          "duration_minutes": 60,
+          "status": "scheduled",
+          "notes": "Bagnetto mantenimento"
+        }
+      ]
+    },
+    {
+      "id": "demo-rocky",
+      "name": "Rocky",
+      "breed": "Golden Retriever",
+      "owner": "Paolo Verdi",
+      "phone": "3492211008",
+      "notes": "Cliente storico demo da usare per il livello Oro.",
+      "no_show_score": 5,
+      "is_blacklisted": false,
+      "visits": [
+        {
+          "id": "visit-62zwdacs",
+          "date": "2023-04-01",
+          "treatments": "Bagno e asciugatura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 45
+        },
+        {
+          "id": "visit-fg7r8wrb",
+          "date": "2023-05-01",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-qfiyvdy3",
+          "date": "2023-05-31",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-dp9jk9ct",
+          "date": "2023-06-30",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-tnauwte6",
+          "date": "2023-07-30",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-402q4xfm",
+          "date": "2023-08-29",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 55
+        },
+        {
+          "id": "visit-2wscxwce",
+          "date": "2023-09-28",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-icfywb69",
+          "date": "2023-10-28",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-t03qv6fb",
+          "date": "2023-11-27",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-skpc6w51",
+          "date": "2023-12-27",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-agr7ryyl",
+          "date": "2024-01-26",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 50
+        },
+        {
+          "id": "visit-fzi5ti2z",
+          "date": "2024-02-25",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-8fv5z3vb",
+          "date": "2024-03-26",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-rpnmt5ag",
+          "date": "2024-04-25",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-kyv9aonv",
+          "date": "2024-05-25",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-ykj5wbk6",
+          "date": "2024-06-24",
+          "treatments": "Bagno e asciugatura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 45
+        },
+        {
+          "id": "visit-2f7pdef2",
+          "date": "2024-07-24",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-2o4vikwk",
+          "date": "2024-08-23",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-8ylezrfr",
+          "date": "2024-09-22",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-yzw96xml",
+          "date": "2024-10-22",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-i8bzmw6l",
+          "date": "2024-11-21",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 55
+        },
+        {
+          "id": "visit-rx5ymnaf",
+          "date": "2024-12-21",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-appyfept",
+          "date": "2025-01-20",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-w9ezyo43",
+          "date": "2025-02-19",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-444a90me",
+          "date": "2025-03-21",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-9dvr8k0r",
+          "date": "2025-04-20",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 50
+        },
+        {
+          "id": "visit-saa9z357",
+          "date": "2025-05-20",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-e57kwwyo",
+          "date": "2025-06-19",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-n8d5b64v",
+          "date": "2025-07-19",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-7ijbsibx",
+          "date": "2025-08-18",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-8xoyd5ki",
+          "date": "2025-09-17",
+          "treatments": "Bagno e asciugatura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 45
+        },
+        {
+          "id": "visit-iskh9sgf",
+          "date": "2025-10-17",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-q40tgl0g",
+          "date": "2025-11-16",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 55
+        },
+        {
+          "id": "visit-s9o6ju8f",
+          "date": "2025-12-16",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 45
+        },
+        {
+          "id": "visit-dlrtq6xs",
+          "date": "2026-01-15",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 50
+        },
+        {
+          "id": "visit-s33amksh",
+          "date": "2026-02-14",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 55
+        }
+      ],
+      "appointments": [
+        {
+          "id": "appt-rocky-1",
+          "scheduled_at": "2026-03-28T06:30:00.000Z",
+          "duration_minutes": 120,
+          "status": "scheduled",
+          "notes": "Bagno completo e sottopelo"
+        }
+      ]
+    },
+    {
+      "id": "demo-milo",
+      "name": "Milo",
+      "breed": "Meticcio",
+      "owner": "Sara Neri",
+      "phone": "3337788990",
+      "notes": "Cliente nuovo, utile per mostrare il livello Base.",
+      "no_show_score": 0,
+      "is_blacklisted": false,
+      "visits": [
+        {
+          "id": "visit-jsbiga27",
+          "date": "2025-11-10",
+          "treatments": "Bagno e asciugatura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 30
+        },
+        {
+          "id": "visit-7am7d9zw",
+          "date": "2025-12-15",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 35
+        },
+        {
+          "id": "visit-15k6ak3t",
+          "date": "2026-01-19",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 40
+        },
+        {
+          "id": "visit-6259hez4",
+          "date": "2026-02-23",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 30
+        }
+      ],
+      "appointments": [
+        {
+          "id": "appt-milo-1",
+          "scheduled_at": "2026-04-02T15:00:00.000Z",
+          "duration_minutes": 45,
+          "status": "scheduled",
+          "notes": "Primo bagnetto della stagione"
+        }
+      ]
+    },
+    {
+      "id": "demo-pepe",
+      "name": "Pepe",
+      "breed": "Carlino",
+      "owner": "Giulia Fontana",
+      "phone": "3310022446",
+      "notes": "Cliente demo con affidabilita bassa e blacklist attiva.",
+      "no_show_score": -3,
+      "is_blacklisted": true,
+      "visits": [
+        {
+          "id": "visit-xaiinxho",
+          "date": "2025-06-15",
+          "treatments": "Bagno e asciugatura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 32
+        },
+        {
+          "id": "visit-z9lknnt8",
+          "date": "2025-07-25",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 37
+        },
+        {
+          "id": "visit-blniqylr",
+          "date": "2025-09-03",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": null,
+          "cost": 42
+        },
+        {
+          "id": "visit-r8gm90wl",
+          "date": "2025-10-13",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 32
+        },
+        {
+          "id": "visit-g1j4kj2t",
+          "date": "2025-11-22",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 37
+        },
+        {
+          "id": "visit-54qby1p0",
+          "date": "2026-01-01",
+          "treatments": "Bagno, spazzolatura e rifinitura",
+          "issues": "Leggera sensibilita alle zampe",
+          "cost": 42
+        },
+        {
+          "id": "visit-xgsyudhe",
+          "date": "2026-02-10",
+          "treatments": "Bagno e asciugatura",
+          "issues": null,
+          "cost": 32
+        },
+        {
+          "id": "visit-b0fuslg6",
+          "date": "2026-03-22",
+          "treatments": "Bagno completo e taglio unghie",
+          "issues": null,
+          "cost": 37
+        }
+      ],
+      "appointments": [
+        {
+          "id": "appt-pepe-1",
+          "scheduled_at": "2026-04-05T10:00:00.000Z",
+          "duration_minutes": 45,
+          "status": "scheduled",
+          "notes": "Appuntamento da confermare con anticipo"
+        }
+      ]
+    }
+  ]
+}

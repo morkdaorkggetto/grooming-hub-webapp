@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllClients } from '../lib/database';
 import { getCurrentUser, logout } from '../lib/supabaseClient';
 import ClientCard from '../components/ClientCard';
+import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
 
 /**
  * Dashboard — Pagina principale
@@ -171,6 +172,18 @@ export default function Dashboard() {
         )}
 
         {/* Search + Add button */}
+        {DEMO_MODE && (
+          <div
+            className="mb-6 p-4 rounded-xl border"
+            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+          >
+            <p className="font-medium text-sm">
+              Demo in sola lettura: puoi esplorare clienti, QR card, fidelity e calendario, ma non creare o modificare dati.
+            </p>
+          </div>
+        )}
+
+        {/* Search + Add button */}
         <div className="mb-8 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
           {/* Barra ricerca */}
           <input
@@ -197,7 +210,9 @@ export default function Dashboard() {
           {/* Pulsante Aggiungi */}
           <button
             onClick={handleAddClient}
-            className="px-6 py-3 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 whitespace-nowrap"
+            disabled={DEMO_MODE}
+            title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi un nuovo cliente'}
+            className="px-6 py-3 rounded-lg font-bold text-white transition duration-200 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ backgroundColor: '#d4a574' }}
           >
             + Nuovo Cliente
@@ -222,7 +237,9 @@ export default function Dashboard() {
             {!searchTerm && (
               <button
                 onClick={handleAddClient}
-                className="inline-block px-6 py-3 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105"
+                disabled={DEMO_MODE}
+                title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi il primo cliente'}
+                className="inline-block px-6 py-3 rounded-lg font-bold text-white transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ backgroundColor: '#d4a574' }}
               >
                 Aggiungi Primo Cliente

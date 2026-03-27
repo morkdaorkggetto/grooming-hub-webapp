@@ -21,6 +21,7 @@ import { getFidelityTierSnapshot } from '../lib/fidelity';
 import ImageCropModal from '../components/ImageCropModal';
 import PromoBadge from '../components/PromoBadge';
 import VisitCard from '../components/VisitCard';
+import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
 
 /**
  * ClientDetail — Pagina dettaglio cliente
@@ -343,6 +344,17 @@ export default function ClientDetail() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
+        {DEMO_MODE && (
+          <div
+            className="mb-6 p-4 rounded-lg border"
+            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+          >
+            <p className="font-medium">
+              Demo in sola lettura: puoi consultare cliente, visite, QR e fidelity, ma non modificare dati.
+            </p>
+          </div>
+        )}
+
         {/* Errore */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
@@ -402,6 +414,8 @@ export default function ClientDetail() {
               <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={handleOpenEditModal}
+                  disabled={DEMO_MODE}
+                  title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Modifica cliente'}
                   className="px-4 py-2 rounded-lg font-medium transition text-white"
                   style={{ backgroundColor: '#d4a574' }}
                 >
@@ -430,6 +444,8 @@ export default function ClientDetail() {
                 </button>
                 <button
                   onClick={handleDeleteClient}
+                  disabled={DEMO_MODE}
+                  title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Elimina cliente'}
                   className="px-4 py-2 rounded-lg font-medium transition text-white bg-red-500 hover:bg-red-600"
                 >
                   🗑️ Elimina
@@ -565,6 +581,8 @@ export default function ClientDetail() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleAdjustNoShowScore(-1)}
+              disabled={DEMO_MODE}
+              title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Segna no-show'}
               className="px-4 py-2 rounded-lg font-medium text-white"
               style={{ backgroundColor: '#e11d48' }}
             >
@@ -572,6 +590,8 @@ export default function ClientDetail() {
             </button>
             <button
               onClick={() => handleAdjustNoShowScore(1)}
+              disabled={DEMO_MODE}
+              title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Segna presenza'}
               className="px-4 py-2 rounded-lg font-medium text-white"
               style={{ backgroundColor: '#16a34a' }}
             >
@@ -579,6 +599,8 @@ export default function ClientDetail() {
             </button>
             <button
               onClick={handleToggleBlacklist}
+              disabled={DEMO_MODE}
+              title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiorna blacklist'}
               className="px-4 py-2 rounded-lg font-medium text-white"
               style={{ backgroundColor: client.is_blacklisted ? '#2563eb' : '#b91c1c' }}
             >
@@ -617,7 +639,9 @@ export default function ClientDetail() {
       {/* FAB Aggiungi Visita */}
       <button
         onClick={() => setShowAddVisitModal(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full text-white text-2xl shadow-lg transform transition duration-200 hover:scale-110 flex items-center justify-center"
+        disabled={DEMO_MODE}
+        title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi visita'}
+        className="fixed bottom-8 right-8 w-16 h-16 rounded-full text-white text-2xl shadow-lg transform transition duration-200 hover:scale-110 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
         style={{ backgroundColor: '#d4a574' }}
       >
         +
@@ -710,7 +734,9 @@ export default function ClientDetail() {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-lg font-bold text-white transition"
+                  disabled={DEMO_MODE}
+                  title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Salva visita'}
+                  className="flex-1 py-3 rounded-lg font-bold text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ backgroundColor: '#d4a574' }}
                 >
                   Salva Visita

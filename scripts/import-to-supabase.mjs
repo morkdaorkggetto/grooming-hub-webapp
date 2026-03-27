@@ -45,6 +45,11 @@ function parseExportPayload(raw) {
   throw new Error('Formato JSON non valido. Atteso array o oggetto con campo "data".');
 }
 
+function parseAppointmentsPayload(raw) {
+  if (raw && Array.isArray(raw.appointments)) return raw.appointments;
+  return [];
+}
+
 function normalizeId(id, fallback = randomUUID()) {
   return String(id || fallback);
 }
@@ -165,6 +170,52 @@ function toVisitRows(clients, sourceToTargetClientId) {
   return rows;
 }
 
+function toAppointmentRows(clients, sourceToTargetClientId, userId, topLevelAppointments = []) {
+  const rows = [];
+
+  const pushAppointment = (appointment, sourceClientId, fallbackIndex) => {
+    const targetClientId =
+      sourceToTargetClientId.get(sourceClientId) || applyPrefix(normalizeId(sourceClientId));
+
+    const sourceAppointmentId = normalizeId(
+      appointment.id,
+      `${sourceClientId}-appointment-${fallbackIndex}`
+    );
+    const targetAppointmentId = applyPrefix(sourceAppointmentId);
+
+    rows.push({
+      id: targetAppointmentId,
+      user_id: userId,
+      client_id: targetClientId,
+      scheduled_at: appointment.scheduled_at || appointment.scheduledAt,
+      duration_minutes: Number(appointment.duration_minutes ?? appointment.durationMinutes) || 60,
+      status: appointment.status || 'scheduled',
+      notes: appointment.notes || null,
+      external_calendar:
+        appointment.external_calendar || appointment.externalCalendar || null,
+      created_at: appointment.created_at || appointment.createdAt || undefined,
+      updated_at: appointment.updated_at || appointment.updatedAt || undefined,
+    });
+  };
+
+  for (const client of clients) {
+    const sourceClientId = normalizeId(client.id);
+    const appointments = Array.isArray(client.appointments) ? client.appointments : [];
+
+    for (let index = 0; index < appointments.length; index += 1) {
+      pushAppointment(appointments[index], sourceClientId, index);
+    }
+  }
+
+  for (let index = 0; index < topLevelAppointments.length; index += 1) {
+    const appointment = topLevelAppointments[index];
+    if (!appointment.client_id && !appointment.clientId) continue;
+    pushAppointment(appointment, normalizeId(appointment.client_id || appointment.clientId), index);
+  }
+
+  return rows;
+}
+
 async function upsertInBatches(table, rows, onConflict, batchSize = 200) {
   let total = 0;
   for (const batch of chunkArray(rows, batchSize)) {
@@ -206,12 +257,24 @@ async function main() {
   const fileContent = fs.readFileSync(filePath, 'utf-8');
   const parsed = JSON.parse(fileContent);
   const clients = parseExportPayload(parsed);
+  const topLevelAppointments = parseAppointmentsPayload(parsed);
   const userId = await resolveUserId();
 
   const { rows: clientRows, sourceToTargetClientId } = buildClientRows(clients, userId);
   const visitRows = toVisitRows(clients, sourceToTargetClientId);
+  const appointmentRows = toAppointmentRows(
+    clients,
+    sourceToTargetClientId,
+    userId,
+    topLevelAppointments
+  );
 
-  const ok = await confirmProceed(filePath, clientRows.length, visitRows.length, userId);
+  const ok = await confirmProceed(
+    filePath,
+    clientRows.length,
+    visitRows.length + appointmentRows.length,
+    userId
+  );
   if (!ok) {
     console.log('Import annullato.');
     process.exit(0);
@@ -229,11 +292,15 @@ async function main() {
   const importedVisits = visitRows.length
     ? await upsertInBatches('visits', visitRows, 'id')
     : 0;
+  const importedAppointments = appointmentRows.length
+    ? await upsertInBatches('appointments', appointmentRows, 'id')
+    : 0;
 
   console.log('');
   console.log('Import completato con successo.');
   console.log(`- Clienti upsert: ${importedClients}`);
   console.log(`- Visite upsert: ${importedVisits}`);
+  console.log(`- Appuntamenti upsert: ${importedAppointments}`);
 }
 
 main().catch((error) => {
