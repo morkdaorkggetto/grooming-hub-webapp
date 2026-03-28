@@ -111,6 +111,15 @@ export default function WeeklyRevenue() {
     };
   }, [visits]);
 
+  const chartRows = useMemo(() => {
+    const maxRevenue = Math.max(...dailyRows.map((row) => row.revenue), 0);
+
+    return dailyRows.map((row) => ({
+      ...row,
+      percentage: maxRevenue > 0 ? Math.max(8, (row.revenue / maxRevenue) * 100) : 0,
+    }));
+  }, [dailyRows]);
+
   return (
     <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen">
       <header
@@ -259,6 +268,59 @@ export default function WeeklyRevenue() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3 mb-6">
+            <div>
+              <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold">
+                Grafico incassi settimanali
+              </h3>
+              <p style={{ color: '#8b5a3c' }} className="text-sm mt-1">
+                Confronto rapido degli incassi giorno per giorno.
+              </p>
+            </div>
+            <p style={{ color: '#8b5a3c' }} className="text-sm">
+              Picco settimana: <strong>{formatCurrency(Math.max(...dailyRows.map((row) => row.revenue), 0))}</strong>
+            </p>
+          </div>
+
+          {chartRows.every((row) => row.revenue === 0) ? (
+            <p style={{ color: '#8b5a3c' }} className="italic">
+              Nessun incasso disponibile da rappresentare nella settimana selezionata.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {chartRows.map((row) => (
+                <div key={`chart-${row.day}`}>
+                  <div className="flex items-center justify-between gap-4 mb-2">
+                    <p style={{ color: '#5a3a2a' }} className="font-bold capitalize min-w-[92px]">
+                      {formatDayLabel(row.day)}
+                    </p>
+                    <p style={{ color: '#166534' }} className="font-bold text-sm">
+                      {formatCurrency(row.revenue)}
+                    </p>
+                  </div>
+                  <div
+                    className="w-full rounded-full overflow-hidden"
+                    style={{ backgroundColor: '#f5eadf', height: '18px' }}
+                  >
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${row.percentage}%`,
+                        background: 'linear-gradient(90deg, #d4a574 0%, #16a34a 100%)',
+                      }}
+                      title={`${formatDayLabel(row.day)} · ${formatCurrency(row.revenue)}`}
+                    />
+                  </div>
+                  <p style={{ color: '#8b5a3c' }} className="text-xs mt-1">
+                    {row.count} {row.count === 1 ? 'visita' : 'visite'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="bg-white rounded-2xl shadow-lg p-6">
