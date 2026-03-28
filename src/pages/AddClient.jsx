@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addClient } from '../lib/database';
 import ImageCropModal from '../components/ImageCropModal';
@@ -22,8 +22,6 @@ export default function AddClient() {
   });
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
-  const cameraInputRef = useRef(null);
-  const galleryInputRef = useRef(null);
   const [pendingCropFile, setPendingCropFile] = useState(null);
 
   useEffect(() => {
@@ -331,21 +329,19 @@ export default function AddClient() {
                 style={{ borderColor: '#d4a574' }}
               >
                 <input
-                  ref={cameraInputRef}
                   id="photo-camera"
                   type="file"
                   accept="image/*,.heic,.heif"
                   capture="environment"
                   onChange={handlePhotoSelect}
-                  className="hidden"
+                  className="sr-only"
                 />
                 <input
-                  ref={galleryInputRef}
                   id="photo-gallery"
                   type="file"
                   accept="image/*,.heic,.heif"
                   onChange={handlePhotoSelect}
-                  className="hidden"
+                  className="sr-only"
                 />
                 <div>
                   <div className="text-4xl mb-2">📸</div>
@@ -357,22 +353,20 @@ export default function AddClient() {
                   </p>
                 </div>
                 <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
-                  <button
-                    type="button"
-                    onClick={() => cameraInputRef.current?.click()}
-                    className="px-4 py-3 rounded-lg font-bold text-white transition"
+                  <label
+                    htmlFor="photo-camera"
+                    className="px-4 py-3 rounded-lg font-bold text-white transition cursor-pointer inline-flex items-center justify-center"
                     style={{ backgroundColor: '#d4a574' }}
                   >
                     Scatta foto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => galleryInputRef.current?.click()}
-                    className="px-4 py-3 rounded-lg font-bold border-2 transition"
+                  </label>
+                  <label
+                    htmlFor="photo-gallery"
+                    className="px-4 py-3 rounded-lg font-bold border-2 transition cursor-pointer inline-flex items-center justify-center"
                     style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
                   >
                     Scegli dalla galleria
-                  </button>
+                  </label>
                 </div>
               </div>
             </div>

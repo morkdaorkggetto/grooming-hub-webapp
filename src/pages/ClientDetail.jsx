@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   getClientById,
@@ -37,8 +37,6 @@ export default function ClientDetail() {
   const [showAddVisitModal, setShowAddVisitModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
-  const editCameraInputRef = useRef(null);
-  const editGalleryInputRef = useRef(null);
   const [pendingEditCropFile, setPendingEditCropFile] = useState(null);
 
   // Form aggiunta visita
@@ -893,19 +891,19 @@ export default function ClientDetail() {
                   style={{ borderColor: '#d4a574' }}
                 >
                   <input
-                    ref={editCameraInputRef}
+                    id="edit-photo-camera"
                     type="file"
                     accept="image/*,.heic,.heif"
                     capture="environment"
                     onChange={handleEditPhotoSelect}
-                    className="hidden"
+                    className="sr-only"
                   />
                   <input
-                    ref={editGalleryInputRef}
+                    id="edit-photo-gallery"
                     type="file"
                     accept="image/*,.heic,.heif"
                     onChange={handleEditPhotoSelect}
-                    className="hidden"
+                    className="sr-only"
                   />
                   <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
                     {editForm.photo || editPhotoPreview
@@ -913,22 +911,20 @@ export default function ClientDetail() {
                       : 'Aggiungi foto del cane'}
                   </p>
                   <div className="mt-3 flex flex-col sm:flex-row gap-3 justify-center">
-                    <button
-                      type="button"
-                      onClick={() => editCameraInputRef.current?.click()}
-                      className="px-4 py-2 rounded-lg font-medium text-white transition"
+                    <label
+                      htmlFor="edit-photo-camera"
+                      className="px-4 py-2 rounded-lg font-medium text-white transition cursor-pointer inline-flex items-center justify-center"
                       style={{ backgroundColor: '#d4a574' }}
                     >
                       Scatta foto
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editGalleryInputRef.current?.click()}
-                      className="px-4 py-2 rounded-lg font-medium border-2 transition"
+                    </label>
+                    <label
+                      htmlFor="edit-photo-gallery"
+                      className="px-4 py-2 rounded-lg font-medium border-2 transition cursor-pointer inline-flex items-center justify-center"
                       style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
                     >
                       Galleria
-                    </button>
+                    </label>
                   </div>
                 </div>
               </div>
