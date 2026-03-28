@@ -823,3 +823,39 @@ export const getClientCardByToken = async (qrToken) => {
     throw new Error(`Non riesco a caricare la card cliente: ${error.message}`);
   }
 };
+
+/**
+ * Restituisce il report incassi per una settimana/intervallo.
+ * @param {{ from: string, to: string }} range - date in formato YYYY-MM-DD
+ * @returns {Promise<Array>}
+ */
+export const getWeeklyRevenueReport = async ({ from, to }) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!from || !to) throw new Error('Intervallo date non valido');
+
+    const { data, error } = await supabase
+      .from('visits')
+      .select(`
+        id,
+        client_id,
+        date,
+        treatments,
+        issues,
+        cost,
+        discount_percent,
+        client:clients(id, name, owner, user_id)
+      `)
+      .gte('date', from)
+      .lte('date', to)
+      .order('date', { ascending: true });
+
+    if (error) throw error;
+
+    return (data || []).filter((visit) => visit.client?.user_id === user.id);
+  } catch (error) {
+    console.error('Errore report settimanale incassi:', error.message);
+    throw new Error(`Non riesco a caricare il report incassi: ${error.message}`);
+  }
+};

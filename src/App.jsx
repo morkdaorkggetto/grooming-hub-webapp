@@ -9,6 +9,7 @@ import AddVisit from './pages/AddVisit';
 import Calendar from './pages/Calendar';
 import ResetPassword from './pages/ResetPassword';
 import ClientCard from './pages/ClientCard';
+import WeeklyRevenue from './pages/WeeklyRevenue';
 import { DEMO_BANNER_TEXT, DEMO_MODE } from './lib/demoMode';
 
 /**
@@ -153,6 +154,15 @@ export default function App() {
             element={
               <ProtectedRoute isAuthenticated={!!user}>
                 <Calendar />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/reports/weekly"
+            element={
+              <ProtectedRoute isAuthenticated={!!user}>
+                <WeeklyRevenue />
               </ProtectedRoute>
             }
           />
