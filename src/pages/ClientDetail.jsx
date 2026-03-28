@@ -890,41 +890,39 @@ export default function ClientDetail() {
                   className="border-2 border-dashed rounded-lg p-4 text-center"
                   style={{ borderColor: '#d4a574' }}
                 >
-                  <input
-                    id="edit-photo-camera"
-                    type="file"
-                    accept="image/*,.heic,.heif"
-                    capture="environment"
-                    onChange={handleEditPhotoSelect}
-                    className="sr-only"
-                  />
-                  <input
-                    id="edit-photo-gallery"
-                    type="file"
-                    accept="image/*,.heic,.heif"
-                    onChange={handleEditPhotoSelect}
-                    className="sr-only"
-                  />
                   <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
                     {editForm.photo || editPhotoPreview
                       ? 'Sostituisci foto del cane'
                       : 'Aggiungi foto del cane'}
                   </p>
                   <div className="mt-3 flex flex-col sm:flex-row gap-3 justify-center">
-                    <label
-                      htmlFor="edit-photo-camera"
-                      className="px-4 py-2 rounded-lg font-medium text-white transition cursor-pointer inline-flex items-center justify-center"
+                    <div
+                      className="relative px-4 py-2 rounded-lg font-medium text-white transition inline-flex items-center justify-center overflow-hidden"
                       style={{ backgroundColor: '#d4a574' }}
                     >
+                      <input
+                        id="edit-photo-camera"
+                        type="file"
+                        accept="image/*,.heic,.heif"
+                        capture="environment"
+                        onChange={handleEditPhotoSelect}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
                       Scatta foto
-                    </label>
-                    <label
-                      htmlFor="edit-photo-gallery"
-                      className="px-4 py-2 rounded-lg font-medium border-2 transition cursor-pointer inline-flex items-center justify-center"
+                    </div>
+                    <div
+                      className="relative px-4 py-2 rounded-lg font-medium border-2 transition inline-flex items-center justify-center overflow-hidden"
                       style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
                     >
+                      <input
+                        id="edit-photo-gallery"
+                        type="file"
+                        accept="image/*,.heic,.heif"
+                        onChange={handleEditPhotoSelect}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
                       Galleria
-                    </label>
+                    </div>
                   </div>
                 </div>
               </div>

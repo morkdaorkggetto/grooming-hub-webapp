@@ -328,21 +328,6 @@ export default function AddClient() {
                 className="border-2 border-dashed rounded-lg p-8 text-center"
                 style={{ borderColor: '#d4a574' }}
               >
-                <input
-                  id="photo-camera"
-                  type="file"
-                  accept="image/*,.heic,.heif"
-                  capture="environment"
-                  onChange={handlePhotoSelect}
-                  className="sr-only"
-                />
-                <input
-                  id="photo-gallery"
-                  type="file"
-                  accept="image/*,.heic,.heif"
-                  onChange={handlePhotoSelect}
-                  className="sr-only"
-                />
                 <div>
                   <div className="text-4xl mb-2">📸</div>
                   <p style={{ color: '#5a3a2a' }} className="font-bold">
@@ -353,20 +338,33 @@ export default function AddClient() {
                   </p>
                 </div>
                 <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
-                  <label
-                    htmlFor="photo-camera"
-                    className="px-4 py-3 rounded-lg font-bold text-white transition cursor-pointer inline-flex items-center justify-center"
+                  <div
+                    className="relative px-4 py-3 rounded-lg font-bold text-white transition inline-flex items-center justify-center overflow-hidden"
                     style={{ backgroundColor: '#d4a574' }}
                   >
+                    <input
+                      id="photo-camera"
+                      type="file"
+                      accept="image/*,.heic,.heif"
+                      capture="environment"
+                      onChange={handlePhotoSelect}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
                     Scatta foto
-                  </label>
-                  <label
-                    htmlFor="photo-gallery"
-                    className="px-4 py-3 rounded-lg font-bold border-2 transition cursor-pointer inline-flex items-center justify-center"
+                  </div>
+                  <div
+                    className="relative px-4 py-3 rounded-lg font-bold border-2 transition inline-flex items-center justify-center overflow-hidden"
                     style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
                   >
+                    <input
+                      id="photo-gallery"
+                      type="file"
+                      accept="image/*,.heic,.heif"
+                      onChange={handlePhotoSelect}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
                     Scegli dalla galleria
-                  </label>
+                  </div>
                 </div>
               </div>
             </div>
