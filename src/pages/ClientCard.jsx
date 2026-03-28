@@ -67,26 +67,26 @@ export default function ClientCard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#faf3f0' }}>
-        <p style={{ color: '#8b5a3c' }}>Caricamento card cliente...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-bg-main)' }}>
+        <p style={{ color: 'var(--color-secondary)' }}>Caricamento card cliente...</p>
       </div>
     );
   }
 
   if (error || !client) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#faf3f0' }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: 'var(--color-bg-main)' }}>
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-lg w-full text-center">
-          <h1 style={{ color: '#5a3a2a' }} className="text-2xl font-bold mb-3">
+          <h1 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold mb-3">
             Card cliente non disponibile
           </h1>
-          <p style={{ color: '#8b5a3c' }} className="mb-6">
+          <p style={{ color: 'var(--color-secondary)' }} className="mb-6">
             {error || 'Cliente non trovato'}
           </p>
           <button
             onClick={() => navigate('/dashboard')}
             className="px-4 py-3 rounded-lg text-white font-medium"
-            style={{ backgroundColor: '#d4a574' }}
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             Torna alla dashboard
           </button>
@@ -96,7 +96,7 @@ export default function ClientCard() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-8" style={{ backgroundColor: '#faf3f0' }}>
+    <div className="min-h-screen px-4 py-8" style={{ backgroundColor: 'var(--color-bg-main)' }}>
       <style>
         {`
           @media print {
@@ -109,10 +109,10 @@ export default function ClientCard() {
       <div className="max-w-3xl mx-auto">
         <div className="print-hidden flex flex-wrap gap-3 justify-between items-center mb-6">
           <div>
-            <h1 style={{ color: '#5a3a2a' }} className="text-3xl font-bold">
+            <h1 style={{ color: 'var(--color-text-primary)' }} className="text-3xl font-bold">
               Card Cliente QR
             </h1>
-            <p style={{ color: '#8b5a3c' }} className="text-sm mt-1">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-1">
               Scheda rapida interna per identificazione e stampa.
             </p>
           </div>
@@ -120,14 +120,14 @@ export default function ClientCard() {
             <button
               onClick={() => navigate(`/client/${client.id}`)}
               className="px-4 py-2 rounded-lg text-white font-medium"
-              style={{ backgroundColor: '#8b5a3c' }}
+              style={{ backgroundColor: 'var(--color-secondary)' }}
             >
               Apri cliente
             </button>
             <button
               onClick={() => navigate(`/calendar?clientId=${client.id}`)}
               className="px-4 py-2 rounded-lg text-white font-medium"
-              style={{ backgroundColor: '#d4a574' }}
+              style={{ backgroundColor: 'var(--color-primary)' }}
             >
               Nuovo appuntamento
             </button>
@@ -144,7 +144,7 @@ export default function ClientCard() {
         <div className="bg-white rounded-[28px] shadow-xl overflow-hidden border" style={{ borderColor: '#ead7c5' }}>
           <div className="grid md:grid-cols-[1.3fr_1fr]">
             <div className="p-8">
-              <p style={{ color: '#8b5a3c' }} className="text-sm uppercase tracking-[0.25em] font-bold mb-3">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm uppercase tracking-[0.25em] font-bold mb-3">
                 Grooming Hub
               </p>
               <div className="flex gap-5 items-start">
@@ -159,64 +159,64 @@ export default function ClientCard() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h2 style={{ color: '#5a3a2a' }} className="text-3xl font-bold leading-tight">
+                  <h2 style={{ color: 'var(--color-text-primary)' }} className="text-3xl font-bold leading-tight">
                     {client.name}
                   </h2>
-                  <p style={{ color: '#8b5a3c' }} className="text-lg mt-1">
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-lg mt-1">
                     {client.breed || 'Razza non specificata'}
                   </p>
-                  <p style={{ color: '#8b5a3c' }} className="mt-2">
+                  <p style={{ color: 'var(--color-secondary)' }} className="mt-2">
                     Proprietario: <strong>{client.owner}</strong>
                   </p>
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4 mt-8">
-                <div className="rounded-2xl p-4" style={{ backgroundColor: '#faf3f0' }}>
-                  <p style={{ color: '#8b5a3c' }} className="text-xs uppercase font-bold tracking-wide mb-1">
+                <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-bg-main)' }}>
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-xs uppercase font-bold tracking-wide mb-1">
                     Affidabilita
                   </p>
-                  <p style={{ color: '#5a3a2a' }} className="text-2xl font-bold">
+                  <p style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold">
                     {client.no_show_score ?? 0}
                   </p>
-                  <p style={{ color: client.is_blacklisted ? '#b91c1c' : '#166534' }} className="text-sm mt-1 font-medium">
+                  <p style={{ color: client.is_blacklisted ? '#b91c1c' : 'var(--color-success-text)' }} className="text-sm mt-1 font-medium">
                     {client.is_blacklisted ? 'Cliente in blacklist' : 'Cliente attivo'}
                   </p>
                 </div>
 
-                <div className="rounded-2xl p-4" style={{ backgroundColor: '#faf3f0' }}>
-                  <p style={{ color: '#8b5a3c' }} className="text-xs uppercase font-bold tracking-wide mb-1">
+                <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-bg-main)' }}>
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-xs uppercase font-bold tracking-wide mb-1">
                     Storico
                   </p>
-                  <p style={{ color: '#5a3a2a' }} className="text-2xl font-bold">
+                  <p style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold">
                     {client.visitsCount}
                   </p>
-                  <p style={{ color: '#8b5a3c' }} className="text-sm mt-1">
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-1">
                     Ultima visita: {formatVisitDate(client.lastVisit?.date)}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-2xl p-4 mt-4" style={{ backgroundColor: '#faf3f0' }}>
-                <p style={{ color: '#8b5a3c' }} className="text-xs uppercase font-bold tracking-wide mb-1">
+              <div className="rounded-2xl p-4 mt-4" style={{ backgroundColor: 'var(--color-bg-main)' }}>
+                <p style={{ color: 'var(--color-secondary)' }} className="text-xs uppercase font-bold tracking-wide mb-1">
                   Prossimo appuntamento
                 </p>
-                <p style={{ color: '#5a3a2a' }} className="font-bold">
+                <p style={{ color: 'var(--color-text-primary)' }} className="font-bold">
                   {formatAppointmentDate(client.nextAppointment?.scheduled_at)}
                 </p>
                 {client.nextAppointment?.notes && (
-                  <p style={{ color: '#8b5a3c' }} className="text-sm mt-2">
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-2">
                     {client.nextAppointment.notes}
                   </p>
                 )}
               </div>
 
               {client.notes && (
-                <div className="rounded-2xl p-4 mt-4 border-l-4" style={{ backgroundColor: '#fffaf0', borderColor: '#d4a574' }}>
-                  <p style={{ color: '#8b5a3c' }} className="text-xs uppercase font-bold tracking-wide mb-1">
+                <div className="rounded-2xl p-4 mt-4 border-l-4" style={{ backgroundColor: '#fffaf0', borderColor: 'var(--color-primary)' }}>
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-xs uppercase font-bold tracking-wide mb-1">
                     Nota rapida
                   </p>
-                  <p style={{ color: '#5a3a2a' }} className="text-sm whitespace-pre-wrap">
+                  <p style={{ color: 'var(--color-text-primary)' }} className="text-sm whitespace-pre-wrap">
                     {client.notes}
                   </p>
                 </div>
@@ -230,10 +230,10 @@ export default function ClientCard() {
                 className="w-56 h-56 rounded-2xl border bg-white p-3"
                 style={{ borderColor: '#ead7c5' }}
               />
-              <p style={{ color: '#5a3a2a' }} className="text-lg font-bold mt-4">
+              <p style={{ color: 'var(--color-text-primary)' }} className="text-lg font-bold mt-4">
                 Codice {getClientCardCode(client.qr_token)}
               </p>
-              <p style={{ color: '#8b5a3c' }} className="text-sm text-center mt-2 break-all">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm text-center mt-2 break-all">
                 {getClientCardUrl(client.qr_token)}
               </p>
             </div>

@@ -104,10 +104,10 @@ export default function AddClient() {
   };
 
   return (
-    <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen">
+    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       {/* Header */}
       <header
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
         className="sticky top-0 z-40 shadow-md"
       >
         <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between">
@@ -125,7 +125,7 @@ export default function AddClient() {
         {DEMO_MODE && (
           <div
             className="mb-6 p-4 rounded-lg border"
-            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
           >
             <p className="font-medium">
               {DEMO_WRITE_BLOCK_MESSAGE}
@@ -136,13 +136,13 @@ export default function AddClient() {
         {/* Errore */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: '#991b1b' }} className="font-medium">
+            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
               {error}
             </p>
             <button
               onClick={() => setError('')}
               className="mt-2 text-sm underline"
-              style={{ color: '#991b1b' }}
+              style={{ color: 'var(--color-danger-text)' }}
             >
               Chiudi
             </button>
@@ -156,7 +156,7 @@ export default function AddClient() {
             <div>
               <label
                 htmlFor="name"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Nome del cane *
@@ -173,11 +173,11 @@ export default function AddClient() {
                 disabled={DEMO_MODE || loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
-                  borderColor: '#e8d5c4',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
                 }}
               />
-              <p style={{ color: '#8b5a3c' }} className="text-xs mt-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-1">
                 Campo obbligatorio
               </p>
             </div>
@@ -186,7 +186,7 @@ export default function AddClient() {
             <div>
               <label
                 htmlFor="breed"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Razza
@@ -202,8 +202,8 @@ export default function AddClient() {
                 disabled={DEMO_MODE || loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
-                  borderColor: '#e8d5c4',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
                 }}
               />
             </div>
@@ -212,7 +212,7 @@ export default function AddClient() {
             <div>
               <label
                 htmlFor="owner"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Proprietario *
@@ -229,11 +229,11 @@ export default function AddClient() {
                 disabled={DEMO_MODE || loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
-                  borderColor: '#e8d5c4',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
                 }}
               />
-              <p style={{ color: '#8b5a3c' }} className="text-xs mt-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-1">
                 Campo obbligatorio
               </p>
             </div>
@@ -242,7 +242,7 @@ export default function AddClient() {
             <div>
               <label
                 htmlFor="phone"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Telefono
@@ -258,8 +258,8 @@ export default function AddClient() {
                 disabled={DEMO_MODE || loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
-                  borderColor: '#e8d5c4',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
                 }}
               />
             </div>
@@ -268,7 +268,7 @@ export default function AddClient() {
             <div>
               <label
                 htmlFor="notes"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Note (allergie, preferenze, caratteristiche)
@@ -282,8 +282,8 @@ export default function AddClient() {
                 }
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
-                  borderColor: '#e8d5c4',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
                 }}
                 rows="4"
               />
@@ -293,7 +293,7 @@ export default function AddClient() {
             <div>
               <label
                 htmlFor="photo"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-4"
               >
                 Foto del cane
@@ -306,7 +306,7 @@ export default function AddClient() {
                     src={photoPreview}
                     alt="Preview"
                     className="w-full h-48 object-cover rounded-lg border-2"
-                    style={{ borderColor: '#d4a574' }}
+                    style={{ borderColor: 'var(--color-primary)' }}
                   />
                   <button
                     type="button"
@@ -326,21 +326,21 @@ export default function AddClient() {
 
               <div
                 className="border-2 border-dashed rounded-lg p-8 text-center"
-                style={{ borderColor: '#d4a574' }}
+                style={{ borderColor: 'var(--color-primary)' }}
               >
                 <div>
                   <div className="text-4xl mb-2">📸</div>
-                  <p style={{ color: '#5a3a2a' }} className="font-bold">
+                  <p style={{ color: 'var(--color-text-primary)' }} className="font-bold">
                     Foto del cane
                   </p>
-                  <p style={{ color: '#8b5a3c' }} className="text-sm mt-1">
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-1">
                     Da smartphone puoi scattarla in diretta oppure scegliere dalla galleria.
                   </p>
                 </div>
                 <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
                   <div
                     className="relative px-4 py-3 rounded-lg font-bold text-white transition inline-flex items-center justify-center overflow-hidden"
-                    style={{ backgroundColor: '#d4a574' }}
+                    style={{ backgroundColor: 'var(--color-primary)' }}
                   >
                     <input
                       id="photo-camera"
@@ -354,7 +354,7 @@ export default function AddClient() {
                   </div>
                   <div
                     className="relative px-4 py-3 rounded-lg font-bold border-2 transition inline-flex items-center justify-center overflow-hidden"
-                    style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
+                    style={{ borderColor: 'var(--color-primary)', color: 'var(--color-text-primary)' }}
                   >
                     <input
                       id="photo-gallery"
@@ -375,7 +375,7 @@ export default function AddClient() {
                 type="submit"
                 disabled={loading}
                 className="flex-1 py-4 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#d4a574' }}
+                style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 {loading ? (
                   <span className="flex items-center justify-center">
@@ -411,8 +411,8 @@ export default function AddClient() {
                 disabled={loading}
                 className="flex-1 py-4 rounded-lg font-bold border-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  borderColor: '#d4a574',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-primary)',
+                  color: 'var(--color-text-primary)',
                 }}
               >
                 Annulla
@@ -423,9 +423,9 @@ export default function AddClient() {
           {/* Info footer */}
           <div
             className="mt-8 p-4 rounded-lg"
-            style={{ backgroundColor: '#faf3f0' }}
+            style={{ backgroundColor: 'var(--color-bg-main)' }}
           >
-            <p style={{ color: '#8b5a3c' }} className="text-sm">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
               💡 <strong>Suggerimento:</strong> Compila il nome e il proprietario
               per iniziare. Puoi aggiungere foto e note in seguito se necessario.
             </p>

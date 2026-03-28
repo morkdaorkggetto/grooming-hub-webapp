@@ -25,13 +25,13 @@ export default function ClientCard({ client }) {
     <div
       className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow overflow-hidden h-full flex flex-col"
       style={{
-        borderTop: '4px solid #d4a574',
+        borderTop: '4px solid var(--color-primary)',
       }}
     >
       {/* Header con foto */}
       <div
         className="h-32 flex items-center justify-center"
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
       >
         {client.photo ? (
           <img
@@ -48,7 +48,7 @@ export default function ClientCard({ client }) {
       <div className="p-5 flex-1 flex flex-col">
         {/* Nome */}
         <h3
-          style={{ color: '#5a3a2a' }}
+          style={{ color: 'var(--color-text-primary)' }}
           className="text-xl font-bold mb-2 truncate"
         >
           {client.name}
@@ -65,7 +65,7 @@ export default function ClientCard({ client }) {
 
         {/* Razza */}
         <p
-          style={{ color: '#8b5a3c' }}
+          style={{ color: 'var(--color-secondary)' }}
           className="text-sm mb-3 truncate"
         >
           {client.breed || 'Razza non specificata'}
@@ -74,7 +74,7 @@ export default function ClientCard({ client }) {
         {/* Proprietario */}
         {client.owner && (
           <p
-            style={{ color: '#8b5a3c' }}
+            style={{ color: 'var(--color-secondary)' }}
             className="text-sm mb-4 truncate"
           >
             <strong>👤</strong> {client.owner}
@@ -86,7 +86,7 @@ export default function ClientCard({ client }) {
             className="text-xs font-bold px-2 py-1 rounded-full"
             style={{
               backgroundColor: noShowScore < 0 ? '#fff1f2' : '#ecfdf5',
-              color: noShowScore < 0 ? '#be123c' : '#166534',
+              color: noShowScore < 0 ? '#be123c' : 'var(--color-success-text)',
             }}
           >
             Score affidabilita: {noShowScore}
@@ -105,10 +105,10 @@ export default function ClientCard({ client }) {
         {/* Conteggio visite */}
         <div
           className="mt-auto pt-4 border-t"
-          style={{ borderColor: '#e8d5c4' }}
+          style={{ borderColor: 'var(--color-border)' }}
         >
           <p
-            style={{ color: '#d4a574' }}
+            style={{ color: 'var(--color-primary)' }}
             className="text-sm font-bold"
           >
             📅 {visitsText}
@@ -120,8 +120,8 @@ export default function ClientCard({ client }) {
       <div
         className="px-5 py-4 text-center text-sm font-medium transition"
         style={{
-          backgroundColor: '#faf3f0',
-          color: '#d4a574',
+          backgroundColor: 'var(--color-bg-main)',
+          color: 'var(--color-primary)',
         }}
       >
         Visualizza dettagli →

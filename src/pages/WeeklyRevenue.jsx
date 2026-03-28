@@ -121,9 +121,9 @@ export default function WeeklyRevenue() {
   }, [dailyRows]);
 
   return (
-    <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen">
+    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       <header
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
         className="sticky top-0 z-40 shadow-md"
       >
         <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-3">
@@ -146,7 +146,7 @@ export default function WeeklyRevenue() {
         {DEMO_MODE && (
           <div
             className="p-4 rounded-lg border"
-            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
           >
             <p className="font-medium">
               Demo attiva: il report usa i dati dimostrativi caricati nell'ambiente demo.
@@ -156,13 +156,13 @@ export default function WeeklyRevenue() {
 
         {error && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: '#991b1b' }} className="font-medium">
+            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
               {error}
             </p>
             <button
               onClick={loadReport}
               className="mt-2 text-sm underline"
-              style={{ color: '#991b1b' }}
+              style={{ color: 'var(--color-danger-text)' }}
             >
               Riprova
             </button>
@@ -172,10 +172,10 @@ export default function WeeklyRevenue() {
         <section className="bg-white rounded-2xl shadow-lg p-6">
           <div className="flex flex-col lg:flex-row gap-4 lg:items-end lg:justify-between">
             <div>
-              <p style={{ color: '#8b5a3c' }} className="text-sm font-medium mb-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium mb-1">
                 Settimana in analisi
               </p>
-              <h2 style={{ color: '#5a3a2a' }} className="text-2xl font-bold capitalize">
+              <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold capitalize">
                 {formatLongDate(weekStart)} - {formatLongDate(weekEnd)}
               </h2>
             </div>
@@ -184,7 +184,7 @@ export default function WeeklyRevenue() {
               <button
                 onClick={() => setWeekStart(addDays(weekStart, -7))}
                 className="px-4 py-2 rounded-lg font-medium text-white"
-                style={{ backgroundColor: '#8b5a3c' }}
+                style={{ backgroundColor: 'var(--color-secondary)' }}
               >
                 ← Settimana prima
               </button>
@@ -198,7 +198,7 @@ export default function WeeklyRevenue() {
               <button
                 onClick={() => setWeekStart(addDays(weekStart, 7))}
                 className="px-4 py-2 rounded-lg font-medium text-white"
-                style={{ backgroundColor: '#8b5a3c' }}
+                style={{ backgroundColor: 'var(--color-secondary)' }}
               >
                 Settimana dopo →
               </button>
@@ -208,34 +208,34 @@ export default function WeeklyRevenue() {
 
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Incasso totale
             </p>
-            <p style={{ color: '#166534' }} className="text-3xl font-bold mt-2">
+            <p style={{ color: 'var(--color-success-text)' }} className="text-3xl font-bold mt-2">
               {formatCurrency(totals.totalRevenue)}
             </p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Visite registrate
             </p>
-            <p style={{ color: '#5a3a2a' }} className="text-3xl font-bold mt-2">
+            <p style={{ color: 'var(--color-text-primary)' }} className="text-3xl font-bold mt-2">
               {totals.visitsCount}
             </p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Media per visita
             </p>
-            <p style={{ color: '#5a3a2a' }} className="text-3xl font-bold mt-2">
+            <p style={{ color: 'var(--color-text-primary)' }} className="text-3xl font-bold mt-2">
               {formatCurrency(totals.averageRevenue)}
             </p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Sconti applicati
             </p>
             <p style={{ color: '#b45309' }} className="text-3xl font-bold mt-2">
@@ -245,7 +245,7 @@ export default function WeeklyRevenue() {
         </section>
 
         <section className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-4">
+          <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-4">
             Andamento giornaliero
           </h3>
 
@@ -256,13 +256,13 @@ export default function WeeklyRevenue() {
                 className="rounded-2xl border p-4"
                 style={{ borderColor: '#ead7c5', backgroundColor: '#fffdfb' }}
               >
-                <p style={{ color: '#5a3a2a' }} className="font-bold capitalize">
+                <p style={{ color: 'var(--color-text-primary)' }} className="font-bold capitalize">
                   {formatDayLabel(row.day)}
                 </p>
-                <p style={{ color: '#8b5a3c' }} className="text-sm mt-2">
+                <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-2">
                   {row.count} {row.count === 1 ? 'visita' : 'visite'}
                 </p>
-                <p style={{ color: '#166534' }} className="text-xl font-bold mt-3">
+                <p style={{ color: 'var(--color-success-text)' }} className="text-xl font-bold mt-3">
                   {formatCurrency(row.revenue)}
                 </p>
               </div>
@@ -273,20 +273,20 @@ export default function WeeklyRevenue() {
         <section className="bg-white rounded-2xl shadow-lg p-6">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3 mb-6">
             <div>
-              <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold">
+              <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold">
                 Grafico incassi settimanali
               </h3>
-              <p style={{ color: '#8b5a3c' }} className="text-sm mt-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-1">
                 Confronto rapido degli incassi giorno per giorno.
               </p>
             </div>
-            <p style={{ color: '#8b5a3c' }} className="text-sm">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
               Picco settimana: <strong>{formatCurrency(Math.max(...dailyRows.map((row) => row.revenue), 0))}</strong>
             </p>
           </div>
 
           {chartRows.every((row) => row.revenue === 0) ? (
-            <p style={{ color: '#8b5a3c' }} className="italic">
+            <p style={{ color: 'var(--color-secondary)' }} className="italic">
               Nessun incasso disponibile da rappresentare nella settimana selezionata.
             </p>
           ) : (
@@ -294,10 +294,10 @@ export default function WeeklyRevenue() {
               {chartRows.map((row) => (
                 <div key={`chart-${row.day}`}>
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <p style={{ color: '#5a3a2a' }} className="font-bold capitalize min-w-[92px]">
+                    <p style={{ color: 'var(--color-text-primary)' }} className="font-bold capitalize min-w-[92px]">
                       {formatDayLabel(row.day)}
                     </p>
-                    <p style={{ color: '#166534' }} className="font-bold text-sm">
+                    <p style={{ color: 'var(--color-success-text)' }} className="font-bold text-sm">
                       {formatCurrency(row.revenue)}
                     </p>
                   </div>
@@ -309,12 +309,12 @@ export default function WeeklyRevenue() {
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${row.percentage}%`,
-                        background: 'linear-gradient(90deg, #d4a574 0%, #16a34a 100%)',
+                        background: 'linear-gradient(90deg, var(--color-primary) 0%, #16a34a 100%)',
                       }}
                       title={`${formatDayLabel(row.day)} · ${formatCurrency(row.revenue)}`}
                     />
                   </div>
-                  <p style={{ color: '#8b5a3c' }} className="text-xs mt-1">
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-1">
                     {row.count} {row.count === 1 ? 'visita' : 'visite'}
                   </p>
                 </div>
@@ -324,14 +324,14 @@ export default function WeeklyRevenue() {
         </section>
 
         <section className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-4">
+          <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-4">
             Dettaglio visite della settimana
           </h3>
 
           {loading ? (
-            <p style={{ color: '#8b5a3c' }}>Caricamento report...</p>
+            <p style={{ color: 'var(--color-secondary)' }}>Caricamento report...</p>
           ) : visits.length === 0 ? (
-            <p style={{ color: '#8b5a3c' }} className="italic">
+            <p style={{ color: 'var(--color-secondary)' }} className="italic">
               Nessuna visita registrata nella settimana selezionata.
             </p>
           ) : (
@@ -346,21 +346,21 @@ export default function WeeklyRevenue() {
                     style={{ borderColor: '#ead7c5', backgroundColor: '#fffdfb' }}
                   >
                     <div>
-                      <p style={{ color: '#5a3a2a' }} className="font-bold">
+                      <p style={{ color: 'var(--color-text-primary)' }} className="font-bold">
                         {visit.client?.name || 'Cliente'} · {visit.client?.owner || '-'}
                       </p>
-                      <p style={{ color: '#8b5a3c' }} className="text-sm mt-1 capitalize">
+                      <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-1 capitalize">
                         {formatLongDate(visit.date)}
                       </p>
                       {visit.treatments && (
-                        <p style={{ color: '#8b5a3c' }} className="text-sm mt-2">
+                        <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-2">
                           Trattamenti: {visit.treatments}
                         </p>
                       )}
                     </div>
 
                     <div className="text-left lg:text-right">
-                      <p style={{ color: '#166534' }} className="text-2xl font-bold">
+                      <p style={{ color: 'var(--color-success-text)' }} className="text-2xl font-bold">
                         {formatCurrency(netRevenue)}
                       </p>
                       {(Number(visit.discount_percent) || 0) > 0 && (

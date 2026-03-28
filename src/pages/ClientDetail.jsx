@@ -285,17 +285,17 @@ export default function ClientDetail() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: '#faf3f0' }}
+        style={{ backgroundColor: 'var(--color-bg-main)' }}
       >
         <div className="text-center">
           <div
             className="animate-spin h-12 w-12 rounded-full border-4 border-solid mx-auto mb-4"
             style={{
-              borderColor: '#d4a574',
+              borderColor: 'var(--color-primary)',
               borderTopColor: 'transparent',
             }}
           ></div>
-          <p style={{ color: '#8b5a3c' }}>Caricamento cliente...</p>
+          <p style={{ color: 'var(--color-secondary)' }}>Caricamento cliente...</p>
         </div>
       </div>
     );
@@ -305,14 +305,14 @@ export default function ClientDetail() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: '#faf3f0' }}
+        style={{ backgroundColor: 'var(--color-bg-main)' }}
       >
         <div className="text-center">
-          <p style={{ color: '#8b5a3c' }}>Cliente non trovato</p>
+          <p style={{ color: 'var(--color-secondary)' }}>Cliente non trovato</p>
           <button
             onClick={() => navigate('/dashboard')}
             className="mt-4 px-4 py-2 rounded-lg text-white font-medium"
-            style={{ backgroundColor: '#d4a574' }}
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             Torna alla lista
           </button>
@@ -325,10 +325,10 @@ export default function ClientDetail() {
   const fidelity = getFidelityTierSnapshot(client);
 
   return (
-    <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen pb-20">
+    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen pb-20">
       {/* Header */}
       <header
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
         className="sticky top-0 z-40 shadow-md"
       >
         <div className="max-w-4xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between">
@@ -346,7 +346,7 @@ export default function ClientDetail() {
         {DEMO_MODE && (
           <div
             className="mb-6 p-4 rounded-lg border"
-            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
           >
             <p className="font-medium">
               Demo in sola lettura: puoi consultare cliente, visite, QR e fidelity, ma non modificare dati.
@@ -357,13 +357,13 @@ export default function ClientDetail() {
         {/* Errore */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: '#991b1b' }} className="font-medium">
+            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
               {error}
             </p>
             <button
               onClick={() => setError('')}
               className="mt-2 text-sm underline"
-              style={{ color: '#991b1b' }}
+              style={{ color: 'var(--color-danger-text)' }}
             >
               Chiudi
             </button>
@@ -376,7 +376,7 @@ export default function ClientDetail() {
             {/* Foto */}
             <div
               className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0 overflow-hidden"
-              style={{ backgroundColor: '#d4a574' }}
+              style={{ backgroundColor: 'var(--color-primary)' }}
             >
               {client.photo ? (
                 <img
@@ -393,19 +393,19 @@ export default function ClientDetail() {
             <div className="flex-1">
               <h2
                 className="text-3xl font-bold mb-2"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
               >
                 {client.name}
               </h2>
-              <p style={{ color: '#8b5a3c' }} className="mb-3 text-lg">
+              <p style={{ color: 'var(--color-secondary)' }} className="mb-3 text-lg">
                 {client.breed || 'Razza non specificata'}
               </p>
               <div className="space-y-2 mb-4">
-                <p style={{ color: '#8b5a3c' }}>
+                <p style={{ color: 'var(--color-secondary)' }}>
                   👤 <strong>{client.owner}</strong>
                 </p>
                 {client.phone && (
-                  <p style={{ color: '#8b5a3c' }}>📱 {client.phone}</p>
+                  <p style={{ color: 'var(--color-secondary)' }}>📱 {client.phone}</p>
                 )}
               </div>
 
@@ -416,14 +416,14 @@ export default function ClientDetail() {
                   disabled={DEMO_MODE}
                   title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Modifica cliente'}
                   className="px-4 py-2 rounded-lg font-medium transition text-white"
-                  style={{ backgroundColor: '#d4a574' }}
+                  style={{ backgroundColor: 'var(--color-primary)' }}
                 >
                   ✏️ Modifica
                 </button>
                 <button
                   onClick={() => navigate(`/calendar?clientId=${clientId}`)}
                   className="px-4 py-2 rounded-lg font-medium transition text-white"
-                  style={{ backgroundColor: '#8b5a3c' }}
+                  style={{ backgroundColor: 'var(--color-secondary)' }}
                 >
                   📅 Appuntamento
                 </button>
@@ -458,10 +458,10 @@ export default function ClientDetail() {
         {promo.count > 0 && <PromoBadge promo={promo} />}
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-3">
+          <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
             🏅 Fidelity cliente
           </h3>
-          <p style={{ color: '#8b5a3c' }} className="mb-5">
+          <p style={{ color: 'var(--color-secondary)' }} className="mb-5">
             Livello attuale:{' '}
             <strong>
               {fidelity.currentTier ? fidelity.currentTier.label : 'Base'}
@@ -512,10 +512,10 @@ export default function ClientDetail() {
         {/* Note */}
         {client.notes && (
           <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-6 mb-6">
-            <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-2">
+            <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold mb-2">
               📝 Note Importanti
             </h3>
-            <p style={{ color: '#8b5a3c' }} className="whitespace-pre-wrap">
+            <p style={{ color: 'var(--color-secondary)' }} className="whitespace-pre-wrap">
               {client.notes}
             </p>
           </div>
@@ -524,13 +524,13 @@ export default function ClientDetail() {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="flex-1">
-              <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-3">
+              <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
                 🪪 Card identificativa QR
               </h3>
-              <p style={{ color: '#8b5a3c' }} className="mb-2">
+              <p style={{ color: 'var(--color-secondary)' }} className="mb-2">
                 Codice card: <strong>{getClientCardCode(client.qr_token)}</strong>
               </p>
-              <p style={{ color: '#8b5a3c' }} className="text-sm mb-4">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-4">
                 Usa questa card per riconoscere il cliente e aprire rapidamente la sua scheda interna.
               </p>
               <div className="flex flex-wrap gap-2">
@@ -544,7 +544,7 @@ export default function ClientDetail() {
                 <button
                   onClick={handlePrintClientCard}
                   className="px-4 py-2 rounded-lg font-medium text-white"
-                  style={{ backgroundColor: '#8b5a3c' }}
+                  style={{ backgroundColor: 'var(--color-secondary)' }}
                 >
                   Stampa card
                 </button>
@@ -567,14 +567,14 @@ export default function ClientDetail() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h3 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-3">
+          <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
             ⚖️ Affidabilita appuntamenti
           </h3>
-          <p style={{ color: '#8b5a3c' }} className="mb-4">
+          <p style={{ color: 'var(--color-secondary)' }} className="mb-4">
             Score attuale: <strong>{client.no_show_score ?? 0}</strong> · Stato:{' '}
             <strong>{client.is_blacklisted ? 'BLACKLIST' : 'Attivo'}</strong>
           </p>
-          <p style={{ color: '#8b5a3c' }} className="text-sm mb-4">
+          <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-4">
             Regola automatica: da -3 in giu il cliente entra in blacklist.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -611,7 +611,7 @@ export default function ClientDetail() {
         {/* Visite */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <h3
-            style={{ color: '#5a3a2a' }}
+            style={{ color: 'var(--color-text-primary)' }}
             className="text-2xl font-bold mb-6 flex items-center"
           >
             📅 Visite ({client.visits?.length || 0})
@@ -628,7 +628,7 @@ export default function ClientDetail() {
               ))}
             </div>
           ) : (
-            <p style={{ color: '#8b5a3c' }} className="italic text-center py-8">
+            <p style={{ color: 'var(--color-secondary)' }} className="italic text-center py-8">
               Nessuna visita registrata
             </p>
           )}
@@ -641,7 +641,7 @@ export default function ClientDetail() {
         disabled={DEMO_MODE}
         title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi visita'}
         className="fixed bottom-8 right-8 w-16 h-16 rounded-full text-white text-2xl shadow-lg transform transition duration-200 hover:scale-110 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
       >
         +
       </button>
@@ -653,14 +653,14 @@ export default function ClientDetail() {
             className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 sm:p-8 shadow-2xl max-h-96 overflow-y-auto"
             style={{ backgroundColor: '#ffffff' }}
           >
-            <h2 style={{ color: '#5a3a2a' }} className="text-2xl font-bold mb-6">
+            <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold mb-6">
               Nuova Visita
             </h2>
 
             <form onSubmit={handleAddVisit} className="space-y-4">
               {/* Data */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Data
                 </label>
                 <input
@@ -671,13 +671,13 @@ export default function ClientDetail() {
                   }
                   required
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               {/* Trattamenti */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Trattamenti
                 </label>
                 <textarea
@@ -687,14 +687,14 @@ export default function ClientDetail() {
                   }
                   placeholder="Es. Bagno, taglio, asciugatura..."
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   rows="3"
                 />
               </div>
 
               {/* Problematiche */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Problematiche
                 </label>
                 <textarea
@@ -704,14 +704,14 @@ export default function ClientDetail() {
                   }
                   placeholder="Es. Pelle irritata, nodi..."
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   rows="3"
                 />
               </div>
 
               {/* Costo */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Costo (€) *
                 </label>
                 <input
@@ -725,7 +725,7 @@ export default function ClientDetail() {
                   placeholder="0.00"
                   required
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
@@ -736,7 +736,7 @@ export default function ClientDetail() {
                   disabled={DEMO_MODE}
                   title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Salva visita'}
                   className="flex-1 py-3 rounded-lg font-bold text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ backgroundColor: '#d4a574' }}
+                  style={{ backgroundColor: 'var(--color-primary)' }}
                 >
                   Salva Visita
                 </button>
@@ -745,8 +745,8 @@ export default function ClientDetail() {
                   onClick={() => setShowAddVisitModal(false)}
                   className="flex-1 py-3 rounded-lg font-bold border-2 transition"
                   style={{
-                    borderColor: '#d4a574',
-                    color: '#5a3a2a',
+                    borderColor: 'var(--color-primary)',
+                    color: 'var(--color-text-primary)',
                   }}
                 >
                   Annulla
@@ -764,14 +764,14 @@ export default function ClientDetail() {
             className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 sm:p-8 shadow-2xl max-h-96 overflow-y-auto"
             style={{ backgroundColor: '#ffffff' }}
           >
-            <h2 style={{ color: '#5a3a2a' }} className="text-2xl font-bold mb-6">
+            <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold mb-6">
               Modifica Cliente
             </h2>
 
             <form onSubmit={handleUpdateClient} className="space-y-4">
               {/* Nome */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Nome *
                 </label>
                 <input
@@ -782,13 +782,13 @@ export default function ClientDetail() {
                   }
                   required
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               {/* Razza */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Razza
                 </label>
                 <input
@@ -798,13 +798,13 @@ export default function ClientDetail() {
                     setEditForm({ ...editForm, breed: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               {/* Proprietario */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Proprietario *
                 </label>
                 <input
@@ -815,13 +815,13 @@ export default function ClientDetail() {
                   }
                   required
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               {/* Telefono */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Telefono
                 </label>
                 <input
@@ -831,13 +831,13 @@ export default function ClientDetail() {
                     setEditForm({ ...editForm, phone: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               {/* Note */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Note
                 </label>
                 <textarea
@@ -846,14 +846,14 @@ export default function ClientDetail() {
                     setEditForm({ ...editForm, notes: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   rows="3"
                 />
               </div>
 
               {/* Foto */}
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Foto del cane
                 </label>
 
@@ -863,7 +863,7 @@ export default function ClientDetail() {
                       src={editPhotoPreview || editForm.photo}
                       alt="Anteprima foto"
                       className="w-full h-40 object-cover rounded-lg border-2"
-                      style={{ borderColor: '#d4a574' }}
+                      style={{ borderColor: 'var(--color-primary)' }}
                     />
                     <button
                       type="button"
@@ -888,9 +888,9 @@ export default function ClientDetail() {
 
                 <div
                   className="border-2 border-dashed rounded-lg p-4 text-center"
-                  style={{ borderColor: '#d4a574' }}
+                  style={{ borderColor: 'var(--color-primary)' }}
                 >
-                  <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
                     {editForm.photo || editPhotoPreview
                       ? 'Sostituisci foto del cane'
                       : 'Aggiungi foto del cane'}
@@ -898,7 +898,7 @@ export default function ClientDetail() {
                   <div className="mt-3 flex flex-col sm:flex-row gap-3 justify-center">
                     <div
                       className="relative px-4 py-2 rounded-lg font-medium text-white transition inline-flex items-center justify-center overflow-hidden"
-                      style={{ backgroundColor: '#d4a574' }}
+                      style={{ backgroundColor: 'var(--color-primary)' }}
                     >
                       <input
                         id="edit-photo-camera"
@@ -912,7 +912,7 @@ export default function ClientDetail() {
                     </div>
                     <div
                       className="relative px-4 py-2 rounded-lg font-medium border-2 transition inline-flex items-center justify-center overflow-hidden"
-                      style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
+                      style={{ borderColor: 'var(--color-primary)', color: 'var(--color-text-primary)' }}
                     >
                       <input
                         id="edit-photo-gallery"
@@ -932,7 +932,7 @@ export default function ClientDetail() {
                 <button
                   type="submit"
                   className="flex-1 py-3 rounded-lg font-bold text-white transition"
-                  style={{ backgroundColor: '#d4a574' }}
+                  style={{ backgroundColor: 'var(--color-primary)' }}
                 >
                   Salva Modifiche
                 </button>
@@ -947,8 +947,8 @@ export default function ClientDetail() {
                   }}
                   className="flex-1 py-3 rounded-lg font-bold border-2 transition"
                   style={{
-                    borderColor: '#d4a574',
-                    color: '#5a3a2a',
+                    borderColor: 'var(--color-primary)',
+                    color: 'var(--color-text-primary)',
                   }}
                 >
                   Annulla

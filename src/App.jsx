@@ -64,17 +64,17 @@ export default function App() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: '#faf3f0' }}
+        style={{ backgroundColor: 'var(--color-bg-main)' }}
       >
         <div className="text-center">
           <div
             className="animate-spin h-16 w-16 rounded-full border-4 border-solid mx-auto mb-4"
             style={{
-              borderColor: '#d4a574',
+              borderColor: 'var(--color-primary)',
               borderTopColor: 'transparent',
             }}
           ></div>
-          <p style={{ color: '#8b5a3c' }} className="text-lg font-medium">
+          <p style={{ color: 'var(--color-secondary)' }} className="text-lg font-medium">
             Caricamento...
           </p>
         </div>
@@ -84,11 +84,14 @@ export default function App() {
 
   return (
     <Router>
-      <div className={DEMO_MODE ? 'pt-14' : ''}>
+      <div className={DEMO_MODE ? 'demo-theme pt-14' : ''}>
         {DEMO_MODE && (
           <div
             className="fixed top-0 inset-x-0 z-[100] px-4 py-3 text-center text-sm font-bold shadow-md"
-            style={{ backgroundColor: '#7c2d12', color: '#fff7ed' }}
+            style={{
+              backgroundColor: 'var(--color-demo-banner-bg)',
+              color: 'var(--color-demo-banner-text)',
+            }}
           >
             {DEMO_BANNER_TEXT}
           </div>
@@ -204,22 +207,22 @@ export default function App() {
             element={
               <div
                 className="min-h-screen flex items-center justify-center"
-                style={{ backgroundColor: '#faf3f0' }}
+                style={{ backgroundColor: 'var(--color-bg-main)' }}
               >
                 <div className="text-center">
                   <h1
-                    style={{ color: '#5a3a2a' }}
+                    style={{ color: 'var(--color-text-primary)' }}
                     className="text-4xl font-bold mb-4"
                   >
                     404
                   </h1>
-                  <p style={{ color: '#8b5a3c' }} className="mb-6">
+                  <p style={{ color: 'var(--color-secondary)' }} className="mb-6">
                     Pagina non trovata
                   </p>
                   <a
                     href="/dashboard"
                     className="inline-block px-6 py-3 rounded-lg font-bold text-white transition"
-                    style={{ backgroundColor: '#d4a574' }}
+                    style={{ backgroundColor: 'var(--color-primary)' }}
                   >
                     Torna alla home
                   </a>

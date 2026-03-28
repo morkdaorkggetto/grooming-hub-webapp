@@ -155,14 +155,19 @@ export default function LoginForm({ onSuccess }) {
   const handleSubmit = isSignUp ? handleSignUp : handleSignIn;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 px-4">
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{
+        background: 'linear-gradient(135deg, var(--color-bg-main) 0%, var(--color-surface-muted) 100%)',
+      }}
+    >
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2" style={{ color: '#5a3a2a' }}>
+          <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             🐕 Grooming Hub
           </h1>
-          <p className="text-sm" style={{ color: '#8b5a3c' }}>
+          <p className="text-sm" style={{ color: 'var(--color-secondary)' }}>
             Gestisci i tuoi clienti a quattro zampe
           </p>
         </div>
@@ -170,11 +175,14 @@ export default function LoginForm({ onSuccess }) {
         {/* Card Form */}
         <div
           className="bg-white rounded-2xl shadow-lg p-8"
-          style={{ borderTop: '4px solid #d4a574' }}
+          style={{
+            borderTop: '4px solid var(--color-primary)',
+            boxShadow: '0 18px 40px rgba(91, 67, 54, 0.10)',
+          }}
         >
           <h2
             className="text-2xl font-bold mb-6 text-center"
-            style={{ color: '#5a3a2a' }}
+            style={{ color: 'var(--color-text-primary)' }}
           >
             {isSignUp ? 'Crea Account' : 'Accedi'}
           </h2>
@@ -182,7 +190,7 @@ export default function LoginForm({ onSuccess }) {
           {DEMO_MODE && (
             <div
               className="mb-4 p-4 rounded-lg border"
-              style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+              style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
             >
               <p className="text-sm font-medium">
                 Ambiente demo: accesso consentito solo agli account che hai creato tu. Le modifiche nell'app sono disattivate.
@@ -194,7 +202,7 @@ export default function LoginForm({ onSuccess }) {
           {error && (
             <div
               className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200"
-              style={{ color: '#991b1b' }}
+              style={{ color: 'var(--color-danger-text)' }}
             >
               <p className="text-sm font-medium">{error}</p>
             </div>
@@ -204,7 +212,7 @@ export default function LoginForm({ onSuccess }) {
           {successMessage && (
             <div
               className="mb-4 p-4 rounded-lg bg-green-50 border border-green-200"
-              style={{ color: '#166534' }}
+              style={{ color: 'var(--color-success-text)' }}
             >
               <p className="text-sm font-medium">{successMessage}</p>
             </div>
@@ -217,7 +225,7 @@ export default function LoginForm({ onSuccess }) {
               <label
                 htmlFor="email"
                 className="block text-sm font-medium mb-2"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
               >
                 Email
               </label>
@@ -230,9 +238,10 @@ export default function LoginForm({ onSuccess }) {
                 disabled={loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition"
                 style={{
-                  borderColor: '#e8d5c4',
-                  focusRingColor: '#d4a574',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  focusRingColor: 'var(--color-primary)',
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'var(--color-surface-main)',
                 }}
               />
             </div>
@@ -242,7 +251,7 @@ export default function LoginForm({ onSuccess }) {
               <label
                 htmlFor="password"
                 className="block text-sm font-medium mb-2"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
               >
                 Password
               </label>
@@ -255,9 +264,10 @@ export default function LoginForm({ onSuccess }) {
                 disabled={loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition"
                 style={{
-                  borderColor: '#e8d5c4',
-                  focusRingColor: '#d4a574',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  focusRingColor: 'var(--color-primary)',
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'var(--color-surface-main)',
                 }}
               />
             </div>
@@ -269,7 +279,7 @@ export default function LoginForm({ onSuccess }) {
                   onClick={handleForgotPassword}
                   disabled={loading}
                   className="text-sm underline"
-                  style={{ color: '#8b5a3c' }}
+                  style={{ color: 'var(--color-secondary)' }}
                 >
                   Password dimenticata?
                 </button>
@@ -281,7 +291,7 @@ export default function LoginForm({ onSuccess }) {
               type="submit"
               disabled={loading}
               className="w-full py-3 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: '#d4a574' }}
+              style={{ backgroundColor: 'var(--color-primary)' }}
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -318,7 +328,7 @@ export default function LoginForm({ onSuccess }) {
           {/* Toggle tra SignUp e SignIn */}
           {!DEMO_MODE && (
             <div className="mt-6 text-center">
-              <p style={{ color: '#8b5a3c' }} className="text-sm">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
                 {isSignUp
                   ? 'Hai già un account? '
                   : 'Non hai un account? '}
@@ -330,7 +340,7 @@ export default function LoginForm({ onSuccess }) {
                     setSuccessMessage('');
                   }}
                   className="font-bold underline hover:opacity-80 transition"
-                  style={{ color: '#d4a574' }}
+                  style={{ color: 'var(--color-primary)' }}
                 >
                   {isSignUp ? 'Accedi' : 'Registrati'}
                 </button>
@@ -342,7 +352,7 @@ export default function LoginForm({ onSuccess }) {
         {/* Footer info */}
         <div
           className="mt-6 text-center text-xs"
-          style={{ color: '#8b5a3c' }}
+          style={{ color: 'var(--color-secondary)' }}
         >
           <p>🔒 I tuoi dati sono protetti con Supabase</p>
           <p className="mt-1">Made with ❤️ for groomers</p>

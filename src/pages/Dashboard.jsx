@@ -107,27 +107,27 @@ export default function Dashboard() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: '#faf3f0' }}
+        style={{ backgroundColor: 'var(--color-bg-main)' }}
       >
         <div className="text-center">
           <div
             className="animate-spin h-12 w-12 rounded-full border-4 border-solid mx-auto mb-4"
             style={{
-              borderColor: '#d4a574',
+              borderColor: 'var(--color-primary)',
               borderTopColor: 'transparent',
             }}
           ></div>
-          <p style={{ color: '#8b5a3c' }}>Caricamento clienti...</p>
+          <p style={{ color: 'var(--color-secondary)' }}>Caricamento clienti...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen">
+    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       {/* Header */}
       <header
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
         className="sticky top-0 z-40 shadow-md"
       >
         <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6">
@@ -166,13 +166,13 @@ export default function Dashboard() {
         {/* Errore */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: '#991b1b' }} className="font-medium">
+            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
               {error}
             </p>
             <button
               onClick={loadClients}
               className="mt-2 text-sm underline"
-              style={{ color: '#991b1b' }}
+              style={{ color: 'var(--color-danger-text)' }}
             >
               Riprova
             </button>
@@ -183,7 +183,7 @@ export default function Dashboard() {
         {DEMO_MODE && (
           <div
             className="mb-6 p-4 rounded-xl border"
-            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
           >
             <p className="font-medium text-sm">
               Demo in sola lettura: puoi esplorare clienti, QR card, fidelity e calendario, ma non creare o modificare dati.
@@ -201,8 +201,8 @@ export default function Dashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition"
             style={{
-              borderColor: '#e8d5c4',
-              color: '#5a3a2a',
+              borderColor: 'var(--color-border)',
+              color: 'var(--color-text-primary)',
               backgroundColor: '#ffffff',
             }}
           />
@@ -210,7 +210,7 @@ export default function Dashboard() {
           <button
             onClick={handleOpenCalendar}
             className="px-6 py-3 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 whitespace-nowrap"
-            style={{ backgroundColor: '#8b5a3c' }}
+            style={{ backgroundColor: 'var(--color-secondary)' }}
           >
             📅 Calendario
           </button>
@@ -226,7 +226,7 @@ export default function Dashboard() {
           <button
             onClick={handleOpenWeeklyReport}
             className="px-6 py-3 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 whitespace-nowrap"
-            style={{ backgroundColor: '#166534' }}
+            style={{ backgroundColor: 'var(--color-success-text)' }}
           >
             💶 Report Incassi
           </button>
@@ -237,7 +237,7 @@ export default function Dashboard() {
             disabled={DEMO_MODE}
             title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi un nuovo cliente'}
             className="px-6 py-3 rounded-lg font-bold text-white transition duration-200 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#d4a574' }}
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             + Nuovo Cliente
           </button>
@@ -248,12 +248,12 @@ export default function Dashboard() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🐕</div>
             <p
-              style={{ color: '#8b5a3c' }}
+              style={{ color: 'var(--color-secondary)' }}
               className="text-lg font-medium mb-2"
             >
               {searchTerm ? 'Nessun cliente trovato' : 'Nessun cliente ancora'}
             </p>
-            <p style={{ color: '#8b5a3c' }} className="text-sm mb-6">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-6">
               {searchTerm
                 ? 'Prova a modificare i parametri di ricerca'
                 : 'Aggiungi il tuo primo cliente per iniziare'}
@@ -264,7 +264,7 @@ export default function Dashboard() {
                 disabled={DEMO_MODE}
                 title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi il primo cliente'}
                 className="inline-block px-6 py-3 rounded-lg font-bold text-white transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#d4a574' }}
+                style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 Aggiungi Primo Cliente
               </button>

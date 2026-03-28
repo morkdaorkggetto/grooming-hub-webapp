@@ -92,27 +92,27 @@ export default function AddVisit() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: '#faf3f0' }}
+        style={{ backgroundColor: 'var(--color-bg-main)' }}
       >
         <div className="text-center">
           <div
             className="animate-spin h-12 w-12 rounded-full border-4 border-solid mx-auto mb-4"
             style={{
-              borderColor: '#d4a574',
+              borderColor: 'var(--color-primary)',
               borderTopColor: 'transparent',
             }}
           ></div>
-          <p style={{ color: '#8b5a3c' }}>Caricamento cliente...</p>
+          <p style={{ color: 'var(--color-secondary)' }}>Caricamento cliente...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen">
+    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       {/* Header */}
       <header
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
         className="sticky top-0 z-40 shadow-md"
       >
         <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between">
@@ -130,7 +130,7 @@ export default function AddVisit() {
         {DEMO_MODE && (
           <div
             className="mb-6 p-4 rounded-lg border"
-            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
           >
             <p className="font-medium">{DEMO_WRITE_BLOCK_MESSAGE}</p>
           </div>
@@ -139,13 +139,13 @@ export default function AddVisit() {
         {/* Errore globale */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: '#991b1b' }} className="font-medium">
+            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
               {error}
             </p>
             <button
               onClick={() => setError('')}
               className="mt-2 text-sm underline"
-              style={{ color: '#991b1b' }}
+              style={{ color: 'var(--color-danger-text)' }}
             >
               Chiudi
             </button>
@@ -156,15 +156,15 @@ export default function AddVisit() {
         {client && (
           <div
             className="mb-6 p-4 rounded-lg"
-            style={{ backgroundColor: '#ffffff', borderLeft: '4px solid #d4a574' }}
+            style={{ backgroundColor: '#ffffff', borderLeft: '4px solid var(--color-primary)' }}
           >
-            <p style={{ color: '#8b5a3c' }} className="text-sm">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
               Aggiungendo una visita a:
             </p>
-            <h2 style={{ color: '#5a3a2a' }} className="text-lg font-bold">
+            <h2 style={{ color: 'var(--color-text-primary)' }} className="text-lg font-bold">
               {client.name}
             </h2>
-            <p style={{ color: '#8b5a3c' }} className="text-sm">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
               {client.breed} • {client.owner}
             </p>
           </div>
@@ -177,7 +177,7 @@ export default function AddVisit() {
             <div>
               <label
                 htmlFor="date"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Data della visita *
@@ -193,11 +193,11 @@ export default function AddVisit() {
                 required
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
-                  borderColor: '#e8d5c4',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
                 }}
               />
-              <p style={{ color: '#8b5a3c' }} className="text-xs mt-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-1">
                 Campo obbligatorio
               </p>
             </div>
@@ -206,7 +206,7 @@ export default function AddVisit() {
             <div>
               <label
                 htmlFor="treatments"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Trattamenti eseguiti
@@ -221,12 +221,12 @@ export default function AddVisit() {
                 disabled={DEMO_MODE || submitting}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition resize-none"
                 style={{
-                  borderColor: '#e8d5c4',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
                 }}
                 rows="4"
               />
-              <p style={{ color: '#8b5a3c' }} className="text-xs mt-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-1">
                 Descrivi i trattamenti eseguiti durante questa visita
               </p>
             </div>
@@ -235,7 +235,7 @@ export default function AddVisit() {
             <div>
               <label
                 htmlFor="issues"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Problematiche riscontrate
@@ -250,12 +250,12 @@ export default function AddVisit() {
                 disabled={DEMO_MODE || submitting}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition resize-none"
                 style={{
-                  borderColor: '#e8d5c4',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
                 }}
                 rows="4"
               />
-              <p style={{ color: '#8b5a3c' }} className="text-xs mt-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-1">
                 Registra eventuali problemi riscontrati per il follow-up
               </p>
             </div>
@@ -264,13 +264,13 @@ export default function AddVisit() {
             <div>
               <label
                 htmlFor="cost"
-                style={{ color: '#5a3a2a' }}
+                style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
                 Costo (€) *
               </label>
               <div className="flex items-center gap-2">
-                <span style={{ color: '#5a3a2a' }} className="text-lg font-bold">
+                <span style={{ color: 'var(--color-text-primary)' }} className="text-lg font-bold">
                   €
                 </span>
                 <input
@@ -287,12 +287,12 @@ export default function AddVisit() {
                   required
                   className="flex-1 px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                   style={{
-                    borderColor: '#e8d5c4',
-                    color: '#5a3a2a',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)',
                   }}
                 />
               </div>
-              <p style={{ color: '#8b5a3c' }} className="text-xs mt-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-1">
                 Campo obbligatorio
               </p>
             </div>
@@ -304,7 +304,7 @@ export default function AddVisit() {
                 disabled={DEMO_MODE || submitting}
                 title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Salva visita'}
                 className="flex-1 py-4 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#d4a574' }}
+                style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 {submitting ? (
                   <span className="flex items-center justify-center">
@@ -340,8 +340,8 @@ export default function AddVisit() {
                 disabled={submitting}
                 className="flex-1 py-4 rounded-lg font-bold border-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  borderColor: '#d4a574',
-                  color: '#5a3a2a',
+                  borderColor: 'var(--color-primary)',
+                  color: 'var(--color-text-primary)',
                 }}
               >
                 Annulla
@@ -352,9 +352,9 @@ export default function AddVisit() {
           {/* Info footer */}
           <div
             className="mt-8 p-4 rounded-lg"
-            style={{ backgroundColor: '#faf3f0' }}
+            style={{ backgroundColor: 'var(--color-bg-main)' }}
           >
-            <p style={{ color: '#8b5a3c' }} className="text-sm">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
               💡 <strong>Suggerimento:</strong> La data e il costo sono
               obbligatori. Compila i campi per i trattamenti e le problematiche
               solo se necessario, ma ricorda che i dettagli aiutano nel

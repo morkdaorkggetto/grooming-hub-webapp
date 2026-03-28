@@ -28,8 +28,8 @@ export default function VisitCard({ visit, onDelete }) {
     <div
       className="border-l-4 p-5 rounded-lg"
       style={{
-        borderColor: '#d4a574',
-        backgroundColor: '#faf3f0',
+        borderColor: 'var(--color-primary)',
+        backgroundColor: 'var(--color-bg-main)',
       }}
     >
       {/* Header: data e costo */}
@@ -37,7 +37,7 @@ export default function VisitCard({ visit, onDelete }) {
         <div>
           {/* Data */}
           <p
-            style={{ color: '#5a3a2a' }}
+            style={{ color: 'var(--color-text-primary)' }}
             className="text-sm font-bold mb-1"
           >
             📅 {formatDate(visit.date)}
@@ -45,7 +45,7 @@ export default function VisitCard({ visit, onDelete }) {
 
           {/* Costo */}
           <p
-            style={{ color: '#d4a574' }}
+            style={{ color: 'var(--color-primary)' }}
             className="text-2xl font-bold"
           >
             €{parseFloat(visit.cost).toFixed(2)}
@@ -68,13 +68,13 @@ export default function VisitCard({ visit, onDelete }) {
       {visit.treatments && (
         <div className="mb-4">
           <p
-            style={{ color: '#5a3a2a' }}
+            style={{ color: 'var(--color-text-primary)' }}
             className="text-xs font-bold mb-1 uppercase"
           >
             Trattamenti
           </p>
           <p
-            style={{ color: '#8b5a3c' }}
+            style={{ color: 'var(--color-secondary)' }}
             className="text-sm whitespace-pre-wrap"
           >
             {visit.treatments}
@@ -103,7 +103,7 @@ export default function VisitCard({ visit, onDelete }) {
       {/* Empty state */}
       {!visit.treatments && !visit.issues && (
         <p
-          style={{ color: '#8b5a3c' }}
+          style={{ color: 'var(--color-secondary)' }}
           className="text-sm italic"
         >
           Nessun dettaglio registrato

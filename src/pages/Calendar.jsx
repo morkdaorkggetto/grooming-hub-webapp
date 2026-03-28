@@ -175,10 +175,10 @@ const getStatusLabel = (status) => {
 
 const getStatusStyle = (status) => {
   if (status === 'completed') {
-    return { backgroundColor: '#dcfce7', color: '#166534' };
+    return { backgroundColor: '#dcfce7', color: 'var(--color-success-text)' };
   }
   if (status === 'cancelled') {
-    return { backgroundColor: '#fef2f2', color: '#991b1b' };
+    return { backgroundColor: '#fef2f2', color: 'var(--color-danger-text)' };
   }
   if (status === 'no_show') {
     return { backgroundColor: '#fff1f2', color: '#be123c' };
@@ -199,23 +199,23 @@ const isImminentAppointment = (appointment) => {
 const getTimelineAppointmentStyle = (appointment, hasConflict) => {
   let palette = {
     backgroundColor: '#ffedd5',
-    borderColor: '#f59e0b',
+    borderColor: 'var(--color-warning-border)',
     textColor: '#7c2d12',
-    ownerColor: '#9a3412',
+    ownerColor: 'var(--color-warning-text)',
   };
 
   if (appointment.status === 'completed') {
     palette = {
       backgroundColor: '#dcfce7',
       borderColor: '#22c55e',
-      textColor: '#166534',
+      textColor: 'var(--color-success-text)',
       ownerColor: '#15803d',
     };
   } else if (isImminentAppointment(appointment)) {
     palette = {
       backgroundColor: '#fee2e2',
       borderColor: '#ef4444',
-      textColor: '#991b1b',
+      textColor: 'var(--color-danger-text)',
       ownerColor: '#b91c1c',
     };
   }
@@ -747,7 +747,7 @@ export default function Calendar() {
         }}
         className="rounded-xl border p-4 cursor-pointer transition hover:shadow-md"
         style={{
-          borderColor: hasConflict ? '#ef4444' : '#e8d5c4',
+          borderColor: hasConflict ? '#ef4444' : 'var(--color-border)',
           backgroundColor: hasConflict ? '#fff7f7' : '#fffdfb',
         }}
       >
@@ -756,14 +756,14 @@ export default function Calendar() {
             <div>
               <p
                 className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold mb-2"
-                style={{ backgroundColor: '#f5eadf', color: '#8b5a3c' }}
+                style={{ backgroundColor: '#f5eadf', color: 'var(--color-secondary)' }}
               >
                 {formatTimeOnly(appointment.scheduled_at)} - {formatTimeOnly(getAppointmentEnd(appointment).toISOString())}
               </p>
-              <p style={{ color: '#5a3a2a' }} className={`font-bold ${compact ? 'text-base' : 'text-lg'}`}>
+              <p style={{ color: 'var(--color-text-primary)' }} className={`font-bold ${compact ? 'text-base' : 'text-lg'}`}>
                 {appointment.client?.name || 'Cliente non trovato'}
               </p>
-              <p style={{ color: '#8b5a3c' }} className="text-sm">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
                 {appointment.client?.owner || '-'}
               </p>
             </div>
@@ -776,11 +776,11 @@ export default function Calendar() {
           </div>
 
           <div>
-            <p style={{ color: '#8b5a3c' }} className="text-sm">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
               Durata: {appointment.duration_minutes} min
             </p>
             {appointment.notes && (
-              <p style={{ color: '#8b5a3c' }} className="text-sm mt-2">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-2">
                 Note: {appointment.notes}
               </p>
             )}
@@ -795,7 +795,7 @@ export default function Calendar() {
               </p>
             )}
           </div>
-          <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+          <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
             Apri dettagli →
           </p>
         </div>
@@ -812,12 +812,12 @@ export default function Calendar() {
             <div
               key={day}
               className="rounded-2xl border px-3 py-3"
-              style={{ borderColor: '#e8d5c4', backgroundColor: '#fffaf6' }}
+              style={{ borderColor: 'var(--color-border)', backgroundColor: '#fffaf6' }}
             >
-              <h3 style={{ color: '#5a3a2a' }} className="font-bold capitalize">
+              <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold capitalize">
                 {formatWeekdayShort(day)}
               </h3>
-              <p style={{ color: '#8b5a3c' }} className="text-sm">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
                 {weeklyAppointments[day]?.length || 0} appuntamenti
               </p>
             </div>
@@ -828,7 +828,7 @@ export default function Calendar() {
               <div
                 key={hour}
                 className="text-xs flex items-start justify-end pr-2"
-                style={{ height: `${HOUR_ROW_HEIGHT}px`, color: '#8b5a3c' }}
+                style={{ height: `${HOUR_ROW_HEIGHT}px`, color: 'var(--color-secondary)' }}
               >
                 {`${hour}`.padStart(2, '0')}:00
               </div>
@@ -840,7 +840,7 @@ export default function Calendar() {
               key={day}
               className="relative rounded-2xl border overflow-hidden"
               style={{
-                borderColor: dragOverDay === day ? '#2563eb' : '#e8d5c4',
+                borderColor: dragOverDay === day ? '#2563eb' : 'var(--color-border)',
                 backgroundColor: dragOverDay === day ? '#eff6ff' : '#fffdfb',
                 height: `${(TIMELINE_END_HOUR - TIMELINE_START_HOUR + 1) * HOUR_ROW_HEIGHT}px`,
               }}
@@ -911,9 +911,9 @@ export default function Calendar() {
   );
 
   return (
-    <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen">
+    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       <header
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
         className="sticky top-0 z-40 shadow-md"
       >
         <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-3">
@@ -936,7 +936,7 @@ export default function Calendar() {
         {DEMO_MODE && (
           <div
             className="p-4 rounded-lg border"
-            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
           >
             <p className="font-medium">
               Demo in sola lettura: calendario consultabile, comunicazioni attive, ma creazione e modifiche appuntamenti disattivate.
@@ -946,7 +946,7 @@ export default function Calendar() {
 
         {error && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: '#991b1b' }} className="font-medium">
+            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
               {error}
             </p>
           </div>
@@ -954,20 +954,20 @@ export default function Calendar() {
 
         {success && (
           <div className="p-4 rounded-lg border" style={{ backgroundColor: '#ecfdf5', borderColor: '#bbf7d0' }}>
-            <p style={{ color: '#166534' }} className="font-medium">
+            <p style={{ color: 'var(--color-success-text)' }} className="font-medium">
               {success}
             </p>
           </div>
         )}
 
         <section ref={createAppointmentRef} className="bg-white rounded-2xl shadow-lg p-6">
-          <h2 style={{ color: '#5a3a2a' }} className="text-xl font-bold mb-4">
+          <h2 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-4">
             Nuovo Appuntamento
           </h2>
 
           <form onSubmit={handleAddAppointment} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             <div className="lg:col-span-2">
-              <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+              <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                 Cliente
               </label>
               <select
@@ -977,7 +977,7 @@ export default function Calendar() {
                   setForm((prev) => ({ ...prev, clientId: e.target.value }));
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 disabled={DEMO_MODE}
                 required
               >
@@ -991,7 +991,7 @@ export default function Calendar() {
             </div>
 
             <div>
-              <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+              <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                 Data
               </label>
               <input
@@ -1002,14 +1002,14 @@ export default function Calendar() {
                   setForm((prev) => ({ ...prev, date: e.target.value }));
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 disabled={DEMO_MODE}
                 required
               />
             </div>
 
             <div>
-              <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+              <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                 Ora
               </label>
               <input
@@ -1020,14 +1020,14 @@ export default function Calendar() {
                   setForm((prev) => ({ ...prev, time: e.target.value }));
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 disabled={DEMO_MODE}
                 required
               />
             </div>
 
             <div>
-              <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+              <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                 Durata (min)
               </label>
               <input
@@ -1041,13 +1041,13 @@ export default function Calendar() {
                   setForm((prev) => ({ ...prev, durationMinutes: e.target.value }));
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 disabled={DEMO_MODE}
               />
             </div>
 
             <div className="md:col-span-2 lg:col-span-4">
-              <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+              <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                 Note
               </label>
               <input
@@ -1059,7 +1059,7 @@ export default function Calendar() {
                 }}
                 placeholder="Es. solo bagno, taglio unghie, richieste particolari"
                 className="w-full px-3 py-3 rounded-lg border-2"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 disabled={DEMO_MODE}
               />
             </div>
@@ -1070,7 +1070,7 @@ export default function Calendar() {
                 disabled={DEMO_MODE || saving}
                 title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi appuntamento'}
                 className="w-full px-4 py-3 rounded-lg font-bold text-white transition disabled:opacity-70"
-                style={{ backgroundColor: '#d4a574' }}
+                style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 {saving ? 'Salvataggio...' : 'Aggiungi'}
               </button>
@@ -1101,7 +1101,7 @@ export default function Calendar() {
           <div className="flex flex-col xl:flex-row gap-4 xl:items-end xl:justify-between mb-6">
             <div className="flex flex-col md:flex-row gap-4 md:items-end">
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Dal
                 </label>
                 <input
@@ -1109,12 +1109,12 @@ export default function Calendar() {
                   value={fromDate}
                   onChange={(e) => setFromDate(e.target.value)}
                   className="px-3 py-2 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Al
                 </label>
                 <input
@@ -1122,14 +1122,14 @@ export default function Calendar() {
                   value={toDate}
                   onChange={(e) => setToDate(e.target.value)}
                   className="px-3 py-2 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
 
               <button
                 onClick={loadData}
                 className="px-4 py-2 rounded-lg font-medium text-white"
-                style={{ backgroundColor: '#8b5a3c' }}
+                style={{ backgroundColor: 'var(--color-secondary)' }}
               >
                 Aggiorna
               </button>
@@ -1139,14 +1139,14 @@ export default function Calendar() {
               <button
                 onClick={() => setViewMode('list')}
                 className="px-4 py-2 rounded-lg font-medium text-white"
-                style={{ backgroundColor: viewMode === 'list' ? '#8b5a3c' : '#caa07a' }}
+                style={{ backgroundColor: viewMode === 'list' ? 'var(--color-secondary)' : '#caa07a' }}
               >
                 Elenco
               </button>
               <button
                 onClick={() => setViewMode('week')}
                 className="px-4 py-2 rounded-lg font-medium text-white"
-                style={{ backgroundColor: viewMode === 'week' ? '#8b5a3c' : '#caa07a' }}
+                style={{ backgroundColor: viewMode === 'week' ? 'var(--color-secondary)' : '#caa07a' }}
               >
                 Settimana
               </button>
@@ -1165,18 +1165,18 @@ export default function Calendar() {
               <button
                 onClick={() => handleShiftWeek(-7)}
                 className="px-4 py-2 rounded-lg font-medium text-white"
-                style={{ backgroundColor: '#8b5a3c' }}
+                style={{ backgroundColor: 'var(--color-secondary)' }}
               >
                 ← Settimana prima
               </button>
               <button
                 onClick={() => handleShiftWeek(7)}
                 className="px-4 py-2 rounded-lg font-medium text-white"
-                style={{ backgroundColor: '#8b5a3c' }}
+                style={{ backgroundColor: 'var(--color-secondary)' }}
               >
                 Settimana dopo →
               </button>
-              <div className="px-4 py-2 rounded-lg" style={{ backgroundColor: '#faf3f0', color: '#8b5a3c' }}>
+              <div className="px-4 py-2 rounded-lg" style={{ backgroundColor: 'var(--color-bg-main)', color: 'var(--color-secondary)' }}>
                 {formatWeekdayShort(weekDays[0])} - {formatWeekdayShort(weekDays[6])}
               </div>
             </div>
@@ -1194,9 +1194,9 @@ export default function Calendar() {
           )}
 
           {loading ? (
-            <p style={{ color: '#8b5a3c' }}>Caricamento appuntamenti...</p>
+            <p style={{ color: 'var(--color-secondary)' }}>Caricamento appuntamenti...</p>
           ) : appointments.length === 0 ? (
-            <p style={{ color: '#8b5a3c' }} className="italic">
+            <p style={{ color: 'var(--color-secondary)' }} className="italic">
               Nessun appuntamento nel periodo selezionato.
             </p>
           ) : viewMode === 'week' ? (
@@ -1205,7 +1205,7 @@ export default function Calendar() {
             <div className="space-y-8">
               {groupedAppointments.map(([dayLabel, dayAppointments]) => (
                 <div key={dayLabel}>
-                  <h3 style={{ color: '#5a3a2a' }} className="text-lg font-bold mb-3 capitalize">
+                  <h3 style={{ color: 'var(--color-text-primary)' }} className="text-lg font-bold mb-3 capitalize">
                     {dayLabel}
                   </h3>
 
@@ -1224,27 +1224,27 @@ export default function Calendar() {
           <div className="w-full max-w-lg h-full overflow-y-auto bg-white shadow-2xl p-6">
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
-                <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+                <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
                   {formatDateTime(selectedAppointment.scheduled_at)}
                 </p>
-                <h2 style={{ color: '#5a3a2a' }} className="text-2xl font-bold">
+                <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold">
                   {selectedAppointment.client?.name || 'Cliente non trovato'}
                 </h2>
-                <p style={{ color: '#8b5a3c' }}>
+                <p style={{ color: 'var(--color-secondary)' }}>
                   {selectedAppointment.client?.owner || '-'}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedAppointment(null)}
                 className="px-3 py-2 rounded-lg text-white font-medium"
-                style={{ backgroundColor: '#8b5a3c' }}
+                style={{ backgroundColor: 'var(--color-secondary)' }}
               >
                 Chiudi
               </button>
             </div>
 
             <div className="space-y-6">
-              <div className="rounded-2xl p-4" style={{ backgroundColor: '#faf3f0' }}>
+              <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-bg-main)' }}>
                 <div className="flex flex-wrap gap-3 items-center mb-3">
                   <span
                     className="px-3 py-1 rounded-full text-xs font-bold"
@@ -1269,30 +1269,30 @@ export default function Calendar() {
                     </span>
                   )}
                 </div>
-                <p style={{ color: '#8b5a3c' }} className="text-sm">
+                <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
                   Durata: {selectedAppointment.duration_minutes} minuti
                 </p>
-                <p style={{ color: '#8b5a3c' }} className="text-sm">
+                <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
                   Telefono: {selectedAppointment.client?.phone || 'non disponibile'}
                 </p>
-                <p style={{ color: '#8b5a3c' }} className="text-sm">
+                <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
                   Score affidabilita: {selectedAppointment.client?.no_show_score ?? 0}
                 </p>
                 {selectedAppointment.notes && (
-                  <p style={{ color: '#8b5a3c' }} className="text-sm mt-3 whitespace-pre-wrap">
+                  <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-3 whitespace-pre-wrap">
                     Note: {selectedAppointment.notes}
                   </p>
                 )}
               </div>
 
               <div>
-                <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-3">
+                <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold mb-3">
                   Modifica orario
                 </h3>
                 <form onSubmit={handleUpdateSelectedAppointment} className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label style={{ color: '#8b5a3c' }} className="block text-sm font-medium mb-1">
+                      <label style={{ color: 'var(--color-secondary)' }} className="block text-sm font-medium mb-1">
                         Data
                       </label>
                       <input
@@ -1302,12 +1302,12 @@ export default function Calendar() {
                           setDetailForm((current) => ({ ...current, date: event.target.value }))
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
-                        style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                        style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                         disabled={DEMO_MODE}
                       />
                     </div>
                     <div>
-                      <label style={{ color: '#8b5a3c' }} className="block text-sm font-medium mb-1">
+                      <label style={{ color: 'var(--color-secondary)' }} className="block text-sm font-medium mb-1">
                         Ora
                       </label>
                       <input
@@ -1317,12 +1317,12 @@ export default function Calendar() {
                           setDetailForm((current) => ({ ...current, time: event.target.value }))
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
-                        style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                        style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                         disabled={DEMO_MODE}
                       />
                     </div>
                     <div>
-                      <label style={{ color: '#8b5a3c' }} className="block text-sm font-medium mb-1">
+                      <label style={{ color: 'var(--color-secondary)' }} className="block text-sm font-medium mb-1">
                         Durata
                       </label>
                       <input
@@ -1338,7 +1338,7 @@ export default function Calendar() {
                           }))
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
-                        style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                        style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                         disabled={DEMO_MODE}
                       />
                     </div>
@@ -1360,7 +1360,7 @@ export default function Calendar() {
                     disabled={DEMO_MODE || updatingAppointment}
                     title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Salva nuovo orario'}
                     className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-60"
-                    style={{ backgroundColor: '#d4a574' }}
+                    style={{ backgroundColor: 'var(--color-primary)' }}
                   >
                     {updatingAppointment ? 'Salvataggio...' : 'Salva nuovo orario'}
                   </button>
@@ -1368,7 +1368,7 @@ export default function Calendar() {
               </div>
 
               <div>
-                <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-3">
+                <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold mb-3">
                   Comunicazione
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -1399,7 +1399,7 @@ export default function Calendar() {
               </div>
 
               <div>
-                <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-3">
+                <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold mb-3">
                   Gestione appuntamento
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -1443,14 +1443,14 @@ export default function Calendar() {
               </div>
 
               <div>
-                <h3 style={{ color: '#5a3a2a' }} className="font-bold mb-3">
+                <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold mb-3">
                   Scheda cliente
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => navigate(`/client/${selectedAppointment.client_id}`)}
                     className="px-4 py-2 rounded-lg text-white font-medium"
-                    style={{ backgroundColor: '#8b5a3c' }}
+                    style={{ backgroundColor: 'var(--color-secondary)' }}
                   >
                     Apri cliente
                   </button>
@@ -1463,12 +1463,12 @@ export default function Calendar() {
                     disabled={DEMO_MODE}
                     title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Nuovo appuntamento per questo cliente'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
-                    style={{ backgroundColor: '#d4a574' }}
+                    style={{ backgroundColor: 'var(--color-primary)' }}
                   >
                     Nuovo appuntamento per questo cliente
                   </button>
                 </div>
-                <p style={{ color: '#8b5a3c' }} className="text-sm mt-3">
+                <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-3">
                   Dalla scheda cliente puoi gestire punteggio affidabilita, blacklist, note e storico visite.
                 </p>
               </div>

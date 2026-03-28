@@ -122,10 +122,10 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
       <div className="w-full max-w-xl rounded-3xl bg-white shadow-2xl p-6">
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <h2 style={{ color: '#5a3a2a' }} className="text-2xl font-bold">
+            <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold">
               Ritaglia foto
             </h2>
-            <p style={{ color: '#8b5a3c' }} className="text-sm mt-1">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-1">
               Trascina l'immagine e regola lo zoom per centrare il muso del cane.
             </p>
           </div>
@@ -133,7 +133,7 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
             type="button"
             onClick={onCancel}
             className="px-3 py-2 rounded-lg text-white font-medium"
-            style={{ backgroundColor: '#8b5a3c' }}
+            style={{ backgroundColor: 'var(--color-secondary)' }}
           >
             Chiudi
           </button>
@@ -153,7 +153,7 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
             style={{
               width: `${FRAME_SIZE}px`,
               height: `${FRAME_SIZE}px`,
-              borderColor: '#d4a574',
+              borderColor: 'var(--color-primary)',
               background:
                 'linear-gradient(135deg, rgba(250,243,240,1) 0%, rgba(245,234,223,1) 100%)',
             }}
@@ -190,7 +190,7 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
 
         <div className="space-y-4">
           <div>
-            <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+            <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
               Zoom
             </label>
             <input
@@ -209,7 +209,7 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
               type="button"
               onClick={onCancel}
               className="px-4 py-3 rounded-lg font-bold border-2 transition"
-              style={{ borderColor: '#d4a574', color: '#5a3a2a' }}
+              style={{ borderColor: 'var(--color-primary)', color: 'var(--color-text-primary)' }}
             >
               Annulla
             </button>
@@ -218,7 +218,7 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
               onClick={handleConfirm}
               disabled={saving}
               className="px-4 py-3 rounded-lg font-bold text-white transition disabled:opacity-60"
-              style={{ backgroundColor: '#d4a574' }}
+              style={{ backgroundColor: 'var(--color-primary)' }}
             >
               {saving ? 'Applicazione...' : 'Usa questa foto'}
             </button>

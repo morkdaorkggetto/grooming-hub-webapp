@@ -35,8 +35,8 @@ const getCardStyle = (status) => {
     return {
       backgroundColor: '#dcfce7',
       borderColor: '#22c55e',
-      titleColor: '#166534',
-      textColor: '#166534',
+      titleColor: 'var(--color-success-text)',
+      textColor: 'var(--color-success-text)',
     };
   }
 
@@ -61,7 +61,7 @@ const getCardStyle = (status) => {
   return {
     backgroundColor: '#fee2e2',
     borderColor: '#ef4444',
-    titleColor: '#991b1b',
+    titleColor: 'var(--color-danger-text)',
     textColor: '#b91c1c',
   };
 };
@@ -203,7 +203,7 @@ export default function DailyAppointments() {
             <button
               onClick={() => navigate(`/client/${appointment.client_id}`)}
               className="px-4 py-2 rounded-lg font-medium text-white"
-              style={{ backgroundColor: '#8b5a3c' }}
+              style={{ backgroundColor: 'var(--color-secondary)' }}
             >
               Apri cliente
             </button>
@@ -230,9 +230,9 @@ export default function DailyAppointments() {
   };
 
   return (
-    <div style={{ backgroundColor: '#faf3f0' }} className="min-h-screen">
+    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       <header
-        style={{ backgroundColor: '#d4a574' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
         className="sticky top-0 z-40 shadow-md"
       >
         <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-3">
@@ -255,7 +255,7 @@ export default function DailyAppointments() {
         {DEMO_MODE && (
           <div
             className="p-4 rounded-lg border"
-            style={{ backgroundColor: '#fff7ed', borderColor: '#f59e0b', color: '#9a3412' }}
+            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
           >
             <p className="font-medium">
               Demo in sola lettura: la vista operativa è consultabile, ma gli stati non possono essere aggiornati.
@@ -265,7 +265,7 @@ export default function DailyAppointments() {
 
         {error && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: '#991b1b' }} className="font-medium">
+            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
               {error}
             </p>
           </div>
@@ -273,7 +273,7 @@ export default function DailyAppointments() {
 
         {success && (
           <div className="p-4 rounded-lg border" style={{ backgroundColor: '#ecfdf5', borderColor: '#bbf7d0' }}>
-            <p style={{ color: '#166534' }} className="font-medium">
+            <p style={{ color: 'var(--color-success-text)' }} className="font-medium">
               {success}
             </p>
           </div>
@@ -282,17 +282,17 @@ export default function DailyAppointments() {
         <section className="bg-white rounded-2xl shadow-lg p-6">
           <div className="flex flex-col lg:flex-row gap-4 lg:items-end lg:justify-between">
             <div>
-              <p style={{ color: '#8b5a3c' }} className="text-sm font-medium mb-1">
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium mb-1">
                 Giorno selezionato
               </p>
-              <h2 style={{ color: '#5a3a2a' }} className="text-2xl font-bold capitalize">
+              <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold capitalize">
                 {formatLongDate(selectedDate)}
               </h2>
             </div>
 
             <div className="flex flex-wrap gap-2 items-end">
               <div>
-                <label style={{ color: '#5a3a2a' }} className="block text-sm font-medium mb-2">
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
                   Data
                 </label>
                 <input
@@ -300,7 +300,7 @@ export default function DailyAppointments() {
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="px-3 py-2 rounded-lg border-2"
-                  style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
               <button
@@ -316,31 +316,31 @@ export default function DailyAppointments() {
 
         <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Totale appuntamenti
             </p>
-            <p style={{ color: '#5a3a2a' }} className="text-3xl font-bold mt-2">
+            <p style={{ color: 'var(--color-text-primary)' }} className="text-3xl font-bold mt-2">
               {counters.total}
             </p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Da fare
             </p>
-            <p style={{ color: '#991b1b' }} className="text-3xl font-bold mt-2">
+            <p style={{ color: 'var(--color-danger-text)' }} className="text-3xl font-bold mt-2">
               {counters.pending}
             </p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Completati
             </p>
-            <p style={{ color: '#166534' }} className="text-3xl font-bold mt-2">
+            <p style={{ color: 'var(--color-success-text)' }} className="text-3xl font-bold mt-2">
               {counters.completed}
             </p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: '#8b5a3c' }} className="text-sm font-medium">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Altri stati
             </p>
             <p style={{ color: '#7c2d12' }} className="text-3xl font-bold mt-2">
@@ -352,11 +352,11 @@ export default function DailyAppointments() {
         <section className="space-y-4">
           {loading ? (
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <p style={{ color: '#8b5a3c' }}>Caricamento appuntamenti...</p>
+              <p style={{ color: 'var(--color-secondary)' }}>Caricamento appuntamenti...</p>
             </div>
           ) : appointments.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <p style={{ color: '#8b5a3c' }} className="italic">
+              <p style={{ color: 'var(--color-secondary)' }} className="italic">
                 Nessun appuntamento per il giorno selezionato.
               </p>
             </div>

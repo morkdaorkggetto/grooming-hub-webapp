@@ -26,11 +26,60 @@
   /* Colori base app */
   :root {
     --color-primary: #d4a574;
-    --color-dark: #5a3a2a;
-    --color-medium: #8b5a3c;
-    --color-light: #faf3f0;
+    --color-primary-hover: #c6925d;
+    --color-secondary: #8b5a3c;
+    --color-secondary-hover: #744a31;
+    --color-bg-main: #faf3f0;
+    --color-surface-main: #ffffff;
+    --color-surface-soft: #faf3f0;
+    --color-surface-muted: #f5eadf;
+    --color-header: #d4a574;
     --color-border: #e8d5c4;
+    --color-text-primary: #5a3a2a;
+    --color-text-secondary: #8b5a3c;
+    --color-placeholder: #b08a73;
+    --color-link: #d4a574;
+    --color-success-text: #166534;
+    --color-success-bg: #ecfdf5;
+    --color-danger-text: #991b1b;
+    --color-danger-bg: #fef2f2;
+    --color-warning-bg: #fff7ed;
+    --color-warning-border: #f59e0b;
+    --color-warning-text: #9a3412;
+    --color-demo-banner-bg: #7c2d12;
+    --color-demo-banner-text: #fff7ed;
   }
+
+  body {
+    background-color: var(--color-bg-main);
+    color: var(--color-text-primary);
+  }
+}
+
+.demo-theme {
+  --color-primary: #c89b74;
+  --color-primary-hover: #b9875e;
+  --color-secondary: #7a5a47;
+  --color-secondary-hover: #654738;
+  --color-bg-main: #f6f1ec;
+  --color-surface-main: #fff9f4;
+  --color-surface-soft: #fcf7f2;
+  --color-surface-muted: #f3e7da;
+  --color-header: #c9a17d;
+  --color-border: #e4d2c2;
+  --color-text-primary: #5b4336;
+  --color-text-secondary: #866555;
+  --color-placeholder: #b39a8a;
+  --color-link: #8e664c;
+  --color-success-text: #5f9b74;
+  --color-success-bg: #e6f3ea;
+  --color-danger-text: #c96b6b;
+  --color-danger-bg: #fbe9e7;
+  --color-warning-bg: #f8ece4;
+  --color-warning-border: #c98b6a;
+  --color-warning-text: #8f5e43;
+  --color-demo-banner-bg: #8a6246;
+  --color-demo-banner-text: #fff9f4;
 }
 
 /* Utilità personalizzate (optional) */
@@ -38,21 +87,21 @@
   /* Pulsante primario riusabile */
   .btn-primary {
     @apply px-4 py-2 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105;
-    background-color: #d4a574;
+    background-color: var(--color-primary);
   }
 
   /* Pulsante secondario riusabile */
   .btn-secondary {
     @apply px-4 py-2 rounded-lg font-bold border-2 transition;
-    border-color: #d4a574;
-    color: #5a3a2a;
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
   }
 
   /* Input base riusabile */
   .input-base {
     @apply px-4 py-3 rounded-lg border-2 focus:outline-none transition;
-    border-color: #e8d5c4;
-    color: #5a3a2a;
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
   }
 }
 
@@ -75,7 +124,7 @@
 /* Fix per scrollbar su Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #d4a574 #faf3f0;
+  scrollbar-color: var(--color-primary) var(--color-bg-main);
 }
 
 /* Fix per scrollbar su Chrome */
@@ -85,14 +134,38 @@
 }
 
 *::-webkit-scrollbar-track {
-  background: #faf3f0;
+  background: var(--color-bg-main);
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #d4a574;
+  background: var(--color-primary);
   border-radius: 4px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #8b5a3c;
+  background: var(--color-secondary);
+}
+
+.demo-theme .bg-white {
+  background-color: var(--color-surface-main) !important;
+}
+
+.demo-theme .bg-red-50 {
+  background-color: var(--color-danger-bg) !important;
+}
+
+.demo-theme .bg-green-50 {
+  background-color: var(--color-success-bg) !important;
+}
+
+.demo-theme .border-red-200 {
+  border-color: #e8c3be !important;
+}
+
+.demo-theme .border-green-200 {
+  border-color: #c7dfcf !important;
+}
+
+.demo-theme .text-red-500 {
+  color: #b97777 !important;
 }

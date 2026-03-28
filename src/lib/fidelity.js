@@ -30,8 +30,8 @@ const FIDELITY_TIERS = [
 
 const INACTIVE_STYLE = {
   backgroundColor: '#ffffff',
-  borderColor: '#e8d5c4',
-  textColor: '#8b5a3c',
+  borderColor: 'var(--color-border)',
+  textColor: 'var(--color-secondary)',
 };
 
 const getCutoffDate = (monthsWindow) => {
@@ -93,7 +93,7 @@ export const getFidelityBadgeStyle = (tierKey) => {
   if (tierKey === 'bronze') {
     return { backgroundColor: '#f6e3cf', color: '#7c4a21' };
   }
-  return { backgroundColor: '#faf3f0', color: '#8b5a3c' };
+  return { backgroundColor: 'var(--color-bg-main)', color: 'var(--color-secondary)' };
 };
 
 export const getFidelityLabel = (tierKey) => {

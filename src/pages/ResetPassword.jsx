@@ -77,32 +77,32 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8" style={{ borderTop: '4px solid #d4a574' }}>
-        <h1 className="text-2xl font-bold mb-2 text-center" style={{ color: '#5a3a2a' }}>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8" style={{ borderTop: '4px solid var(--color-primary)' }}>
+        <h1 className="text-2xl font-bold mb-2 text-center" style={{ color: 'var(--color-text-primary)' }}>
           Reimposta Password
         </h1>
-        <p className="text-sm text-center mb-6" style={{ color: '#8b5a3c' }}>
+        <p className="text-sm text-center mb-6" style={{ color: 'var(--color-secondary)' }}>
           Inserisci una nuova password per il tuo account.
         </p>
 
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm" style={{ color: '#991b1b' }}>
+          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm" style={{ color: 'var(--color-danger-text)' }}>
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-200 text-sm" style={{ color: '#166534' }}>
+          <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-200 text-sm" style={{ color: 'var(--color-success-text)' }}>
             {success}
           </div>
         )}
 
         {checkingSession ? (
-          <p className="text-sm text-center" style={{ color: '#8b5a3c' }}>Verifica link in corso...</p>
+          <p className="text-sm text-center" style={{ color: 'var(--color-secondary)' }}>Verifica link in corso...</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#5a3a2a' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
                 Nuova password
               </label>
               <input
@@ -111,12 +111,12 @@ export default function ResetPassword() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#5a3a2a' }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
                 Conferma password
               </label>
               <input
@@ -125,7 +125,7 @@ export default function ResetPassword() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
-                style={{ borderColor: '#e8d5c4', color: '#5a3a2a' }}
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
               />
             </div>
 
@@ -133,7 +133,7 @@ export default function ResetPassword() {
               type="submit"
               disabled={loading}
               className="w-full py-3 rounded-lg font-bold text-white disabled:opacity-50"
-              style={{ backgroundColor: '#d4a574' }}
+              style={{ backgroundColor: 'var(--color-primary)' }}
             >
               {loading ? 'Aggiornamento...' : 'Salva nuova password'}
             </button>
@@ -141,7 +141,7 @@ export default function ResetPassword() {
         )}
 
         <div className="mt-6 text-center">
-          <Link to="/login" className="text-sm underline" style={{ color: '#8b5a3c' }}>
+          <Link to="/login" className="text-sm underline" style={{ color: 'var(--color-secondary)' }}>
             Torna al login
           </Link>
         </div>
