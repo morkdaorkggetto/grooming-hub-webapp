@@ -1,5 +1,6 @@
 import { supabase, getCurrentUser } from './supabaseClient';
 import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from './demoMode';
+import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 
 const CLIENT_PHOTOS_BUCKET = 'client-photos';
 const BLACKLIST_THRESHOLD = -3;
@@ -29,14 +30,16 @@ const assertDemoWriteAllowed = () => {
 };
 
 const getFileExtension = (file) => {
-  const nameParts = file?.name?.split('.') || [];
-  const extFromName = nameParts.length > 1 ? nameParts.pop().toLowerCase() : '';
+  const extFromName = getFileExtensionFromName(file?.name || '');
   if (extFromName) return extFromName;
 
   const mime = file?.type || '';
+  if (mime === 'image/jpeg') return 'jpg';
   if (mime === 'image/png') return 'png';
   if (mime === 'image/webp') return 'webp';
   if (mime === 'image/gif') return 'gif';
+  if (mime === 'image/heic') return 'heic';
+  if (mime === 'image/heif') return 'heif';
   return 'jpg';
 };
 
@@ -56,7 +59,7 @@ const uploadClientPhoto = async (userId, clientId, file) => {
     .from(CLIENT_PHOTOS_BUCKET)
     .upload(filePath, file, {
       upsert: false,
-      contentType: file.type || 'image/jpeg',
+      contentType: getSafeImageMimeType(file),
     });
 
   if (uploadError) throw uploadError;

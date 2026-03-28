@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { addClient } from '../lib/database';
 import ImageCropModal from '../components/ImageCropModal';
 import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
+import { isSupportedImageFile } from '../lib/imageFiles';
 
 /**
  * AddClient — Pagina form aggiunta nuovo cliente
@@ -42,7 +43,7 @@ export default function AddClient() {
     if (!file) return;
 
     // Validazione tipo file
-    if (!file.type.startsWith('image/')) {
+    if (!isSupportedImageFile(file)) {
       setError('Seleziona un file immagine');
       return;
     }
@@ -333,7 +334,7 @@ export default function AddClient() {
                   ref={cameraInputRef}
                   id="photo-camera"
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.heic,.heif"
                   capture="environment"
                   onChange={handlePhotoSelect}
                   className="hidden"
@@ -342,7 +343,7 @@ export default function AddClient() {
                   ref={galleryInputRef}
                   id="photo-gallery"
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.heic,.heif"
                   onChange={handlePhotoSelect}
                   className="hidden"
                 />

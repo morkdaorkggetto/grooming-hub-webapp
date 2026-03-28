@@ -22,6 +22,7 @@ import ImageCropModal from '../components/ImageCropModal';
 import PromoBadge from '../components/PromoBadge';
 import VisitCard from '../components/VisitCard';
 import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
+import { isSupportedImageFile } from '../lib/imageFiles';
 
 /**
  * ClientDetail — Pagina dettaglio cliente
@@ -111,7 +112,7 @@ export default function ClientDetail() {
     e.target.value = '';
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
+    if (!isSupportedImageFile(file)) {
       setError('Seleziona un file immagine valido');
       return;
     }
@@ -894,7 +895,7 @@ export default function ClientDetail() {
                   <input
                     ref={editCameraInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     capture="environment"
                     onChange={handleEditPhotoSelect}
                     className="hidden"
@@ -902,7 +903,7 @@ export default function ClientDetail() {
                   <input
                     ref={editGalleryInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     onChange={handleEditPhotoSelect}
                     className="hidden"
                   />
