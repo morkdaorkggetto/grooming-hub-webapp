@@ -10,6 +10,7 @@ import Calendar from './pages/Calendar';
 import ResetPassword from './pages/ResetPassword';
 import ClientCard from './pages/ClientCard';
 import WeeklyRevenue from './pages/WeeklyRevenue';
+import DailyAppointments from './pages/DailyAppointments';
 import { DEMO_BANNER_TEXT, DEMO_MODE } from './lib/demoMode';
 
 /**
@@ -154,6 +155,15 @@ export default function App() {
             element={
               <ProtectedRoute isAuthenticated={!!user}>
                 <Calendar />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/appointments/today"
+            element={
+              <ProtectedRoute isAuthenticated={!!user}>
+                <DailyAppointments />
               </ProtectedRoute>
             }
           />

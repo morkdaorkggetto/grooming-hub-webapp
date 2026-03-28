@@ -98,6 +98,10 @@ export default function Dashboard() {
     navigate('/reports/weekly');
   };
 
+  const handleOpenDailyAppointments = () => {
+    navigate('/appointments/today');
+  };
+
   // Stato di caricamento
   if (loading) {
     return (
@@ -209,6 +213,14 @@ export default function Dashboard() {
             style={{ backgroundColor: '#8b5a3c' }}
           >
             📅 Calendario
+          </button>
+
+          <button
+            onClick={handleOpenDailyAppointments}
+            className="px-6 py-3 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 whitespace-nowrap"
+            style={{ backgroundColor: '#b91c1c' }}
+          >
+            🔴 Operatività Oggi
           </button>
 
           <button
