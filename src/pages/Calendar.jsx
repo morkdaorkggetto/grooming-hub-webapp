@@ -621,10 +621,6 @@ export default function Calendar() {
   };
 
   const handleAppointmentDragStart = (appointment) => {
-    if (DEMO_MODE) {
-      setError(DEMO_WRITE_BLOCK_MESSAGE);
-      return;
-    }
     setDraggingAppointmentId(appointment.id);
     setDragOverDay('');
   };
