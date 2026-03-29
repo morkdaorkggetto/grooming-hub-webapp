@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default function AppHeader({
   title,
@@ -15,9 +16,12 @@ export default function AppHeader({
         className={`${maxWidthClass} mx-auto px-4 py-4 sm:py-6 flex items-start justify-between gap-4`}
       >
         <div className="flex-1 min-w-0">
-          <p className="text-sm sm:text-base uppercase tracking-[0.28em] font-bold text-white/80 mb-2">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center text-sm sm:text-base uppercase tracking-[0.28em] font-bold text-white/80 mb-2 transition hover:text-white focus:outline-none focus:text-white"
+          >
             Grooming Hub
-          </p>
+          </Link>
           <h1 className="text-[1.85rem] sm:text-[2.1rem] leading-tight font-semibold text-white">
             {title}
           </h1>
