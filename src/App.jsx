@@ -11,7 +11,7 @@ import ResetPassword from './pages/ResetPassword';
 import ClientCard from './pages/ClientCard';
 import WeeklyRevenue from './pages/WeeklyRevenue';
 import DailyAppointments from './pages/DailyAppointments';
-import { DEMO_BANNER_TEXT, DEMO_MODE } from './lib/demoMode';
+import { DEMO_MODE } from './lib/demoMode';
 
 /**
  * ProtectedRoute — Componente wrapper per route protette
@@ -84,18 +84,7 @@ export default function App() {
 
   return (
     <Router>
-      <div className={DEMO_MODE ? 'demo-theme pt-14' : ''}>
-        {DEMO_MODE && (
-          <div
-            className="fixed top-0 inset-x-0 z-[100] px-4 py-3 text-center text-sm font-bold shadow-md"
-            style={{
-              backgroundColor: 'var(--color-demo-banner-bg)',
-              color: 'var(--color-demo-banner-text)',
-            }}
-          >
-            {DEMO_BANNER_TEXT}
-          </div>
-        )}
+      <div className={DEMO_MODE ? 'demo-theme' : ''}>
         <Routes>
           {/* Route pubblica: Login */}
           <Route

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addClient } from '../lib/database';
 import ImageCropModal from '../components/ImageCropModal';
-import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
 import { isSupportedImageFile } from '../lib/imageFiles';
 
 /**
@@ -122,17 +121,6 @@ export default function AddClient() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
-        {DEMO_MODE && (
-          <div
-            className="mb-6 p-4 rounded-lg border"
-            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
-          >
-            <p className="font-medium">
-              {DEMO_WRITE_BLOCK_MESSAGE}
-            </p>
-          </div>
-        )}
-
         {/* Errore */}
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
@@ -170,7 +158,7 @@ export default function AddClient() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                disabled={DEMO_MODE || loading}
+                disabled={loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
                   borderColor: 'var(--color-border)',
@@ -199,7 +187,7 @@ export default function AddClient() {
                 onChange={(e) =>
                   setFormData({ ...formData, breed: e.target.value })
                 }
-                disabled={DEMO_MODE || loading}
+                disabled={loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
                   borderColor: 'var(--color-border)',
@@ -226,7 +214,7 @@ export default function AddClient() {
                   setFormData({ ...formData, owner: e.target.value })
                 }
                 required
-                disabled={DEMO_MODE || loading}
+                disabled={loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
                   borderColor: 'var(--color-border)',
@@ -255,7 +243,7 @@ export default function AddClient() {
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
-                disabled={DEMO_MODE || loading}
+                disabled={loading}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
                   borderColor: 'var(--color-border)',

@@ -304,6 +304,7 @@ export default function Calendar() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [viewMode, setViewMode] = useState('week');
+  const [calendarProvider, setCalendarProvider] = useState('google');
 
   const [fromDate, setFromDate] = useState(getToday());
   const [toDate, setToDate] = useState(addDays(getToday(), 14));
@@ -428,6 +429,17 @@ export default function Calendar() {
 
     return findConflictForCandidate(candidate, selectedAppointment.id);
   }, [appointments, detailForm.date, detailForm.time, detailForm.durationMinutes, selectedAppointment]);
+
+  const handleOpenCalendarExport = (appointment) => {
+    if (!appointment) return;
+
+    if (calendarProvider === 'icloud') {
+      downloadIcs(appointment);
+      return;
+    }
+
+    window.open(getGoogleCalendarUrl(appointment), '_blank', 'noopener,noreferrer');
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -873,7 +885,7 @@ export default function Calendar() {
                   <button
                     key={appointment.id}
                     type="button"
-                    draggable={!DEMO_MODE}
+                    draggable
                     title={`${appointment.client?.name || 'Cliente'} · ${getTimelineStatusDescription(
                       appointment
                     )} · ${formatTimeOnly(appointment.scheduled_at)}-${formatTimeOnly(
@@ -933,17 +945,6 @@ export default function Calendar() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {DEMO_MODE && (
-          <div
-            className="p-4 rounded-lg border"
-            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
-          >
-            <p className="font-medium">
-              Demo in sola lettura: calendario consultabile, comunicazioni attive, ma creazione e modifiche appuntamenti disattivate.
-            </p>
-          </div>
-        )}
-
         {error && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200">
             <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
@@ -978,7 +979,6 @@ export default function Calendar() {
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                disabled={DEMO_MODE}
                 required
               >
                 <option value="">Seleziona cliente</option>
@@ -1003,7 +1003,6 @@ export default function Calendar() {
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                disabled={DEMO_MODE}
                 required
               />
             </div>
@@ -1021,7 +1020,6 @@ export default function Calendar() {
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                disabled={DEMO_MODE}
                 required
               />
             </div>
@@ -1042,7 +1040,6 @@ export default function Calendar() {
                 }}
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                disabled={DEMO_MODE}
               />
             </div>
 
@@ -1060,15 +1057,13 @@ export default function Calendar() {
                 placeholder="Es. solo bagno, taglio unghie, richieste particolari"
                 className="w-full px-3 py-3 rounded-lg border-2"
                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                disabled={DEMO_MODE}
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                disabled={DEMO_MODE || saving}
-                title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi appuntamento'}
+                disabled={saving}
                 className="w-full px-4 py-3 rounded-lg font-bold text-white transition disabled:opacity-70"
                 style={{ backgroundColor: 'var(--color-primary)' }}
               >
@@ -1303,7 +1298,6 @@ export default function Calendar() {
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
                         style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                        disabled={DEMO_MODE}
                       />
                     </div>
                     <div>
@@ -1318,7 +1312,6 @@ export default function Calendar() {
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
                         style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                        disabled={DEMO_MODE}
                       />
                     </div>
                     <div>
@@ -1339,7 +1332,6 @@ export default function Calendar() {
                         }
                         className="w-full px-3 py-2 rounded-lg border-2"
                         style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                        disabled={DEMO_MODE}
                       />
                     </div>
                   </div>
@@ -1357,8 +1349,7 @@ export default function Calendar() {
 
                   <button
                     type="submit"
-                    disabled={DEMO_MODE || updatingAppointment}
-                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Salva nuovo orario'}
+                    disabled={updatingAppointment}
                     className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-60"
                     style={{ backgroundColor: 'var(--color-primary)' }}
                   >
@@ -1371,30 +1362,63 @@ export default function Calendar() {
                 <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold mb-3">
                   Comunicazione
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="space-y-3">
                   <button
                     onClick={() => handleOpenAppointmentWhatsApp(selectedAppointment)}
-                    className="px-4 py-2 rounded-lg text-white font-medium"
+                    className="w-full px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#16a34a' }}
                   >
                     Promemoria WhatsApp
                   </button>
-                  <a
-                    href={getGoogleCalendarUrl(selectedAppointment)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-4 py-2 rounded-lg text-white font-medium"
-                    style={{ backgroundColor: '#2563eb' }}
+                  <div
+                    className="rounded-2xl border p-3"
+                    style={{
+                      borderColor: 'var(--color-border)',
+                      backgroundColor: 'var(--color-surface-soft)',
+                    }}
                   >
-                    Google Calendar
-                  </a>
-                  <button
-                    onClick={() => downloadIcs(selectedAppointment)}
-                    className="px-4 py-2 rounded-lg text-white font-medium"
-                    style={{ backgroundColor: '#7c3aed' }}
-                  >
-                    File iCloud / Apple
-                  </button>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div>
+                        <p
+                          className="text-sm font-semibold"
+                          style={{ color: 'var(--color-text-primary)' }}
+                        >
+                          Calendario
+                        </p>
+                        <p
+                          className="text-xs"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                          Scegli dove esportare questo appuntamento
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleOpenCalendarExport(selectedAppointment)}
+                        className="w-11 h-11 rounded-xl text-white text-lg font-semibold flex items-center justify-center"
+                        style={{ backgroundColor: 'var(--color-secondary)' }}
+                        title={
+                          calendarProvider === 'icloud'
+                            ? 'Esporta file iCloud / Apple'
+                            : 'Apri in Google Calendar'
+                        }
+                      >
+                        📅
+                      </button>
+                    </div>
+                    <select
+                      value={calendarProvider}
+                      onChange={(event) => setCalendarProvider(event.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border"
+                      style={{
+                        borderColor: 'var(--color-border)',
+                        backgroundColor: 'var(--color-surface-main)',
+                        color: 'var(--color-text-primary)',
+                      }}
+                    >
+                      <option value="google">Google Calendar</option>
+                      <option value="icloud">iCloud / Apple</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -1405,8 +1429,6 @@ export default function Calendar() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleStatusChange(selectedAppointment.id, 'completed')}
-                    disabled={DEMO_MODE}
-                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Segna completato'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#16a34a' }}
                   >
@@ -1414,8 +1436,6 @@ export default function Calendar() {
                   </button>
                   <button
                     onClick={() => handleStatusChange(selectedAppointment.id, 'no_show')}
-                    disabled={DEMO_MODE}
-                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Segna no-show'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#e11d48' }}
                   >
@@ -1423,8 +1443,6 @@ export default function Calendar() {
                   </button>
                   <button
                     onClick={() => handleStatusChange(selectedAppointment.id, 'cancelled')}
-                    disabled={DEMO_MODE}
-                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Annulla appuntamento'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#9ca3af' }}
                   >
@@ -1432,8 +1450,6 @@ export default function Calendar() {
                   </button>
                   <button
                     onClick={() => handleDeleteAppointment(selectedAppointment.id)}
-                    disabled={DEMO_MODE}
-                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Elimina appuntamento'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: '#dc2626' }}
                   >
@@ -1460,8 +1476,6 @@ export default function Calendar() {
                         replace: false,
                       })
                     }
-                    disabled={DEMO_MODE}
-                    title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Nuovo appuntamento per questo cliente'}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: 'var(--color-primary)' }}
                   >

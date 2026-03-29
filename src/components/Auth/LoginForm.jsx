@@ -187,17 +187,6 @@ export default function LoginForm({ onSuccess }) {
             {isSignUp ? 'Crea Account' : 'Accedi'}
           </h2>
 
-          {DEMO_MODE && (
-            <div
-              className="mb-4 p-4 rounded-lg border"
-              style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
-            >
-              <p className="text-sm font-medium">
-                Ambiente demo: accesso consentito solo agli account che hai creato tu. Le modifiche nell'app sono disattivate.
-              </p>
-            </div>
-          )}
-
           {/* Messaggio di errore */}
           {error && (
             <div

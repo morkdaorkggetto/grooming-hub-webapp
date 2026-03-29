@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAppointments, updateAppointmentStatus } from '../lib/database';
-import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
 import { getAppointmentWhatsAppUrl } from '../lib/whatsapp';
 
 const toLocalDateString = (date) => {
@@ -216,8 +215,7 @@ export default function DailyAppointments() {
             </button>
             <button
               onClick={() => handleMarkCompleted(appointment.id)}
-              disabled={DEMO_MODE || updatingId === appointment.id || appointment.status === 'completed'}
-              title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Segna completato'}
+              disabled={updatingId === appointment.id || appointment.status === 'completed'}
               className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ backgroundColor: '#15803d' }}
             >
@@ -252,17 +250,6 @@ export default function DailyAppointments() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {DEMO_MODE && (
-          <div
-            className="p-4 rounded-lg border"
-            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
-          >
-            <p className="font-medium">
-              Demo in sola lettura: la vista operativa è consultabile, ma gli stati non possono essere aggiornati.
-            </p>
-          </div>
-        )}
-
         {error && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200">
             <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getWeeklyRevenueReport } from '../lib/database';
-import { DEMO_MODE } from '../lib/demoMode';
 
 const toLocalDateString = (date) => {
   const year = date.getFullYear();
@@ -143,17 +142,6 @@ export default function WeeklyRevenue() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {DEMO_MODE && (
-          <div
-            className="p-4 rounded-lg border"
-            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
-          >
-            <p className="font-medium">
-              Demo attiva: il report usa i dati dimostrativi caricati nell'ambiente demo.
-            </p>
-          </div>
-        )}
-
         {error && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200">
             <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">

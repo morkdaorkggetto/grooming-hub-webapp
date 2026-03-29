@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { getAllClients } from '../lib/database';
 import { getCurrentUser, logout } from '../lib/supabaseClient';
 import ClientCard from '../components/ClientCard';
-import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from '../lib/demoMode';
 
 /**
  * Dashboard — Pagina principale
@@ -281,17 +280,6 @@ export default function Dashboard() {
         )}
 
         {/* Search + Add button */}
-        {DEMO_MODE && (
-          <div
-            className="mb-6 p-4 rounded-2xl border"
-            style={{ backgroundColor: 'var(--color-warning-bg)', borderColor: 'var(--color-warning-border)', color: 'var(--color-warning-text)' }}
-          >
-            <p className="font-medium text-sm">
-              Demo in sola lettura: puoi esplorare clienti, QR card, fidelity e calendario, ma non creare o modificare dati.
-            </p>
-          </div>
-        )}
-
         <section className="mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
             <div
@@ -437,9 +425,7 @@ export default function Dashboard() {
             </div>
             <button
               onClick={handleAddClient}
-              disabled={DEMO_MODE}
-              title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi un nuovo cliente'}
-              className="px-6 py-3 rounded-2xl font-bold text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="px-6 py-3 rounded-2xl font-bold text-white transition"
               style={{ backgroundColor: 'var(--color-primary)' }}
             >
               + Nuovo Cliente
@@ -550,9 +536,7 @@ export default function Dashboard() {
             {!searchTerm && (
               <button
                 onClick={handleAddClient}
-                disabled={DEMO_MODE}
-                title={DEMO_MODE ? DEMO_WRITE_BLOCK_MESSAGE : 'Aggiungi il primo cliente'}
-                className="inline-block px-6 py-3 rounded-2xl font-bold text-white transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-block px-6 py-3 rounded-2xl font-bold text-white transition duration-200"
                 style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 Aggiungi Primo Cliente
