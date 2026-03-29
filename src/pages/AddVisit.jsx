@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getClientById, addVisit } from '../lib/database';
+import AppHeader from '../components/AppHeader';
 
 /**
  * AddVisit — Pagina form aggiunta visita per un cliente
@@ -109,21 +110,24 @@ export default function AddVisit() {
 
   return (
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
-      {/* Header */}
-      <header
-        style={{ backgroundColor: 'var(--color-primary)' }}
-        className="sticky top-0 z-40 shadow-md"
-      >
-        <div className="max-w-2xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Nuova Visita</h1>
+      <AppHeader
+        title="Nuova visita"
+        subtitle={client ? `Registra una visita per ${client.name} e aggiorna subito lo storico.` : 'Registra una visita e aggiorna subito lo storico del cliente.'}
+        maxWidthClass="max-w-2xl"
+        rightContent={
           <button
             onClick={handleCancel}
-            className="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-sm font-medium transition"
+            className="px-4 py-2 rounded-xl text-sm font-medium transition"
+            style={{
+              backgroundColor: 'rgba(251, 246, 243, 0.16)',
+              color: '#FBF6F3',
+              border: '1px solid rgba(251, 246, 243, 0.22)',
+            }}
           >
             ← Indietro
           </button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         {/* Errore globale */}

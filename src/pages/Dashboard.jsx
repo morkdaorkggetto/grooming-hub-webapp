@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllClients } from '../lib/database';
 import { getCurrentUser, logout } from '../lib/supabaseClient';
+import AppHeader from '../components/AppHeader';
 import ClientCard from '../components/ClientCard';
 
 /**
@@ -214,53 +215,33 @@ export default function Dashboard() {
 
   return (
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
-      {/* Header */}
-      <header
-        style={{
-          backgroundColor: 'var(--color-header)',
-          boxShadow: '0 10px 30px rgba(43, 37, 37, 0.08)',
-        }}
-        className="sticky top-0 z-40"
-      >
-        <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="flex-1">
-              <p className="text-sm sm:text-base uppercase tracking-[0.28em] font-bold text-white/80 mb-2">
-                Grooming Hub
-              </p>
-              <h1 className="text-[1.9rem] sm:text-[2.15rem] leading-tight font-semibold text-white">
-                Dashboard clienti
-              </h1>
-              <p className="text-sm text-white/80 mt-2 max-w-2xl">
-                Una panoramica più calma e leggibile per arrivare subito alle priorità:
-                ricerca, clienti, aree operative e dati chiave.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3 lg:items-end">
-              {user && (
-                <div className="px-4 py-3 rounded-2xl bg-white/12 border border-white/20 backdrop-blur-sm">
-                  <p className="text-xs uppercase tracking-wide text-white/60 mb-1">
-                    Account attivo
-                  </p>
-                  <p className="text-sm text-white font-medium">{user.email}</p>
-                </div>
-              )}
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-xl text-sm font-medium transition"
-                style={{
-                  backgroundColor: 'rgba(251, 246, 243, 0.16)',
-                  color: '#FBF6F3',
-                  border: '1px solid rgba(251, 246, 243, 0.22)',
-                }}
-              >
-                Esci
-              </button>
-            </div>
+      <AppHeader
+        title="Dashboard clienti"
+        subtitle="Una panoramica più calma e leggibile per arrivare subito alle priorità: ricerca, clienti, aree operative e dati chiave."
+        rightContent={
+          <div className="flex flex-col gap-3 items-end">
+            {user && (
+              <div className="px-4 py-3 rounded-2xl bg-white/12 border border-white/20 backdrop-blur-sm">
+                <p className="text-xs uppercase tracking-wide text-white/60 mb-1">
+                  Account attivo
+                </p>
+                <p className="text-sm text-white font-medium">{user.email}</p>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-xl text-sm font-medium transition"
+              style={{
+                backgroundColor: 'rgba(251, 246, 243, 0.16)',
+                color: '#FBF6F3',
+                border: '1px solid rgba(251, 246, 243, 0.22)',
+              }}
+            >
+              Esci
+            </button>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <main className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
         {/* Errore */}

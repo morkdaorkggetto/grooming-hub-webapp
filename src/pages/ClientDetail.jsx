@@ -22,6 +22,7 @@ import ImageCropModal from '../components/ImageCropModal';
 import PromoBadge from '../components/PromoBadge';
 import VisitCard from '../components/VisitCard';
 import { isSupportedImageFile } from '../lib/imageFiles';
+import AppHeader from '../components/AppHeader';
 
 /**
  * ClientDetail — Pagina dettaglio cliente
@@ -325,21 +326,24 @@ export default function ClientDetail() {
 
   return (
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen pb-20">
-      {/* Header */}
-      <header
-        style={{ backgroundColor: 'var(--color-primary)' }}
-        className="sticky top-0 z-40 shadow-md"
-      >
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Dettagli Cliente</h1>
+      <AppHeader
+        title="Scheda cliente"
+        subtitle={`${client.name} · ${client.owner}${client.breed ? ` · ${client.breed}` : ''}`}
+        maxWidthClass="max-w-4xl"
+        rightContent={
           <button
             onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-sm font-medium transition"
+            className="px-4 py-2 rounded-xl text-sm font-medium transition"
+            style={{
+              backgroundColor: 'rgba(251, 246, 243, 0.16)',
+              color: '#FBF6F3',
+              border: '1px solid rgba(251, 246, 243, 0.22)',
+            }}
           >
             ← Indietro
           </button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Errore */}

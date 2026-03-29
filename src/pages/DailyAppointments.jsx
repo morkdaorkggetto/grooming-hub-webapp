@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAppointments, updateAppointmentStatus } from '../lib/database';
 import { getAppointmentWhatsAppUrl } from '../lib/whatsapp';
+import AppHeader from '../components/AppHeader';
 
 const toLocalDateString = (date) => {
   const year = date.getFullYear();
@@ -229,25 +230,23 @@ export default function DailyAppointments() {
 
   return (
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
-      <header
-        style={{ backgroundColor: 'var(--color-primary)' }}
-        className="sticky top-0 z-40 shadow-md"
-      >
-        <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Operatività Giornaliera</h1>
-            <p className="text-sm text-white text-opacity-80">
-              Vista rapida degli appuntamenti del giorno per gli operatori
-            </p>
-          </div>
+      <AppHeader
+        title="Operatività giornaliera"
+        subtitle="Una vista rapida e leggibile degli appuntamenti del giorno per il team operativo."
+        rightContent={
           <button
             onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-sm font-medium transition"
+            className="px-4 py-2 rounded-xl text-sm font-medium transition"
+            style={{
+              backgroundColor: 'rgba(251, 246, 243, 0.16)',
+              color: '#FBF6F3',
+              border: '1px solid rgba(251, 246, 243, 0.22)',
+            }}
           >
             ← Dashboard
           </button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         {error && (
