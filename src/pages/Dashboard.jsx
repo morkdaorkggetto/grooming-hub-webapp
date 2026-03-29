@@ -225,10 +225,10 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex-1">
-              <p className="text-xs uppercase tracking-[0.25em] font-semibold text-white/70 mb-2">
+              <p className="text-sm sm:text-base uppercase tracking-[0.28em] font-bold text-white/80 mb-2">
                 Grooming Hub
               </p>
-              <h1 className="text-3xl sm:text-[2.4rem] leading-tight font-bold text-white">
+              <h1 className="text-[1.9rem] sm:text-[2.15rem] leading-tight font-semibold text-white">
                 Dashboard clienti
               </h1>
               <p className="text-sm text-white/80 mt-2 max-w-2xl">
