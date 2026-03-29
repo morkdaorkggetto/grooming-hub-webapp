@@ -17,6 +17,7 @@ export default function ClientCard({ client }) {
   const visitsText =
     visitsCount === 1 ? `${visitsCount} visita` : `${visitsCount} visite`;
   const noShowScore = client.no_show_score ?? 0;
+  const hasPhoto = Boolean(client.photo);
   const fidelity = getFidelityTierSnapshot(client);
   const currentTierKey = fidelity.currentTier?.key || 'none';
   const fidelityBadgeStyle = getFidelityBadgeStyle(currentTierKey);
@@ -29,12 +30,22 @@ export default function ClientCard({ client }) {
         boxShadow: '0 14px 28px rgba(43, 37, 37, 0.06)',
       }}
     >
+      <div
+        className="h-1.5"
+        style={{
+          backgroundColor: client.is_blacklisted
+            ? 'var(--color-danger-text)'
+            : noShowScore >= 1
+              ? 'var(--color-success-text)'
+              : 'var(--color-primary)',
+        }}
+      />
       {/* Header con foto */}
       <div
-        className="h-36 flex items-center justify-center"
+        className="h-40 flex items-center justify-center relative"
         style={{ backgroundColor: 'var(--color-surface-muted)' }}
       >
-        {client.photo ? (
+        {hasPhoto ? (
           <img
             src={client.photo}
             alt={client.name}
@@ -43,6 +54,16 @@ export default function ClientCard({ client }) {
         ) : (
           <span className="text-5xl">🐕</span>
         )}
+        <div
+          className="absolute top-4 left-4 px-3 py-1.5 rounded-full text-[11px] uppercase tracking-[0.18em] font-semibold"
+          style={{
+            backgroundColor: 'rgba(251, 246, 243, 0.88)',
+            color: 'var(--color-text-secondary)',
+            backdropFilter: 'blur(6px)',
+          }}
+        >
+          {hasPhoto ? 'Profilo attivo' : 'Foto mancante'}
+        </div>
       </div>
 
       {/* Contenuto */}
@@ -72,12 +93,26 @@ export default function ClientCard({ client }) {
         </div>
 
         {/* Nome */}
-        <p
-          style={{ color: 'var(--color-text-secondary)' }}
-          className="text-sm mb-3 truncate"
-        >
-          {client.breed || 'Razza non specificata'}
-        </p>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <span
+            className="text-xs font-semibold px-3 py-1.5 rounded-full"
+            style={{
+              backgroundColor: 'var(--color-surface-soft)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            {client.breed || 'Razza non specificata'}
+          </span>
+          <span
+            className="text-xs font-semibold px-3 py-1.5 rounded-full"
+            style={{
+              backgroundColor: 'var(--color-bg-main)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            {visitsText}
+          </span>
+        </div>
 
         {/* Proprietario */}
         {client.owner && (
@@ -115,12 +150,20 @@ export default function ClientCard({ client }) {
           className="mt-auto pt-4 border-t flex items-center justify-between gap-3"
           style={{ borderColor: 'var(--color-border)' }}
         >
-          <p
-            style={{ color: 'var(--color-secondary)' }}
-            className="text-sm font-bold"
-          >
-            {visitsText}
-          </p>
+          <div>
+            <p
+              className="text-xs uppercase tracking-[0.16em] font-semibold mb-1"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Stato scheda
+            </p>
+            <p
+              style={{ color: 'var(--color-secondary)' }}
+              className="text-sm font-bold"
+            >
+              {client.is_blacklisted ? 'Monitoraggio attivo' : 'Cliente in archivio'}
+            </p>
+          </div>
           <p
             className="text-xs font-medium uppercase tracking-[0.18em]"
             style={{ color: 'var(--color-primary)' }}

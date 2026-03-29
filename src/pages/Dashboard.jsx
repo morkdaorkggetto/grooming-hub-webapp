@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
@@ -26,22 +27,36 @@ export default function Dashboard() {
   }, []);
 
   /**
-   * Filtra clienti in base al search term
+   * Filtra clienti in base al search term e ai filtri rapidi
    */
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredClients(clients);
-    } else {
-      const lowerSearch = searchTerm.toLowerCase();
-      const filtered = clients.filter(
-        (client) =>
-          client.name.toLowerCase().includes(lowerSearch) ||
-          client.breed?.toLowerCase().includes(lowerSearch) ||
-          client.owner.toLowerCase().includes(lowerSearch)
-      );
-      setFilteredClients(filtered);
-    }
-  }, [searchTerm, clients]);
+    const lowerSearch = searchTerm.trim().toLowerCase();
+
+    const filtered = clients.filter((client) => {
+      const matchesSearch =
+        !lowerSearch ||
+        client.name.toLowerCase().includes(lowerSearch) ||
+        client.breed?.toLowerCase().includes(lowerSearch) ||
+        client.owner.toLowerCase().includes(lowerSearch);
+
+      if (!matchesSearch) {
+        return false;
+      }
+
+      switch (activeFilter) {
+        case 'reliable':
+          return (client.no_show_score ?? 0) >= 1;
+        case 'fidelity':
+          return (client.visits?.length || 0) >= 12;
+        case 'blacklist':
+          return Boolean(client.is_blacklisted);
+        default:
+          return true;
+      }
+    });
+
+    setFilteredClients(filtered);
+  }, [searchTerm, activeFilter, clients]);
 
   /**
    * Carica i clienti dall'API
@@ -139,29 +154,42 @@ export default function Dashboard() {
 
   const quickActions = [
     {
+      eyebrow: 'Pianificazione',
       title: 'Calendario',
       description: 'Vista completa della settimana e gestione conflitti',
       actionLabel: 'Apri calendario',
+      metric: 'Settimana completa',
       onClick: handleOpenCalendar,
       accent: 'var(--color-secondary)',
       surface: 'var(--color-surface-main)',
     },
     {
+      eyebrow: 'Team operativo',
       title: 'Operatività oggi',
       description: 'Per gli operatori: appuntamenti del giorno e completamenti rapidi',
       actionLabel: 'Apri operatività',
+      metric: 'Focus giornaliero',
       onClick: handleOpenDailyAppointments,
       accent: 'var(--color-danger-text)',
       surface: 'var(--color-danger-bg)',
     },
     {
+      eyebrow: 'Controllo business',
       title: 'Report incassi',
       description: 'KPI settimanali, grafico e dettaglio delle visite',
       actionLabel: 'Apri report',
+      metric: 'Ultimi 7 giorni',
       onClick: handleOpenWeeklyReport,
       accent: 'var(--color-success-text)',
       surface: 'var(--color-success-bg)',
     },
+  ];
+
+  const quickFilters = [
+    { key: 'all', label: 'Tutti', count: clients.length },
+    { key: 'reliable', label: 'Affidabili', count: reliableClients },
+    { key: 'fidelity', label: 'Fidelity', count: fidelityClients },
+    { key: 'blacklist', label: 'Blacklist', count: blacklistedCount },
   ];
 
   // Stato di caricamento
@@ -304,6 +332,41 @@ export default function Dashboard() {
                   backgroundColor: 'var(--color-bg-main)',
                 }}
               />
+              <div className="mt-4 flex flex-wrap gap-2">
+                {quickFilters.map((filter) => {
+                  const isActive = activeFilter === filter.key;
+                  return (
+                    <button
+                      key={filter.key}
+                      type="button"
+                      onClick={() => setActiveFilter(filter.key)}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition"
+                      style={{
+                        backgroundColor: isActive
+                          ? 'var(--color-primary)'
+                          : 'var(--color-surface-soft)',
+                        color: isActive ? '#FBF6F3' : 'var(--color-text-primary)',
+                        border: `1px solid ${
+                          isActive ? 'var(--color-primary)' : 'var(--color-border)'
+                        }`,
+                      }}
+                    >
+                      <span>{filter.label}</span>
+                      <span
+                        className="inline-flex min-w-6 h-6 items-center justify-center rounded-full px-1.5 text-xs"
+                        style={{
+                          backgroundColor: isActive
+                            ? 'rgba(251, 246, 243, 0.18)'
+                            : 'var(--color-bg-main)',
+                          color: isActive ? '#FBF6F3' : 'var(--color-text-secondary)',
+                        }}
+                      >
+                        {filter.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div
@@ -395,9 +458,19 @@ export default function Dashboard() {
                 }}
               >
                 <div
-                  className="w-12 h-12 rounded-2xl mb-4"
-                  style={{ backgroundColor: action.accent, opacity: 0.14 }}
-                />
+                  className="flex items-start justify-between gap-4 mb-5"
+                >
+                  <div
+                    className="w-12 h-12 rounded-2xl"
+                    style={{ backgroundColor: action.accent, opacity: 0.14 }}
+                  />
+                  <span
+                    className="text-[11px] uppercase tracking-[0.2em] font-semibold"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {action.eyebrow}
+                  </span>
+                </div>
                 <h3
                   className="text-xl font-bold mb-2"
                   style={{ color: 'var(--color-text-primary)' }}
@@ -410,12 +483,20 @@ export default function Dashboard() {
                 >
                   {action.description}
                 </p>
-                <span
-                  className="inline-flex px-4 py-2 rounded-xl text-sm font-semibold"
-                  style={{ backgroundColor: action.accent, color: '#FBF6F3' }}
-                >
-                  {action.actionLabel}
-                </span>
+                <div className="flex items-center justify-between gap-3 mt-auto">
+                  <span
+                    className="text-xs uppercase tracking-[0.18em] font-semibold"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {action.metric}
+                  </span>
+                  <span
+                    className="inline-flex px-4 py-2 rounded-xl text-sm font-semibold"
+                    style={{ backgroundColor: action.accent, color: '#FBF6F3' }}
+                  >
+                    {action.actionLabel}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
