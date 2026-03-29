@@ -23,15 +23,16 @@ export default function ClientCard({ client }) {
 
   return (
     <div
-      className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow overflow-hidden h-full flex flex-col"
+      className="bg-white rounded-[28px] shadow-sm transition-shadow overflow-hidden h-full flex flex-col border"
       style={{
-        borderTop: '4px solid var(--color-primary)',
+        borderColor: 'var(--color-border)',
+        boxShadow: '0 14px 28px rgba(43, 37, 37, 0.06)',
       }}
     >
       {/* Header con foto */}
       <div
-        className="h-32 flex items-center justify-center"
-        style={{ backgroundColor: 'var(--color-primary)' }}
+        className="h-36 flex items-center justify-center"
+        style={{ backgroundColor: 'var(--color-surface-muted)' }}
       >
         {client.photo ? (
           <img
@@ -46,26 +47,33 @@ export default function ClientCard({ client }) {
 
       {/* Contenuto */}
       <div className="p-5 flex-1 flex flex-col">
-        {/* Nome */}
-        <h3
-          style={{ color: 'var(--color-text-primary)' }}
-          className="text-xl font-bold mb-2 truncate"
-        >
-          {client.name}
-        </h3>
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="min-w-0">
+            <p
+              className="text-xs uppercase tracking-[0.2em] font-semibold mb-2"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Scheda cliente
+            </p>
+            <h3
+              style={{ color: 'var(--color-text-primary)' }}
+              className="text-[1.35rem] font-bold truncate"
+            >
+              {client.name}
+            </h3>
+          </div>
 
-        <div className="mb-3">
           <span
-            className="text-xs font-bold px-2 py-1 rounded-full"
+            className="text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap"
             style={fidelityBadgeStyle}
           >
-            Fidelity {getFidelityLabel(currentTierKey)}
+            {getFidelityLabel(currentTierKey)}
           </span>
         </div>
 
-        {/* Razza */}
+        {/* Nome */}
         <p
-          style={{ color: 'var(--color-secondary)' }}
+          style={{ color: 'var(--color-text-secondary)' }}
           className="text-sm mb-3 truncate"
         >
           {client.breed || 'Razza non specificata'}
@@ -74,28 +82,28 @@ export default function ClientCard({ client }) {
         {/* Proprietario */}
         {client.owner && (
           <p
-            style={{ color: 'var(--color-secondary)' }}
+            style={{ color: 'var(--color-text-secondary)' }}
             className="text-sm mb-4 truncate"
           >
-            <strong>👤</strong> {client.owner}
+            <strong>Proprietario:</strong> {client.owner}
           </p>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-5">
           <span
-            className="text-xs font-bold px-2 py-1 rounded-full"
+            className="text-xs font-bold px-3 py-1.5 rounded-full"
             style={{
-              backgroundColor: noShowScore < 0 ? '#fff1f2' : '#ecfdf5',
+              backgroundColor: noShowScore < 0 ? 'var(--color-danger-bg)' : 'var(--color-success-bg)',
               color: noShowScore < 0 ? '#be123c' : 'var(--color-success-text)',
             }}
           >
-            Score affidabilita: {noShowScore}
+            Score {noShowScore}
           </span>
 
           {client.is_blacklisted && (
             <span
-              className="text-xs font-bold px-2 py-1 rounded-full"
-              style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}
+              className="text-xs font-bold px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: 'var(--color-danger-bg)', color: 'var(--color-danger-text)' }}
             >
               BLACKLIST
             </span>
@@ -104,27 +112,22 @@ export default function ClientCard({ client }) {
 
         {/* Conteggio visite */}
         <div
-          className="mt-auto pt-4 border-t"
+          className="mt-auto pt-4 border-t flex items-center justify-between gap-3"
           style={{ borderColor: 'var(--color-border)' }}
         >
           <p
-            style={{ color: 'var(--color-primary)' }}
+            style={{ color: 'var(--color-secondary)' }}
             className="text-sm font-bold"
           >
-            📅 {visitsText}
+            {visitsText}
+          </p>
+          <p
+            className="text-xs font-medium uppercase tracking-[0.18em]"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            Apri
           </p>
         </div>
-      </div>
-
-      {/* Footer con pulsante */}
-      <div
-        className="px-5 py-4 text-center text-sm font-medium transition"
-        style={{
-          backgroundColor: 'var(--color-bg-main)',
-          color: 'var(--color-primary)',
-        }}
-      >
-        Visualizza dettagli →
       </div>
     </div>
   );
