@@ -232,7 +232,7 @@ export default function DailyAppointments() {
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       <AppHeader
         title="Operatività giornaliera"
-        subtitle="Una vista rapida e leggibile degli appuntamenti del giorno per il team operativo."
+        subtitle="Lista appuntamenti del giorno."
         rightContent={
           <button
             onClick={() => navigate('/dashboard')}
