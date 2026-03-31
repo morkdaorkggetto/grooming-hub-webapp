@@ -217,7 +217,7 @@ export default function Dashboard() {
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       <AppHeader
         title="Dashboard clienti"
-        subtitle="Una panoramica più calma e leggibile per arrivare subito alle priorità: ricerca, clienti, aree operative e dati chiave."
+        subtitle="Ricerca, clienti, aree operative e dati chiave."
         rightContent={
           <div className="flex flex-col gap-3 items-end">
             {user && (
