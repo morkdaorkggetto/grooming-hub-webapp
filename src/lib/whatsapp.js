@@ -25,7 +25,9 @@ const buildWhatsAppUrl = (phone, message) => {
   return `https://wa.me/${normalizedPhone}?${params.toString()}`;
 };
 
-const PUBLIC_GROOMING_HUB_PHONE = import.meta.env.VITE_PUBLIC_GROOMING_WHATSAPP || '';
+const DEFAULT_PUBLIC_GROOMING_HUB_PHONE = '393332979797';
+const PUBLIC_GROOMING_HUB_PHONE =
+  import.meta.env.VITE_PUBLIC_GROOMING_WHATSAPP || DEFAULT_PUBLIC_GROOMING_HUB_PHONE;
 const PUBLIC_GROOMING_HUB_NAME = import.meta.env.VITE_PUBLIC_GROOMING_HUB_NAME || 'Grooming Hub';
 
 export const getClientWhatsAppUrl = (client) => {
