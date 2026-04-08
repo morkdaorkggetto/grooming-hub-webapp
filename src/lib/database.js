@@ -825,6 +825,30 @@ export const getClientCardByToken = async (qrToken) => {
 };
 
 /**
+ * Restituisce la mini-card pubblica associata al QR token.
+ * Non richiede autenticazione e usa una RPC Supabase che espone solo dati sicuri.
+ * @param {string} qrToken
+ * @returns {Promise<Object>}
+ */
+export const getPublicPetCardByToken = async (qrToken) => {
+  try {
+    if (!qrToken) throw new Error('QR token non valido');
+
+    const { data, error } = await supabase.rpc('get_public_pet_card', {
+      p_qr_token: qrToken,
+    });
+
+    if (error) throw error;
+    if (!data) throw new Error('Card cliente non disponibile');
+
+    return data;
+  } catch (error) {
+    console.error('Errore caricamento card pubblica:', error.message);
+    throw new Error(`Non riesco a caricare la card pubblica: ${error.message}`);
+  }
+};
+
+/**
  * Restituisce il report incassi per una settimana/intervallo.
  * @param {{ from: string, to: string }} range - date in formato YYYY-MM-DD
  * @returns {Promise<Array>}

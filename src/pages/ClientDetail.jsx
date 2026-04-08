@@ -519,7 +519,7 @@ export default function ClientDetail() {
                 Codice card: <strong>{getClientCardCode(client.qr_token)}</strong>
               </p>
               <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-4">
-                Usa questa card per riconoscere il cliente e aprire rapidamente la sua scheda interna.
+                Il QR apre la card cliente pubblica. Se sei in area operatore, puoi continuare dalla scheda completa.
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -527,7 +527,7 @@ export default function ClientDetail() {
                   className="px-4 py-2 rounded-lg font-medium text-white"
                   style={{ backgroundColor: '#2563eb' }}
                 >
-                  Apri card
+                  Apri area operatore
                 </button>
                 <button
                   onClick={handlePrintClientCard}
