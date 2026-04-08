@@ -1,8 +1,17 @@
 const QR_BASE_URL = 'https://api.qrserver.com/v1/create-qr-code/';
+const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
 const getOrigin = () => {
   if (typeof window === 'undefined') return '';
   return window.location.origin;
+};
+
+const getPublicAppOrigin = () => {
+  if (PUBLIC_APP_URL) {
+    return PUBLIC_APP_URL.replace(/\/+$/, '');
+  }
+
+  return getOrigin();
 };
 
 export const getPublicPetPath = (qrToken) => {
@@ -11,7 +20,7 @@ export const getPublicPetPath = (qrToken) => {
 };
 
 export const getPublicPetUrl = (qrToken) => {
-  const origin = getOrigin();
+  const origin = getPublicAppOrigin();
   return `${origin}${getPublicPetPath(qrToken)}`;
 };
 
