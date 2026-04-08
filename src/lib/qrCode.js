@@ -5,6 +5,16 @@ const getOrigin = () => {
   return window.location.origin;
 };
 
+export const getPublicPetPath = (qrToken) => {
+  if (!qrToken) return '/dashboard';
+  return `/client-card/${qrToken}`;
+};
+
+export const getPublicPetUrl = (qrToken) => {
+  const origin = getOrigin();
+  return `${origin}${getPublicPetPath(qrToken)}`;
+};
+
 export const getClientCardPath = (qrToken, options = {}) => {
   if (!qrToken) return '/dashboard';
 
@@ -14,7 +24,7 @@ export const getClientCardPath = (qrToken, options = {}) => {
   }
 
   const suffix = params.toString() ? `?${params.toString()}` : '';
-  return `/client-card/${qrToken}${suffix}`;
+  return `/client-card/internal/${qrToken}${suffix}`;
 };
 
 export const getClientCardUrl = (qrToken, options = {}) => {
@@ -23,7 +33,7 @@ export const getClientCardUrl = (qrToken, options = {}) => {
 };
 
 export const getClientQrImageUrl = (qrToken, size = 240) => {
-  const targetUrl = getClientCardUrl(qrToken);
+  const targetUrl = getPublicPetUrl(qrToken);
   return `${QR_BASE_URL}?size=${size}x${size}&data=${encodeURIComponent(targetUrl)}`;
 };
 

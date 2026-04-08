@@ -25,6 +25,9 @@ const buildWhatsAppUrl = (phone, message) => {
   return `https://wa.me/${normalizedPhone}?${params.toString()}`;
 };
 
+const PUBLIC_GROOMING_HUB_PHONE = import.meta.env.VITE_PUBLIC_GROOMING_WHATSAPP || '';
+const PUBLIC_GROOMING_HUB_NAME = import.meta.env.VITE_PUBLIC_GROOMING_HUB_NAME || 'Grooming Hub';
+
 export const getClientWhatsAppUrl = (client) => {
   const ownerName = client?.owner || 'cliente';
   const petName = client?.name || 'il tuo cane';
@@ -70,4 +73,12 @@ export const getDraftAppointmentWhatsAppUrl = ({ client, date, time }) => {
     : `Buongiorno ${ownerName}, ti contatto da Grooming Hub per fissare un appuntamento per ${clientName}.`;
 
   return buildWhatsAppUrl(client?.phone, message);
+};
+
+export const getPublicGroomingHubWhatsAppUrl = ({ petName } = {}) => {
+  const message = petName
+    ? `Ciao, sto scrivendo dalla card di ${petName}. Vorrei contattare ${PUBLIC_GROOMING_HUB_NAME}.`
+    : `Ciao, vorrei contattare ${PUBLIC_GROOMING_HUB_NAME}.`;
+
+  return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };

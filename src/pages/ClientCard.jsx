@@ -3,8 +3,8 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getClientCardByToken } from '../lib/database';
 import {
   getClientCardCode,
-  getClientCardUrl,
   getClientQrImageUrl,
+  getPublicPetUrl,
 } from '../lib/qrCode';
 
 const formatAppointmentDate = (iso) => {
@@ -234,7 +234,7 @@ export default function ClientCard() {
                 Codice {getClientCardCode(client.qr_token)}
               </p>
               <p style={{ color: 'var(--color-secondary)' }} className="text-sm text-center mt-2 break-all">
-                {getClientCardUrl(client.qr_token)}
+                {getPublicPetUrl(client.qr_token)}
               </p>
             </div>
           </div>

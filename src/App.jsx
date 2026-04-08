@@ -9,6 +9,7 @@ import AddVisit from './pages/AddVisit';
 import Calendar from './pages/Calendar';
 import ResetPassword from './pages/ResetPassword';
 import ClientCard from './pages/ClientCard';
+import PublicPetCard from './pages/PublicPetCard';
 import WeeklyRevenue from './pages/WeeklyRevenue';
 import DailyAppointments from './pages/DailyAppointments';
 import { DEMO_MODE } from './lib/demoMode';
@@ -105,6 +106,9 @@ export default function App() {
 
           <Route path="/reset-password" element={<ResetPassword />} />
 
+          <Route path="/client-card/:qrToken" element={<PublicPetCard />} />
+
+
           {/* Route protette */}
           <Route
             path="/dashboard"
@@ -170,7 +174,7 @@ export default function App() {
           />
 
           <Route
-            path="/client-card/:qrToken"
+            path="/client-card/internal/:qrToken"
             element={
               <ProtectedRoute isAuthenticated={!!user}>
                 <ClientCard />
