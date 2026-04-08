@@ -5,6 +5,30 @@ import { getPublicPetCardByToken } from '../lib/database';
 import { getPublicGroomingHubWhatsAppUrl } from '../lib/whatsapp';
 import { getFidelityBadgeStyle, getFidelityLabel } from '../lib/fidelity';
 
+const getVisitsLabel = (count) => (count === 1 ? '1 visita registrata' : `${count} visite registrate`);
+
+const getRemainingVisitsMessage = (remainingVisits, nextTier) => {
+  if (!nextTier) {
+    return 'Hai già raggiunto il livello massimo di fedeltà. Complimenti!';
+  }
+
+  if (remainingVisits === 1) {
+    return (
+      <>
+        Ti manca <strong>1 visita</strong> per raggiungere il livello{' '}
+        <strong>{getFidelityLabel(nextTier)}</strong>.
+      </>
+    );
+  }
+
+  return (
+    <>
+      Ti mancano <strong>{remainingVisits}</strong> visite per raggiungere il livello{' '}
+      <strong>{getFidelityLabel(nextTier)}</strong>.
+    </>
+  );
+};
+
 export default function PublicPetCard() {
   const { qrToken } = useParams();
   const navigate = useNavigate();
@@ -136,20 +160,13 @@ export default function PublicPetCard() {
                     Livello {getFidelityLabel(petCard.fidelityTier)}
                   </span>
                   <span style={{ color: 'var(--color-secondary)' }} className="text-sm">
-                    {petCard.visitsCount} visite registrate
+                    {getVisitsLabel(petCard.visitsCount)}
                   </span>
                 </div>
 
-                {petCard.nextTier ? (
-                  <p style={{ color: 'var(--color-text-primary)' }} className="text-base font-medium">
-                    Ti mancano <strong>{petCard.remainingVisits}</strong> visite per raggiungere il livello{' '}
-                    <strong>{getFidelityLabel(petCard.nextTier)}</strong>.
-                  </p>
-                ) : (
-                  <p style={{ color: 'var(--color-text-primary)' }} className="text-base font-medium">
-                    Hai già raggiunto il livello massimo di fedeltà. Complimenti!
-                  </p>
-                )}
+                <p style={{ color: 'var(--color-text-primary)' }} className="text-base font-medium">
+                  {getRemainingVisitsMessage(petCard.remainingVisits, petCard.nextTier)}
+                </p>
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -161,7 +178,7 @@ export default function PublicPetCard() {
                     className="px-5 py-3 rounded-xl text-white font-semibold transition"
                     style={{ backgroundColor: '#16a34a' }}
                   >
-                    Contatta Grooming Hub
+                    Scrivi a Grooming Hub
                   </a>
                 ) : null}
 
@@ -216,7 +233,7 @@ export default function PublicPetCard() {
               </div>
 
               <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-4 leading-relaxed">
-                Scansionando questa card puoi verificare il profilo del cane e, se sei operatore, entrare nell'area riservata.
+                Questa pagina mostra le informazioni pubbliche del cane. Se sei un operatore, puoi continuare dall'area riservata.
               </p>
             </div>
           </div>
