@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
 import {
   addContact,
@@ -49,6 +50,7 @@ const INITIAL_FORM = {
 };
 
 export default function Contacts() {
+  const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -139,6 +141,24 @@ export default function Contacts() {
     }
 
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleConvertToClient = (contact) => {
+    navigate('/add-client', {
+      state: {
+        sourceContactId: contact.id,
+        pet_name: contact.pet_name || '',
+        owner_name: contact.owner_name || '',
+        phone: contact.phone || '',
+        notes: contact.notes || '',
+        returnTo: '/contacts',
+      },
+    });
+  };
+
+  const handleOpenLinkedClient = (contact) => {
+    if (!contact.linked_client_id) return;
+    navigate(`/client/${contact.linked_client_id}`);
   };
 
   return (
@@ -429,6 +449,29 @@ export default function Contacts() {
                       >
                         Apri WhatsApp
                       </button>
+
+                      {contact.status !== 'converted' ? (
+                        <button
+                          onClick={() => handleConvertToClient(contact)}
+                          className="px-4 py-3 rounded-xl font-semibold text-white"
+                          style={{ backgroundColor: 'var(--color-primary)' }}
+                        >
+                          Converti in cliente
+                        </button>
+                      ) : null}
+
+                      {contact.status === 'converted' && contact.linked_client_id ? (
+                        <button
+                          onClick={() => handleOpenLinkedClient(contact)}
+                          className="px-4 py-3 rounded-xl font-medium border"
+                          style={{
+                            borderColor: 'var(--color-border)',
+                            color: 'var(--color-secondary)',
+                          }}
+                        >
+                          Apri cliente
+                        </button>
+                      ) : null}
 
                       {contact.status !== 'contacted' ? (
                         <button

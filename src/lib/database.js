@@ -249,6 +249,38 @@ export const updateContactStatus = async (contactId, status) => {
 };
 
 /**
+ * Segna un contatto come convertito e lo collega al cliente creato
+ * @param {string} contactId
+ * @param {string} clientId
+ * @returns {Promise<void>}
+ */
+export const convertContactToClient = async (contactId, clientId) => {
+  try {
+    assertDemoWriteAllowed();
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!contactId || !clientId) {
+      throw new Error('Contatto o cliente non valido');
+    }
+
+    const { error } = await supabase
+      .from('contacts')
+      .update({
+        status: 'converted',
+        linked_client_id: clientId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', contactId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Errore conversione contatto:', error.message);
+    throw new Error(`Non riesco a convertire il contatto: ${error.message}`);
+  }
+};
+
+/**
  * Aggiunge un nuovo cliente
  * @param {Object} clientData - Dati cliente { name, breed?, owner, phone?, notes?, photo? }
  * @returns {Promise<string>} ID del nuovo cliente

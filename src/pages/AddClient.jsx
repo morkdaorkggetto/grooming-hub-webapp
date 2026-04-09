@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { addClient } from '../lib/database';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { addClient, convertContactToClient } from '../lib/database';
 import ImageCropModal from '../components/ImageCropModal';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import AppHeader from '../components/AppHeader';
@@ -11,6 +11,7 @@ import AppHeader from '../components/AppHeader';
  */
 export default function AddClient() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -24,6 +25,20 @@ export default function AddClient() {
   const [photoPreview, setPhotoPreview] = useState('');
   const [pendingCropFile, setPendingCropFile] = useState(null);
 
+  const contactConversion = useMemo(() => {
+    const state = location.state;
+    if (!state?.sourceContactId) return null;
+
+    return {
+      sourceContactId: state.sourceContactId,
+      returnTo: state.returnTo || '/contacts',
+      petName: state.pet_name || '',
+      ownerName: state.owner_name || '',
+      phone: state.phone || '',
+      notes: state.notes || '',
+    };
+  }, [location.state]);
+
   useEffect(() => {
     return () => {
       if (photoPreview) {
@@ -31,6 +46,18 @@ export default function AddClient() {
       }
     };
   }, [photoPreview]);
+
+  useEffect(() => {
+    if (!contactConversion) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      name: contactConversion.petName,
+      owner: contactConversion.ownerName,
+      phone: contactConversion.phone,
+      notes: contactConversion.notes,
+    }));
+  }, [contactConversion]);
 
   /**
    * Gestisce upload foto cliente
@@ -83,11 +110,17 @@ export default function AddClient() {
     setLoading(true);
 
     try {
-      await addClient({
+      const createdClientId = await addClient({
         ...formData,
         photoFile,
       });
-      // Navigazione automatica dopo successo
+
+      if (contactConversion?.sourceContactId) {
+        await convertContactToClient(contactConversion.sourceContactId, createdClientId);
+        navigate(`/client/${createdClientId}`);
+        return;
+      }
+
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Errore nell\'aggiunta del cliente');
@@ -100,14 +133,18 @@ export default function AddClient() {
    * Annulla e torna a dashboard
    */
   const handleCancel = () => {
-    navigate('/dashboard');
+    navigate(contactConversion?.returnTo || '/dashboard');
   };
 
   return (
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       <AppHeader
-        title="Nuovo cliente"
-        subtitle="Inserisci i dati essenziali, aggiungi una foto e prepara subito la scheda del cane."
+        title={contactConversion ? 'Converti in cliente' : 'Nuovo cliente'}
+        subtitle={
+          contactConversion
+            ? 'Completa i dati essenziali e trasforma il contatto in una scheda cliente pronta all’uso.'
+            : 'Inserisci i dati essenziali, aggiungi una foto e prepara subito la scheda del cane.'
+        }
         maxWidthClass="max-w-2xl"
         rightContent={
           <button
@@ -143,6 +180,27 @@ export default function AddClient() {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
+          {contactConversion ? (
+            <div
+              className="mb-6 p-4 rounded-xl border"
+              style={{
+                backgroundColor: 'var(--color-surface-soft)',
+                borderColor: 'var(--color-border)',
+              }}
+            >
+              <p
+                className="text-xs uppercase tracking-[0.2em] font-semibold mb-2"
+                style={{ color: 'var(--color-secondary)' }}
+              >
+                Conversione contatto
+              </p>
+              <p style={{ color: 'var(--color-text-primary)' }}>
+                Stai convertendo il contatto di <strong>{contactConversion.petName}</strong>.
+                Dopo il salvataggio il contatto verrà segnato come convertito.
+              </p>
+            </div>
+          ) : null}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nome (obbligatorio) */}
             <div>
@@ -394,7 +452,7 @@ export default function AddClient() {
                     Salvataggio...
                   </span>
                 ) : (
-                  '✅ Salva Cliente'
+                  contactConversion ? '✅ Converti in cliente' : '✅ Salva Cliente'
                 )}
               </button>
               <button
