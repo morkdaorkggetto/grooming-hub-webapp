@@ -5,6 +5,8 @@ import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 const CLIENT_PHOTOS_BUCKET = 'client-photos';
 const BLACKLIST_THRESHOLD = -3;
 const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
+const CONTACT_SOURCES = ['manual', 'whatsapp', 'qr'];
+const CONTACT_STATUSES = ['new', 'contacted', 'converted', 'archived'];
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -104,6 +106,8 @@ const getOwnedClient = async (clientId, userId) => {
  * RLS policies assicurano che ogni utente veda solo i propri dati
  */
 export const VALID_APPOINTMENT_STATUSES = [...APPOINTMENT_STATUSES];
+export const VALID_CONTACT_SOURCES = [...CONTACT_SOURCES];
+export const VALID_CONTACT_STATUSES = [...CONTACT_STATUSES];
 
 /**
  * Carica tutti i clienti dell'utente corrente con le loro visite
@@ -145,6 +149,102 @@ export const getAllClients = async () => {
   } catch (error) {
     console.error('Errore nel caricamento clienti:', error.message);
     throw new Error(`Non riesco a caricare i clienti: ${error.message}`);
+  }
+};
+
+/**
+ * Carica tutti i contatti dell'utente corrente
+ * @returns {Promise<Array>}
+ */
+export const getAllContacts = async () => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    const { data, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Errore nel caricamento contatti:', error.message);
+    throw new Error(`Non riesco a caricare i contatti: ${error.message}`);
+  }
+};
+
+/**
+ * Aggiunge un nuovo contatto in rubrica
+ * @param {Object} contactData
+ * @returns {Promise<string>}
+ */
+export const addContact = async (contactData) => {
+  try {
+    assertDemoWriteAllowed();
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    if (!contactData.pet_name?.trim()) {
+      throw new Error('Il nome del cane è obbligatorio');
+    }
+
+    const source = CONTACT_SOURCES.includes(contactData.source)
+      ? contactData.source
+      : 'manual';
+
+    const { data, error } = await supabase
+      .from('contacts')
+      .insert({
+        id: generateId(),
+        user_id: user.id,
+        pet_name: contactData.pet_name.trim(),
+        owner_name: contactData.owner_name?.trim() || null,
+        phone: contactData.phone?.trim() || null,
+        source,
+        status: 'new',
+        notes: contactData.notes?.trim() || null,
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    return data.id;
+  } catch (error) {
+    console.error('Errore aggiungimento contatto:', error.message);
+    throw new Error(`Non riesco ad aggiungere il contatto: ${error.message}`);
+  }
+};
+
+/**
+ * Aggiorna lo stato di un contatto
+ * @param {string} contactId
+ * @param {string} status
+ * @returns {Promise<void>}
+ */
+export const updateContactStatus = async (contactId, status) => {
+  try {
+    assertDemoWriteAllowed();
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!CONTACT_STATUSES.includes(status)) {
+      throw new Error('Stato contatto non valido');
+    }
+
+    const { error } = await supabase
+      .from('contacts')
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', contactId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Errore aggiornamento stato contatto:', error.message);
+    throw new Error(`Non riesco ad aggiornare il contatto: ${error.message}`);
   }
 };
 

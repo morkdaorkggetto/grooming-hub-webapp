@@ -117,6 +117,10 @@ export default function Dashboard() {
     navigate('/appointments/today');
   };
 
+  const handleOpenContacts = () => {
+    navigate('/contacts');
+  };
+
   const totalVisits = clients.reduce(
     (sum, client) => sum + (client.visits?.length || 0),
     0
@@ -182,6 +186,16 @@ export default function Dashboard() {
       onClick: handleOpenWeeklyReport,
       accent: 'var(--color-success-text)',
       surface: 'var(--color-success-bg)',
+    },
+    {
+      eyebrow: 'Rubrica',
+      title: 'Contatti',
+      description: 'Richieste WhatsApp, lead da QR pubblico e contatti da seguire',
+      actionLabel: 'Apri contatti',
+      metric: 'Nuove richieste',
+      onClick: handleOpenContacts,
+      accent: 'var(--color-primary)',
+      surface: 'var(--color-surface-soft)',
     },
   ];
 
@@ -413,7 +427,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
             {quickActions.map((action) => (
               <button
                 key={action.title}

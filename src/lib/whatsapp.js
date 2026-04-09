@@ -77,6 +77,13 @@ export const getDraftAppointmentWhatsAppUrl = ({ client, date, time }) => {
   return buildWhatsAppUrl(client?.phone, message);
 };
 
+export const getContactWhatsAppUrl = (contact) => {
+  const ownerName = contact?.owner_name || 'cliente';
+  const petName = contact?.pet_name || 'il tuo cane';
+  const message = `Buongiorno ${ownerName}, ti contatto da Grooming Hub per ${petName}.`;
+  return buildWhatsAppUrl(contact?.phone, message);
+};
+
 export const getPublicGroomingHubWhatsAppUrl = ({ petName } = {}) => {
   const message = petName
     ? `Ciao, sto scrivendo dalla card di ${petName}. Vorrei contattare ${PUBLIC_GROOMING_HUB_NAME}.`
