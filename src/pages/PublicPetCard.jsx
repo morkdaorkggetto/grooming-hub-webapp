@@ -99,6 +99,13 @@ const getRemainingVisitsMessage = (remainingVisits, nextTier) => {
   );
 };
 
+const getIllustrationBackground = (tierKey) => {
+  if (tierKey === 'gold') return '#F4E3A1';
+  if (tierKey === 'silver') return '#E5E7EB';
+  if (tierKey === 'bronze') return '#EBC9A7';
+  return 'var(--color-bg-main)';
+};
+
 export default function PublicPetCard() {
   const { qrToken } = useParams();
   const navigate = useNavigate();
@@ -200,7 +207,7 @@ export default function PublicPetCard() {
               <div className="flex gap-5 items-start">
                 <div
                   className="w-24 h-24 rounded-2xl overflow-hidden flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: 'var(--color-bg-main)' }}
+                  style={{ backgroundColor: getIllustrationBackground(petCard.fidelityTier) }}
                 >
                   <div className="w-full h-full p-2">
                     <PalettePetIllustration />
