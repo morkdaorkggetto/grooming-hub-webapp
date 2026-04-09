@@ -12,6 +12,7 @@ import ClientCard from './pages/ClientCard';
 import PublicPetCard from './pages/PublicPetCard';
 import WeeklyRevenue from './pages/WeeklyRevenue';
 import DailyAppointments from './pages/DailyAppointments';
+import Contacts from './pages/Contacts';
 import { DEMO_MODE } from './lib/demoMode';
 
 /**
@@ -169,6 +170,15 @@ export default function App() {
             element={
               <ProtectedRoute isAuthenticated={!!user}>
                 <WeeklyRevenue />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/contacts"
+            element={
+              <ProtectedRoute isAuthenticated={!!user}>
+                <Contacts />
               </ProtectedRoute>
             }
           />
