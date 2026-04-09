@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { addClient, convertContactToClient } from '../lib/database';
+import { addClient, convertContactToClient, createContactFromClient } from '../lib/database';
 import ImageCropModal from '../components/ImageCropModal';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import AppHeader from '../components/AppHeader';
@@ -120,6 +120,8 @@ export default function AddClient() {
         navigate(`/client/${createdClientId}`);
         return;
       }
+
+      await createContactFromClient(createdClientId, formData);
 
       navigate('/dashboard');
     } catch (err) {

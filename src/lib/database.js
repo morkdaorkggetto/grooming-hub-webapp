@@ -281,6 +281,40 @@ export const convertContactToClient = async (contactId, clientId) => {
 };
 
 /**
+ * Crea una voce rubrica già convertita a partire da un cliente creato manualmente
+ * @param {string} clientId
+ * @param {Object} clientData
+ * @returns {Promise<void>}
+ */
+export const createContactFromClient = async (clientId, clientData) => {
+  try {
+    assertDemoWriteAllowed();
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!clientId || !clientData?.name?.trim()) {
+      throw new Error('Cliente non valido');
+    }
+
+    const { error } = await supabase.from('contacts').insert({
+      id: generateId(),
+      user_id: user.id,
+      pet_name: clientData.name.trim(),
+      owner_name: clientData.owner?.trim() || null,
+      phone: clientData.phone?.trim() || null,
+      source: 'manual',
+      status: 'converted',
+      notes: clientData.notes?.trim() || null,
+      linked_client_id: clientId,
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Errore creazione contatto da cliente:', error.message);
+    throw new Error(`Non riesco ad aggiungere il cliente in rubrica: ${error.message}`);
+  }
+};
+
+/**
  * Aggiunge un nuovo cliente
  * @param {Object} clientData - Dati cliente { name, breed?, owner, phone?, notes?, photo? }
  * @returns {Promise<string>} ID del nuovo cliente
