@@ -37,7 +37,8 @@ export default function Dashboard() {
         !lowerSearch ||
         client.name.toLowerCase().includes(lowerSearch) ||
         client.breed?.toLowerCase().includes(lowerSearch) ||
-        client.owner.toLowerCase().includes(lowerSearch);
+        client.owner.toLowerCase().includes(lowerSearch) ||
+        client.phone?.toLowerCase().includes(lowerSearch);
 
       if (!matchesSearch) {
         return false;
@@ -305,7 +306,7 @@ export default function Dashboard() {
               </p>
               <input
                 type="text"
-                placeholder="Cerca cliente per nome, razza, proprietario..."
+                placeholder="Cerca per nome, razza, proprietario o telefono..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-4 rounded-2xl border focus:outline-none transition"
