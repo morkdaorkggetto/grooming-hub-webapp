@@ -5,6 +5,30 @@ import { getPublicPetCardByToken } from '../lib/database';
 import { getPublicGroomingHubWhatsAppUrl } from '../lib/whatsapp';
 import { getFidelityBadgeStyle, getFidelityLabel } from '../lib/fidelity';
 
+function PublicPetIllustration() {
+  return (
+    <svg
+      viewBox="0 0 96 96"
+      className="w-16 h-16"
+      aria-hidden="true"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="6" y="10" width="84" height="76" rx="24" fill="#F5EADF" />
+      <path
+        d="M28 58C28 49.7 34.7 43 43 43H55C63.3 43 70 49.7 70 58V60.5C70 62.4 68.4 64 66.5 64H31.5C29.6 64 28 62.4 28 60.5V58Z"
+        fill="#7A5A47"
+      />
+      <circle cx="39" cy="38" r="12" fill="#7A5A47" />
+      <path d="M32 30L24 20C22 17.5 22.7 14 25.4 12.6C27.5 11.5 30.1 12 31.6 13.8L37 20.5L32 30Z" fill="#7A5A47" />
+      <path d="M46 64V73" stroke="#7A5A47" strokeWidth="5" strokeLinecap="round" />
+      <path d="M60 64V73" stroke="#7A5A47" strokeWidth="5" strokeLinecap="round" />
+      <path d="M65 50L78 43" stroke="#7A5A47" strokeWidth="5" strokeLinecap="round" />
+      <circle cx="42" cy="37" r="1.8" fill="#F5EADF" />
+    </svg>
+  );
+}
+
 const getVisitsLabel = (count) => (count === 1 ? '1 visita registrata' : `${count} visite registrate`);
 
 const getRemainingVisitsMessage = (remainingVisits, nextTier) => {
@@ -132,19 +156,12 @@ export default function PublicPetCard() {
                   className="w-24 h-24 rounded-2xl overflow-hidden flex items-center justify-center text-4xl shrink-0"
                   style={{ backgroundColor: '#f5eadf' }}
                 >
-                  {petCard.photo ? (
-                    <img src={petCard.photo} alt={petCard.name} className="w-full h-full object-cover" />
-                  ) : (
-                    '🐕'
-                  )}
+                  <PublicPetIllustration />
                 </div>
                 <div className="min-w-0">
                   <h2 style={{ color: 'var(--color-text-primary)' }} className="text-3xl font-bold leading-tight">
                     {petCard.name}
                   </h2>
-                  <p style={{ color: 'var(--color-secondary)' }} className="text-lg mt-1">
-                    {petCard.breed || 'Razza non specificata'}
-                  </p>
                 </div>
               </div>
 
