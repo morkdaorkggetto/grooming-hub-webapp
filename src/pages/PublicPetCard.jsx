@@ -6,6 +6,75 @@ import { getPublicGroomingHubWhatsAppUrl } from '../lib/whatsapp';
 import { getFidelityBadgeStyle, getFidelityLabel } from '../lib/fidelity';
 import publicPetCardIllustration from '../assets/public-pet-card-illustration.png';
 
+function PalettePetIllustration() {
+  const [processedSrc, setProcessedSrc] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const img = new Image();
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) {
+          if (!cancelled) setProcessedSrc(publicPetCardIllustration);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        const sample = [data[0], data[1], data[2]];
+
+        for (let i = 0; i < data.length; i += 4) {
+          const dr = data[i] - sample[0];
+          const dg = data[i + 1] - sample[1];
+          const db = data[i + 2] - sample[2];
+          const distance = Math.sqrt(dr * dr + dg * dg + db * db);
+
+          if (distance < 42) {
+            data[i + 3] = 0;
+          } else if (distance < 72) {
+            const alphaRatio = (distance - 42) / 30;
+            data[i + 3] = Math.round(data[i + 3] * alphaRatio);
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        if (!cancelled) {
+          setProcessedSrc(canvas.toDataURL('image/png'));
+        }
+      } catch {
+        if (!cancelled) setProcessedSrc(publicPetCardIllustration);
+      }
+    };
+
+    img.onerror = () => {
+      if (!cancelled) setProcessedSrc(publicPetCardIllustration);
+    };
+
+    img.src = publicPetCardIllustration;
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <img
+      src={processedSrc || publicPetCardIllustration}
+      alt=""
+      aria-hidden="true"
+      className="w-full h-full object-contain"
+    />
+  );
+}
+
 const getVisitsLabel = (count) => (count === 1 ? '1 visita registrata' : `${count} visite registrate`);
 
 const getRemainingVisitsMessage = (remainingVisits, nextTier) => {
@@ -131,14 +200,11 @@ export default function PublicPetCard() {
               <div className="flex gap-5 items-start">
                 <div
                   className="w-24 h-24 rounded-2xl overflow-hidden flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: '#f5eadf' }}
+                  style={{ backgroundColor: 'var(--color-bg-main)' }}
                 >
-                  <img
-                    src={publicPetCardIllustration}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="w-full h-full p-2">
+                    <PalettePetIllustration />
+                  </div>
                 </div>
                 <div className="min-w-0">
                   <h2 style={{ color: 'var(--color-text-primary)' }} className="text-3xl font-bold leading-tight">
