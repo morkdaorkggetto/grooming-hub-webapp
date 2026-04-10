@@ -7,6 +7,7 @@ import {
   updateContactStatus,
   VALID_CONTACT_SOURCES,
 } from '../lib/database';
+import { DEMO_MODE } from '../lib/demoMode';
 import { getContactWhatsAppUrl } from '../lib/whatsapp';
 
 const SOURCE_LABELS = {
@@ -133,7 +134,7 @@ export default function Contacts() {
     }
   };
 
-  const handleOpenWhatsApp = (contact) => {
+  const handleOpenWhatsApp = async (contact) => {
     const whatsappUrl = getContactWhatsAppUrl(contact);
     if (!whatsappUrl) {
       setError('Inserisci un numero di telefono per aprire WhatsApp.');
@@ -141,6 +142,15 @@ export default function Contacts() {
     }
 
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+
+    if (DEMO_MODE || contact.status !== 'new') return;
+
+    try {
+      await updateContactStatus(contact.id, 'contacted');
+      await loadContacts();
+    } catch (err) {
+      setError(err.message || 'Errore aggiornamento contatto');
+    }
   };
 
   const handleConvertToClient = (contact) => {
