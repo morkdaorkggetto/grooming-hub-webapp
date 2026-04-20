@@ -28,6 +28,15 @@ const formatVisitDate = (date) => {
   });
 };
 
+const loadImage = (src) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Non riesco a caricare il QR per il download.'));
+    image.src = src;
+  });
+
 export default function ClientCard() {
   const navigate = useNavigate();
   const { qrToken } = useParams();
@@ -35,6 +44,7 @@ export default function ClientCard() {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [downloadingBack, setDownloadingBack] = useState(false);
 
   useEffect(() => {
     const loadClientCard = async () => {
@@ -64,6 +74,61 @@ export default function ClientCard() {
 
     return () => window.clearTimeout(timer);
   }, [client, searchParams]);
+
+  const handleDownloadBackAsset = async () => {
+    if (!client?.qr_token) return;
+
+    setDownloadingBack(true);
+    setError('');
+
+    try {
+      const qrImage = await loadImage(getClientQrImageUrl(client.qr_token, 900));
+
+      const canvas = document.createElement('canvas');
+      const width = 1180;
+      const height = 760;
+      canvas.width = width;
+      canvas.height = height;
+
+      const context = canvas.getContext('2d');
+      if (!context) {
+        throw new Error('Canvas non disponibile per generare il file.');
+      }
+
+      context.clearRect(0, 0, width, height);
+
+      const qrSize = 420;
+      const qrX = (width - qrSize) / 2;
+      const qrY = 40;
+      context.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+
+      context.textAlign = 'center';
+      context.fillStyle = '#5B4336';
+
+      context.font = '700 54px "Inter", "Helvetica Neue", Arial, sans-serif';
+      context.fillText(client.name, width / 2, 560);
+
+      context.font = '600 38px "Inter", "Helvetica Neue", Arial, sans-serif';
+      context.fillStyle = '#866555';
+      context.fillText(`Codice ${getClientCardCode(client.qr_token)}`, width / 2, 625);
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      const safeName = (client.name || 'cliente')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/gi, '-')
+        .replace(/^-+|-+$/g, '');
+      link.href = dataUrl;
+      link.download = `retro-card-${safeName || 'cliente'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setError(err.message || 'Non riesco a generare il file della card.');
+    } finally {
+      setDownloadingBack(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -137,6 +202,14 @@ export default function ClientCard() {
               style={{ backgroundColor: '#2563eb' }}
             >
               Stampa
+            </button>
+            <button
+              onClick={handleDownloadBackAsset}
+              disabled={downloadingBack}
+              className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-60"
+              style={{ backgroundColor: '#7c3aed' }}
+            >
+              {downloadingBack ? 'Generazione PNG...' : 'Scarica retro PNG'}
             </button>
           </div>
         </div>
