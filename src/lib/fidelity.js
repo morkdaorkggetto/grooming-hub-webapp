@@ -4,6 +4,7 @@ const FIDELITY_TIERS = [
     label: 'Bronzo',
     visitsRequired: 12,
     monthsWindow: 12,
+    pointsRequired: 100,
     activeBackground: '#f6e3cf',
     activeBorder: '#cd7f32',
     activeText: '#7c4a21',
@@ -13,6 +14,7 @@ const FIDELITY_TIERS = [
     label: 'Argento',
     visitsRequired: 24,
     monthsWindow: 24,
+    pointsRequired: 250,
     activeBackground: '#eef2f7',
     activeBorder: '#94a3b8',
     activeText: '#334155',
@@ -22,6 +24,7 @@ const FIDELITY_TIERS = [
     label: 'Oro',
     visitsRequired: 36,
     monthsWindow: 36,
+    pointsRequired: 500,
     activeBackground: '#fff3bf',
     activeBorder: '#d4a017',
     activeText: '#7a5c00',
@@ -52,16 +55,22 @@ const countVisitsInWindow = (visits = [], monthsWindow) => {
 
 export const getFidelityTierSnapshot = (client) => {
   const visits = Array.isArray(client?.visits) ? client.visits : [];
+  const rewardPointsTotal = Number(client?.rewardPointsTotal || 0);
+  const useRewardPoints = rewardPointsTotal > 0;
 
   const tiers = FIDELITY_TIERS.map((tier) => {
     const visitsInWindow = countVisitsInWindow(visits, tier.monthsWindow);
-    const achieved = visitsInWindow >= tier.visitsRequired;
+    const achieved = useRewardPoints
+      ? rewardPointsTotal >= tier.pointsRequired
+      : visitsInWindow >= tier.visitsRequired;
 
     return {
       ...tier,
       visitsInWindow,
+      rewardPointsTotal,
       achieved,
       remainingVisits: Math.max(0, tier.visitsRequired - visitsInWindow),
+      remainingPoints: Math.max(0, tier.pointsRequired - rewardPointsTotal),
       style: achieved
         ? {
             backgroundColor: tier.activeBackground,
@@ -80,6 +89,8 @@ export const getFidelityTierSnapshot = (client) => {
     currentTier,
     nextTier,
     tiers,
+    mode: useRewardPoints ? 'points' : 'visits',
+    rewardPointsTotal,
   };
 };
 

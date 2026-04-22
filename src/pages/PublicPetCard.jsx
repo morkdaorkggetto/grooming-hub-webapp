@@ -77,6 +77,8 @@ function PalettePetIllustration() {
 
 const getVisitsLabel = (count) => (count === 1 ? '1 visita registrata' : `${count} visite registrate`);
 
+const getPointsLabel = (count) => (count === 1 ? '1 punto premio' : `${count} punti premio`);
+
 const getRemainingVisitsMessage = (remainingVisits, nextTier) => {
   if (!nextTier) {
     return 'Hai già raggiunto il livello massimo di fedeltà. Complimenti!';
@@ -99,11 +101,55 @@ const getRemainingVisitsMessage = (remainingVisits, nextTier) => {
   );
 };
 
+const getRemainingRewardMessage = (petCard) => {
+  if (petCard.fidelityMode !== 'points') {
+    return getRemainingVisitsMessage(petCard.remainingVisits, petCard.nextTier);
+  }
+
+  if (!petCard.nextTier) {
+    return 'Hai già raggiunto il livello massimo di fedeltà. Complimenti!';
+  }
+
+  if (petCard.remainingPoints === 1) {
+    return (
+      <>
+        Ti manca <strong>1 punto</strong> per raggiungere il livello{' '}
+        <strong>{getFidelityLabel(petCard.nextTier)}</strong>.
+      </>
+    );
+  }
+
+  return (
+    <>
+      Ti mancano <strong>{petCard.remainingPoints}</strong> punti per raggiungere il livello{' '}
+      <strong>{getFidelityLabel(petCard.nextTier)}</strong>.
+    </>
+  );
+};
+
 const getIllustrationBackground = (tierKey) => {
   if (tierKey === 'gold') return '#F4E3A1';
   if (tierKey === 'silver') return '#E5E7EB';
   if (tierKey === 'bronze') return '#EBC9A7';
   return 'var(--color-bg-main)';
+};
+
+const getProgressRows = (petCard) => {
+  if (petCard.fidelityMode === 'points') {
+    const rewardPointsTotal = Number(petCard.rewardPointsTotal || 0);
+
+    return [
+      { label: 'Bronzo', current: rewardPointsTotal, target: 100, color: '#cd7f32' },
+      { label: 'Argento', current: rewardPointsTotal, target: 250, color: '#94a3b8' },
+      { label: 'Oro', current: rewardPointsTotal, target: 500, color: '#d4a017' },
+    ];
+  }
+
+  return [
+    { label: 'Bronzo', current: Number(petCard.visits12Months || 0), target: 12, color: '#cd7f32' },
+    { label: 'Argento', current: Number(petCard.visits24Months || 0), target: 24, color: '#94a3b8' },
+    { label: 'Oro', current: Number(petCard.visits36Months || 0), target: 36, color: '#d4a017' },
+  ];
 };
 
 export default function PublicPetCard() {
@@ -145,6 +191,11 @@ export default function PublicPetCard() {
   const contactUrl = useMemo(
     () => getPublicGroomingHubWhatsAppUrl({ petName: petCard?.name }),
     [petCard?.name]
+  );
+
+  const progressRows = useMemo(
+    () => (petCard ? getProgressRows(petCard) : []),
+    [petCard]
   );
 
   const handleReservedArea = () => {
@@ -232,12 +283,14 @@ export default function PublicPetCard() {
                     Livello {getFidelityLabel(petCard.fidelityTier)}
                   </span>
                   <span style={{ color: 'var(--color-secondary)' }} className="text-sm">
-                    {getVisitsLabel(petCard.visitsCount)}
+                    {petCard.fidelityMode === 'points'
+                      ? getPointsLabel(petCard.rewardPointsTotal || 0)
+                      : getVisitsLabel(petCard.visitsCount)}
                   </span>
                 </div>
 
                 <p style={{ color: 'var(--color-text-primary)' }} className="text-base font-medium">
-                  {getRemainingVisitsMessage(petCard.remainingVisits, petCard.nextTier)}
+                  {getRemainingRewardMessage(petCard)}
                 </p>
               </div>
 
@@ -277,30 +330,28 @@ export default function PublicPetCard() {
                   Progressione fedeltà
                 </p>
                 <div className="space-y-3">
-                  <div>
-                    <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
-                      Bronzo
-                    </p>
-                    <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: '#f0e7de' }}>
-                      <div className="h-2 rounded-full" style={{ width: `${Math.min(100, (petCard.visits12Months / 12) * 100)}%`, backgroundColor: '#cd7f32' }} />
-                    </div>
-                  </div>
-                  <div>
-                    <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
-                      Argento
-                    </p>
-                    <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: '#f0e7de' }}>
-                      <div className="h-2 rounded-full" style={{ width: `${Math.min(100, (petCard.visits24Months / 24) * 100)}%`, backgroundColor: '#94a3b8' }} />
-                    </div>
-                  </div>
-                  <div>
-                    <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
-                      Oro
-                    </p>
-                    <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: '#f0e7de' }}>
-                      <div className="h-2 rounded-full" style={{ width: `${Math.min(100, (petCard.visits36Months / 36) * 100)}%`, backgroundColor: '#d4a017' }} />
-                    </div>
-                  </div>
+                  {progressRows.map((row) => {
+                    const progress = Math.min(100, (row.current / row.target) * 100);
+
+                    return (
+                      <div key={row.label}>
+                        <div className="flex items-center justify-between gap-3">
+                          <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
+                            {row.label}
+                          </p>
+                          <p style={{ color: 'var(--color-secondary)' }} className="text-xs">
+                            {Math.min(row.current, row.target)} / {row.target}
+                          </p>
+                        </div>
+                        <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: '#f0e7de' }}>
+                          <div
+                            className="h-2 rounded-full"
+                            style={{ width: `${progress}%`, backgroundColor: row.color }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

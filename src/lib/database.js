@@ -7,6 +7,7 @@ const BLACKLIST_THRESHOLD = -3;
 const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
 const CONTACT_SOURCES = ['manual', 'whatsapp', 'qr'];
 const CONTACT_STATUSES = ['new', 'contacted', 'converted', 'archived'];
+const REWARD_POINT_REASONS = ['visit', 'manual', 'promotion', 'redeem', 'correction'];
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -108,6 +109,7 @@ const getOwnedClient = async (clientId, userId) => {
 export const VALID_APPOINTMENT_STATUSES = [...APPOINTMENT_STATUSES];
 export const VALID_CONTACT_SOURCES = [...CONTACT_SOURCES];
 export const VALID_CONTACT_STATUSES = [...CONTACT_STATUSES];
+export const VALID_REWARD_POINT_REASONS = [...REWARD_POINT_REASONS];
 
 /**
  * Carica tutti i clienti dell'utente corrente con le loro visite
@@ -311,6 +313,49 @@ export const createContactFromClient = async (clientId, clientData) => {
   } catch (error) {
     console.error('Errore creazione contatto da cliente:', error.message);
     throw new Error(`Non riesco ad aggiungere il cliente in rubrica: ${error.message}`);
+  }
+};
+
+/**
+ * Aggiunge un movimento punti premio per un cliente
+ * @param {string} clientId
+ * @param {{ points: number|string, reason?: string, note?: string }} pointData
+ * @returns {Promise<string>}
+ */
+export const addRewardPointMovement = async (clientId, pointData) => {
+  try {
+    assertDemoWriteAllowed();
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    const points = Number.parseInt(pointData.points, 10);
+    if (!Number.isFinite(points) || points === 0) {
+      throw new Error('Inserisci un numero di punti diverso da zero');
+    }
+
+    const client = await getOwnedClient(clientId, user.id);
+    const reason = REWARD_POINT_REASONS.includes(pointData.reason)
+      ? pointData.reason
+      : 'manual';
+
+    const { data, error } = await supabase
+      .from('reward_points')
+      .insert({
+        id: generateId(),
+        user_id: user.id,
+        client_id: client.id,
+        points,
+        reason,
+        note: pointData.note?.trim() || null,
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    return data.id;
+  } catch (error) {
+    console.error('Errore aggiunta punti premio:', error.message);
+    throw new Error(`Non riesco ad aggiungere i punti premio: ${error.message}`);
   }
 };
 
@@ -920,9 +965,25 @@ export const getClientById = async (clientId) => {
 
     if (visitsError) throw visitsError;
 
+    const { data: rewardPoints, error: rewardPointsError } = await supabase
+      .from('reward_points')
+      .select('*')
+      .eq('client_id', clientId)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (rewardPointsError) throw rewardPointsError;
+
+    const rewardPointsTotal = (rewardPoints || []).reduce(
+      (sum, movement) => sum + Number(movement.points || 0),
+      0
+    );
+
     return {
       ...client,
       visits: visits || [],
+      rewardPoints: rewardPoints || [],
+      rewardPointsTotal,
     };
   } catch (error) {
     console.error('Errore caricamento cliente:', error.message);

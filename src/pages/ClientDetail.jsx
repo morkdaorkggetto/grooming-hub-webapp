@@ -9,6 +9,8 @@ import {
   getClientPromos,
   updateClientNoShowScore,
   setClientBlacklistStatus,
+  addRewardPointMovement,
+  VALID_REWARD_POINT_REASONS,
 } from '../lib/database';
 import { getClientWhatsAppUrl } from '../lib/whatsapp';
 import {
@@ -24,6 +26,14 @@ import VisitCard from '../components/VisitCard';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import AppHeader from '../components/AppHeader';
 
+const REWARD_REASON_LABELS = {
+  visit: 'Visita',
+  manual: 'Premio manuale',
+  promotion: 'Promozione',
+  redeem: 'Riscatto premio',
+  correction: 'Correzione',
+};
+
 /**
  * ClientDetail — Pagina dettaglio cliente
  * Mostra: info cliente, visite, promozioni, form per nuova visita/modifica
@@ -36,6 +46,7 @@ export default function ClientDetail() {
   const [error, setError] = useState('');
   const [showAddVisitModal, setShowAddVisitModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showRewardModal, setShowRewardModal] = useState(false);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
   const [pendingEditCropFile, setPendingEditCropFile] = useState(null);
 
@@ -57,6 +68,11 @@ export default function ClientDetail() {
     photo: '',
     photoFile: null,
     removePhoto: false,
+  });
+  const [rewardForm, setRewardForm] = useState({
+    points: '',
+    reason: 'manual',
+    note: '',
   });
 
   /**
@@ -249,6 +265,23 @@ export default function ClientDetail() {
       await loadClient();
     } catch (err) {
       setError(err.message || 'Errore aggiornamento blacklist');
+    }
+  };
+
+  const handleAddRewardPoints = async (e) => {
+    e.preventDefault();
+
+    try {
+      await addRewardPointMovement(clientId, rewardForm);
+      setRewardForm({
+        points: '',
+        reason: 'manual',
+        note: '',
+      });
+      setShowRewardModal(false);
+      await loadClient();
+    } catch (err) {
+      setError(err.message || 'Errore aggiornamento punti premio');
     }
   };
 
@@ -456,11 +489,51 @@ export default function ClientDetail() {
             </strong>
             {fidelity.nextTier && (
               <>
-                {' '}· Mancano <strong>{fidelity.nextTier.remainingVisits}</strong> visite per{' '}
+                {' '}· Mancano{' '}
+                <strong>
+                  {fidelity.mode === 'points'
+                    ? `${fidelity.nextTier.remainingPoints} punti`
+                    : `${fidelity.nextTier.remainingVisits} visite`}
+                </strong>{' '}
+                per{' '}
                 <strong>{fidelity.nextTier.label}</strong>
               </>
             )}
           </p>
+
+          <div
+            className="rounded-2xl p-5 mb-5 border"
+            style={{
+              backgroundColor: 'var(--color-bg-main)',
+              borderColor: 'var(--color-border)',
+            }}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p
+                  className="text-xs uppercase tracking-[0.2em] font-bold mb-2"
+                  style={{ color: 'var(--color-secondary)' }}
+                >
+                  Punti premio
+                </p>
+                <p className="text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                  {fidelity.rewardPointsTotal}
+                </p>
+                <p className="text-sm mt-2" style={{ color: 'var(--color-secondary)' }}>
+                  {fidelity.mode === 'points'
+                    ? 'Il livello fidelity è calcolato sui punti premio.'
+                    : 'Nessun punto ancora assegnato: la card usa ancora il fallback sulle visite.'}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowRewardModal(true)}
+                className="px-5 py-3 rounded-xl font-bold text-white"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+              >
+                Aggiungi / rimuovi punti
+              </button>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {fidelity.tiers.map((tier) => (
@@ -479,22 +552,79 @@ export default function ClientDetail() {
                   {tier.label}
                 </p>
                 <p style={{ color: tier.style.textColor }} className="text-sm">
-                  {tier.visitsRequired} visite in {tier.monthsWindow} mesi
+                  {fidelity.mode === 'points'
+                    ? `${tier.pointsRequired} punti`
+                    : `${tier.visitsRequired} visite in ${tier.monthsWindow} mesi`}
                 </p>
                 <p
                   style={{ color: tier.style.textColor }}
                   className="text-2xl font-bold mt-3"
                 >
-                  {tier.visitsInWindow}
+                  {fidelity.mode === 'points'
+                    ? Math.min(fidelity.rewardPointsTotal, tier.pointsRequired)
+                    : tier.visitsInWindow}
                 </p>
                 <p style={{ color: tier.style.textColor }} className="text-sm mt-1">
                   {tier.achieved
                     ? 'Obiettivo raggiunto'
-                    : `${tier.remainingVisits} visite mancanti`}
+                    : fidelity.mode === 'points'
+                      ? `${tier.remainingPoints} punti mancanti`
+                      : `${tier.remainingVisits} visite mancanti`}
                 </p>
               </div>
             ))}
           </div>
+
+          {client.rewardPoints?.length > 0 ? (
+            <div className="mt-6">
+              <p
+                className="text-sm font-bold mb-3"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Ultimi movimenti punti
+              </p>
+              <div className="space-y-2">
+                {client.rewardPoints.slice(0, 5).map((movement) => (
+                  <div
+                    key={movement.id}
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border px-4 py-3"
+                    style={{ borderColor: 'var(--color-border)' }}
+                  >
+                    <div>
+                      <p
+                        className="font-semibold"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
+                        {REWARD_REASON_LABELS[movement.reason] || movement.reason}
+                      </p>
+                      {movement.note ? (
+                        <p className="text-sm" style={{ color: 'var(--color-secondary)' }}>
+                          {movement.note}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="sm:text-right">
+                      <p
+                        className="font-bold"
+                        style={{
+                          color:
+                            Number(movement.points) > 0
+                              ? 'var(--color-success-text)'
+                              : 'var(--color-danger-text)',
+                        }}
+                      >
+                        {Number(movement.points) > 0 ? '+' : ''}
+                        {movement.points} punti
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--color-secondary)' }}>
+                        {new Date(movement.created_at).toLocaleDateString('it-IT')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {/* Note */}
@@ -923,6 +1053,99 @@ export default function ClientDetail() {
                     setEditPhotoPreview('');
                     setShowEditModal(false);
                   }}
+                  className="flex-1 py-3 rounded-lg font-bold border-2 transition"
+                  style={{
+                    borderColor: 'var(--color-primary)',
+                    color: 'var(--color-text-primary)',
+                  }}
+                >
+                  Annulla
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showRewardModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50 sm:items-center sm:justify-center">
+          <div
+            className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 sm:p-8 shadow-2xl max-h-96 overflow-y-auto"
+            style={{ backgroundColor: '#ffffff' }}
+          >
+            <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold mb-2">
+              Punti premio
+            </h2>
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-6">
+              Usa valori positivi per assegnare punti, negativi per riscatti o correzioni.
+            </p>
+
+            <form onSubmit={handleAddRewardPoints} className="space-y-4">
+              <div>
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
+                  Punti *
+                </label>
+                <input
+                  type="number"
+                  step="1"
+                  value={rewardForm.points}
+                  onChange={(e) =>
+                    setRewardForm({ ...rewardForm, points: e.target.value })
+                  }
+                  placeholder="Es. 25 oppure -50"
+                  required
+                  className="w-full px-4 py-3 rounded-lg border-2"
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
+                  Motivo
+                </label>
+                <select
+                  value={rewardForm.reason}
+                  onChange={(e) =>
+                    setRewardForm({ ...rewardForm, reason: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-lg border-2 bg-white"
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                >
+                  {VALID_REWARD_POINT_REASONS.map((reason) => (
+                    <option key={reason} value={reason}>
+                      {REWARD_REASON_LABELS[reason] || reason}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
+                  Nota
+                </label>
+                <textarea
+                  value={rewardForm.note}
+                  onChange={(e) =>
+                    setRewardForm({ ...rewardForm, note: e.target.value })
+                  }
+                  placeholder="Dettaglio facoltativo"
+                  className="w-full px-4 py-3 rounded-lg border-2"
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                  rows="3"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 rounded-lg font-bold text-white transition"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                >
+                  Salva movimento
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowRewardModal(false)}
                   className="flex-1 py-3 rounded-lg font-bold border-2 transition"
                   style={{
                     borderColor: 'var(--color-primary)',
