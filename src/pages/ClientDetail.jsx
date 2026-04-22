@@ -475,8 +475,8 @@ export default function ClientDetail() {
           </div>
         </div>
 
-        {/* Promozione */}
-        {promo.count > 0 && <PromoBadge promo={promo} />}
+        {/* Promozione visite legacy: non mostrarla quando la fidelity usa punti manuali. */}
+        {fidelity.mode !== 'points' && promo.count > 0 && <PromoBadge promo={promo} />}
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
