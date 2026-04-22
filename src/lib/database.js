@@ -1014,7 +1014,12 @@ export const getClientCardByToken = async (qrToken) => {
 
     const nowIso = new Date().toISOString();
 
-    const [{ data: nextAppointment }, { data: lastVisit }, { count: visitsCount, error: visitsCountError }] =
+    const [
+      { data: nextAppointment },
+      { data: lastVisit },
+      { data: visits, error: visitsError },
+      { data: rewardPoints, error: rewardPointsError },
+    ] =
       await Promise.all([
         supabase
           .from('appointments')
@@ -1033,17 +1038,30 @@ export const getClientCardByToken = async (qrToken) => {
           .maybeSingle(),
         supabase
           .from('visits')
-          .select('id', { count: 'exact', head: true })
+          .select('id, date')
           .eq('client_id', client.id),
+        supabase
+          .from('reward_points')
+          .select('points')
+          .eq('client_id', client.id)
+          .eq('user_id', user.id),
       ]);
 
-    if (visitsCountError) throw visitsCountError;
+    if (visitsError) throw visitsError;
+    if (rewardPointsError) throw rewardPointsError;
+
+    const rewardPointsTotal = (rewardPoints || []).reduce(
+      (sum, movement) => sum + Number(movement.points || 0),
+      0
+    );
 
     return {
       ...client,
       nextAppointment: nextAppointment || null,
       lastVisit: lastVisit || null,
-      visitsCount: visitsCount || 0,
+      visits: visits || [],
+      visitsCount: visits?.length || 0,
+      rewardPointsTotal,
     };
   } catch (error) {
     console.error('Errore caricamento card cliente:', error.message);

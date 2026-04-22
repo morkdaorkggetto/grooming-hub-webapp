@@ -6,6 +6,11 @@ import {
   getClientQrImageUrl,
   getPublicPetUrl,
 } from '../lib/qrCode';
+import {
+  getFidelityBadgeStyle,
+  getFidelityLabel,
+  getFidelityTierSnapshot,
+} from '../lib/fidelity';
 
 const formatAppointmentDate = (iso) => {
   if (!iso) return 'Nessun appuntamento futuro';
@@ -160,6 +165,10 @@ export default function ClientCard() {
     );
   }
 
+  const fidelity = getFidelityTierSnapshot(client);
+  const fidelityTierKey = fidelity.currentTier?.key || 'base';
+  const fidelityStyle = getFidelityBadgeStyle(fidelityTierKey);
+
   return (
     <div className="min-h-screen px-4 py-8" style={{ backgroundColor: 'var(--color-bg-main)' }}>
       <style>
@@ -244,7 +253,7 @@ export default function ClientCard() {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4 mt-8">
+              <div className="grid sm:grid-cols-3 gap-4 mt-8">
                 <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-bg-main)' }}>
                   <p style={{ color: 'var(--color-secondary)' }} className="text-xs uppercase font-bold tracking-wide mb-1">
                     Affidabilita
@@ -254,6 +263,29 @@ export default function ClientCard() {
                   </p>
                   <p style={{ color: client.is_blacklisted ? '#b91c1c' : 'var(--color-success-text)' }} className="text-sm mt-1 font-medium">
                     {client.is_blacklisted ? 'Cliente in blacklist' : 'Cliente attivo'}
+                  </p>
+                </div>
+
+                <div
+                  className="rounded-2xl p-4 border"
+                  style={{
+                    backgroundColor: fidelityStyle.backgroundColor,
+                    borderColor: fidelity.currentTier?.activeBorder || 'var(--color-border)',
+                  }}
+                >
+                  <p
+                    style={{ color: fidelityStyle.color }}
+                    className="text-xs uppercase font-bold tracking-wide mb-1"
+                  >
+                    Premio
+                  </p>
+                  <p style={{ color: fidelityStyle.color }} className="text-2xl font-bold">
+                    {getFidelityLabel(fidelityTierKey)}
+                  </p>
+                  <p style={{ color: fidelityStyle.color }} className="text-sm mt-1 font-medium">
+                    {fidelity.mode === 'points'
+                      ? `${fidelity.rewardPointsTotal} punti`
+                      : `${client.visitsCount} visite`}
                   </p>
                 </div>
 
