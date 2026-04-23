@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { DEMO_MODE } from '../../lib/demoMode';
+import { ensureOperatorProfile } from '../../lib/database';
 
 /**
  * LoginForm — Componente autenticazione
@@ -81,16 +82,11 @@ export default function LoginForm({ onSuccess }) {
 
       // 2. Crea profilo utente nella tabella profiles
       if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            business_name: email.split('@')[0], // nome di default dal prefix email
-          });
-
-        if (profileError) {
+        try {
+          await ensureOperatorProfile(authData.user);
+        } catch (profileError) {
           console.error('Errore creazione profilo:', profileError.message);
-          // Non interrompiamo, continua anche se profilo non creato
+          // Non interrompiamo, continua anche se profilo non creato.
         }
       }
 
@@ -136,6 +132,13 @@ export default function LoginForm({ onSuccess }) {
 
       if (authError) {
         throw new Error(authError.message);
+      }
+
+      const {
+        data: { user: signedInUser },
+      } = await supabase.auth.getUser();
+      if (signedInUser) {
+        await ensureOperatorProfile(signedInUser);
       }
 
       setSuccessMessage('Login riuscito! Caricamento...');

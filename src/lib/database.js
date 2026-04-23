@@ -184,6 +184,32 @@ export const ensureCustomerProfile = async (user) => {
   }
 };
 
+export const ensureOperatorProfile = async (user) => {
+  try {
+    if (!user?.id) throw new Error('Utente non autenticato');
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .upsert(
+        {
+          id: user.id,
+          business_name: user.email?.split('@')[0] || 'Operatore',
+          role: 'operator',
+        },
+        { onConflict: 'id' }
+      )
+      .select('id, business_name, role, created_at')
+      .single();
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.error('Errore profilo operatore:', error.message);
+    throw new Error(`Non riesco a creare il profilo operatore: ${error.message}`);
+  }
+};
+
 export const createCustomerPortalInvite = async (clientId, customerEmail = '') => {
   try {
     assertDemoWriteAllowed();

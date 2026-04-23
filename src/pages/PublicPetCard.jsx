@@ -207,12 +207,12 @@ export default function PublicPetCard() {
 
   const handleReservedArea = () => {
     if (user) {
-      if (profile?.role === 'customer') {
-        navigate('/portal');
+      if (profile?.role === 'operator') {
+        navigate(`/client-card/internal/${qrToken}`);
         return;
       }
 
-      navigate(`/client-card/internal/${qrToken}`);
+      navigate('/portal');
       return;
     }
 

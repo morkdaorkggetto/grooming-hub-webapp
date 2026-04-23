@@ -37,8 +37,11 @@ function ProtectedRoute({
     return <Navigate to={`${loginPath}?redirect=${encodeURIComponent(redirect)}`} replace />;
   }
 
-  const role = profile?.role || 'operator';
+  const role = profile?.role || null;
   if (allowedRole && role !== allowedRole) {
+    if (!role) {
+      return <Navigate to="/portal/login" replace />;
+    }
     return <Navigate to={role === 'customer' ? '/portal' : '/dashboard'} replace />;
   }
 
@@ -53,6 +56,8 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const getDefaultAuthenticatedPath = (currentProfile) =>
+    currentProfile?.role === 'operator' ? '/dashboard' : '/portal';
 
   /**
    * Monitora i cambiamenti di stato autenticazione
@@ -118,7 +123,7 @@ export default function App() {
             path="/login"
             element={
               user ? (
-                <Navigate to={(profile?.role || 'operator') === 'customer' ? '/portal' : '/dashboard'} replace />
+                <Navigate to={getDefaultAuthenticatedPath(profile)} replace />
               ) : (
                 <LoginForm
                   onSuccess={() => {
@@ -138,7 +143,7 @@ export default function App() {
             path="/portal/login"
             element={
               user ? (
-                <Navigate to={(profile?.role || 'operator') === 'customer' ? '/portal' : '/dashboard'} replace />
+                <Navigate to={getDefaultAuthenticatedPath(profile)} replace />
               ) : (
                 <CustomerLogin />
               )
@@ -249,7 +254,7 @@ export default function App() {
             path="/"
             element={
               user ? (
-                <Navigate to={(profile?.role || 'operator') === 'customer' ? '/portal' : '/dashboard'} replace />
+                <Navigate to={getDefaultAuthenticatedPath(profile)} replace />
               ) : (
                 <Navigate to="/login" replace />
               )
