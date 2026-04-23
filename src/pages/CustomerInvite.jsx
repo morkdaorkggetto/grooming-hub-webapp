@@ -16,6 +16,10 @@ export default function CustomerInvite() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const inviteUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/portal/invite/${token}`
+      : undefined;
 
   const acceptInviteForCurrentUser = async () => {
     setLoading(true);
@@ -25,6 +29,9 @@ export default function CustomerInvite() {
       const user = await getCurrentUser();
       if (!user) return;
 
+      // If the profile was auto-created as operator during email confirmation,
+      // force customer role before accepting the invite.
+      await ensureCustomerProfile(user);
       await acceptCustomerPortalInvite(token);
       navigate('/portal', { replace: true });
     } catch (err) {
@@ -57,12 +64,17 @@ export default function CustomerInvite() {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: inviteUrl,
+          },
         });
 
         if (signUpError) throw signUpError;
 
         if (!data.session) {
-          setMessage('Account creato. Controlla la tua email, conferma l\'account e poi riapri questo invito.');
+          setMessage(
+            'Account creato. Conferma l\'email e verrai riportato automaticamente su questo invito.'
+          );
           return;
         }
 
@@ -173,6 +185,10 @@ export default function CustomerInvite() {
           >
             {isSignUp ? 'Hai gia un account? Accedi' : 'Non hai un account? Crealo'}
           </button>
+
+          <p className="text-xs text-center mt-4" style={{ color: 'var(--color-secondary)' }}>
+            Usa sempre questo link invito per completare il collegamento.
+          </p>
 
           <div className="text-center mt-6">
             <Link to="/login" className="text-xs underline" style={{ color: 'var(--color-secondary)' }}>

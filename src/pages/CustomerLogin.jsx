@@ -23,7 +23,17 @@ export default function CustomerLogin() {
       if (password.length < 6) throw new Error('La password deve contenere almeno 6 caratteri.');
 
       if (isSignUp) {
-        const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
+        const redirectUrl =
+          typeof window !== 'undefined'
+            ? `${window.location.origin}/portal/login`
+            : undefined;
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: redirectUrl,
+          },
+        });
         if (signUpError) throw signUpError;
 
         if (!data.session) {
