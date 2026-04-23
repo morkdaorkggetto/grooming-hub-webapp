@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { ensureCustomerProfile } from '../lib/database';
+import { ensureCustomerProfile, ensureOperatorProfile } from '../lib/database';
 
-export default function CustomerLogin() {
+export default function CustomerLogin({ currentUser = null, currentRole = null }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,6 +11,50 @@ export default function CustomerLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+
+  const handleContinueAsCustomer = async () => {
+    if (!currentUser) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      await ensureCustomerProfile(currentUser);
+      navigate('/portal', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Non riesco ad attivare l\'area cliente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContinueAsOperator = async () => {
+    if (!currentUser) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      await ensureOperatorProfile(currentUser);
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Non riesco ad attivare l\'area operatore.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      await supabase.auth.signOut();
+      navigate('/portal/login', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Non riesco a chiudere la sessione.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -54,6 +98,59 @@ export default function CustomerLogin() {
       setLoading(false);
     }
   };
+
+  if (currentUser && !currentRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{ backgroundColor: 'var(--color-bg-main)' }}>
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-xl p-8 border" style={{ borderColor: '#ead7c5' }}>
+            <h2 className="text-2xl font-bold mb-3 text-center" style={{ color: 'var(--color-text-primary)' }}>
+              Completa accesso
+            </h2>
+            <p className="text-sm text-center mb-6" style={{ color: 'var(--color-secondary)' }}>
+              Sessione attiva ({currentUser.email}). Scegli dove proseguire.
+            </p>
+
+            {error ? (
+              <div className="mb-4 rounded-xl border p-4 bg-red-50 border-red-200">
+                <p className="text-sm font-medium" style={{ color: 'var(--color-danger-text)' }}>{error}</p>
+              </div>
+            ) : null}
+
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleContinueAsCustomer}
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-60"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+              >
+                Continua come cliente
+              </button>
+              <button
+                type="button"
+                onClick={handleContinueAsOperator}
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-60"
+                style={{ backgroundColor: 'var(--color-secondary)' }}
+              >
+                Continua come operatore
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-semibold border"
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+              >
+                Esci
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{ backgroundColor: 'var(--color-bg-main)' }}>

@@ -57,7 +57,11 @@ export default function App() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const getDefaultAuthenticatedPath = (currentProfile) =>
-    currentProfile?.role === 'operator' ? '/dashboard' : '/portal';
+    currentProfile?.role === 'operator'
+      ? '/dashboard'
+      : currentProfile?.role === 'customer'
+        ? '/portal'
+        : '/portal/login';
 
   /**
    * Monitora i cambiamenti di stato autenticazione
@@ -142,10 +146,10 @@ export default function App() {
           <Route
             path="/portal/login"
             element={
-              user ? (
+              user && profile?.role ? (
                 <Navigate to={getDefaultAuthenticatedPath(profile)} replace />
               ) : (
-                <CustomerLogin />
+                <CustomerLogin currentUser={user} currentRole={profile?.role || null} />
               )
             }
           />
