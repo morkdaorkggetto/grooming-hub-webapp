@@ -159,6 +159,17 @@ export default function App() {
           <Route path="/portal/invite/:token" element={<CustomerInvite />} />
 
           <Route
+            path="/portal/demo"
+            element={
+              DEMO_MODE ? (
+                <CustomerPortal demoPreview />
+              ) : (
+                <Navigate to="/portal/login" replace />
+              )
+            }
+          />
+
+          <Route
             path="/portal"
             element={
               <ProtectedRoute

@@ -6,6 +6,7 @@ import {
   getCustomerAppointmentRequestWhatsAppUrl,
   getPublicGroomingHubWhatsAppUrl,
 } from '../lib/whatsapp';
+import { DEMO_MODE } from '../lib/demoMode';
 import { getFidelityBadgeStyle, getFidelityLabel, getFidelityTierSnapshot } from '../lib/fidelity';
 import publicPetCardIllustration from '../assets/public-pet-card-illustration.png';
 
@@ -66,6 +67,77 @@ const SECTIONS = [
   { id: 'booking', label: 'Prenota' },
   { id: 'history', label: 'Storico' },
 ];
+
+const getDemoPortalClients = () => {
+  const now = new Date();
+  const nextAppointment = new Date(now);
+  nextAppointment.setDate(now.getDate() + 4);
+  nextAppointment.setHours(10, 30, 0, 0);
+
+  const pendingAppointment = new Date(now);
+  pendingAppointment.setDate(now.getDate() + 8);
+  pendingAppointment.setHours(9, 0, 0, 0);
+
+  const completedAppointment = new Date(now);
+  completedAppointment.setDate(now.getDate() - 22);
+  completedAppointment.setHours(15, 0, 0, 0);
+
+  return [
+    {
+      id: 'demo-client-luna',
+      name: 'Luna',
+      notes: 'Preferisce essere accolta con calma. Mantello sensibile: usare prodotti delicati.',
+      visits: [
+        { id: 'demo-visit-1', client_id: 'demo-client-luna', date: toLocalDateString(completedAppointment) },
+        { id: 'demo-visit-2', client_id: 'demo-client-luna', date: toLocalDateString(new Date(now.getTime() - 48 * 24 * 60 * 60 * 1000)) },
+      ],
+      rewardPoints: [],
+      rewardPointsTotal: 180,
+      nextAppointment: {
+        id: 'demo-appointment-next',
+        client_id: 'demo-client-luna',
+        scheduled_at: nextAppointment.toISOString(),
+        duration_minutes: 90,
+        status: 'scheduled',
+        approval_status: 'approved',
+        appointment_source: 'operator',
+        notes: 'Bagno e tosatura completa confermati.',
+      },
+      appointments: [
+        {
+          id: 'demo-appointment-next',
+          client_id: 'demo-client-luna',
+          scheduled_at: nextAppointment.toISOString(),
+          duration_minutes: 90,
+          status: 'scheduled',
+          approval_status: 'approved',
+          appointment_source: 'operator',
+          notes: 'Bagno e tosatura completa confermati.',
+        },
+        {
+          id: 'demo-appointment-pending',
+          client_id: 'demo-client-luna',
+          scheduled_at: pendingAppointment.toISOString(),
+          duration_minutes: 180,
+          status: 'scheduled',
+          approval_status: 'pending',
+          appointment_source: 'customer',
+          notes: 'Servizio richiesto: Bagno e tosatura completa. Fascia preferita: Mattina (09:00-12:00).',
+        },
+        {
+          id: 'demo-appointment-completed',
+          client_id: 'demo-client-luna',
+          scheduled_at: completedAppointment.toISOString(),
+          duration_minutes: 75,
+          status: 'completed',
+          approval_status: 'approved',
+          appointment_source: 'operator',
+          notes: 'Toelettatura estetica completata.',
+        },
+      ],
+    },
+  ];
+};
 
 const toLocalDateString = (date) => {
   const year = date.getFullYear();
@@ -765,7 +837,7 @@ function AppointmentListItem({ appointment, compact = false }) {
   );
 }
 
-export default function CustomerPortal() {
+export default function CustomerPortal({ demoPreview = false }) {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [activeSection, setActiveSection] = useState('home');
@@ -780,8 +852,7 @@ export default function CustomerPortal() {
     setError('');
 
     try {
-      const data = await getCustomerPortalData();
-      const loadedClients = data.clients || [];
+      const loadedClients = demoPreview ? getDemoPortalClients() : (await getCustomerPortalData()).clients || [];
       setClients(loadedClients);
       setActiveClientId((currentId) =>
         loadedClients.some((client) => client.id === currentId)
@@ -817,13 +888,40 @@ export default function CustomerPortal() {
 
     try {
       setSubmittingClientId(clientId);
-      await createCustomerAppointmentRequest(clientId, payload);
-      await loadPortal();
+      if (demoPreview) {
+        const scheduledAtDate = new Date(`${payload.date}T${payload.time}`);
+        const demoAppointment = {
+          id: `demo-request-${Date.now()}`,
+          client_id: clientId,
+          scheduled_at: scheduledAtDate.toISOString(),
+          duration_minutes: Number(payload.duration_minutes) || 60,
+          status: 'scheduled',
+          approval_status: 'pending',
+          appointment_source: 'customer',
+          notes: payload.notes || null,
+        };
+
+        setClients((prevClients) =>
+          prevClients.map((client) =>
+            client.id === clientId
+              ? {
+                  ...client,
+                  appointments: [demoAppointment, ...(client.appointments || [])],
+                }
+              : client
+          )
+        );
+      } else {
+        await createCustomerAppointmentRequest(clientId, payload);
+        await loadPortal();
+      }
       setRequestNoticeByClient((prev) => ({
         ...prev,
         [clientId]: {
           type: 'success',
-          message: "Richiesta inviata. Ti confermeremo l'appuntamento appena possibile.",
+          message: demoPreview
+            ? 'Anteprima demo: richiesta aggiunta solo in questa schermata.'
+            : "Richiesta inviata. Ti confermeremo l'appuntamento appena possibile.",
         },
       }));
       return true;
@@ -856,10 +954,10 @@ export default function CustomerPortal() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] font-bold text-white/75 mb-2">
-                Grooming Hub
+                {demoPreview && DEMO_MODE ? 'Grooming Hub demo' : 'Grooming Hub'}
               </p>
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
-                Area cliente
+                {demoPreview && DEMO_MODE ? 'Anteprima cliente' : 'Area cliente'}
               </h1>
               <p className="text-sm text-white/80 mt-2">
                 Prenotazioni, fidelity e scheda cane collegate al gestionale.

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { ensureCustomerProfile } from '../lib/database';
+import { DEMO_MODE } from '../lib/demoMode';
 
 export default function CustomerLogin({ currentUser = null, currentRole = null }) {
   const navigate = useNavigate();
@@ -215,6 +216,17 @@ export default function CustomerLogin({ currentUser = null, currentRole = null }
           >
             {isSignUp ? 'Hai gia un account? Accedi' : 'Non hai un account? Crealo'}
           </button>
+
+          {DEMO_MODE ? (
+            <button
+              type="button"
+              onClick={() => navigate('/portal/demo')}
+              className="w-full mt-4 py-3 rounded-xl font-bold border"
+              style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+            >
+              Apri anteprima cliente demo
+            </button>
+          ) : null}
 
         </div>
       </div>
