@@ -139,6 +139,20 @@ export const VALID_PROFILE_ROLES = [...PROFILE_ROLES];
 export const VALID_APPOINTMENT_APPROVAL_STATUSES = [...APPOINTMENT_APPROVAL_STATUSES];
 export const VALID_APPOINTMENT_SOURCES = [...APPOINTMENT_SOURCES];
 
+async function userHasCustomerClientLinks(userId) {
+  if (!userId) return false;
+
+  const { data, error } = await supabase
+    .from('customer_client_links')
+    .select('customer_user_id')
+    .eq('customer_user_id', userId)
+    .limit(1);
+
+  if (error) throw error;
+
+  return (data || []).length > 0;
+}
+
 export const getUserProfile = async (userId) => {
   try {
     if (!userId) return null;
@@ -151,6 +165,19 @@ export const getUserProfile = async (userId) => {
 
     if (error) throw error;
 
+    if (data?.role === 'operator' && await userHasCustomerClientLinks(userId)) {
+      const { data: repairedProfile, error: repairError } = await supabase
+        .from('profiles')
+        .update({ role: 'customer' })
+        .eq('id', userId)
+        .select('id, business_name, role, created_at')
+        .single();
+
+      if (repairError) throw repairError;
+
+      return repairedProfile || { ...data, role: 'customer' };
+    }
+
     return data || null;
   } catch (error) {
     console.error('Errore caricamento profilo:', error.message);
@@ -161,6 +188,13 @@ export const getUserProfile = async (userId) => {
 export const ensureCustomerProfile = async (user) => {
   try {
     if (!user?.id) throw new Error('Utente non autenticato');
+
+    const existingProfile = await getUserProfile(user.id);
+    const hasCustomerLinks = await userHasCustomerClientLinks(user.id);
+
+    if (existingProfile?.role === 'operator' && !hasCustomerLinks) {
+      throw new Error('Questo account e\' un account operatore. Usa o crea un account cliente separato.');
+    }
 
     const { data, error } = await supabase
       .from('profiles')
@@ -187,6 +221,17 @@ export const ensureCustomerProfile = async (user) => {
 export const ensureOperatorProfile = async (user) => {
   try {
     if (!user?.id) throw new Error('Utente non autenticato');
+
+    const existingProfile = await getUserProfile(user.id);
+    const hasCustomerLinks = await userHasCustomerClientLinks(user.id);
+
+    if (existingProfile?.role === 'customer' || hasCustomerLinks) {
+      throw new Error('Questo account e\' un account cliente. Accedi dall\'area cliente.');
+    }
+
+    if (existingProfile?.role === 'operator') {
+      return existingProfile;
+    }
 
     const { data, error } = await supabase
       .from('profiles')

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { ensureCustomerProfile, ensureOperatorProfile } from '../lib/database';
+import { ensureCustomerProfile } from '../lib/database';
 
 export default function CustomerLogin({ currentUser = null, currentRole = null }) {
   const navigate = useNavigate();
@@ -22,21 +22,6 @@ export default function CustomerLogin({ currentUser = null, currentRole = null }
       navigate('/portal', { replace: true });
     } catch (err) {
       setError(err.message || 'Non riesco ad attivare l\'area cliente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleContinueAsOperator = async () => {
-    if (!currentUser) return;
-    setLoading(true);
-    setError('');
-
-    try {
-      await ensureOperatorProfile(currentUser);
-      navigate('/dashboard', { replace: true });
-    } catch (err) {
-      setError(err.message || 'Non riesco ad attivare l\'area operatore.');
     } finally {
       setLoading(false);
     }
@@ -89,10 +74,18 @@ export default function CustomerLogin({ currentUser = null, currentRole = null }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
+
+        const {
+          data: { user: signedInUser },
+        } = await supabase.auth.getUser();
+        if (signedInUser) {
+          await ensureCustomerProfile(signedInUser);
+        }
       }
 
       navigate('/portal', { replace: true });
     } catch (err) {
+      await supabase.auth.signOut();
       setError(err.message || 'Accesso non riuscito.');
     } finally {
       setLoading(false);
@@ -108,7 +101,7 @@ export default function CustomerLogin({ currentUser = null, currentRole = null }
               Completa accesso
             </h2>
             <p className="text-sm text-center mb-6" style={{ color: 'var(--color-secondary)' }}>
-              Sessione attiva ({currentUser.email}). Scegli dove proseguire.
+              Sessione attiva ({currentUser.email}). Completa l'accesso all'area cliente.
             </p>
 
             {error ? (
@@ -126,15 +119,6 @@ export default function CustomerLogin({ currentUser = null, currentRole = null }
                 style={{ backgroundColor: 'var(--color-primary)' }}
               >
                 Continua come cliente
-              </button>
-              <button
-                type="button"
-                onClick={handleContinueAsOperator}
-                disabled={loading}
-                className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-60"
-                style={{ backgroundColor: 'var(--color-secondary)' }}
-              >
-                Continua come operatore
               </button>
               <button
                 type="button"
@@ -232,11 +216,6 @@ export default function CustomerLogin({ currentUser = null, currentRole = null }
             {isSignUp ? 'Hai gia un account? Accedi' : 'Non hai un account? Crealo'}
           </button>
 
-          <div className="text-center mt-6">
-            <Link to="/login" className="text-xs underline" style={{ color: 'var(--color-secondary)' }}>
-              Area riservata operatori
-            </Link>
-          </div>
         </div>
       </div>
     </div>

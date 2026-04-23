@@ -216,7 +216,7 @@ export default function PublicPetCard() {
       return;
     }
 
-    navigate(`/login?redirect=${encodeURIComponent(`/client-card/${qrToken}`)}`);
+    navigate('/portal/login');
   };
 
   if (loading) {

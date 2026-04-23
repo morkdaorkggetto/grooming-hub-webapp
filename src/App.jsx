@@ -40,7 +40,7 @@ function ProtectedRoute({
   const role = profile?.role || null;
   if (allowedRole && role !== allowedRole) {
     if (!role) {
-      return <Navigate to="/portal/login" replace />;
+      return <Navigate to={loginPath} replace />;
     }
     return <Navigate to={role === 'customer' ? '/portal' : '/dashboard'} replace />;
   }
@@ -126,10 +126,12 @@ export default function App() {
           <Route
             path="/login"
             element={
-              user ? (
+              user && profile?.role ? (
                 <Navigate to={getDefaultAuthenticatedPath(profile)} replace />
               ) : (
                 <LoginForm
+                  currentUser={user}
+                  currentRole={profile?.role || null}
                   onSuccess={() => {
                     // Callback dopo login riuscito
                     // L'app si aggiornerà automaticamente tramite onAuthStateChange

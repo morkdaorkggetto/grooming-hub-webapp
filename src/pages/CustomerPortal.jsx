@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createCustomerAppointmentRequest, getCustomerPortalData } from '../lib/database';
 import { logout } from '../lib/supabaseClient';
 import { getPublicGroomingHubWhatsAppUrl } from '../lib/whatsapp';
@@ -465,9 +465,6 @@ export default function CustomerPortal() {
             <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--color-secondary)' }}>
               Apri il link d'invito ricevuto dal tuo groomer per collegare la scheda del cane a questo account.
             </p>
-            <Link to="/login" className="inline-block mt-6 text-sm underline" style={{ color: 'var(--color-secondary)' }}>
-              Area operatori
-            </Link>
           </div>
         ) : (
           <div className="space-y-6">

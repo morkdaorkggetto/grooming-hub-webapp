@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase, getCurrentUser } from '../lib/supabaseClient';
 import {
   acceptCustomerPortalInvite,
@@ -86,11 +86,15 @@ export default function CustomerInvite() {
         });
 
         if (signInError) throw signInError;
+
+        const user = await getCurrentUser();
+        await ensureCustomerProfile(user);
       }
 
       await acceptCustomerPortalInvite(token);
       navigate('/portal', { replace: true });
     } catch (err) {
+      await supabase.auth.signOut();
       setError(err.message || 'Accesso non riuscito.');
     } finally {
       setSubmitting(false);
@@ -190,11 +194,6 @@ export default function CustomerInvite() {
             Usa sempre questo link invito per completare il collegamento.
           </p>
 
-          <div className="text-center mt-6">
-            <Link to="/login" className="text-xs underline" style={{ color: 'var(--color-secondary)' }}>
-              Area riservata operatori
-            </Link>
-          </div>
         </div>
       </div>
     </div>

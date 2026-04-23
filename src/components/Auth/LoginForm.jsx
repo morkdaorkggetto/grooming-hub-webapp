@@ -11,7 +11,7 @@ import { ensureOperatorProfile } from '../../lib/database';
  * Props:
  * - onSuccess: callback dopo autenticazione riuscita
  */
-export default function LoginForm({ onSuccess }) {
+export default function LoginForm({ currentUser = null, currentRole = null, onSuccess }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
@@ -43,6 +43,38 @@ export default function LoginForm({ onSuccess }) {
       setSuccessMessage('Ti ho inviato il link per reimpostare la password.');
     } catch (err) {
       setError(`Errore reset password: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContinueAsOperator = async () => {
+    if (!currentUser) return;
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    try {
+      await ensureOperatorProfile(currentUser);
+      if (onSuccess) onSuccess();
+      navigate('/dashboard', { replace: true });
+    } catch (error) {
+      await supabase.auth.signOut();
+      setError(`Errore login: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      setError(`Errore logout: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -149,6 +181,7 @@ export default function LoginForm({ onSuccess }) {
       if (onSuccess) onSuccess();
       navigate(redirectTo, { replace: true });
     } catch (error) {
+      await supabase.auth.signOut();
       setError(`Errore login: ${error.message}`);
     } finally {
       setLoading(false);
@@ -156,6 +189,73 @@ export default function LoginForm({ onSuccess }) {
   };
 
   const handleSubmit = isSignUp ? handleSignUp : handleSignIn;
+
+  if (currentUser && !currentRole) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center px-4"
+        style={{
+          background: 'linear-gradient(135deg, var(--color-bg-main) 0%, var(--color-surface-muted) 100%)',
+        }}
+      >
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              🐕 Grooming Hub
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--color-secondary)' }}>
+              Accesso operatori
+            </p>
+          </div>
+
+          <div
+            className="bg-white rounded-2xl shadow-lg p-8"
+            style={{
+              borderTop: '4px solid var(--color-primary)',
+              boxShadow: '0 18px 40px rgba(91, 67, 54, 0.10)',
+            }}
+          >
+            <h2 className="text-2xl font-bold mb-3 text-center" style={{ color: 'var(--color-text-primary)' }}>
+              Completa accesso
+            </h2>
+            <p className="text-sm text-center mb-6" style={{ color: 'var(--color-secondary)' }}>
+              Sessione attiva ({currentUser.email}). Completa l'accesso all'area operatori.
+            </p>
+
+            {error && (
+              <div
+                className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200"
+                style={{ color: 'var(--color-danger-text)' }}
+              >
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleContinueAsOperator}
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-60"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+              >
+                Continua come operatore
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-semibold border"
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+              >
+                Esci
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
