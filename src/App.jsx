@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { onAuthStateChange } from './lib/supabaseClient';
+import { getUserProfile } from './lib/database';
 import LoginForm from './components/Auth/LoginForm';
 import Dashboard from './pages/Dashboard';
 import ClientDetail from './pages/ClientDetail';
@@ -13,19 +14,34 @@ import PublicPetCard from './pages/PublicPetCard';
 import WeeklyRevenue from './pages/WeeklyRevenue';
 import DailyAppointments from './pages/DailyAppointments';
 import Contacts from './pages/Contacts';
+import CustomerLogin from './pages/CustomerLogin';
+import CustomerInvite from './pages/CustomerInvite';
+import CustomerPortal from './pages/CustomerPortal';
 import { DEMO_MODE } from './lib/demoMode';
 
 /**
  * ProtectedRoute — Componente wrapper per route protette
  * Mostra la route se autenticato, altrimenti reindirizza a /login
  */
-function ProtectedRoute({ isAuthenticated, children }) {
+function ProtectedRoute({
+  isAuthenticated,
+  profile,
+  allowedRole = 'operator',
+  loginPath = '/login',
+  children,
+}) {
   const location = useLocation();
 
   if (!isAuthenticated) {
     const redirect = `${location.pathname}${location.search}`;
-    return <Navigate to={`/login?redirect=${encodeURIComponent(redirect)}`} replace />;
+    return <Navigate to={`${loginPath}?redirect=${encodeURIComponent(redirect)}`} replace />;
   }
+
+  const role = profile?.role || 'operator';
+  if (allowedRole && role !== allowedRole) {
+    return <Navigate to={role === 'customer' ? '/portal' : '/dashboard'} replace />;
+  }
+
   return children;
 }
 
@@ -35,6 +51,7 @@ function ProtectedRoute({ isAuthenticated, children }) {
  */
 export default function App() {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   /**
@@ -42,17 +59,25 @@ export default function App() {
    * Chiamato una sola volta al mount
    */
   useEffect(() => {
+    const updateAuthState = async (currentUser) => {
+      setUser(currentUser);
+
+      if (!currentUser) {
+        setProfile(null);
+        setLoading(false);
+        console.log('❌ Utente non autenticato');
+        return;
+      }
+
+      const loadedProfile = await getUserProfile(currentUser.id);
+      setProfile(loadedProfile);
+      setLoading(false);
+      console.log('✅ Utente autenticato:', currentUser.email);
+    };
+
     // Iscriviti ai cambiamenti di autenticazione
     const { data: subscription } = onAuthStateChange((event, currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-
-      // Log per debug
-      if (currentUser) {
-        console.log('✅ Utente autenticato:', currentUser.email);
-      } else {
-        console.log('❌ Utente non autenticato');
-      }
+      updateAuthState(currentUser);
     });
 
     // Cleanup subscription
@@ -93,7 +118,7 @@ export default function App() {
             path="/login"
             element={
               user ? (
-                <Navigate to="/dashboard" replace />
+                <Navigate to={(profile?.role || 'operator') === 'customer' ? '/portal' : '/dashboard'} replace />
               ) : (
                 <LoginForm
                   onSuccess={() => {
@@ -109,12 +134,39 @@ export default function App() {
 
           <Route path="/client-card/:qrToken" element={<PublicPetCard />} />
 
+          <Route
+            path="/portal/login"
+            element={
+              user ? (
+                <Navigate to={(profile?.role || 'operator') === 'customer' ? '/portal' : '/dashboard'} replace />
+              ) : (
+                <CustomerLogin />
+              )
+            }
+          />
+
+          <Route path="/portal/invite/:token" element={<CustomerInvite />} />
+
+          <Route
+            path="/portal"
+            element={
+              <ProtectedRoute
+                isAuthenticated={!!user}
+                profile={profile}
+                allowedRole="customer"
+                loginPath="/portal/login"
+              >
+                <CustomerPortal />
+              </ProtectedRoute>
+            }
+          />
+
 
           {/* Route protette */}
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -123,7 +175,7 @@ export default function App() {
           <Route
             path="/client/:clientId"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <ClientDetail />
               </ProtectedRoute>
             }
@@ -132,7 +184,7 @@ export default function App() {
           <Route
             path="/add-client"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <AddClient />
               </ProtectedRoute>
             }
@@ -141,7 +193,7 @@ export default function App() {
           <Route
             path="/client/:clientId/add-visit"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <AddVisit />
               </ProtectedRoute>
             }
@@ -150,7 +202,7 @@ export default function App() {
           <Route
             path="/calendar"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <Calendar />
               </ProtectedRoute>
             }
@@ -159,7 +211,7 @@ export default function App() {
           <Route
             path="/appointments/today"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <DailyAppointments />
               </ProtectedRoute>
             }
@@ -168,7 +220,7 @@ export default function App() {
           <Route
             path="/reports/weekly"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <WeeklyRevenue />
               </ProtectedRoute>
             }
@@ -177,7 +229,7 @@ export default function App() {
           <Route
             path="/contacts"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <Contacts />
               </ProtectedRoute>
             }
@@ -186,7 +238,7 @@ export default function App() {
           <Route
             path="/client-card/internal/:qrToken"
             element={
-              <ProtectedRoute isAuthenticated={!!user}>
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <ClientCard />
               </ProtectedRoute>
             }
@@ -197,7 +249,7 @@ export default function App() {
             path="/"
             element={
               user ? (
-                <Navigate to="/dashboard" replace />
+                <Navigate to={(profile?.role || 'operator') === 'customer' ? '/portal' : '/dashboard'} replace />
               ) : (
                 <Navigate to="/login" replace />
               )

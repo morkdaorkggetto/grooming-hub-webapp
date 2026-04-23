@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../lib/supabaseClient';
-import { getPublicPetCardByToken } from '../lib/database';
+import { getPublicPetCardByToken, getUserProfile } from '../lib/database';
 import { getPublicGroomingHubWhatsAppUrl } from '../lib/whatsapp';
 import { getFidelityBadgeStyle, getFidelityLabel } from '../lib/fidelity';
 import publicPetCardIllustration from '../assets/public-pet-card-illustration.png';
@@ -157,6 +157,7 @@ export default function PublicPetCard() {
   const navigate = useNavigate();
   const [petCard, setPetCard] = useState(null);
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -173,6 +174,12 @@ export default function PublicPetCard() {
 
         setPetCard(cardData);
         setUser(currentUser);
+        if (currentUser) {
+          const currentProfile = await getUserProfile(currentUser.id);
+          setProfile(currentProfile);
+        } else {
+          setProfile(null);
+        }
       } catch (err) {
         setError(err.message || 'Errore caricamento card pubblica');
       } finally {
@@ -200,6 +207,11 @@ export default function PublicPetCard() {
 
   const handleReservedArea = () => {
     if (user) {
+      if (profile?.role === 'customer') {
+        navigate('/portal');
+        return;
+      }
+
       navigate(`/client-card/internal/${qrToken}`);
       return;
     }
@@ -316,7 +328,7 @@ export default function PublicPetCard() {
                     backgroundColor: '#fffaf6',
                   }}
                 >
-                  {user ? 'Apri scheda completa' : 'Area riservata'}
+                  {user ? (profile?.role === 'customer' ? 'Apri area cliente' : 'Apri scheda completa') : 'Area riservata'}
                 </button>
               </div>
             </div>

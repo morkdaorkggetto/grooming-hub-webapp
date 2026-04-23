@@ -8,6 +8,7 @@ const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
 const CONTACT_SOURCES = ['manual', 'whatsapp', 'qr'];
 const CONTACT_STATUSES = ['new', 'contacted', 'converted', 'archived'];
 const REWARD_POINT_REASONS = ['visit', 'manual', 'promotion', 'redeem', 'correction'];
+const PROFILE_ROLES = ['operator', 'customer'];
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -24,6 +25,15 @@ const generateQrToken = () => {
       : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
 
   return `ghc_${randomPart}`;
+};
+
+const generateCustomerInviteToken = () => {
+  const randomPart =
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID().replace(/-/g, '').slice(0, 28)
+      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 18)}`;
+
+  return `ghi_${randomPart}`;
 };
 
 const assertDemoWriteAllowed = () => {
@@ -110,6 +120,204 @@ export const VALID_APPOINTMENT_STATUSES = [...APPOINTMENT_STATUSES];
 export const VALID_CONTACT_SOURCES = [...CONTACT_SOURCES];
 export const VALID_CONTACT_STATUSES = [...CONTACT_STATUSES];
 export const VALID_REWARD_POINT_REASONS = [...REWARD_POINT_REASONS];
+export const VALID_PROFILE_ROLES = [...PROFILE_ROLES];
+
+export const getUserProfile = async (userId) => {
+  try {
+    if (!userId) return null;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, business_name, role, created_at')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data || null;
+  } catch (error) {
+    console.error('Errore caricamento profilo:', error.message);
+    return null;
+  }
+};
+
+export const ensureCustomerProfile = async (user) => {
+  try {
+    if (!user?.id) throw new Error('Utente non autenticato');
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .upsert(
+        {
+          id: user.id,
+          business_name: user.email?.split('@')[0] || 'Cliente',
+          role: 'customer',
+        },
+        { onConflict: 'id' }
+      )
+      .select('id, business_name, role, created_at')
+      .single();
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.error('Errore profilo cliente:', error.message);
+    throw new Error(`Non riesco a creare il profilo cliente: ${error.message}`);
+  }
+};
+
+export const createCustomerPortalInvite = async (clientId, customerEmail = '') => {
+  try {
+    assertDemoWriteAllowed();
+
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!clientId) throw new Error('Cliente non valido');
+
+    await getOwnedClient(clientId, user.id);
+
+    const token = generateCustomerInviteToken();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    const { data, error } = await supabase
+      .from('customer_invitations')
+      .insert({
+        id: `inv_${generateId().replace(/-/g, '')}`,
+        token,
+        operator_user_id: user.id,
+        client_id: clientId,
+        customer_email: customerEmail || null,
+        expires_at: expiresAt.toISOString(),
+      })
+      .select('id, token, client_id, customer_email, expires_at, created_at')
+      .single();
+
+    if (error) throw error;
+
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    return {
+      ...data,
+      inviteUrl: `${origin}/portal/invite/${data.token}`,
+    };
+  } catch (error) {
+    console.error('Errore invito portale cliente:', error.message);
+    throw new Error(`Non riesco a creare l'invito cliente: ${error.message}`);
+  }
+};
+
+export const acceptCustomerPortalInvite = async (token) => {
+  try {
+    if (!token) throw new Error('Invito non valido');
+
+    const { data, error } = await supabase.rpc('accept_customer_invite', {
+      p_token: token,
+    });
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.error('Errore accettazione invito cliente:', error.message);
+    throw new Error(`Non riesco ad accettare l'invito: ${error.message}`);
+  }
+};
+
+export const getCustomerPortalData = async () => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    const { data: links, error: linksError } = await supabase
+      .from('customer_client_links')
+      .select('client_id, created_at')
+      .eq('customer_user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (linksError) throw linksError;
+
+    const clientIds = [...new Set((links || []).map((link) => link.client_id).filter(Boolean))];
+    if (clientIds.length === 0) {
+      return { clients: [] };
+    }
+
+    const nowIso = new Date().toISOString();
+    const [
+      { data: clients, error: clientsError },
+      { data: visits, error: visitsError },
+      { data: appointments, error: appointmentsError },
+      { data: rewardPoints, error: rewardPointsError },
+    ] = await Promise.all([
+      supabase
+        .from('clients')
+        .select('id, name, photo, notes, qr_token, created_at')
+        .in('id', clientIds)
+        .order('name', { ascending: true }),
+      supabase
+        .from('visits')
+        .select('id, client_id, date')
+        .in('client_id', clientIds)
+        .order('date', { ascending: false }),
+      supabase
+        .from('appointments')
+        .select('id, client_id, scheduled_at, duration_minutes, status, notes')
+        .in('client_id', clientIds)
+        .gte('scheduled_at', nowIso)
+        .order('scheduled_at', { ascending: true }),
+      supabase
+        .from('reward_points')
+        .select('id, client_id, points, reason, note, created_at')
+        .in('client_id', clientIds)
+        .order('created_at', { ascending: false }),
+    ]);
+
+    if (clientsError) throw clientsError;
+    if (visitsError) throw visitsError;
+    if (appointmentsError) throw appointmentsError;
+    if (rewardPointsError) throw rewardPointsError;
+
+    const visitsByClient = (visits || []).reduce((acc, visit) => {
+      acc[visit.client_id] = acc[visit.client_id] || [];
+      acc[visit.client_id].push(visit);
+      return acc;
+    }, {});
+
+    const appointmentsByClient = (appointments || []).reduce((acc, appointment) => {
+      acc[appointment.client_id] = acc[appointment.client_id] || [];
+      acc[appointment.client_id].push(appointment);
+      return acc;
+    }, {});
+
+    const rewardPointsByClient = (rewardPoints || []).reduce((acc, movement) => {
+      acc[movement.client_id] = acc[movement.client_id] || [];
+      acc[movement.client_id].push(movement);
+      return acc;
+    }, {});
+
+    return {
+      clients: (clients || []).map((client) => {
+        const clientRewardPoints = rewardPointsByClient[client.id] || [];
+        const rewardPointsTotal = clientRewardPoints.reduce(
+          (sum, movement) => sum + Number(movement.points || 0),
+          0
+        );
+
+        return {
+          ...client,
+          visits: visitsByClient[client.id] || [],
+          appointments: appointmentsByClient[client.id] || [],
+          nextAppointment: appointmentsByClient[client.id]?.[0] || null,
+          rewardPoints: clientRewardPoints,
+          rewardPointsTotal,
+        };
+      }),
+    };
+  } catch (error) {
+    console.error('Errore portale cliente:', error.message);
+    throw new Error(`Non riesco a caricare il portale cliente: ${error.message}`);
+  }
+};
 
 /**
  * Carica tutti i clienti dell'utente corrente con le loro visite

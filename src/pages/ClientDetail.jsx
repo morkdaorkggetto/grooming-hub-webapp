@@ -10,6 +10,7 @@ import {
   updateClientNoShowScore,
   setClientBlacklistStatus,
   addRewardPointMovement,
+  createCustomerPortalInvite,
   VALID_REWARD_POINT_REASONS,
 } from '../lib/database';
 import { getClientWhatsAppUrl } from '../lib/whatsapp';
@@ -47,6 +48,8 @@ export default function ClientDetail() {
   const [showAddVisitModal, setShowAddVisitModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
+  const [customerInviteEmail, setCustomerInviteEmail] = useState('');
+  const [customerInvite, setCustomerInvite] = useState(null);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
   const [pendingEditCropFile, setPendingEditCropFile] = useState(null);
 
@@ -302,6 +305,19 @@ export default function ClientDetail() {
     }
 
     navigate(getClientCardPath(client.qr_token));
+  };
+
+  const handleCreateCustomerInvite = async () => {
+    try {
+      const invite = await createCustomerPortalInvite(clientId, customerInviteEmail.trim());
+      setCustomerInvite(invite);
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(invite.inviteUrl);
+      }
+    } catch (err) {
+      setError(err.message || 'Errore creazione invito cliente');
+    }
   };
 
   const handlePrintClientCard = () => {
@@ -681,6 +697,54 @@ export default function ClientDetail() {
                 />
               </div>
             )}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+            <div className="flex-1">
+              <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
+                Area cliente digitale
+              </h3>
+              <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-4">
+                Genera un link riservato per collegare questa scheda cane a un account cliente.
+                Il cliente vedra solo card, fidelity, prossimo appuntamento e contatto WhatsApp.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="email"
+                  value={customerInviteEmail}
+                  onChange={(event) => setCustomerInviteEmail(event.target.value)}
+                  placeholder="Email cliente opzionale"
+                  className="flex-1 px-4 py-3 rounded-lg border-2"
+                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                />
+                <button
+                  onClick={handleCreateCustomerInvite}
+                  className="px-5 py-3 rounded-lg font-bold text-white"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                >
+                  Genera invito
+                </button>
+              </div>
+            </div>
+
+            {customerInvite ? (
+              <div
+                className="lg:w-80 rounded-2xl border p-4"
+                style={{ backgroundColor: 'var(--color-bg-main)', borderColor: 'var(--color-border)' }}
+              >
+                <p className="text-xs uppercase tracking-[0.2em] font-bold mb-2" style={{ color: 'var(--color-secondary)' }}>
+                  Link invito
+                </p>
+                <p className="text-sm break-all" style={{ color: 'var(--color-text-primary)' }}>
+                  {customerInvite.inviteUrl}
+                </p>
+                <p className="text-xs mt-3" style={{ color: 'var(--color-secondary)' }}>
+                  Link copiato negli appunti. Scade tra 30 giorni.
+                </p>
+              </div>
+            ) : null}
           </div>
         </div>
 
