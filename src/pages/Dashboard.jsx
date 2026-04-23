@@ -131,6 +131,10 @@ export default function Dashboard() {
     navigate('/appointments/today');
   };
 
+  const handleOpenCustomerRequests = () => {
+    navigate('/requests');
+  };
+
   const handleOpenContacts = () => {
     navigate('/contacts');
   };
@@ -210,6 +214,16 @@ export default function Dashboard() {
       onClick: handleOpenContacts,
       accent: 'var(--color-primary)',
       surface: 'var(--color-surface-soft)',
+    },
+    {
+      eyebrow: 'Area cliente',
+      title: 'Richieste clienti',
+      description: 'Appuntamenti richiesti dal portale e prossimi flussi cliente',
+      actionLabel: 'Apri richieste',
+      metric: `${pendingRequests.length} da gestire`,
+      onClick: handleOpenCustomerRequests,
+      accent: '#c2410c',
+      surface: '#fff7ed',
     },
   ];
 
@@ -329,7 +343,7 @@ export default function Dashboard() {
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={handleOpenDailyAppointments}
+                  onClick={handleOpenCustomerRequests}
                   className="px-5 py-3 rounded-2xl font-bold text-white transition"
                   style={{ backgroundColor: '#c2410c' }}
                 >

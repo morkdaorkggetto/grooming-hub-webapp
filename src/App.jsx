@@ -17,6 +17,7 @@ import Contacts from './pages/Contacts';
 import CustomerLogin from './pages/CustomerLogin';
 import CustomerInvite from './pages/CustomerInvite';
 import CustomerPortal from './pages/CustomerPortal';
+import CustomerRequests from './pages/CustomerRequests';
 import { DEMO_MODE } from './lib/demoMode';
 
 /**
@@ -190,6 +191,15 @@ export default function App() {
             element={
               <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/requests"
+            element={
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
+                <CustomerRequests />
               </ProtectedRoute>
             }
           />
