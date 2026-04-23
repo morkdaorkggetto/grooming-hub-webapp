@@ -111,14 +111,18 @@ export const getCustomerAppointmentRequestWhatsAppUrl = ({
   date,
   time,
   durationMinutes,
+  serviceName,
+  timeWindowLabel,
   notes,
 } = {}) => {
   const clientName = petName || 'il mio cane';
   const when = formatAppointmentRange({ date, time, durationMinutes });
+  const requestedWindow = timeWindowLabel || when;
+  const serviceText = serviceName ? ` Servizio richiesto: ${serviceName}.` : '';
   const noteText = notes ? ` Note: ${notes}.` : '';
-  const message = when
-    ? `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}, fascia ${when}.${noteText}`
-    : `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}.${noteText}`;
+  const message = requestedWindow
+    ? `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}, fascia ${requestedWindow}.${serviceText}${noteText}`
+    : `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}.${serviceText}${noteText}`;
 
   return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };
