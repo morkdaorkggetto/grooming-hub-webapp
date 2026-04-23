@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAppointments, updateAppointmentStatus } from '../lib/database';
+import {
+  getAppointments,
+  updateAppointmentApproval,
+  updateAppointmentStatus,
+} from '../lib/database';
 import { getAppointmentWhatsAppUrl } from '../lib/whatsapp';
 import AppHeader from '../components/AppHeader';
 
@@ -30,17 +34,17 @@ const getAppointmentEnd = (appointment) => {
   return new Date(start.getTime() + appointment.duration_minutes * 60000);
 };
 
-const getCardStyle = (status) => {
-  if (status === 'completed') {
+const getCardStyle = (appointment) => {
+  if (appointment.approval_status === 'pending') {
     return {
-      backgroundColor: '#dcfce7',
-      borderColor: '#22c55e',
-      titleColor: 'var(--color-success-text)',
-      textColor: 'var(--color-success-text)',
+      backgroundColor: '#fef3c7',
+      borderColor: '#f59e0b',
+      titleColor: '#92400e',
+      textColor: '#78350f',
     };
   }
 
-  if (status === 'cancelled') {
+  if (appointment.approval_status === 'rejected') {
     return {
       backgroundColor: '#f3f4f6',
       borderColor: '#9ca3af',
@@ -49,7 +53,25 @@ const getCardStyle = (status) => {
     };
   }
 
-  if (status === 'no_show') {
+  if (appointment.status === 'completed') {
+    return {
+      backgroundColor: '#dcfce7',
+      borderColor: '#22c55e',
+      titleColor: 'var(--color-success-text)',
+      textColor: 'var(--color-success-text)',
+    };
+  }
+
+  if (appointment.status === 'cancelled') {
+    return {
+      backgroundColor: '#f3f4f6',
+      borderColor: '#9ca3af',
+      titleColor: '#4b5563',
+      textColor: '#6b7280',
+    };
+  }
+
+  if (appointment.status === 'no_show') {
     return {
       backgroundColor: '#fff1f2',
       borderColor: '#e11d48',
@@ -66,11 +88,24 @@ const getCardStyle = (status) => {
   };
 };
 
-const getStatusLabel = (status) => {
-  if (status === 'completed') return 'Completato';
-  if (status === 'cancelled') return 'Annullato';
-  if (status === 'no_show') return 'No-show';
-  return 'Da fare';
+const getStatusLabel = (appointment) => {
+  if (appointment.approval_status === 'pending') return 'Richiesta in attesa';
+  if (appointment.approval_status === 'rejected') return 'Richiesta rifiutata';
+  if (appointment.status === 'completed') return 'Completato';
+  if (appointment.status === 'cancelled') return 'Annullato';
+  if (appointment.status === 'no_show') return 'No-show';
+  return 'Programmato';
+};
+
+const getSourceLabel = (appointment) =>
+  appointment.appointment_source === 'customer' ? 'Richiesta cliente' : 'Inserito operatore';
+
+const getSourceStyle = (appointment) => {
+  if (appointment.appointment_source === 'customer') {
+    return { backgroundColor: '#e0e7ff', color: '#3730a3' };
+  }
+
+  return { backgroundColor: '#ede9fe', color: '#6d28d9' };
 };
 
 export default function DailyAppointments() {
@@ -89,7 +124,12 @@ export default function DailyAppointments() {
     try {
       const from = new Date(`${selectedDate}T00:00:00`).toISOString();
       const to = new Date(`${selectedDate}T23:59:59`).toISOString();
-      const data = await getAppointments({ from, to });
+      const data = await getAppointments({
+        from,
+        to,
+        includePending: true,
+        includeRejected: true,
+      });
       setAppointments(data);
     } catch (err) {
       setError(err.message || 'Errore nel caricamento appuntamenti');
@@ -103,19 +143,30 @@ export default function DailyAppointments() {
   }, [selectedDate]);
 
   const grouped = useMemo(() => {
-    const pending = appointments.filter((item) => item.status === 'scheduled');
-    const completed = appointments.filter((item) => item.status === 'completed');
+    const pendingRequests = appointments.filter((item) => item.approval_status === 'pending');
+    const scheduledApproved = appointments.filter(
+      (item) => item.approval_status === 'approved' && item.status === 'scheduled'
+    );
+    const completed = appointments.filter(
+      (item) => item.approval_status === 'approved' && item.status === 'completed'
+    );
     const other = appointments.filter(
-      (item) => item.status !== 'scheduled' && item.status !== 'completed'
+      (item) =>
+        item.approval_status !== 'pending' &&
+        !(
+          item.approval_status === 'approved' &&
+          (item.status === 'scheduled' || item.status === 'completed')
+        )
     );
 
-    return { pending, completed, other };
+    return { pendingRequests, scheduledApproved, completed, other };
   }, [appointments]);
 
   const counters = useMemo(
     () => ({
       total: appointments.length,
-      pending: grouped.pending.length,
+      pendingRequests: grouped.pendingRequests.length,
+      scheduledApproved: grouped.scheduledApproved.length,
       completed: grouped.completed.length,
       other: grouped.other.length,
     }),
@@ -138,6 +189,26 @@ export default function DailyAppointments() {
     }
   };
 
+  const handleApproval = async (appointmentId, approvalStatus) => {
+    setSuccess('');
+    setError('');
+
+    try {
+      setUpdatingId(appointmentId);
+      await updateAppointmentApproval(appointmentId, approvalStatus);
+      setSuccess(
+        approvalStatus === 'approved'
+          ? 'Richiesta appuntamento approvata.'
+          : 'Richiesta appuntamento rifiutata.'
+      );
+      await loadAppointments();
+    } catch (err) {
+      setError(err.message || 'Errore aggiornamento richiesta');
+    } finally {
+      setUpdatingId('');
+    }
+  };
+
   const handleWhatsApp = (appointment) => {
     const url = getAppointmentWhatsAppUrl(appointment);
     if (!url) {
@@ -149,10 +220,13 @@ export default function DailyAppointments() {
   };
 
   const renderAppointmentRow = (appointment) => {
-    const cardStyle = getCardStyle(appointment.status);
+    const cardStyle = getCardStyle(appointment);
     const timeRange = `${formatTimeOnly(appointment.scheduled_at)} - ${formatTimeOnly(
       getAppointmentEnd(appointment).toISOString()
     )}`;
+    const isPendingRequest = appointment.approval_status === 'pending';
+    const canMarkCompleted =
+      appointment.approval_status === 'approved' && appointment.status === 'scheduled';
 
     return (
       <div
@@ -176,7 +250,13 @@ export default function DailyAppointments() {
                 className="px-3 py-1 rounded-full text-xs font-bold"
                 style={{ backgroundColor: 'rgba(255,255,255,0.85)', color: cardStyle.titleColor }}
               >
-                {getStatusLabel(appointment.status)}
+                {getStatusLabel(appointment)}
+              </span>
+              <span
+                className="px-3 py-1 rounded-full text-xs font-bold"
+                style={getSourceStyle(appointment)}
+              >
+                {getSourceLabel(appointment)}
               </span>
             </div>
 
@@ -214,14 +294,35 @@ export default function DailyAppointments() {
             >
               WhatsApp
             </button>
-            <button
-              onClick={() => handleMarkCompleted(appointment.id)}
-              disabled={updatingId === appointment.id || appointment.status === 'completed'}
-              className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
-              style={{ backgroundColor: '#15803d' }}
-            >
-              {updatingId === appointment.id ? 'Aggiorno...' : 'Completato'}
-            </button>
+            {isPendingRequest ? (
+              <>
+                <button
+                  onClick={() => handleApproval(appointment.id, 'approved')}
+                  disabled={updatingId === appointment.id}
+                  className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: '#15803d' }}
+                >
+                  {updatingId === appointment.id ? 'Aggiorno...' : 'Approva'}
+                </button>
+                <button
+                  onClick={() => handleApproval(appointment.id, 'rejected')}
+                  disabled={updatingId === appointment.id}
+                  className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: '#be123c' }}
+                >
+                  {updatingId === appointment.id ? 'Aggiorno...' : 'Rifiuta'}
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => handleMarkCompleted(appointment.id)}
+                disabled={updatingId === appointment.id || !canMarkCompleted}
+                className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#15803d' }}
+              >
+                {updatingId === appointment.id ? 'Aggiorno...' : 'Completato'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -300,7 +401,7 @@ export default function DailyAppointments() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="bg-white rounded-2xl shadow-lg p-5">
             <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
               Totale appuntamenti
@@ -311,10 +412,18 @@ export default function DailyAppointments() {
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-5">
             <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
-              Da fare
+              Richieste in attesa
+            </p>
+            <p style={{ color: '#92400e' }} className="text-3xl font-bold mt-2">
+              {counters.pendingRequests}
+            </p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg p-5">
+            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
+              Programmati
             </p>
             <p style={{ color: 'var(--color-danger-text)' }} className="text-3xl font-bold mt-2">
-              {counters.pending}
+              {counters.scheduledApproved}
             </p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-5">

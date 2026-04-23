@@ -9,6 +9,8 @@ const CONTACT_SOURCES = ['manual', 'whatsapp', 'qr'];
 const CONTACT_STATUSES = ['new', 'contacted', 'converted', 'archived'];
 const REWARD_POINT_REASONS = ['visit', 'manual', 'promotion', 'redeem', 'correction'];
 const PROFILE_ROLES = ['operator', 'customer'];
+const APPOINTMENT_APPROVAL_STATUSES = ['pending', 'approved', 'rejected'];
+const APPOINTMENT_SOURCES = ['operator', 'customer'];
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
 const generateId = () => {
@@ -134,6 +136,8 @@ export const VALID_CONTACT_SOURCES = [...CONTACT_SOURCES];
 export const VALID_CONTACT_STATUSES = [...CONTACT_STATUSES];
 export const VALID_REWARD_POINT_REASONS = [...REWARD_POINT_REASONS];
 export const VALID_PROFILE_ROLES = [...PROFILE_ROLES];
+export const VALID_APPOINTMENT_APPROVAL_STATUSES = [...APPOINTMENT_APPROVAL_STATUSES];
+export const VALID_APPOINTMENT_SOURCES = [...APPOINTMENT_SOURCES];
 
 export const getUserProfile = async (userId) => {
   try {
@@ -244,7 +248,7 @@ export const getCustomerPortalData = async () => {
 
     const { data: links, error: linksError } = await supabase
       .from('customer_client_links')
-      .select('client_id, created_at')
+      .select('client_id, operator_user_id, created_at')
       .eq('customer_user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -255,7 +259,7 @@ export const getCustomerPortalData = async () => {
       return { clients: [] };
     }
 
-    const nowIso = new Date().toISOString();
+    const lookbackIso = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
     const [
       { data: clients, error: clientsError },
       { data: visits, error: visitsError },
@@ -274,9 +278,9 @@ export const getCustomerPortalData = async () => {
         .order('date', { ascending: false }),
       supabase
         .from('appointments')
-        .select('id, client_id, scheduled_at, duration_minutes, status, notes')
+        .select('id, user_id, client_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes')
         .in('client_id', clientIds)
-        .gte('scheduled_at', nowIso)
+        .gte('scheduled_at', lookbackIso)
         .order('scheduled_at', { ascending: true }),
       supabase
         .from('reward_points')
@@ -302,6 +306,13 @@ export const getCustomerPortalData = async () => {
       return acc;
     }, {});
 
+    const operatorByClient = (links || []).reduce((acc, link) => {
+      if (!acc[link.client_id] && link.operator_user_id) {
+        acc[link.client_id] = link.operator_user_id;
+      }
+      return acc;
+    }, {});
+
     const rewardPointsByClient = (rewardPoints || []).reduce((acc, movement) => {
       acc[movement.client_id] = acc[movement.client_id] || [];
       acc[movement.client_id].push(movement);
@@ -318,9 +329,16 @@ export const getCustomerPortalData = async () => {
 
         return {
           ...client,
+          operator_user_id: operatorByClient[client.id] || null,
           visits: visitsByClient[client.id] || [],
           appointments: appointmentsByClient[client.id] || [],
-          nextAppointment: appointmentsByClient[client.id]?.[0] || null,
+          nextAppointment:
+            (appointmentsByClient[client.id] || []).find(
+              (appointment) =>
+                appointment.approval_status === 'approved' &&
+                appointment.status === 'scheduled' &&
+                new Date(appointment.scheduled_at).getTime() >= Date.now()
+            ) || null,
           rewardPoints: clientRewardPoints,
           rewardPointsTotal,
         };
@@ -898,6 +916,12 @@ export const addAppointment = async (appointmentData) => {
 
     await getOwnedClient(appointmentData.client_id, user.id);
     const appointmentId = generateId();
+    const approvalStatus = APPOINTMENT_APPROVAL_STATUSES.includes(appointmentData.approval_status)
+      ? appointmentData.approval_status
+      : 'approved';
+    const appointmentSource = APPOINTMENT_SOURCES.includes(appointmentData.appointment_source)
+      ? appointmentData.appointment_source
+      : 'operator';
 
     const { data, error } = await supabase
       .from('appointments')
@@ -908,6 +932,9 @@ export const addAppointment = async (appointmentData) => {
         scheduled_at: appointmentData.scheduled_at,
         duration_minutes: Number(appointmentData.duration_minutes) || 60,
         status,
+        approval_status: approvalStatus,
+        appointment_source: appointmentSource,
+        requested_by_customer_id: appointmentData.requested_by_customer_id || null,
         notes: appointmentData.notes || null,
         external_calendar: appointmentData.external_calendar || null,
       })
@@ -928,14 +955,93 @@ export const addAppointment = async (appointmentData) => {
 };
 
 /**
+ * Crea una richiesta appuntamento dal portale cliente.
+ * @param {string} clientId
+ * @param {{ date: string, time: string, duration_minutes?: number, notes?: string }} requestData
+ * @returns {Promise<Object>}
+ */
+export const createCustomerAppointmentRequest = async (clientId, requestData = {}) => {
+  try {
+    assertDemoWriteAllowed();
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!clientId) throw new Error('Cliente non valido');
+    if (!requestData.date || !requestData.time) {
+      throw new Error('Data e ora sono obbligatorie');
+    }
+
+    const scheduledAtDate = new Date(`${requestData.date}T${requestData.time}`);
+    if (Number.isNaN(scheduledAtDate.getTime())) {
+      throw new Error('Data o ora richiesta non valide');
+    }
+
+    const duration = Number(requestData.duration_minutes) || 60;
+    if (duration <= 0 || duration > 480) {
+      throw new Error('Durata richiesta non valida');
+    }
+
+    const { data: link, error: linkError } = await supabase
+      .from('customer_client_links')
+      .select('operator_user_id, client_id')
+      .eq('customer_user_id', user.id)
+      .eq('client_id', clientId)
+      .maybeSingle();
+
+    if (linkError) throw linkError;
+    if (!link?.operator_user_id) {
+      throw new Error('Cliente non collegato al tuo account');
+    }
+
+    const { data, error } = await supabase
+      .from('appointments')
+      .insert({
+        id: generateId(),
+        user_id: link.operator_user_id,
+        client_id: clientId,
+        scheduled_at: scheduledAtDate.toISOString(),
+        duration_minutes: duration,
+        status: 'scheduled',
+        approval_status: 'pending',
+        appointment_source: 'customer',
+        requested_by_customer_id: user.id,
+        notes: requestData.notes?.trim() || null,
+      })
+      .select(`
+        id,
+        user_id,
+        client_id,
+        scheduled_at,
+        duration_minutes,
+        status,
+        approval_status,
+        appointment_source,
+        requested_by_customer_id,
+        notes,
+        external_calendar,
+        created_at,
+        updated_at
+      `)
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Errore richiesta appuntamento cliente:', error.message);
+    throw new Error(`Non riesco a inviare la richiesta appuntamento: ${error.message}`);
+  }
+};
+
+/**
  * Carica appuntamenti dell'utente.
- * @param {Object} filters - { from?, to? } ISO datetime
+ * @param {Object} filters - { from?, to?, includePending?, includeRejected? } ISO datetime
  * @returns {Promise<Array>}
  */
 export const getAppointments = async (filters = {}) => {
   try {
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
+    const includePending = filters.includePending === true;
+    const includeRejected = filters.includeRejected === true;
 
     let query = supabase
       .from('appointments')
@@ -946,6 +1052,9 @@ export const getAppointments = async (filters = {}) => {
         scheduled_at,
         duration_minutes,
         status,
+        approval_status,
+        appointment_source,
+        requested_by_customer_id,
         notes,
         external_calendar,
         created_at,
@@ -960,6 +1069,12 @@ export const getAppointments = async (filters = {}) => {
     }
     if (filters.to) {
       query = query.lte('scheduled_at', filters.to);
+    }
+    if (!includePending) {
+      query = query.neq('approval_status', 'pending');
+    }
+    if (!includeRejected) {
+      query = query.neq('approval_status', 'rejected');
     }
 
     const { data, error } = await query;
@@ -989,12 +1104,18 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
 
     const { data: appointment, error: appointmentError } = await supabase
       .from('appointments')
-      .select('id, user_id, client_id, status')
+      .select('id, user_id, client_id, status, approval_status')
       .eq('id', appointmentId)
       .single();
 
     if (appointmentError || appointment.user_id !== user.id) {
       throw new Error('Accesso negato: appuntamento non disponibile');
+    }
+    if (appointment.approval_status === 'pending') {
+      throw new Error('Conferma o rifiuta prima la richiesta appuntamento');
+    }
+    if (appointment.approval_status === 'rejected') {
+      throw new Error('Non puoi aggiornare uno slot rifiutato');
     }
 
     const previousStatus = appointment.status;
@@ -1026,6 +1147,78 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
 };
 
 /**
+ * Approva o rifiuta una richiesta appuntamento cliente.
+ * @param {string} appointmentId
+ * @param {'approved'|'rejected'} approvalStatus
+ * @returns {Promise<Object>}
+ */
+export const updateAppointmentApproval = async (appointmentId, approvalStatus) => {
+  try {
+    assertDemoWriteAllowed();
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+    if (!APPOINTMENT_APPROVAL_STATUSES.includes(approvalStatus)) {
+      throw new Error('Stato approvazione non valido');
+    }
+    if (!['approved', 'rejected'].includes(approvalStatus)) {
+      throw new Error('Puoi solo approvare o rifiutare la richiesta');
+    }
+
+    const { data: appointment, error: appointmentError } = await supabase
+      .from('appointments')
+      .select('id, user_id, status, approval_status')
+      .eq('id', appointmentId)
+      .single();
+
+    if (appointmentError || appointment.user_id !== user.id) {
+      throw new Error('Accesso negato: appuntamento non disponibile');
+    }
+    if (appointment.approval_status === approvalStatus) {
+      return appointment;
+    }
+
+    const nextStatus =
+      approvalStatus === 'rejected'
+        ? 'cancelled'
+        : appointment.status === 'cancelled'
+          ? 'scheduled'
+          : appointment.status;
+
+    const { data, error } = await supabase
+      .from('appointments')
+      .update({
+        approval_status: approvalStatus,
+        status: nextStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', appointmentId)
+      .select(`
+        id,
+        user_id,
+        client_id,
+        scheduled_at,
+        duration_minutes,
+        status,
+        approval_status,
+        appointment_source,
+        requested_by_customer_id,
+        notes,
+        external_calendar,
+        created_at,
+        updated_at,
+        client:clients(id, name, owner, phone, no_show_score, is_blacklisted)
+      `)
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Errore approvazione appuntamento:', error.message);
+    throw new Error(`Non riesco ad aggiornare la richiesta: ${error.message}`);
+  }
+};
+
+/**
  * Aggiorna data/ora e durata di un appuntamento esistente.
  * @param {string} appointmentId
  * @param {{ scheduled_at: string, duration_minutes?: number }} updates
@@ -1043,12 +1236,15 @@ export const updateAppointmentSchedule = async (appointmentId, updates) => {
 
     const { data: appointment, error: appointmentError } = await supabase
       .from('appointments')
-      .select('id, user_id, scheduled_at, duration_minutes, client_id')
+      .select('id, user_id, scheduled_at, duration_minutes, client_id, approval_status')
       .eq('id', appointmentId)
       .single();
 
     if (appointmentError || appointment.user_id !== user.id) {
       throw new Error('Accesso negato: appuntamento non disponibile');
+    }
+    if (appointment.approval_status === 'rejected') {
+      throw new Error('Non puoi spostare uno slot rifiutato');
     }
 
     const { data, error } = await supabase
@@ -1066,6 +1262,9 @@ export const updateAppointmentSchedule = async (appointmentId, updates) => {
         scheduled_at,
         duration_minutes,
         status,
+        approval_status,
+        appointment_source,
+        requested_by_customer_id,
         notes,
         external_calendar,
         created_at,
