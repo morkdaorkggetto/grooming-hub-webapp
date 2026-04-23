@@ -161,3 +161,14 @@ export const getPublicGroomingHubWhatsAppUrl = ({ petName } = {}) => {
 
   return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };
+
+export const getBoutiqueOrderWhatsAppUrl = ({ petName, items = [] } = {}) => {
+  const itemText = items
+    .map((item) => `${item.quantity}x ${item.name}`)
+    .join(', ');
+  const message = itemText
+    ? `Ciao, sto scrivendo dall'area cliente di ${petName || 'il mio cane'}. Vorrei mettere da parte questi prodotti: ${itemText}.`
+    : `Ciao, sto scrivendo dall'area cliente di ${petName || 'il mio cane'}. Vorrei informazioni sulla boutique.`;
+
+  return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
+};
