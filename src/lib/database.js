@@ -9,6 +9,7 @@ const CONTACT_SOURCES = ['manual', 'whatsapp', 'qr'];
 const CONTACT_STATUSES = ['new', 'contacted', 'converted', 'archived'];
 const REWARD_POINT_REASONS = ['visit', 'manual', 'promotion', 'redeem', 'correction'];
 const PROFILE_ROLES = ['operator', 'customer'];
+const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -34,6 +35,18 @@ const generateCustomerInviteToken = () => {
       : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 18)}`;
 
   return `ghi_${randomPart}`;
+};
+
+const getPublicAppOrigin = () => {
+  if (PUBLIC_APP_URL) {
+    return PUBLIC_APP_URL.replace(/\/+$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+
+  return '';
 };
 
 const assertDemoWriteAllowed = () => {
@@ -196,7 +209,7 @@ export const createCustomerPortalInvite = async (clientId, customerEmail = '') =
 
     if (error) throw error;
 
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const origin = getPublicAppOrigin();
     return {
       ...data,
       inviteUrl: `${origin}/portal/invite/${data.token}`,
