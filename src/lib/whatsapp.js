@@ -117,8 +117,8 @@ export const getCustomerAppointmentRequestWhatsAppUrl = ({
   const when = formatAppointmentRange({ date, time, durationMinutes });
   const noteText = notes ? ` Note: ${notes}.` : '';
   const message = when
-    ? `Ciao, vorrei richiedere un appuntamento per ${clientName} nella fascia ${when}.${noteText}`
-    : `Ciao, vorrei richiedere un appuntamento per ${clientName}.${noteText}`;
+    ? `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}, fascia ${when}.${noteText}`
+    : `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}.${noteText}`;
 
   return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };
@@ -134,11 +134,11 @@ export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) =
   const message =
     approvalStatus === 'approved'
       ? when
-        ? `Buongiorno ${ownerName}, confermiamo l'appuntamento per ${clientName} nella fascia ${when}.`
-        : `Buongiorno ${ownerName}, confermiamo l'appuntamento per ${clientName}.`
+        ? `Buongiorno ${ownerName}, la richiesta registrata in Grooming Hub per ${clientName} è confermata nella fascia ${when}.`
+        : `Buongiorno ${ownerName}, la richiesta registrata in Grooming Hub per ${clientName} è confermata.`
       : when
-        ? `Buongiorno ${ownerName}, la fascia richiesta per ${clientName} (${when}) non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`
-        : `Buongiorno ${ownerName}, la fascia richiesta per ${clientName} non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`;
+        ? `Buongiorno ${ownerName}, la fascia richiesta in Grooming Hub per ${clientName} (${when}) non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`
+        : `Buongiorno ${ownerName}, la fascia richiesta in Grooming Hub per ${clientName} non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`;
 
   return buildWhatsAppUrl(appointment?.client?.phone, message);
 };
