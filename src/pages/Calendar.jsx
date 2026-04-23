@@ -167,21 +167,29 @@ const downloadIcs = (appointment) => {
   URL.revokeObjectURL(url);
 };
 
-const getStatusLabel = (status) => {
-  if (status === 'completed') return 'Completato';
-  if (status === 'cancelled') return 'Annullato';
-  if (status === 'no_show') return 'No-show';
+const getStatusLabel = (appointment) => {
+  if (appointment.approval_status === 'pending') return 'Richiesta in attesa';
+  if (appointment.approval_status === 'rejected') return 'Richiesta rifiutata';
+  if (appointment.status === 'completed') return 'Completato';
+  if (appointment.status === 'cancelled') return 'Annullato';
+  if (appointment.status === 'no_show') return 'No-show';
   return 'Programmato';
 };
 
-const getStatusStyle = (status) => {
-  if (status === 'completed') {
+const getStatusStyle = (appointment) => {
+  if (appointment.approval_status === 'pending') {
+    return { backgroundColor: '#fef3c7', color: '#92400e' };
+  }
+  if (appointment.approval_status === 'rejected') {
+    return { backgroundColor: '#f3f4f6', color: '#4b5563' };
+  }
+  if (appointment.status === 'completed') {
     return { backgroundColor: '#dcfce7', color: 'var(--color-success-text)' };
   }
-  if (status === 'cancelled') {
+  if (appointment.status === 'cancelled') {
     return { backgroundColor: '#fef2f2', color: 'var(--color-danger-text)' };
   }
-  if (status === 'no_show') {
+  if (appointment.status === 'no_show') {
     return { backgroundColor: '#fff1f2', color: '#be123c' };
   }
   return { backgroundColor: '#eff6ff', color: '#1d4ed8' };
@@ -205,7 +213,14 @@ const getTimelineAppointmentStyle = (appointment, hasConflict) => {
     ownerColor: 'var(--color-warning-text)',
   };
 
-  if (appointment.status === 'completed') {
+  if (appointment.approval_status === 'pending') {
+    palette = {
+      backgroundColor: '#fef3c7',
+      borderColor: '#f59e0b',
+      textColor: '#92400e',
+      ownerColor: '#78350f',
+    };
+  } else if (appointment.status === 'completed') {
     palette = {
       backgroundColor: '#dcfce7',
       borderColor: '#22c55e',
@@ -233,6 +248,8 @@ const getTimelineAppointmentStyle = (appointment, hasConflict) => {
 };
 
 const getTimelineStatusDescription = (appointment) => {
+  if (appointment.approval_status === 'pending') return 'Richiesta in attesa';
+  if (appointment.approval_status === 'rejected') return 'Richiesta rifiutata';
   if (appointment.status === 'completed') return 'Completato';
   if (appointment.status === 'cancelled') return 'Annullato';
   if (appointment.status === 'no_show') return 'No-show';
@@ -450,7 +467,7 @@ export default function Calendar() {
       const { fromIso, toIso } = toIsoDateRange(fromDate, toDate);
       const [clientData, appointmentData] = await Promise.all([
         getAllClients(),
-        getAppointments({ from: fromIso, to: toIso }),
+        getAppointments({ from: fromIso, to: toIso, includePending: true }),
       ]);
 
       setClients(clientData);
@@ -778,9 +795,9 @@ export default function Calendar() {
             </div>
             <span
               className="px-3 py-1 rounded-full text-xs font-bold shrink-0"
-              style={getStatusStyle(appointment.status)}
+              style={getStatusStyle(appointment)}
             >
-              {getStatusLabel(appointment.status)}
+              {getStatusLabel(appointment)}
             </span>
           </div>
 
@@ -1238,9 +1255,9 @@ export default function Calendar() {
                 <div className="flex flex-wrap gap-3 items-center mb-3">
                   <span
                     className="px-3 py-1 rounded-full text-xs font-bold"
-                    style={getStatusStyle(selectedAppointment.status)}
+                    style={getStatusStyle(selectedAppointment)}
                   >
-                    {getStatusLabel(selectedAppointment.status)}
+                    {getStatusLabel(selectedAppointment)}
                   </span>
                   {conflictIds.has(selectedAppointment.id) && (
                     <span

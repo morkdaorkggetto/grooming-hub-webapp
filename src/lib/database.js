@@ -1112,6 +1112,40 @@ export const getAppointments = async (filters = {}) => {
   }
 };
 
+export const getPendingAppointmentRequests = async () => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Utente non autenticato');
+
+    const { data, error } = await supabase
+      .from('appointments')
+      .select(`
+        id,
+        user_id,
+        client_id,
+        scheduled_at,
+        duration_minutes,
+        status,
+        approval_status,
+        appointment_source,
+        requested_by_customer_id,
+        notes,
+        created_at,
+        client:clients(id, name, owner, phone)
+      `)
+      .eq('user_id', user.id)
+      .eq('approval_status', 'pending')
+      .eq('appointment_source', 'customer')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Errore caricamento richieste appuntamento:', error.message);
+    throw new Error(`Non riesco a caricare le richieste appuntamento: ${error.message}`);
+  }
+};
+
 /**
  * Aggiorna lo stato di un appuntamento.
  * Se passa a no_show applica penalità automatica cliente.

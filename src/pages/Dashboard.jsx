@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllClients } from '../lib/database';
+import { getAllClients, getPendingAppointmentRequests } from '../lib/database';
 import { getCurrentUser, logout } from '../lib/supabaseClient';
 import AppHeader from '../components/AppHeader';
 import ClientCard from '../components/ClientCard';
+
+const formatRequestDateTime = (iso) =>
+  new Date(iso).toLocaleString('it-IT', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
 /**
  * Dashboard — Pagina principale
@@ -18,6 +26,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
+  const [pendingRequests, setPendingRequests] = useState([]);
 
   /**
    * Carica clienti all'avvio e ogni volta che torna a questa pagina
@@ -70,8 +79,12 @@ export default function Dashboard() {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
 
-      const data = await getAllClients();
+      const [data, requestData] = await Promise.all([
+        getAllClients(),
+        getPendingAppointmentRequests(),
+      ]);
       setClients(data);
+      setPendingRequests(requestData);
     } catch (err) {
       setError(err.message || 'Errore nel caricamento clienti');
       console.error(err);
@@ -273,6 +286,70 @@ export default function Dashboard() {
               Riprova
             </button>
           </div>
+        )}
+
+        {pendingRequests.length > 0 && (
+          <section
+            className="mb-8 rounded-[28px] border p-5 sm:p-6 shadow-sm"
+            style={{
+              backgroundColor: '#fff7ed',
+              borderColor: '#fed7aa',
+            }}
+          >
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+              <div>
+                <p
+                  className="text-xs uppercase tracking-[0.22em] font-semibold mb-2"
+                  style={{ color: '#9a3412' }}
+                >
+                  Richieste appuntamento
+                </p>
+                <h2 className="text-xl font-bold" style={{ color: '#7c2d12' }}>
+                  {pendingRequests.length === 1
+                    ? '1 richiesta cliente da confermare'
+                    : `${pendingRequests.length} richieste cliente da confermare`}
+                </h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {pendingRequests.slice(0, 3).map((request) => (
+                    <span
+                      key={request.id}
+                      className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold"
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderColor: '#fdba74',
+                        color: '#7c2d12',
+                      }}
+                    >
+                      {request.client?.name || 'Cliente'} · {formatRequestDateTime(request.scheduled_at)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleOpenDailyAppointments}
+                  className="px-5 py-3 rounded-2xl font-bold text-white transition"
+                  style={{ backgroundColor: '#c2410c' }}
+                >
+                  Gestisci richieste
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOpenCalendar}
+                  className="px-5 py-3 rounded-2xl font-bold transition border"
+                  style={{
+                    backgroundColor: '#ffffff',
+                    borderColor: '#fdba74',
+                    color: '#9a3412',
+                  }}
+                >
+                  Vedi calendario
+                </button>
+              </div>
+            </div>
+          </section>
         )}
 
         {/* Search + Add button */}
