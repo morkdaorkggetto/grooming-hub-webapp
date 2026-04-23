@@ -25,6 +25,35 @@ const buildWhatsAppUrl = (phone, message) => {
   return `https://wa.me/${normalizedPhone}?${params.toString()}`;
 };
 
+const formatDateTime = (date) =>
+  date.toLocaleString('it-IT', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+const formatAppointmentRange = ({ scheduledAt, date, time, durationMinutes = 60 } = {}) => {
+  const start = scheduledAt
+    ? new Date(scheduledAt)
+    : date && time
+      ? new Date(`${date}T${time}`)
+      : null;
+
+  if (!start || Number.isNaN(start.getTime())) return '';
+
+  const duration = Number(durationMinutes) || 60;
+  const end = new Date(start.getTime() + duration * 60000);
+  const endTime = end.toLocaleTimeString('it-IT', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  return `${formatDateTime(start)}-${endTime}`;
+};
+
 const DEFAULT_PUBLIC_GROOMING_HUB_PHONE = '393332979797';
 const PUBLIC_GROOMING_HUB_PHONE =
   import.meta.env.VITE_PUBLIC_GROOMING_WHATSAPP || DEFAULT_PUBLIC_GROOMING_HUB_PHONE;
@@ -75,6 +104,43 @@ export const getDraftAppointmentWhatsAppUrl = ({ client, date, time }) => {
     : `Buongiorno ${ownerName}, ti contatto da Grooming Hub per fissare un appuntamento per ${clientName}.`;
 
   return buildWhatsAppUrl(client?.phone, message);
+};
+
+export const getCustomerAppointmentRequestWhatsAppUrl = ({
+  petName,
+  date,
+  time,
+  durationMinutes,
+  notes,
+} = {}) => {
+  const clientName = petName || 'il mio cane';
+  const when = formatAppointmentRange({ date, time, durationMinutes });
+  const noteText = notes ? ` Note: ${notes}.` : '';
+  const message = when
+    ? `Ciao, vorrei richiedere un appuntamento per ${clientName} nella fascia ${when}.${noteText}`
+    : `Ciao, vorrei richiedere un appuntamento per ${clientName}.${noteText}`;
+
+  return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
+};
+
+export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) => {
+  const clientName = appointment?.client?.name || 'il tuo cane';
+  const ownerName = appointment?.client?.owner || 'cliente';
+  const when = formatAppointmentRange({
+    scheduledAt: appointment?.scheduled_at,
+    durationMinutes: appointment?.duration_minutes,
+  });
+
+  const message =
+    approvalStatus === 'approved'
+      ? when
+        ? `Buongiorno ${ownerName}, confermiamo l'appuntamento per ${clientName} nella fascia ${when}.`
+        : `Buongiorno ${ownerName}, confermiamo l'appuntamento per ${clientName}.`
+      : when
+        ? `Buongiorno ${ownerName}, la fascia richiesta per ${clientName} (${when}) non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`
+        : `Buongiorno ${ownerName}, la fascia richiesta per ${clientName} non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`;
+
+  return buildWhatsAppUrl(appointment?.client?.phone, message);
 };
 
 export const getContactWhatsAppUrl = (contact) => {

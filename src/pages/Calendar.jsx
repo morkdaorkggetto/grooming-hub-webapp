@@ -5,11 +5,13 @@ import {
   deleteAppointment,
   getAllClients,
   getAppointments,
+  updateAppointmentApproval,
   updateAppointmentSchedule,
   updateAppointmentStatus,
   VALID_APPOINTMENT_STATUSES,
 } from '../lib/database';
 import {
+  getAppointmentApprovalWhatsAppUrl,
   getAppointmentWhatsAppUrl,
   getDraftAppointmentWhatsAppUrl,
 } from '../lib/whatsapp';
@@ -582,6 +584,35 @@ export default function Calendar() {
       await loadData();
     } catch (err) {
       setError(err.message || 'Errore aggiornamento stato');
+    }
+  };
+
+  const handleApprovalChange = async (appointment, approvalStatus) => {
+    try {
+      setUpdatingAppointment(true);
+      setError('');
+      setSuccess('');
+
+      const updatedAppointment = await updateAppointmentApproval(appointment.id, approvalStatus);
+      const whatsappUrl = getAppointmentApprovalWhatsAppUrl(updatedAppointment, approvalStatus);
+
+      if (whatsappUrl) {
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        setError('Richiesta aggiornata, ma numero cliente non disponibile per WhatsApp.');
+      }
+
+      setSelectedAppointment(updatedAppointment);
+      setSuccess(
+        approvalStatus === 'approved'
+          ? 'Richiesta appuntamento approvata. WhatsApp di conferma pronto.'
+          : 'Richiesta appuntamento rifiutata. WhatsApp per nuova fascia pronto.'
+      );
+      await loadData();
+    } catch (err) {
+      setError(err.message || 'Errore aggiornamento richiesta');
+    } finally {
+      setUpdatingAppointment(false);
     }
   };
 
@@ -1438,6 +1469,40 @@ export default function Calendar() {
                 <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold mb-3">
                   Gestione appuntamento
                 </h3>
+                {selectedAppointment.approval_status === 'pending' && (
+                  <div
+                    className="rounded-2xl border p-3 mb-4"
+                    style={{
+                      borderColor: '#fde68a',
+                      backgroundColor: '#fffbeb',
+                    }}
+                  >
+                    <p
+                      className="text-sm font-semibold mb-3"
+                      style={{ color: '#92400e' }}
+                    >
+                      Richiesta cliente in attesa di conferma
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleApprovalChange(selectedAppointment, 'approved')}
+                        disabled={updatingAppointment}
+                        className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-60"
+                        style={{ backgroundColor: '#16a34a' }}
+                      >
+                        {updatingAppointment ? 'Aggiorno...' : 'Approva e WhatsApp'}
+                      </button>
+                      <button
+                        onClick={() => handleApprovalChange(selectedAppointment, 'rejected')}
+                        disabled={updatingAppointment}
+                        className="px-4 py-2 rounded-lg text-white font-medium disabled:opacity-60"
+                        style={{ backgroundColor: '#e11d48' }}
+                      >
+                        {updatingAppointment ? 'Aggiorno...' : 'Rifiuta e WhatsApp'}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleStatusChange(selectedAppointment.id, 'completed')}

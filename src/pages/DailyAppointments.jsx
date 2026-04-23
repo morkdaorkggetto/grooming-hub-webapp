@@ -5,7 +5,10 @@ import {
   updateAppointmentApproval,
   updateAppointmentStatus,
 } from '../lib/database';
-import { getAppointmentWhatsAppUrl } from '../lib/whatsapp';
+import {
+  getAppointmentApprovalWhatsAppUrl,
+  getAppointmentWhatsAppUrl,
+} from '../lib/whatsapp';
 import AppHeader from '../components/AppHeader';
 
 const toLocalDateString = (date) => {
@@ -189,17 +192,25 @@ export default function DailyAppointments() {
     }
   };
 
-  const handleApproval = async (appointmentId, approvalStatus) => {
+  const handleApproval = async (appointment, approvalStatus) => {
     setSuccess('');
     setError('');
 
     try {
-      setUpdatingId(appointmentId);
-      await updateAppointmentApproval(appointmentId, approvalStatus);
+      setUpdatingId(appointment.id);
+      const updatedAppointment = await updateAppointmentApproval(appointment.id, approvalStatus);
+      const whatsappUrl = getAppointmentApprovalWhatsAppUrl(updatedAppointment, approvalStatus);
+
+      if (whatsappUrl) {
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        setError('Richiesta aggiornata, ma numero cliente non disponibile per WhatsApp.');
+      }
+
       setSuccess(
         approvalStatus === 'approved'
-          ? 'Richiesta appuntamento approvata.'
-          : 'Richiesta appuntamento rifiutata.'
+          ? 'Richiesta appuntamento approvata. WhatsApp di conferma pronto.'
+          : 'Richiesta appuntamento rifiutata. WhatsApp per nuova fascia pronto.'
       );
       await loadAppointments();
     } catch (err) {
@@ -297,7 +308,7 @@ export default function DailyAppointments() {
             {isPendingRequest ? (
               <>
                 <button
-                  onClick={() => handleApproval(appointment.id, 'approved')}
+                  onClick={() => handleApproval(appointment, 'approved')}
                   disabled={updatingId === appointment.id}
                   className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ backgroundColor: '#15803d' }}
@@ -305,7 +316,7 @@ export default function DailyAppointments() {
                   {updatingId === appointment.id ? 'Aggiorno...' : 'Approva'}
                 </button>
                 <button
-                  onClick={() => handleApproval(appointment.id, 'rejected')}
+                  onClick={() => handleApproval(appointment, 'rejected')}
                   disabled={updatingId === appointment.id}
                   className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ backgroundColor: '#be123c' }}

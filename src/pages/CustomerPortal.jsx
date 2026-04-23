@@ -2,7 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createCustomerAppointmentRequest, getCustomerPortalData } from '../lib/database';
 import { logout } from '../lib/supabaseClient';
-import { getPublicGroomingHubWhatsAppUrl } from '../lib/whatsapp';
+import {
+  getCustomerAppointmentRequestWhatsAppUrl,
+  getPublicGroomingHubWhatsAppUrl,
+} from '../lib/whatsapp';
 import { getFidelityBadgeStyle, getFidelityLabel, getFidelityTierSnapshot } from '../lib/fidelity';
 import publicPetCardIllustration from '../assets/public-pet-card-illustration.png';
 
@@ -120,6 +123,18 @@ function PetPortalCard({
     });
 
     if (ok) {
+      const whatsappUrl = getCustomerAppointmentRequestWhatsAppUrl({
+        petName: client.name,
+        date: requestForm.date,
+        time: requestForm.time,
+        durationMinutes: requestForm.durationMinutes,
+        notes: requestForm.notes,
+      });
+
+      if (whatsappUrl) {
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      }
+
       setRequestForm((prev) => ({ ...prev, notes: '' }));
     }
   };
