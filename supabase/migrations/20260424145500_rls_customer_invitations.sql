@@ -8,10 +8,12 @@
 
 BEGIN;
 
--- Cleanup policy originali (operator-scoped via user_id)
+-- Cleanup policy originali (operator-scoped via user_id) + policy legacy
+-- introdotta da M11-bis come ponte fino a questo file.
 DROP POLICY IF EXISTS "Operators can view their customer invitations"   ON public.customer_invitations;
 DROP POLICY IF EXISTS "Operators can create customer invitations"       ON public.customer_invitations;
 DROP POLICY IF EXISTS "Operators can delete their customer invitations" ON public.customer_invitations;
+DROP POLICY IF EXISTS customer_invitations_operator_legacy              ON public.customer_invitations;
 
 CREATE POLICY customer_invitations_staff_all
   ON public.customer_invitations FOR ALL
