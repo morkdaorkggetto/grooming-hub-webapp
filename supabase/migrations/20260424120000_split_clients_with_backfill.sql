@@ -275,7 +275,17 @@ DROP POLICY IF EXISTS "Users can view visits of their clients"      ON public.vi
 DROP POLICY IF EXISTS "Users can insert visits to their clients"    ON public.visits;
 DROP POLICY IF EXISTS "Users can update visits of their clients"    ON public.visits;
 DROP POLICY IF EXISTS "Users can delete visits of their clients"    ON public.visits;
--- Le policy su `clients` si autodistruggono col DROP TABLE in [9].
+-- customer_invitations: la policy "Operators can create customer invitations"
+-- referenzia direttamente `client_id`. Postgres rifiuta DROP COLUMN se una
+-- policy dipende dalla colonna; questa MANCAVA nel primo apply (errore
+-- SQLSTATE 2BP01 in 7e). Le altre due (view/delete) non sono bloccanti ma
+-- vengono droppate per coerenza: M33 (rls_customer_invitations) le sostituisce
+-- comunque con la versione tenant-aware.
+DROP POLICY IF EXISTS "Operators can create customer invitations"   ON public.customer_invitations;
+DROP POLICY IF EXISTS "Operators can view their customer invitations"   ON public.customer_invitations;
+DROP POLICY IF EXISTS "Operators can delete their customer invitations" ON public.customer_invitations;
+-- Le policy su `clients` e `customer_client_links` si autodistruggono col
+-- DROP TABLE in [8].
 
 -- ============================================================================
 -- [6] Backfill: per ogni client crea (o riusa) customer + crea pet.
@@ -816,5 +826,15 @@ CREATE POLICY customers_self_update
   ON public.customers FOR UPDATE
   USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
+
+-- customer_invitations legacy: ponte staff-only fino a M33 (rls_customer_invitations).
+-- Garantisce che lo staff possa continuare a creare/leggere/eliminare inviti se
+-- l'apply si interrompe fra M11-bis e M33 (es. finestra di manutenzione spezzata).
+-- Coerente con il pattern già applicato a pets/customers/visits/reward_points.
+-- Colonna `operator_user_id` (uuid NOT NULL) verificata sul DB demo prima del fix.
+CREATE POLICY customer_invitations_operator_legacy
+  ON public.customer_invitations FOR ALL
+  USING (auth.uid() = operator_user_id)
+  WITH CHECK (auth.uid() = operator_user_id);
 
 COMMIT;
