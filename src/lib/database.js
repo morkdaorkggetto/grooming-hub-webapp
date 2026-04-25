@@ -153,6 +153,20 @@ async function userHasCustomerClientLinks(userId) {
   return (data || []).length > 0;
 }
 
+async function userOwnsClients(userId) {
+  if (!userId) return false;
+
+  const { data, error } = await supabase
+    .from('clients')
+    .select('id')
+    .eq('user_id', userId)
+    .limit(1);
+
+  if (error) throw error;
+
+  return (data || []).length > 0;
+}
+
 export const getUserProfile = async (userId) => {
   try {
     if (!userId) return null;
@@ -165,7 +179,31 @@ export const getUserProfile = async (userId) => {
 
     if (error) throw error;
 
-    if (data?.role === 'operator' && await userHasCustomerClientLinks(userId)) {
+    const [hasOwnedClients, hasCustomerLinks] = await Promise.all([
+      userOwnsClients(userId),
+      userHasCustomerClientLinks(userId),
+    ]);
+
+    if (hasOwnedClients && data?.role !== 'operator') {
+      const { data: repairedProfile, error: repairError } = await supabase
+        .from('profiles')
+        .upsert(
+          {
+            id: userId,
+            business_name: data?.business_name || null,
+            role: 'operator',
+          },
+          { onConflict: 'id' }
+        )
+        .select('id, business_name, role, created_at')
+        .single();
+
+      if (repairError) throw repairError;
+
+      return repairedProfile || { ...data, role: 'operator' };
+    }
+
+    if (!hasOwnedClients && data?.role === 'operator' && hasCustomerLinks) {
       const { data: repairedProfile, error: repairError } = await supabase
         .from('profiles')
         .update({ role: 'customer' })
@@ -189,10 +227,13 @@ export const ensureCustomerProfile = async (user) => {
   try {
     if (!user?.id) throw new Error('Utente non autenticato');
 
-    const existingProfile = await getUserProfile(user.id);
-    const hasCustomerLinks = await userHasCustomerClientLinks(user.id);
+    const [existingProfile, hasCustomerLinks, hasOwnedClients] = await Promise.all([
+      getUserProfile(user.id),
+      userHasCustomerClientLinks(user.id),
+      userOwnsClients(user.id),
+    ]);
 
-    if (existingProfile?.role === 'operator' && !hasCustomerLinks) {
+    if (hasOwnedClients || (existingProfile?.role === 'operator' && !hasCustomerLinks)) {
       throw new Error('Questo account e\' un account operatore. Usa o crea un account cliente separato.');
     }
 
@@ -222,10 +263,13 @@ export const ensureOperatorProfile = async (user) => {
   try {
     if (!user?.id) throw new Error('Utente non autenticato');
 
-    const existingProfile = await getUserProfile(user.id);
-    const hasCustomerLinks = await userHasCustomerClientLinks(user.id);
+    const [existingProfile, hasCustomerLinks, hasOwnedClients] = await Promise.all([
+      getUserProfile(user.id),
+      userHasCustomerClientLinks(user.id),
+      userOwnsClients(user.id),
+    ]);
 
-    if (existingProfile?.role === 'customer' || hasCustomerLinks) {
+    if (!hasOwnedClients && (existingProfile?.role === 'customer' || hasCustomerLinks)) {
       throw new Error('Questo account e\' un account cliente. Accedi dall\'area cliente.');
     }
 
