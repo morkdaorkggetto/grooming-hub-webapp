@@ -528,7 +528,13 @@ ALTER TABLE public.customer_invitations
 -- ============================================================================
 -- [8] Rimozione colonna-ponte e drop tabelle dismissate.
 -- ============================================================================
-DROP INDEX IF EXISTS public.pets_legacy_client_id_key;  -- dovuto al UNIQUE inline
+-- Drop esplicito del UNIQUE constraint generato dall'inline
+-- `legacy_client_id text UNIQUE` allo step [4]. Postgres genera anche un
+-- indice `pets_legacy_client_id_key` *legato al constraint*, quindi un
+-- `DROP INDEX` puro fallisce con SQLSTATE 2BP01 ("constraint requires it").
+-- DROP CONSTRAINT cascadea anche l'indice. DROP COLUMN sotto cascadeerebbe
+-- comunque, ma esplicitiamo per chiarezza e pulizia.
+ALTER TABLE public.pets DROP CONSTRAINT IF EXISTS pets_legacy_client_id_key;
 ALTER TABLE public.pets DROP COLUMN legacy_client_id;
 
 DROP TABLE IF EXISTS public.customer_client_links;
