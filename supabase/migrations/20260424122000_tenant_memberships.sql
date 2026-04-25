@@ -3,6 +3,15 @@
 -- ----------------------------------------------------------------------------
 -- L'autorizzazione app-level passa qui. `profiles.role` (legacy) resta fino a
 -- deprecazione completa (vedi M14).
+--
+-- NOTA: a seguito di M11-bis, l'enum `tenant_role`, la tabella
+-- `tenant_memberships` e una prima riga di seed (l'operatore demo come
+-- `owner` del tenant pilota) potrebbero già esistere. Tutto il DDL qui è
+-- idempotente (`CREATE TYPE` in `DO BEGIN ... EXCEPTION WHEN duplicate_object`,
+-- `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`). M13 può
+-- girare dopo M11-bis senza effetti collaterali. La duplicazione strutturata
+-- è intenzionale: M11-bis anticipa il DDL per poter eseguire il mini-seed
+-- nella stessa transazione.
 -- ============================================================================
 
 BEGIN;
