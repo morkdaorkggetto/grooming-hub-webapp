@@ -284,8 +284,15 @@ DROP POLICY IF EXISTS "Users can delete visits of their clients"    ON public.vi
 DROP POLICY IF EXISTS "Operators can create customer invitations"   ON public.customer_invitations;
 DROP POLICY IF EXISTS "Operators can view their customer invitations"   ON public.customer_invitations;
 DROP POLICY IF EXISTS "Operators can delete their customer invitations" ON public.customer_invitations;
--- Le policy su `clients` e `customer_client_links` si autodistruggono col
--- DROP TABLE in [8].
+-- Bloccante cross-table: la policy è ON clients, ma referenzia
+-- customer_client_links nel suo predicato (EXISTS subquery). Postgres
+-- registra la dipendenza in pg_depend (deptype 'n'). Rifiuta DROP TABLE
+-- customer_client_links finché la policy esiste. Auto-droppata sarebbe
+-- dal DROP TABLE clients, ma quel drop arriva dopo ccl in step [8] →
+-- l'ordine è incompatibile senza questo drop esplicito qui.
+DROP POLICY IF EXISTS "Customers can view linked clients" ON public.clients;
+-- Le altre policy su `clients` e `customer_client_links` si autodistruggono
+-- col DROP TABLE in [8] (verificato via pg_depend deptype='a').
 
 -- ============================================================================
 -- [6] Backfill: per ogni client crea (o riusa) customer + crea pet.
