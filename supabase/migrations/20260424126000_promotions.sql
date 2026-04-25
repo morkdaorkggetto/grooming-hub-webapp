@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS public.promotions (
   created_at     timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX promotions_tenant_active_idx ON public.promotions (tenant_id, is_active, display_order);
-CREATE INDEX promotions_valid_to_idx      ON public.promotions (valid_to);
+CREATE INDEX IF NOT EXISTS promotions_tenant_active_idx ON public.promotions (tenant_id, is_active, display_order);
+CREATE INDEX IF NOT EXISTS promotions_valid_to_idx      ON public.promotions (valid_to);
 
 ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
 

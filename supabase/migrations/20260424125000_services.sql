@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS public.services (
   updated_at        timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX services_tenant_active_idx ON public.services (tenant_id, is_active, display_order);
-CREATE INDEX services_category_idx      ON public.services (tenant_id, category) WHERE category IS NOT NULL;
+CREATE INDEX IF NOT EXISTS services_tenant_active_idx ON public.services (tenant_id, is_active, display_order);
+CREATE INDEX IF NOT EXISTS services_category_idx      ON public.services (tenant_id, category) WHERE category IS NOT NULL;
 
 CREATE OR REPLACE TRIGGER update_services_timestamp
   BEFORE UPDATE ON public.services

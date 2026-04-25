@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS public.tenant_memberships (
   UNIQUE (tenant_id, user_id, role)
 );
 
-CREATE INDEX tenant_memberships_user_idx        ON public.tenant_memberships (user_id);
-CREATE INDEX tenant_memberships_tenant_role_idx ON public.tenant_memberships (tenant_id, role);
+CREATE INDEX IF NOT EXISTS tenant_memberships_user_idx        ON public.tenant_memberships (user_id);
+CREATE INDEX IF NOT EXISTS tenant_memberships_tenant_role_idx ON public.tenant_memberships (tenant_id, role);
 
 ALTER TABLE public.tenant_memberships ENABLE ROW LEVEL SECURITY;
 
