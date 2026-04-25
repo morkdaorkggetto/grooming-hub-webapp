@@ -5,6 +5,14 @@
 -- Il customer vede solo la propria riga.
 -- INSERT lato customer: gestito dalla RPC `accept_customer_invite`
 -- (SECURITY DEFINER bypassa RLS).
+--
+-- Nota su `user_id IS NULL` (anagrafiche pre-account introdotte da M11-bis):
+-- le policy `*_self_*` filtrano via `user_id = auth.uid()`. In SQL standard,
+-- `NULL = qualunque` ritorna NULL → il predicato non matcha. Conseguenza:
+-- le anagrafiche senza account (operator-popolate ma mai adottate via
+-- accept_customer_invite) sono **invisibili al customer** per costruzione,
+-- visibili solo allo staff via `customers_staff_all`. Non serve un
+-- predicato esplicito `AND user_id IS NOT NULL`.
 -- ============================================================================
 
 BEGIN;

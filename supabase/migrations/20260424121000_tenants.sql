@@ -3,6 +3,13 @@
 -- ----------------------------------------------------------------------------
 -- Decisione acquisita: slug = 'grooming-hub', name = 'Grooming HUB'.
 -- L'UUID generato sarà usato come `tenant_id` nei backfill di M18/M19.
+--
+-- NOTA: a seguito di M11-bis, questa tabella e il suo seed potrebbero già
+-- esistere. Tutto il DDL qui è idempotente (`CREATE TABLE IF NOT EXISTS`,
+-- `CREATE INDEX IF NOT EXISTS`, `ON CONFLICT DO NOTHING`). M12 può girare
+-- dopo M11-bis senza effetti collaterali. La duplicazione strutturata è
+-- intenzionale: M11-bis anticipa il DDL per poter eseguire il mini-seed
+-- `tenant_memberships` nella stessa transazione.
 -- ============================================================================
 
 BEGIN;
