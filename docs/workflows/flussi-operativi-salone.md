@@ -8,7 +8,7 @@ Lo riempiamo insieme, prendendoci il tempo necessario. Le sezioni si affrontano 
 
 ## Sintesi delle osservazioni emerse
 
-Dal primo round di contributi di Davide e Roby (aprile 2026) emergono sei osservazioni che orientano le scelte di prodotto:
+Dai contributi di Davide e Roby (aprile 2026, due round) emergono nove osservazioni che orientano le scelte di prodotto:
 
 **1. Il salone come luogo di accoglienza, non come fornitore di servizi.** L'app customer non deve sentirsi transazionale. Il prodotto digitale deve riflettere la qualità relazionale del salone offline.
 
@@ -18,9 +18,17 @@ Dal primo round di contributi di Davide e Roby (aprile 2026) emergono sei osserv
 
 **4. Il listino è strutturato in due pacchetti.** Bagno e Toelettatura Completa. Niente menù modulare. La pagina di prenotazione customer sarà semplice.
 
-**5. Il momento del ritiro è uno spazio di consulenza.** Davide e Roby condividono osservazioni sul comportamento del pet. Da capire se queste osservazioni vadano persistite nel sistema (note di visita accessibili al customer).
+**5. Il momento del ritiro è uno spazio di consulenza.** Davide e Roby condividono osservazioni sul comportamento del pet. Le criticità o i comportamenti inadeguati vengono registrati direttamente nell'app — distinguiamo quindi tra "consigli al cliente" (potenzialmente condivisibili) e "note operative interne" (riservate allo staff).
 
 **6. La visione a tre anni è di posizionamento culturale, non di scaling.** Eccellenza territoriale, punto di aggregazione, missione di sensibilizzazione. Il SaaS futuro dovrà attirare saloni con vocazione affine.
+
+**7. Visita = singolo appuntamento.** Definizione netta. Ogni venuta del pet è una visita, con i suoi servizi e il suo ritiro. La scheda visita corrisponde a un evento puntuale.
+
+**8. Due flussi di prenotazione distinti.** Cliente nuovo: mai prenotazione diretta, sempre telefonata di accoglienza. Cliente storico: prenotazione possibile via app, con almeno una settimana di anticipo. L'app deve riflettere questa biforcazione.
+
+**9. WhatsApp è il canale primario, anche audio.** Le comunicazioni sono ricche, conversazionali, non transazionali. Il prodotto digitale deve dialogare con questa pratica, non sostituirla. Possibili integrazioni con WhatsApp invece di sistemi di chat propri.
+
+**Nota di contesto (Luigi, aprile 2026):** Davide e Roby sono entrambi laureati in Scienze Naturali. La missione di sensibilizzazione alla tutela del mondo animale non è una posa comunicativa ma una scelta di vita radicata nella loro formazione. È un dato che orienta le scelte di prodotto: il salone non è "un negozio con missione" ma "una missione che si esprime attraverso un negozio".
 
 ---
 
@@ -76,17 +84,15 @@ Sull'app customer: vorreste che il cliente potesse personalizzare la "sua" foto 
 
 "Visita" nel vostro vocabolario è un concetto che vorremmo precisare.
 
-### Risposta di Davide e Roby (primo round, parziale)
+### Risposta di Davide e Roby
 
-Al momento del ritiro, dedichiamo un momento per dare qualche consiglio utile e condividere le nostre osservazioni sul comportamento dell'animale durante la permanenza da noi.
+**Primo round (parziale):** Al momento del ritiro, dedichiamo un momento per dare qualche consiglio utile e condividere le nostre osservazioni sul comportamento dell'animale durante la permanenza da noi.
+
+**Secondo round:** La visita coincide con il singolo appuntamento. Al ritiro analizziamo il comportamento dell'animale e forniamo al cliente consigli o raccomandazioni specifiche. Qualora dovessero emergere criticità o comportamenti inadeguati, provvederemo a registrarli direttamente nell'applicazione.
 
 ### Punti aperti per ulteriori approfondimenti
 
-Cosa è una "visita" per voi nel concreto? È il singolo passaggio del pet, comprensivo di tutto quello che gli viene fatto in quell'occasione? Oppure ha una definizione più stretta o più larga?
-
-I "consigli al ritiro" e le "osservazioni sul comportamento" sono cose che oggi rimangono nello scambio verbale, oppure le scrivete da qualche parte? Vi piacerebbe se l'app potesse persistere queste osservazioni e renderle accessibili al cliente dopo la visita (storico)?
-
-Si scrivono note dopo una visita? Tipo "il cane oggi era nervoso", "ha avuto un piccolo problema all'orecchio destro", "la padrona ha chiesto un taglio diverso la prossima volta"? Dove finiscono queste note — sulla scheda pet, sulla scheda visita, in entrambe?
+Le criticità registrate nell'app sono visibili al cliente nella scheda della sua visita, oppure restano interne allo staff? Probabilmente vorremmo distinguere tra "consigli e raccomandazioni" (condivisibili col cliente, es. "il cane oggi era nervoso, consigliamo questa abitudine") e "note operative interne" (riservate allo staff, es. "padrone difficile da gestire, attenzione alle modalità").
 
 Esistono visite "speciali" — primo contatto, ricontrollo dopo problemi, visite stagionali tipo prima dell'estate per il pelo — che hanno un trattamento diverso?
 
@@ -116,51 +122,57 @@ Le "preferenze estetiche" del taglio sono qualcosa che il cliente potrebbe espri
 
 Questo è il punto più delicato del prodotto.
 
+### Risposta di Davide e Roby (secondo round)
+
+Per i nuovi clienti raccogliamo molti dati anche telefonicamente, soprattutto se non sono mai stati in salone. Per quelli storici, invece, fissiamo direttamente l'appuntamento. È importante che prenotino almeno una settimana prima.
+
 ### Punti aperti per ulteriori approfondimenti
 
-Avete detto in una conversazione precedente che gli appuntamenti programmati per pet sconosciuti sono "pericolosi" perché bisogna prima vedere il cane. Possiamo descrivere meglio questa logica? Cosa significa nel concreto — il cliente nuovo che chiama, cosa gli rispondete?
+Per i clienti storici, dove avviene la prenotazione? Telefonata, WhatsApp, di persona quando vengono per un'altra visita? L'app dovrebbe affiancarsi a questi canali o sostituirli?
 
-Per i clienti che già conoscete, come gestite oggi gli appuntamenti? Telefono, WhatsApp, di persona quando vengono per un'altra visita?
+Quando il cliente storico richiede una prenotazione via app, quale è il flusso ideale di approvazione da parte vostra? Davide o Roby aprono l'app e confermano nei momenti morti? In real-time non realistico?
 
-Esistono "appuntamenti ricorrenti" — clienti che vengono ogni X settimane in modo prevedibile? Come li gestite?
+L'anticipo minimo di una settimana è strict (l'app blocca richieste sotto i 7 giorni) o flexible (l'app le permette ma le segnala come "richiede contatto telefonico")?
 
-Se l'app permette al cliente di richiedere un appuntamento, quale è il flusso ideale di approvazione? Davide o Roby aprono l'app e confermano? Si guarda l'agenda fisica e si risponde nel pomeriggio? In real-time non realistico?
-
-Quanto in anticipo ha senso che un cliente possa prenotare? Una settimana? Un mese? Non c'è limite?
-
-Al cliente che richiede un appuntamento e voi non potete confermarlo subito, cosa preferite che dica l'app? "Ti ricontatteremo a breve" è sufficiente, o vorreste che l'app comunicasse un tempo stimato?
+Esistono "appuntamenti ricorrenti" — clienti che vengono ogni X settimane in modo prevedibile? Vi sarebbe comodo poterli "schedulare" automaticamente?
 
 ---
 
 ## 6. Comunicazioni con i clienti
 
-Il telefono è centrale nel vostro lavoro.
+Il telefono e WhatsApp sono i canali centrali.
+
+### Risposta di Davide e Roby (secondo round)
+
+Utilizziamo telefonate, messaggi WhatsApp o messaggi audio WhatsApp. Il tono è sempre molto cordiale e riusciamo ad ottenere tutte le informazioni necessarie.
 
 ### Punti aperti per ulteriori approfondimenti
 
-Quali canali usate oggi per comunicare con i clienti? WhatsApp, SMS, telefonate, email? In quali proporzioni?
+L'uso dei messaggi audio WhatsApp è interessante: suggerisce che le comunicazioni sono spesso ricche, conversazionali, non transazionali. L'app non dovrebbe duplicare un sistema di chat — potrebbe invece offrire scorciatoie verso WhatsApp ("contatta il salone su WhatsApp" come bottone), preservando il vostro canale di lavoro abituale.
 
-Cosa comunicate di solito? Promemoria appuntamenti, conferme, promozioni, auguri di compleanno (loro o del pet), foto del pet appena lavato, altro?
+Cosa comunicate di solito ai clienti? Promemoria appuntamenti, conferme, foto del pet appena lavato, auguri di compleanno (loro o del pet)?
 
-Esiste un "tono" del salone nelle comunicazioni? Formale, informale, ironico? Differenziate il tono in base al cliente?
+Ci sono comunicazioni che vi piacerebbe inviare ma che oggi è scomodo gestire a mano? Tipo "vorrei mandare una foto a tutti i clienti del cane appena finito ma è troppo lavoro"?
 
-Ci sono comunicazioni che vi piacerebbe inviare ma che oggi è scomodo gestire? Tipo "vorrei mandare una foto a tutti i clienti del cane appena finito ma è troppo lavoro farlo a mano"?
-
-L'app in futuro potrebbe inviare automaticamente comunicazioni a vostro nome (promemoria, conferme, post-visita). Quali vi piacerebbero? Quali invece vorreste continuare a fare voi a mano?
+L'app in futuro potrebbe inviare automaticamente comunicazioni a vostro nome (promemoria, conferme, post-visita). Quali sì, quali no?
 
 ---
 
 ## 7. Promozioni e fidelizzazione
 
+### Risposta di Davide e Roby (secondo round)
+
+Non abbiamo per ora una tessera fedeltà. Davide ci pensa da tantissimo e vorremmo averla.
+
 ### Punti aperti per ulteriori approfondimenti
 
-Avete mai fatto promozioni? Tipo "il quinto bagno gratis", sconto stagionale, pacchetti? Hanno funzionato?
+C'è già un'aspettativa positiva: la tessera fedeltà è una cosa che vorreste avere e che il prodotto digitale può portare. Probabilmente fuori scope per la Fase 1 dell'app, candidato forte per la Fase 2.
 
-Esistono clienti che ricevono attenzioni particolari (sconti, regali) per anzianità o frequenza? Sono cose informali o strutturate?
+Quando ci arriveremo: in che forma vorreste la tessera? Punti accumulati per servizio? Sconti dopo N visite? Premi per anniversari (compleanno cliente, compleanno pet, anniversario della prima visita)?
 
-Vorreste un sistema di "punti" o "tessera fedeltà" sull'app? In che forma?
+C'è un budget mentale per la "perdita" di una tessera fedeltà — sapete più o meno quanto vi costerà in sconti? È una domanda per dopo, ma vale la pena tenerla in mente prima di disegnarla.
 
-Vorreste poter inviare promozioni mirate a sottogruppi di clienti (es. solo a chi non viene da più di tre mesi, solo a chi ha un cane di taglia grande)? Oggi è qualcosa che non potete fare facilmente?
+Esistono già clienti che ricevono attenzioni informali (sconti, regali) per anzianità o frequenza? Sono cose che vorreste formalizzare nel sistema fedeltà o che restano "private" di Davide e Roby?
 
 ---
 
@@ -182,9 +194,21 @@ Cosa vi piace del gestionale attuale, che non vorreste perdere?
 
 ## 9. Visione del salone tra tre anni
 
-### Risposta di Davide e Roby (primo round, aprile 2026)
+### Risposta di Davide e Roby (primo round)
 
 Il nostro obiettivo per il prossimo triennio è trasformare il nostro negozio in un'eccellenza per il territorio. Completamente ristrutturato. Non desideriamo assolutamente che sia percepito come un semplice negozio, bensì come un punto di riferimento professionale e un luogo di aggregazione per tutti gli amanti del mondo animale. Come naturalisti, abbiamo una missione: vogliamo che ogni ambiente rifletta la qualità del nostro lavoro, aiutandoci a sensibilizzare le persone alla tutela di questo mondo.
+
+### Risposta di Davide e Roby (secondo round, post-scriptum)
+
+E comunque la Missione Naturalistica è da sempre la nostra missione. La riproponiamo in ogni cosa che facciamo. ♥️
+
+### Nota di contesto (Luigi, aprile 2026)
+
+Davide e Roby sono entrambi laureati in Scienze Naturali. La frase "come naturalisti, abbiamo una missione" non è marketing — è identità professionale radicata nella loro formazione. Il salone è l'estensione operativa di una vocazione scientifico-divulgativa, non l'inverso. Questo dato di contesto orienta diverse scelte di prodotto:
+
+- Lo spazio per contenuti educativi/divulgativi nell'app non è forzato, è coerente con la postura del salone.
+- Il posizionamento del SaaS futuro può cercare saloni con vocazione affine (segmento "missionario") oppure presentarsi a un mercato più ampio (segmento generico). Decisione strategica da prendere a tempo debito.
+- Le comunicazioni del prodotto possono permettersi un tono educativo ("sapevi che il pelo annodato dei cani può causare problemi cutanei?") senza sembrare forzate o didascaliche, perché rispecchiano la postura abituale del salone.
 
 ### Punti aperti per ulteriori approfondimenti
 
@@ -192,7 +216,7 @@ L'app — quando sarà finita — cosa vorreste che cambiasse nel vostro quotidi
 
 Ci sono cose che non vorreste mai dall'app? Tipo "non voglio ricevere notifiche di sera", "non voglio che i clienti possano cancellare appuntamenti senza chiamarmi prima"?
 
-La "missione naturalistica" che descrivete — sensibilizzare alla tutela del mondo animale — è qualcosa che vorreste passasse anche attraverso l'app? Tipo contenuti educativi, segnalazioni, link a iniziative? O preferite tenerla nello spazio fisico del salone?
+La missione naturalistica è qualcosa che vorreste passasse anche attraverso l'app? Tipo contenuti educativi, segnalazioni stagionali ("attenzione al caldo per i cani anziani"), link a iniziative?
 
 ---
 
@@ -203,3 +227,5 @@ Documento aperto. Ogni sezione si rivede quando emergono novità o quando le sce
 **Storico revisioni:**
 
 - *Aprile 2026 — Primo round*: contributi di Davide e Roby integrati nelle sezioni 1, 2 (parziale), 3 (parziale), 4, 9. Sezioni 5, 6, 7, 8 in attesa di secondo round.
+
+- *Aprile 2026 — Secondo round*: contributi di Davide e Roby integrati nelle sezioni 3 (completata), 5, 6, 7, 9 (post-scriptum). Aggiunta nota di contesto sulla formazione naturalistica dei proprietari. Sezione 8 (zona grigia) e dettagli puntuali su sezione 2 (foto operativa vs identificativa) restano in attesa di terzo round.
