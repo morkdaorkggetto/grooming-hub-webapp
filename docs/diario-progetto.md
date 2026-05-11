@@ -13,7 +13,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **Schema multi-tenant**: applicato sul DB demo `grooming-hub-demo` (Gate 2 chiuso, 25 aprile 2026). Demo Supabase riattivato manualmente l'11 maggio dopo auto-pause.
 - **DB produzione** `grooming`: intatto, schema vecchio (`clients` legacy), 189 clienti reali. `ACTIVE_HEALTHY`.
 - **App staff sul demo**: rotta — `webapp/src/lib/database.js` contiene 13 chiamate `from('clients')` su tabella droppata da M11-bis, più 3 chiamate a `customer_client_links` (anch'essa droppata) e 48 occorrenze testuali di `client_id`. Refactor previsto al Gate 5.
-- **App customer**: non scaffolded. Pre-Gate 3 in corso, **1 decisione presa su 8** (prenotazione customer in stato `pending` in attesa di conferma staff). 7 decisioni di prodotto ancora aperte.
+- **App customer**: non scaffolded. Pre-Gate 3 in corso, **3 decisioni prese su 8**: (1) prenotazione customer in stato `pending` in attesa di conferma staff; (2) foto pet sulla scheda customer = foto affettiva caricata dal proprietario su `pet-avatars`, con fallback su avatar a iniziali (decisione 11 maggio 2026 dopo terzo round con salone); (3) campi `notes` liberi staff-only protetti via trigger BEFORE UPDATE su `customers.operator_notes` e `pets.internal_notes` — schema già supportato (decisione 11 maggio 2026 dopo verifica schema). 5 decisioni di prodotto ancora aperte (più (4) note di visita = consiglio condivisibile vs interno: parzialmente illuminata).
 - **Refactor monorepo-ready** (`src/apps/staff/` + `src/apps/customer/` + `src/shared/`): non avviato. La cartella `webapp/src/` è ancora piatta. Gate 6 vergine.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
@@ -23,6 +23,35 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 ---
 
 ## Cronologia
+
+### 11 maggio 2026 — Verifica schema notes + enforcement column-level
+
+**Attori**: Luigi (ha confermato le raccomandazioni Cowork), Cowork (analisi), Code (verifica schema demo).
+
+**Decisioni prese**:
+
+- **Niente migration di rinomina dei campi notes.** Lo schema esistente li ha già con nomi più espressivi: `customers.operator_notes`, `pets.owner_notes` (customer-modificabile), `pets.internal_notes` (staff-only). L'UI mapperà "Note" senza esporre la nomenclatura tecnica.
+- **Distinzione `owner_notes` / `internal_notes` su pets mantenuta.** Coerente con bundle Design + risposta del salone. `owner_notes` = ciò che il customer condivide; `internal_notes` = ciò che lo staff annota e non condivide.
+- **Enforcement column-level via trigger BEFORE UPDATE.** PostgreSQL non offre RLS a livello colonna; le policy attuali (`customers_self_update`, `pets_customer_update`) permettono al customer di toccare anche i campi staff-only. Migration aggiuntiva con due trigger che, se l'attore non ha `has_tenant_any_staff_access(tenant_id)`, ripristinano `OLD.operator_notes` / `OLD.internal_notes`. File: `<timestamp>_enforce_staff_only_notes_columns.sql`.
+- **Discrepanza migration chiusa**: 34 file in repo = 34 entries in `schema_migrations` del demo. Il "33" del piano era refuso testuale ("23 nuovi" → in realtà 24 nuovi). Nessuna azione correttiva.
+
+**Lavori completati**:
+
+- Code ha eseguito sei query di verifica sul DB demo: `information_schema.columns` su customers e pets, `pg_policies` per RLS attive, `supabase_migrations.schema_migrations` per conteggio applicate.
+- Cowork ha scritto la bozza SQL della migration di enforcement: `webapp/supabase/migrations/<timestamp>_enforce_staff_only_notes_columns.sql`.
+- Aggiornato lo "Stato attuale" del diario: count delle decisioni prese del pre-Gate 3 passa da 1 a 3 su 8.
+
+**Aperto**:
+
+- Apply della migration sul demo + commit. Sessione Code immediata.
+- Verificare interazione tra trigger SECURITY DEFINER e `auth.uid()` dentro eventuali RPC future: se una RPC chiamata da customer fa UPDATE su `customers`/`pets`, `auth.uid()` resta del chiamante customer e il trigger blocca correttamente. Comportamento atteso ma da rivedere quando entreranno in scena `book_appointment` e simili.
+- Decisione UX fallback foto pet sulla scheda customer (avatar iniziali vs foto operativa più recente) → confermata in chiusura di sessione del terzo round: avatar iniziali. Già registrato nello "Stato attuale".
+
+**Prossimo passo**:
+
+- Code applica la migration + commit. Poi sessione chiusa, restano sul tavolo le 5 decisioni di prodotto residue del pre-Gate 3 e i due blocker tecnici (cherry-pick `c9a3678`, `vercel link`) per le prossime sessioni.
+
+---
 
 ### 11 maggio 2026 — Terzo round parziale con Davide e Roby (sezioni 2 e 8)
 
@@ -126,4 +155,4 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Storico revisioni del diario
 
-- **11 maggio 2026** — Diario creato. Tre entry: terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.
+- **11 maggio 2026** — Diario creato. Quattro entry: verifica schema notes + enforcement column-level, terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.
