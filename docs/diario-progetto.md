@@ -15,7 +15,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **App staff sul demo**: rotta — `webapp/src/lib/database.js` contiene 13 chiamate `from('clients')` su tabella droppata da M11-bis, più 3 chiamate a `customer_client_links` (anch'essa droppata) e 48 occorrenze testuali di `client_id`. Refactor previsto al Gate 5.
 - **App customer**: non scaffolded. Pre-Gate 3 in corso, **1 decisione presa su 8** (prenotazione customer in stato `pending` in attesa di conferma staff). 7 decisioni di prodotto ancora aperte.
 - **Refactor monorepo-ready** (`src/apps/staff/` + `src/apps/customer/` + `src/shared/`): non avviato. La cartella `webapp/src/` è ancora piatta. Gate 6 vergine.
-- **Documento partecipato salone**: due round completati. Sezioni 2 (foto pet) e 8 (zona grigia delle pratiche quotidiane) in attesa di terzo round.
+- **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
 
 **Prossimo passo**: aprire una sessione sulle 7 decisioni di prodotto aperte del pre-Gate 3, strutturandole in un file dedicato `webapp/docs/pre-gate3-decisioni.md`. Mappa di partenza già abbozzata nel report di lettura Cowork dell'11 maggio.
@@ -23,6 +23,34 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 ---
 
 ## Cronologia
+
+### 11 maggio 2026 — Terzo round parziale con Davide e Roby (sezioni 2 e 8)
+
+**Attori**: Luigi (ha inviato le domande via WhatsApp), Davide e Roby (hanno risposto), Cowork (ha integrato risposte nel documento partecipato e nel diario).
+
+**Decisioni emerse dalla risposta del salone**:
+
+- **Foto del pet — esiste una foto principale, con criterio funzionale.** Per il gestionale staff la foto principale di un pet è «quella che descrive meglio le condizioni del cane e la sua riconoscibilità all'atto dell'accoglienza». Non è una foto affettiva: è funzionale, scelta dallo staff, e va riaggiornata con le nuove accoglienze.
+- **Foto affettiva del customer — coesistenza approvata.** Sulla app cliente, il proprietario può caricare la sua foto preferita del pet senza che dia fastidio al gestionale. Le due foto sono *due viste* dello stesso pet: vista staff (operativa, da `client-photos`) e vista customer (affettiva, da `pet-avatars`).
+- **Note libere su clienti e pet — confermate come pratica quotidiana.** Davide e Roby «aggiungono sempre note sia sul cliente che sul pet». Sono appunti operativi internal-only, da prevedere come campi `notes text` libero su `customers` e su `pets`. Non in conflitto con la Decisione 3 di Gate 5 (che escludeva campi qualitativi *strutturati*, non testo libero).
+
+**Lavori completati**:
+
+- Aggiornato `webapp/docs/workflows/flussi-operativi-salone.md` con un terzo round parziale: sezione 2 (foto pet) + sezione 8 (note libere), e storico revisioni in fondo.
+- Aggiornato lo "Stato attuale" del diario per riflettere il terzo round.
+
+**Aperto**:
+
+- **Verifica schema**: confermare se `customers.notes` e `pets.notes` esistono già nel DB demo dopo M11-bis. Il bundle Design li prevedeva (vedi `02-database.md`), il piano Gate 2 non li menziona esplicitamente. Da ispezionare in sessione Code (query su `information_schema.columns` per le due tabelle).
+- **Eventuale migration aggiuntiva** se i campi mancano: `ALTER TABLE customers ADD COLUMN notes text;` e/o `ALTER TABLE pets ADD COLUMN notes text;`. Aggiungere policy RLS staff-only (no SELECT customer).
+- **Decisione UX fallback foto pet**: nella scheda customer, quando il proprietario non ha caricato la sua foto, mostriamo (a) la foto operativa più recente dello staff, oppure (b) un avatar con iniziali del pet? Proposta Cowork: opzione (b) — la foto operativa potrebbe non essere quella che il cliente vuole vedere come "home page del suo pet". Da confermare in sede di decisione di prodotto pre-Gate 3.
+- **Punti residui sezioni 2 e 8 del documento partecipato**: pet difficili da fotografare, convenzioni interne tra staff, momenti "uffa, di nuovo", cosa non vorreste perdere del gestionale attuale. Eventuale quarto round, non urgente.
+
+**Prossimo passo**:
+
+- Sessione Code di verifica schema (`customers.notes` e `pets.notes`) + eventuale migration aggiuntiva. 15-20 minuti.
+
+---
 
 ### 11 maggio 2026 — Apertura diario, archiviazione documenti pre-skill, sintesi stato dell'arte
 
@@ -98,4 +126,4 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Storico revisioni del diario
 
-- **11 maggio 2026** — Diario creato. Prima entry (apertura, archiviazione, sintesi stato dell'arte) + entry retroattiva di aprile 2026.
+- **11 maggio 2026** — Diario creato. Tre entry: terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.

@@ -68,6 +68,14 @@ Utilizziamo queste immagini per il nostro gestionale interno, in modo da poter r
 
 Il cliente non partecipa all'inserimento di queste informazioni.
 
+### Risposta di Davide e Roby (terzo round parziale, maggio 2026)
+
+**Sulla foto principale del pet nella scheda:** «quella che descrive meglio le condizioni del cane e la sua riconoscibilità all'atto dell'accoglienza».
+
+**Sulla foto affettiva che il proprietario potrebbe caricare nella sua app cliente:** «non ci dà fastidio».
+
+Conferma operativa: nella scheda gestionale staff la foto principale è quella *funzionale* scelta dallo staff al momento dell'accoglienza (riconoscibilità + condizioni), non una foto affettiva. La foto del cliente nell'app sua può coesistere senza creare conflitti col gestionale interno.
+
 ### Punti aperti per ulteriori approfondimenti
 
 Esiste una distinzione tra "foto identificativa" del pet (la più rappresentativa, quella che serve a riconoscerlo) e "foto operativa" (quella che documenta una condizione specifica, come il manto annodato)? Il sistema attuale le distingue in qualche modo?
@@ -180,6 +188,12 @@ Esistono già clienti che ricevono attenzioni informali (sconti, regali) per anz
 
 Tutte le cose che si fanno e che non rientrano in nessuna delle sezioni precedenti.
 
+### Risposta di Davide e Roby (terzo round parziale, maggio 2026)
+
+**Su appunti operativi liberi sui clienti e sui pet:** «sì. Aggiungiamo sempre note sia sul cliente che sul pet».
+
+Conferma operativa: nella pratica quotidiana annotano appunti operativi su entrambe le entità, in modo frequente ("sempre"). Sono note di servizio, internal-only, distinte dai tag categoriali esclusi dalla Decisione 3 di Gate 5 — qui si parla di testo libero, non di strutture qualitative pre-impostate.
+
 ### Punti aperti per ulteriori approfondimenti
 
 Esistono "convenzioni interne" — soprannomi per pet difficili, codici tra colleghi, segnalazioni che vi date senza scriverle da nessuna parte ma che sono importanti per il lavoro?
@@ -229,3 +243,5 @@ Documento aperto. Ogni sezione si rivede quando emergono novità o quando le sce
 - *Aprile 2026 — Primo round*: contributi di Davide e Roby integrati nelle sezioni 1, 2 (parziale), 3 (parziale), 4, 9. Sezioni 5, 6, 7, 8 in attesa di secondo round.
 
 - *Aprile 2026 — Secondo round*: contributi di Davide e Roby integrati nelle sezioni 3 (completata), 5, 6, 7, 9 (post-scriptum). Aggiunta nota di contesto sulla formazione naturalistica dei proprietari. Sezione 8 (zona grigia) e dettagli puntuali su sezione 2 (foto operativa vs identificativa) restano in attesa di terzo round.
+
+- *Maggio 2026 — Terzo round parziale*: tre domande mirate inviate via WhatsApp da Luigi su foto pet (sezione 2) e note libere su clienti e pet (sezione 8). Risposte di Davide e Roby integrate. Sezione 2 (pet difficili da fotografare, campi critici al primo contatto) e sezione 8 (convenzioni interne, momenti "uffa, di nuovo", cosa non vorreste perdere del gestionale attuale) restano aperte per un eventuale quarto round.
