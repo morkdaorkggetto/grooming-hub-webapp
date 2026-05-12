@@ -44,6 +44,17 @@ Azione:
 - il backend è attivo
 - il problema non è nel pause automatico di Supabase
 
+### Se il demo è stato riattivato dopo una pausa lunga
+Sintomo:
+- `supabase db push` ritorna `password authentication failed for user "postgres"`
+- al riattivarsi del progetto la password DB del pooler può essere stata ruotata da Supabase
+
+Mitigazione:
+- recuperare la nuova password dal dashboard Supabase (Settings → Database → Connection string), aggiornare `SUPABASE_DB_PASSWORD` e ritentare `supabase db push`
+- in alternativa, per apply puntuali di una singola migration: usare `mcp__supabase__apply_migration` via MCP binding (bypassa il pooler con OAuth)
+
+*Osservato l'11 maggio 2026 dopo riattivazione manuale di `grooming-hub-demo`. Apply della migration `20260511070742_enforce_staff_only_notes_columns` riuscito col fallback MCP.*
+
 ## Comandi utili
 
 ### Collegare Supabase demo

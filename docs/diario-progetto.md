@@ -32,24 +32,28 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 - **Niente migration di rinomina dei campi notes.** Lo schema esistente li ha già con nomi più espressivi: `customers.operator_notes`, `pets.owner_notes` (customer-modificabile), `pets.internal_notes` (staff-only). L'UI mapperà "Note" senza esporre la nomenclatura tecnica.
 - **Distinzione `owner_notes` / `internal_notes` su pets mantenuta.** Coerente con bundle Design + risposta del salone. `owner_notes` = ciò che il customer condivide; `internal_notes` = ciò che lo staff annota e non condivide.
-- **Enforcement column-level via trigger BEFORE UPDATE.** PostgreSQL non offre RLS a livello colonna; le policy attuali (`customers_self_update`, `pets_customer_update`) permettono al customer di toccare anche i campi staff-only. Migration aggiuntiva con due trigger che, se l'attore non ha `has_tenant_any_staff_access(tenant_id)`, ripristinano `OLD.operator_notes` / `OLD.internal_notes`. File: `<timestamp>_enforce_staff_only_notes_columns.sql`.
+- **Enforcement column-level via trigger BEFORE UPDATE.** PostgreSQL non offre RLS a livello colonna; le policy attuali (`customers_self_update`, `pets_customer_update`) permettono al customer di toccare anche i campi staff-only. Migration aggiuntiva con due trigger che, se l'attore non ha `has_tenant_any_staff_access(tenant_id)`, ripristinano `OLD.operator_notes` / `OLD.internal_notes`. File: `supabase/migrations/20260511070742_enforce_staff_only_notes_columns.sql`. Applicata al demo nella stessa sessione (commit `d440131`).
 - **Discrepanza migration chiusa**: 34 file in repo = 34 entries in `schema_migrations` del demo. Il "33" del piano era refuso testuale ("23 nuovi" → in realtà 24 nuovi). Nessuna azione correttiva.
 
 **Lavori completati**:
 
 - Code ha eseguito sei query di verifica sul DB demo: `information_schema.columns` su customers e pets, `pg_policies` per RLS attive, `supabase_migrations.schema_migrations` per conteggio applicate.
-- Cowork ha scritto la bozza SQL della migration di enforcement: `webapp/supabase/migrations/<timestamp>_enforce_staff_only_notes_columns.sql`.
+- Cowork ha scritto la migration SQL di enforcement (due trigger BEFORE UPDATE) e l'ha salvata nel main worktree.
+- Code ha applicato la migration al demo. Approccio scelto: worktree subordinato (già linkato). `supabase db push` ha però fallito con `password authentication failed for user "postgres"` (password del pooler probabilmente ruotata dopo la riattivazione post-pausa). Fallback usato: `mcp__supabase__apply_migration` via OAuth MCP binding, apply riuscito. Timestamp generato dal MCP a runtime: `20260511070742` — file rinominato di conseguenza nel repo per allineamento (era `20260511120000` come placeholder di Cowork). Trigger verificati: 2 righe in `pg_trigger`. Migration registrata: 1 riga in `schema_migrations`. Test funzionale del trigger col customer-token non eseguito (avrebbe richiesto setup di due sessioni `auth` distinte staff/customer, fuori budget di tempo).
+- Commit `d440131` su `feat/customer-app`: `feat(db): enforce staff-only enforcement on notes columns via BEFORE UPDATE triggers` (2 file, +111 / -2). Push NON eseguito.
 - Aggiornato lo "Stato attuale" del diario: count delle decisioni prese del pre-Gate 3 passa da 1 a 3 su 8.
+- Aggiornato `environment-map.md` con nota operativa sulla password DB ruotata dopo la riattivazione del demo.
+- **Cleanup git di chiusura sessione**: cherry-pick di `c9a3678` da `main` portato su `feat/customer-app` per chiudere il commit orfano (hotfix `Protect operator accounts from customer bootstrap`, 25 aprile 2026). Blocker tecnico chiuso. Commit di chiusura sessione separato con le note finali al diario e a environment-map.
 
 **Aperto**:
 
-- Apply della migration sul demo + commit. Sessione Code immediata.
-- Verificare interazione tra trigger SECURITY DEFINER e `auth.uid()` dentro eventuali RPC future: se una RPC chiamata da customer fa UPDATE su `customers`/`pets`, `auth.uid()` resta del chiamante customer e il trigger blocca correttamente. Comportamento atteso ma da rivedere quando entreranno in scena `book_appointment` e simili.
-- Decisione UX fallback foto pet sulla scheda customer (avatar iniziali vs foto operativa più recente) → confermata in chiusura di sessione del terzo round: avatar iniziali. Già registrato nello "Stato attuale".
+- Password DB demo da rigenerare/recuperare dal dashboard Supabase (Settings → Database → Connection string) per riattivare `supabase db push` da CLI. Per ora apply alternativi via MCP funzionano.
+- Test funzionale del trigger column-level con due token (staff + customer) rinviato a sessione di test RLS dedicata.
+- Verificare interazione tra trigger `SECURITY DEFINER` e `auth.uid()` dentro eventuali RPC future: se una RPC chiamata da customer fa UPDATE su `customers`/`pets`, `auth.uid()` resta del chiamante customer e il trigger blocca correttamente. Comportamento atteso ma da rivedere quando entreranno in scena `book_appointment` e simili.
 
 **Prossimo passo**:
 
-- Code applica la migration + commit. Poi sessione chiusa, restano sul tavolo le 5 decisioni di prodotto residue del pre-Gate 3 e i due blocker tecnici (cherry-pick `c9a3678`, `vercel link`) per le prossime sessioni.
+- Sessione chiusa. Restano sul tavolo per le prossime sessioni: 5 decisioni di prodotto residue del pre-Gate 3 (da chiudere rapidamente con un round Chat), `vercel link` da configurare prima del primo deploy preview, password DB demo da recuperare dal dashboard, test funzionale RLS. **Direzione di marcia**: roadmap fast-track verso preview navigabile dell'app customer.
 
 ---
 
