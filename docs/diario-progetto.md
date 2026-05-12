@@ -13,7 +13,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **Schema multi-tenant**: applicato sul DB demo `grooming-hub-demo` (Gate 2 chiuso, 25 aprile 2026). Demo Supabase riattivato manualmente l'11 maggio dopo auto-pause.
 - **DB produzione** `grooming`: intatto, schema vecchio (`clients` legacy), 189 clienti reali. `ACTIVE_HEALTHY`.
 - **App staff sul demo**: rotta — `webapp/src/lib/database.js` contiene 13 chiamate `from('clients')` su tabella droppata da M11-bis, più 3 chiamate a `customer_client_links` (anch'essa droppata) e 48 occorrenze testuali di `client_id`. Refactor previsto al Gate 5.
-- **App customer**: non scaffolded. Pre-Gate 3 in corso, **3 decisioni prese su 8**: (1) prenotazione customer in stato `pending` in attesa di conferma staff; (2) foto pet sulla scheda customer = foto affettiva caricata dal proprietario su `pet-avatars`, con fallback su avatar a iniziali (decisione 11 maggio 2026 dopo terzo round con salone); (3) campi `notes` liberi staff-only protetti via trigger BEFORE UPDATE su `customers.operator_notes` e `pets.internal_notes` — schema già supportato (decisione 11 maggio 2026 dopo verifica schema). 5 decisioni di prodotto ancora aperte (più (4) note di visita = consiglio condivisibile vs interno: parzialmente illuminata).
+- **App customer**: non scaffolded. **Pre-Gate 3 chiuso, 8 decisioni su 8 prese.** Vedi entry "Chiusura pre-Gate 3" dell'11 maggio per la lista compatta. Pronti a entrare in fase di scaffolding (roadmap fast-track verso preview).
 - **Refactor monorepo-ready** (`src/apps/staff/` + `src/apps/customer/` + `src/shared/`): non avviato. La cartella `webapp/src/` è ancora piatta. Gate 6 vergine.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
@@ -23,6 +23,24 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 ---
 
 ## Cronologia
+
+### 11 maggio 2026 — Chiusura pre-Gate 3: cinque decisioni di prodotto residue
+
+**Attori**: Luigi, Cowork.
+
+**Decisioni prese** (in versione operativa, ognuna pronta per il codice):
+
+1. **Registrazione customer**: solo via `accept_customer_invite(token)`. Route applicativa `/u/redeem/:token`. Nessun `/u/register` pubblico. Coerente con Decisione 12 di Gate 2 e con la postura "il salone mantiene il controllo della relazione".
+2. **Comunicazioni**: WhatsApp è il canale primario, l'app usa deep link `https://wa.me/<numero-salone>?text=<pre-fill>` nelle CTA pertinenti (contatto salone, "sposta/annulla appuntamento"). Nessuna chat in-app. Il numero del salone vive in `tenants.settings` (jsonb).
+3. **Promozioni Fase 1**: sola lettura. Copy prudente "Promozioni del momento" — non confondere con un futuro programma fedeltà. Tessera fedeltà candidata Fase 2.
+4. **Biforcazione 7 giorni nel flusso prenotazione**: SOFT, non hard-block. Sotto 7 giorni la prenotazione è permessa con interstitial *"Per appuntamenti entro una settimana preferiamo contatto diretto. Vuoi mandare comunque la richiesta?"* → procede con `appointments.status = 'pending'` + flag di urgenza visibile allo staff (calcolato a runtime da `requested_at - scheduled_at < 7 days`, oppure colonna esplicita da definire al Gate 5).
+5. **Prezzi**: NON mostrati nell'app customer in Fase 1. La prenotazione customer è una *richiesta*, non un acquisto. La schermata mostra pacchetto (Bagno / Toelettatura Completa) + durata indicativa + nota *"prezzo confermato dal salone in base a taglia e pelo del tuo pet"*. Lo staff conferma con prezzo via WhatsApp o al contatto. Coerente con `status='pending'` e con la postura non-transazionale del salone. Fase 2 può aggiungere "a partire da".
+
+**Implicazione**: pre-Gate 3 chiuso, 8 decisioni su 8 prese. Pronti per la fase di scaffolding.
+
+**Prossimo passo**: Step 1 della roadmap fast-track — refactor monorepo `webapp/src/` → `webapp/src/apps/{staff,customer}` + `webapp/src/shared/{supabase,auth,tenant,ui,tokens,utils}`. Sessione Code immediata.
+
+---
 
 ### 11 maggio 2026 — Verifica schema notes + enforcement column-level
 
@@ -159,4 +177,4 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Storico revisioni del diario
 
-- **11 maggio 2026** — Diario creato. Quattro entry: verifica schema notes + enforcement column-level, terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.
+- **11 maggio 2026** — Diario creato. Cinque entry: chiusura pre-Gate 3, verifica schema notes + enforcement column-level, terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.
