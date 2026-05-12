@@ -13,7 +13,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **Schema multi-tenant**: applicato sul DB demo `grooming-hub-demo` (Gate 2 chiuso, 25 aprile 2026). Demo Supabase riattivato manualmente l'11 maggio dopo auto-pause.
 - **DB produzione** `grooming`: intatto, schema vecchio (`clients` legacy), 189 clienti reali. `ACTIVE_HEALTHY`.
 - **App staff sul demo**: rotta — `webapp/src/lib/database.js` contiene 13 chiamate `from('clients')` su tabella droppata da M11-bis, più 3 chiamate a `customer_client_links` (anch'essa droppata) e 48 occorrenze testuali di `client_id`. Refactor previsto al Gate 5.
-- **App customer**: non scaffolded. **Pre-Gate 3 chiuso, 8 decisioni su 8 prese.** Vedi entry "Chiusura pre-Gate 3" dell'11 maggio per la lista compatta. Pronti a entrare in fase di scaffolding (roadmap fast-track verso preview).
+- **App customer**: **scaffolding base completato** (Step 1 + Step 2 dell'11 maggio). Routing top-level pattern catch-all (`/u/*` → CustomerApp, `/*` → StaffApp). AuthProvider + TenantProvider attivi a livello root. Tre pagine `/u/{login,home,redeem}` con placeholder navigabili. UI shared base disponibile (`Button`, `Card`, `Skeleton`). Build Vite verde. Pre-Gate 3 chiuso, 8 decisioni su 8 prese.
 - **Refactor monorepo-ready** (`src/apps/staff/` + `src/apps/customer/` + `src/shared/`): non avviato. La cartella `webapp/src/` è ancora piatta. Gate 6 vergine.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
@@ -23,6 +23,35 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 ---
 
 ## Cronologia
+
+### 11 maggio 2026 — Step 1 e Step 2 della roadmap fast-track: refactor monorepo + scaffolding customer
+
+**Attori**: Luigi, Cowork, Code.
+
+**Lavori completati**:
+
+- **Step 1** (commit `6948589`): refactor del codice esistente nella struttura monorepo-ready. `webapp/src/` ora ha `apps/staff/` (codice esistente preservato) + `apps/customer/` (placeholder) + `shared/{supabase,auth,tenant,ui,tokens,utils}/` (vuoto). Top-level `App.jsx` thin shell. Build verde. `npm run build` 103 moduli, 1.18s.
+- **Step 2** (commit `633d7fe`): scaffolding customer. AuthProvider + `useRequireCustomer` in `shared/auth/`; TenantProvider hardcoded sul tenant pilota in `shared/tenant/`; tre pagine in `apps/customer/pages/` (`Login.jsx`, `Home.jsx`, `Redeem.jsx`); `CustomerApp.jsx` router interno; tre componenti UI shared (`Button`, `Card`, `Skeleton`); supabase client estratto in `shared/supabase/client.js`. Build verde, 114 moduli, 883ms.
+- `.gitignore` aggiornato per coprire `.claude/` e `grooming-app/` (embedded repos di lunga data, finalmente fuori da `git status`).
+
+**Decisioni operative di Code in autonomia** (accettate, da registrare):
+
+1. **Routing top-level pattern catch-all**: `/u/*` → CustomerApp, `/*` → StaffApp. Evita la riscrittura di tutti i `<Route>`/`<Link>`/`<Navigate>` interni dello staff (che vivono a `/dashboard`, `/login`, `/portal`, ecc.). Migrazione a `/staff/*` rinviabile come refactor separato se servirà.
+2. **Supabase client come shim re-export** in `apps/staff/lib/supabaseClient.js` invece di find-replace su 9 file. Il canonico ora è `shared/supabase/client.js`. Lo shim sparisce al Gate 5.
+3. **`AuthContext.currentRole` semplificato in Step 2**: restituisce `'customer'` se l'utente ha questa membership in qualsiasi tenant, altrimenti il role della prima membership. Filtraggio per `tenantId` attivo rinviato a Step 3+ (caso multi-tenant raro ma previsto da `03-auth-e-rls.md`).
+4. **StaffApp continua su AuthContext interno proprio**: i provider shared sono attivi top-level ma NON cablati ancora in StaffApp. L'app staff usa ancora `onAuthStateChange` dal vecchio path (via shim). Unificazione di Auth tra staff e customer al Gate 5.
+
+**Aperto**:
+
+- **Test E2E del login customer**: per testarlo serve un customer di test sul demo. Sul demo oggi c'è solo `profiles.role='operator'`, nessun customer. Strategia proposta: creare manualmente 1-2 customer fittizi via SQL diretto su `auth.users` + `customers` + `tenant_memberships` come prerequisito di Step 3. Il flusso reale di redenzione invito (`accept_customer_invite` + Redeem page reale, non placeholder) arriva in step successivo.
+- **Gate 5** (refactor `database.js` + cablaggio StaffApp sui provider shared + eliminazione shim Supabase): può procedere in parallelo a Step 3, non blocca la preview customer.
+- **Warning chunk size Vite** (589 kB minified): pre-esistente, non bloccante. Da affrontare a Gate "performance" futuro.
+
+**Prossimo passo**:
+
+- **Step 3 della roadmap fast-track**: schermata Promozioni (la "prova del circuito" come da bundle Design gate 7). Prerequisito leggero: customer di test sul demo. Sessione successiva.
+
+---
 
 ### 11 maggio 2026 — Chiusura pre-Gate 3: cinque decisioni di prodotto residue
 
@@ -177,4 +206,4 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Storico revisioni del diario
 
-- **11 maggio 2026** — Diario creato. Cinque entry: chiusura pre-Gate 3, verifica schema notes + enforcement column-level, terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.
+- **11 maggio 2026** — Diario creato. Sei entry: Step 1 e Step 2 roadmap fast-track, chiusura pre-Gate 3, verifica schema notes + enforcement column-level, terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.
