@@ -43,7 +43,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - Commit `d440131` su `feat/customer-app`: `feat(db): enforce staff-only enforcement on notes columns via BEFORE UPDATE triggers` (2 file, +111 / -2). Push NON eseguito.
 - Aggiornato lo "Stato attuale" del diario: count delle decisioni prese del pre-Gate 3 passa da 1 a 3 su 8.
 - Aggiornato `environment-map.md` con nota operativa sulla password DB ruotata dopo la riattivazione del demo.
-- **Cleanup git di chiusura sessione**: cherry-pick di `c9a3678` da `main` portato su `feat/customer-app` per chiudere il commit orfano (hotfix `Protect operator accounts from customer bootstrap`, 25 aprile 2026). Blocker tecnico chiuso. Commit di chiusura sessione separato con le note finali al diario e a environment-map.
+- **Verifica del commit orfano `c9a3678` su `main`**: ispezione preventiva da parte di Code prima del cherry-pick → il diff (helper `userOwnsClients` + auto-repair `role='operator'` in `getUserProfile`) risulta **già presente in `feat/customer-app`**, assorbito da merge precedenti (probabilmente via worktree `claude/kind-faraday-956d1a`). Cherry-pick eseguito ma a diff vuoto, chiuso con `--skip`. Il count `git rev-list --left-right` "1 commit solo su main" è metadata SHA-based, non un problema funzionale: il futuro merge `feat → main` non duplicherà la modifica. Blocker chiuso senza ulteriori commit. *Nota collaterale*: la hotfix continua a usare `.from('clients')` come le altre 13 chiamate orfane di `database.js`, sarà sistemata al Gate 5. Commit di chiusura sessione `d587843` con le note finali al diario e a environment-map.
 
 **Aperto**:
 
