@@ -16,3 +16,7 @@ pnpm-debug.log*
 
 # system files
 .DS_Store
+
+# Embedded repos di lavoro locale (worktree Cowork + storica app mobile)
+.claude/
+grooming-app/

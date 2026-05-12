@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { onAuthStateChange } from './lib/supabaseClient';
 import { getUserProfile } from './lib/database';
 import LoginForm from './components/Auth/LoginForm';
@@ -120,9 +120,8 @@ export default function App() {
   }
 
   return (
-    <Router>
-      <div className={DEMO_MODE ? 'demo-theme' : ''}>
-        <Routes>
+    <div className={DEMO_MODE ? 'demo-theme' : ''}>
+      <Routes>
           {/* Route pubblica: Login */}
           <Route
             path="/login"
@@ -317,8 +316,7 @@ export default function App() {
               </div>
             }
           />
-        </Routes>
-      </div>
-    </Router>
+      </Routes>
+    </div>
   );
 }

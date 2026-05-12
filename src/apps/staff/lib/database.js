@@ -1,4 +1,4 @@
-import { supabase, getCurrentUser } from './supabaseClient';
+import { supabase, getCurrentUser } from '../../../shared/supabase/client';
 import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from './demoMode';
 import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 
