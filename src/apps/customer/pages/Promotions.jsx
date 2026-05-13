@@ -16,8 +16,9 @@ import Skeleton from '../../../shared/ui/Skeleton';
  * sola lettura, niente framing fedeltà).
  *
  * Layout:
- *   - BackgroundDecor + Brandmark
- *   - Eyebrow "PROMOZIONI" + H1 Fraunces "del momento"
+ *   - BackgroundDecor + Brandmark (cliccabile → /u/home)
+ *   - H1 Fraunces italic primary "Promozioni del momento" (unico, no eyebrow
+ *     sopra: l'occhiello ripeteva la prima parola dell'H1)
  *   - Sub paragraph "Le iniziative attive del salone."
  *   - Grid responsive (auto-fit, min 420px → 1 col mobile, 2 col desktop)
  *
@@ -202,29 +203,19 @@ export default function Promotions() {
           >
             <Brandmark size={isMobile ? 32 : 36} />
           </Link>
-          <Eyebrow withRule style={{ marginBottom: 10 }}>
-            Promozioni
-          </Eyebrow>
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
               fontSize: isMobile ? 30 : 44,
               fontWeight: 500,
+              fontStyle: 'italic',
               lineHeight: 1.05,
               letterSpacing: '-0.02em',
               margin: '0 0 12px',
-              color: 'var(--color-text-primary)',
+              color: 'var(--color-primary)',
             }}
           >
-            <em
-              style={{
-                color: 'var(--color-primary)',
-                fontStyle: 'italic',
-                fontWeight: 500,
-              }}
-            >
-              del momento
-            </em>
+            Promozioni del momento
           </h1>
           <p
             style={{
