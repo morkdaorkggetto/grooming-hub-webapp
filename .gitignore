@@ -20,3 +20,7 @@ pnpm-debug.log*
 # Embedded repos di lavoro locale (worktree Cowork + storica app mobile)
 .claude/
 grooming-app/
+
+# Vercel CLI local link (project metadata, non versionato)
+.vercel/
+.vercel
