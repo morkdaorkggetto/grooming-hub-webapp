@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Promotions from './pages/Promotions';
 import Redeem from './pages/Redeem';
 
 /**
@@ -26,6 +27,7 @@ export default function CustomerApp() {
       <Route path="/" element={<Navigate to="/u/home" replace />} />
       <Route path="/home" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/promotions" element={<Promotions />} />
       <Route path="/redeem" element={<Redeem />} />
       <Route path="/redeem/:token" element={<Redeem />} />
       <Route path="*" element={<Navigate to="/u/home" replace />} />

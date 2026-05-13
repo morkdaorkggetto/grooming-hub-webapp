@@ -14,11 +14,11 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **DB produzione** `grooming`: intatto, schema vecchio (`clients` legacy), 189 clienti reali. `ACTIVE_HEALTHY`.
 - **App staff sul demo**: rotta — `webapp/src/lib/database.js` contiene 13 chiamate `from('clients')` su tabella droppata da M11-bis, più 3 chiamate a `customer_client_links` (anch'essa droppata) e 48 occorrenze testuali di `client_id`. Refactor previsto al Gate 5.
 - **App customer**: **scaffolding base completato** (Step 1 + Step 2 dell'11 maggio). Routing top-level pattern catch-all (`/u/*` → CustomerApp, `/*` → StaffApp). AuthProvider + TenantProvider attivi a livello root. Tre pagine `/u/{login,home,redeem}` con placeholder navigabili. UI shared base disponibile (`Button`, `Card`, `Skeleton`). Build Vite verde. Pre-Gate 3 chiuso, 8 decisioni su 8 prese.
-- **Refactor monorepo-ready** (`src/apps/staff/` + `src/apps/customer/` + `src/shared/`): non avviato. La cartella `webapp/src/` è ancora piatta. Gate 6 vergine.
+- **Refactor monorepo-ready**: completato in Step 1 (commit `6948589`). `webapp/src/` ora ha `apps/staff/` + `apps/customer/` + `shared/{supabase,auth,tenant,ui,tokens,utils}/`. Top-level `App.jsx` thin shell con routing catch-all.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
 
-**Prossimo passo**: aprire una sessione sulle 7 decisioni di prodotto aperte del pre-Gate 3, strutturandole in un file dedicato `webapp/docs/pre-gate3-decisioni.md`. Mappa di partenza già abbozzata nel report di lettura Cowork dell'11 maggio.
+**Prossimo passo**: Step 3 della roadmap fast-track — schermata Promozioni (`/u/promotions`) come "prova del circuito" (auth → tenant → query con RLS → render). Prerequisito leggero: seedare 1-2 customer di test sul demo (via SQL admin) + 2-3 promozioni sulla tabella `promotions`. Sessione Code dedicata.
 
 ---
 
