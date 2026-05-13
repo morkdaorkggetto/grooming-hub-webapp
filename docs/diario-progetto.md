@@ -8,21 +8,99 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato l'11 maggio 2026.*
+*Aggiornato il 12 maggio 2026.*
 
 - **Schema multi-tenant**: applicato sul DB demo `grooming-hub-demo` (Gate 2 chiuso, 25 aprile 2026). Demo Supabase riattivato manualmente l'11 maggio dopo auto-pause.
 - **DB produzione** `grooming`: intatto, schema vecchio (`clients` legacy), 189 clienti reali. `ACTIVE_HEALTHY`.
 - **App staff sul demo**: rotta — `webapp/src/lib/database.js` contiene 13 chiamate `from('clients')` su tabella droppata da M11-bis, più 3 chiamate a `customer_client_links` (anch'essa droppata) e 48 occorrenze testuali di `client_id`. Refactor previsto al Gate 5.
-- **App customer**: **scaffolding base completato** (Step 1 + Step 2 dell'11 maggio). Routing top-level pattern catch-all (`/u/*` → CustomerApp, `/*` → StaffApp). AuthProvider + TenantProvider attivi a livello root. Tre pagine `/u/{login,home,redeem}` con placeholder navigabili. UI shared base disponibile (`Button`, `Card`, `Skeleton`). Build Vite verde. Pre-Gate 3 chiuso, 8 decisioni su 8 prese.
+- **App customer**: **scaffolding completato + prima schermata funzionante** (Step 1, 2, 3 della roadmap fast-track). Routing top-level pattern catch-all (`/u/*` → CustomerApp, `/*` → StaffApp). AuthProvider + TenantProvider attivi a livello root. Quattro pagine: `/u/login`, `/u/home` (placeholder), `/u/redeem/:token` (placeholder), `/u/promotions` (**funzionante**, RLS verificata via E2E). UI shared base (`Button`, `Card`, `Skeleton`). Build Vite verde (116 moduli). Pre-Gate 3 chiuso, 8 decisioni su 8 prese. Sul demo: 2 customer di test (`mario.rossi@test.example`, `luca.bianchi@test.example`, password `test1234`) e 3 promozioni seed.
 - **Refactor monorepo-ready**: completato in Step 1 (commit `6948589`). `webapp/src/` ora ha `apps/staff/` + `apps/customer/` + `shared/{supabase,auth,tenant,ui,tokens,utils}/`. Top-level `App.jsx` thin shell con routing catch-all.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
 
-**Prossimo passo**: Step 3 della roadmap fast-track — schermata Promozioni (`/u/promotions`) come "prova del circuito" (auth → tenant → query con RLS → render). Prerequisito leggero: seedare 1-2 customer di test sul demo (via SQL admin) + 2-3 promozioni sulla tabella `promotions`. Sessione Code dedicata.
+**Prossimo passo**: roadmap fast-track conclusa con Step 4. Preview customer navigabile (URL nel diario, entry 12 maggio Step 4) — in attesa di disabilitazione della Vercel Deployment Protection sul progetto `-aish` per renderla pubblicamente accessibile. Da lì in poi: chiusura del Gate 5 (refactor `database.js` staff + cablaggio StaffApp sui provider shared + rimozione shim Supabase) può procedere in parallelo, sblocca l'app staff sul demo.
 
 ---
 
 ## Cronologia
+
+### 12 maggio 2026 — Step 4 della roadmap fast-track: vercel link + primo deploy preview
+
+**Attori**: Luigi, Cowork, Code.
+
+**Lavori completati**:
+
+- **Vercel link** del main worktree al progetto `grooming-hub-webapp-aish` (preview-only, distinto dal `grooming-hub-webapp` di produzione). `.vercel/` aggiunto a `.gitignore`. Commit `e5aa92c`.
+- **Env vars Supabase**: già presenti sul progetto `-aish` da 47 giorni, configurate correttamente sul demo (`qttpinkslhenxrsbhhhg`). Code ha verificato i valori via `vercel env pull --environment=preview` e ha deciso correttamente di NON sovrascrivere.
+- **Deploy preview**: completato (`readyState: READY`, build 3.01s). URL: `https://grooming-hub-webapp-aish-bp91vkrap-morkdaorkggettos-projects.vercel.app`.
+
+**Side effect non bloccante ma da gestire — Vercel Deployment Protection**:
+
+Il progetto `-aish` ha la Deployment Protection abilitata (SSO Vercel), default ragionevole per progetti aziendali. Tutti gli URL preview ritornano HTTP 401 con cookie `_vercel_sso_nonce` finché non si entra come `morkdaorkggetto`. I 3 smoke test (`/`, `/u/login`, `/u/promotions`) hanno restituito 401 per questo motivo, NON per problemi di build o env.
+
+**Decisione di prodotto — Deployment Protection differenziata per ambiente**:
+
+- Per `grooming-hub-webapp-aish` (preview-only, dati di test sul demo): **disabilitata**. I dati sono finti (`mario.rossi@test.example`, 3 promozioni seed). Anche se l'URL trapelasse, niente di sensibile esposto. Necessario per poter mostrare la preview al salone con un click.
+- Per `grooming-hub-webapp` (production, prod Supabase con 189 clienti reali): **resta abilitata** sempre. Decisione registrata qui per memoria futura — la Deployment Protection di un progetto di produzione non si disabilita.
+
+Azione manuale richiesta a Luigi (1 minuto): Vercel Dashboard → progetto `grooming-hub-webapp-aish` → Settings → Deployment Protection → Disabled. Da fare prima di consegnare l'URL al salone.
+
+**Decisioni operative di Code in autonomia** (accettate):
+
+1. Env vars NON ricreate: già presenti sul progetto da 47 giorni con valori corretti. Sovrascriverle sarebbe stato no-op (best case) o distruttivo (worst case). Verifica via `vercel env pull` invece che add.
+2. Anon key legacy JWT mantenuta (coerente con `.env.local` locale e con la config di 47 giorni fa). Migrazione a publishable key `sb_publishable_*` cosmetica, fuori scope di Step 4.
+3. Diario non incluso nel commit Step 4: scelta corretta — Cowork stava aggiornando il diario in parallelo. Una entry "Step 4" è scritta da Cowork al ritorno, con URL + nota Deployment Protection (questa).
+
+**Aperto**:
+
+- **Disabilitazione Deployment Protection** sul progetto `-aish` (azione manuale Luigi). Una volta fatta, ri-eseguire i 3 smoke test e confermare 200.
+- **Verifica visiva in browser** della preview deployata (Luigi può aprire l'URL e navigare login → home → promozioni una volta tolto l'SSO).
+- **Sostituire URL preview con dominio custom** (es. `clienti-demo.groominghub.it` o simile) come refinement futuro, non urgente.
+- **Push dei 10+ commit locali** della giornata su `origin/feat/customer-app`. Da decidere quando — consigliato dopo che la preview è pubblica e verificata.
+
+**Prossimo passo**:
+
+- Disabilitazione SSO + smoke test ri-verificati = preview pubblica navigabile. Da lì si può consegnare l'URL a Davide e Roby per il primo "look & feel" feedback. In parallelo, il Gate 5 (refactor `database.js`) può iniziare quando vuoi.
+
+---
+
+### 12 maggio 2026 — Step 3 della roadmap fast-track: seed dati di test + schermata `/u/promotions`
+
+**Attori**: Luigi, Cowork, Code.
+
+**Lavori completati**:
+
+- **Seed sul demo** (via MCP `apply_migration` / `execute_sql`, niente migration files):
+  - 2 customer di test: `mario.rossi@test.example`, `luca.bianchi@test.example` (password `test1234`, phone E.164, tenant `grooming-hub`, role `customer`). Righe in `auth.users` + `auth.identities` + `public.customers` + `public.tenant_memberships`.
+  - 3 promozioni sul tenant pilota: "Toelettatura primaverile" (attiva, con CTA WhatsApp), "Cliente del mese" (attiva, no CTA), "Promo scaduta (per test empty filter)" (inattiva + scaduta, per verificare il filtro RLS).
+- **Schermata `/u/promotions` implementata**: pagina nuova in `apps/customer/pages/Promotions.jsx`, route aggiunta a `CustomerApp.jsx`, hook custom in `apps/customer/hooks/usePromotions.js`.
+- **Stati**: loading (3 skeleton card), empty con copy "Nessuna promozione attiva al momento. Torna a trovarci.", error con bottone "Riprova", success.
+- **Layout responsive** via CSS grid `repeat(auto-fit, minmax(min(100%, 420px), 1fr))` (decisione autonoma Code, vedi sotto).
+- **Auth gate** via `useRequireCustomer()`.
+- **Build verde**: 116 moduli, 980ms, 0 errori. Warning chunk size pre-esistente, non bloccante.
+- **E2E test via REST API** (no Chrome MCP in sessione):
+  1. POST `/auth/v1/token?grant_type=password` con `mario.rossi@test.example` → `access_token` rilasciato ✓
+  2. GET `/rest/v1/promotions` con quel token (SENZA filtro `is_active` lato client) → 2 righe ritornate (le due attive). La promo scaduta è esclusa server-side dalla policy RLS `promotions_customer_select_active` di M32.
+  3. **RLS verificata funzionante**: la sicurezza non è solo in superficie nel client ma è enforced sul DB.
+- Commit `b745e90` (4 file, +262/-2).
+
+**Decisioni operative di Code in autonomia** (accettate, registrate):
+
+1. **Hook in cartella dedicata** `apps/customer/hooks/` invece che inline. Logica non-banale (dipendenza da `useTenant`, doppio filtro con `or` su `valid_to`, refetch), merita estrazione e riusabilità futura per test/storia.
+2. **Filtro `is_active` + `valid_to` doppiato client-side** anche se la RLS lo applica già server-side. Difensivo per chiarezza del contratto della query, ma la RLS resta il vero gate di sicurezza (verificato in E2E).
+3. **CSS grid `auto-fit minmax(min(100%, 420px), 1fr)`** invece di media query a 960px. Più conciso e robusto su viewport intermedie. *Nota Cowork*: il comportamento differisce leggermente dal bundle Design (che parlava di "Mobile stack / Desktop ≥960px 2 colonne") — col grid auto-fit ci sono 2 colonne già da ~440px, quindi anche su tablet portrait. Per Step 3 va bene, ma quando aggiungeremo Dashboard e Scheda pet vale la pena decidere se uniformare ai breakpoint del Design system o tenere `auto-fit` come pattern generale.
+
+**Aperto**:
+
+- **Test visivo browser** saltato (Chrome MCP non attivo). Luigi può fare un'occhiata con `npm run dev` localmente quando vuole verificare l'estetica.
+- Email dei customer di test su dominio `@test.example`: non realistiche ma valide per i test. Per la prima preview reale al salone si valuterà se creare customer demo "vestiti" meglio.
+- Filosofia copy / brand voice: la copy "Promozioni del momento" + "Le iniziative attive del salone" è prudente come da decisione di prodotto, ma vale la pena un check da Davide e Roby quando vedranno la preview live.
+
+**Prossimo passo**:
+
+- **Step 4 della roadmap fast-track**: `vercel link` del repo (non ancora linkato sul main worktree) + primo deploy preview con env Supabase del demo. Tempo stimato 30 minuti. Sessione Code dedicata.
+
+---
 
 ### 11 maggio 2026 — Step 1 e Step 2 della roadmap fast-track: refactor monorepo + scaffolding customer
 
@@ -207,3 +285,5 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 ## Storico revisioni del diario
 
 - **11 maggio 2026** — Diario creato. Sei entry: Step 1 e Step 2 roadmap fast-track, chiusura pre-Gate 3, verifica schema notes + enforcement column-level, terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.
+
+- **12 maggio 2026** — Step 3 e Step 4 della roadmap fast-track: seed customer + seed promozioni sul demo, schermata `/u/promotions` con RLS verificata via E2E REST, vercel link a `grooming-hub-webapp-aish` + primo deploy preview (gated da SSO in attesa di disabilitazione manuale). Settima e ottava entry.
