@@ -18,11 +18,43 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
 
-**Prossimo passo**: roadmap fast-track conclusa con Step 5 (rifinitura visiva). Preview customer navigabile e pubblica (Deployment Protection disabilitata). Step 5 ha aggiornato il codice ma non ha redeployato — il deploy attuale (`bp91vkrap`) serve ancora il vecchio aspetto. Un `vercel deploy` rinfresca la preview con la nuova estetica. Dopo: consegna URL a Davide e Roby per primo feedback look & feel. In parallelo: Gate 5 (refactor `database.js` staff) sblocca anche l'app staff sul demo.
+**Prossimo passo**: preview customer consegnabile. URL pubblico aggiornato `https://grooming-hub-webapp-aish-6joizoj4m-morkdaorkggettos-projects.vercel.app` (atterra su `/u/login` per via dell'hotfix routing). Dopo: consegna a Davide e Roby per primo feedback look & feel via WhatsApp. In parallelo: Gate 5 (refactor `database.js` staff) sblocca anche l'app staff sul demo.
 
 ---
 
 ## Cronologia
+
+### 13 maggio 2026 — Hotfix routing top-level + navigazione minima customer
+
+**Attori**: Luigi (test visivo del deploy + segnalazione), Cowork (proposta), Code (esecuzione).
+
+**Contesto**: prima della consegna al salone sono emersi due problemi di esperienza che andavano corretti.
+
+**Problema 1 — Landing rotto sull'URL root.** Aprendo `https://...vercel.app/` senza prefisso `/u/login`, l'utente atterrava sul login STAFF (per via del catch-all `/*` → StaffApp). La pagina staff sul demo è rotta per Gate 5 mancante: faceva errore "Could not find the table 'public.customer_client_links' in the schema cache". Davide e Roby avrebbero visto l'errore e pensato che l'app non funzioni.
+
+**Fix 1**: in `src/App.jsx` aggiunta una rotta esplicita `/` PRIMA del catch-all che fa `<Navigate to="/u/login" replace />`. La StaffApp resta raggiungibile via path interni (`/dashboard`, `/login`, `/portal`) — non scompare, semplicemente non è più la landing default. Quando Gate 5 sblocca lo staff, valuteremo se cambiare la regola.
+
+**Problema 2 — Le promozioni invisibili.** Dopo login, `/u/home` non aveva alcun link a `/u/promotions`. Davide e Roby sarebbero usciti dalla preview credendo che "non c'è altro" — non avrebbero mai visto il pezzo "vero" di Step 3.
+
+**Fix 2**: aggiunto un CTA secondary sotto la sub copy della home, "Guarda le promozioni del salone" → `/u/promotions`. Reciprocamente, in `/u/promotions` aggiunto link "← Torna alla home" in alto (o brandmark cliccabile, dettaglio cosmetico). Loop esplicito home ↔ promozioni.
+
+NON è stata aggiunta una nav globale (TopNav + BottomNav come da `proto-dashboard.jsx`): sarebbe sovradimensionata per due sole pagine. Quando arriveranno Dashboard reale, Scheda pet, Prenotazione (Step 6+), la nav globale avrà senso.
+
+**Lavori completati**:
+
+- Edit `src/App.jsx` con redirect `/` → `/u/login`. Commit di hotfix routing.
+- Edit `src/apps/customer/pages/Home.jsx` con CTA a `/u/promotions`.
+- Edit `src/apps/customer/pages/Promotions.jsx` con link "← Torna alla home" in alto.
+- Build verde.
+- Redeploy preview. Nuovo URL: `https://grooming-hub-webapp-aish-6joizoj4m-morkdaorkggettos-projects.vercel.app`.
+- Smoke test HTTP 200 sui path principali.
+- Verifica visiva da Luigi: aprendo l'URL pelato si atterra correttamente sul login customer; dopo login si vede la home placeholder editorial; il loop home ↔ promozioni funziona.
+
+**Prossimo passo**:
+
+- Consegna URL a Davide e Roby via WhatsApp (Cowork ha la bozza del messaggio nei turni precedenti).
+
+---
 
 ### 13 maggio 2026 — Step 5 della roadmap fast-track: rifinitura visiva customer app
 
@@ -341,4 +373,4 @@ Azione manuale richiesta a Luigi (1 minuto): Vercel Dashboard → progetto `groo
 
 - **12 maggio 2026** — Step 3 e Step 4 della roadmap fast-track: seed customer + seed promozioni sul demo, schermata `/u/promotions` con RLS verificata via E2E REST, vercel link a `grooming-hub-webapp-aish` + primo deploy preview (gated da SSO in attesa di disabilitazione manuale). Settima e ottava entry.
 
-- **13 maggio 2026** — Step 5 della roadmap fast-track: rifinitura visiva customer app basata sui pattern estratti dai prototipi del bundle Design (cartella `reference/`). Fraunces, Eyebrow, Brandmark, BackgroundDecor, Icon vocabulary, Card upgraded. Tre pagine restylate (`/u/login`, `/u/home`, `/u/promotions`) + stub `/u/forgot`. Nona entry.
+- **13 maggio 2026** — Step 5 della roadmap fast-track: rifinitura visiva customer app basata sui pattern estratti dai prototipi del bundle Design (cartella `reference/`). Fraunces, Eyebrow, Brandmark, BackgroundDecor, Icon vocabulary, Card upgraded. Tre pagine restylate (`/u/login`, `/u/home`, `/u/promotions`) + stub `/u/forgot`. Nona entry. Più: hotfix routing top-level (`/` → `/u/login`) + navigazione minima customer (CTA Home → Promotions + link "Torna alla home"). Decima entry.

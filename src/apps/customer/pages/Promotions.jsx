@@ -189,7 +189,23 @@ export default function Promotions() {
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 980, margin: '0 auto' }}>
         <header style={{ marginBottom: isMobile ? 28 : 40 }}>
-          <Brandmark size={isMobile ? 32 : 36} style={{ marginBottom: isMobile ? 24 : 32 }} />
+          <Brandmark size={isMobile ? 32 : 36} style={{ marginBottom: isMobile ? 16 : 20 }} />
+          <Link
+            to="/u/home"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              color: 'var(--color-text-secondary)',
+              fontSize: 13,
+              fontWeight: 600,
+              textDecoration: 'none',
+              marginBottom: isMobile ? 18 : 24,
+            }}
+          >
+            <span aria-hidden="true">←</span>
+            Torna alla home
+          </Link>
           <Eyebrow withRule style={{ marginBottom: 10 }}>
             Promozioni
           </Eyebrow>
