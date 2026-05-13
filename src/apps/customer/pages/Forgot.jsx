@@ -27,9 +27,20 @@ export default function Forgot() {
       }}
     >
       <BackgroundDecor />
-      <div style={{ marginBottom: 24, zIndex: 1 }}>
+      <Link
+        to="/u/home"
+        style={{
+          display: 'inline-block',
+          textDecoration: 'none',
+          color: 'inherit',
+          cursor: 'pointer',
+          marginBottom: 24,
+          zIndex: 1,
+        }}
+        aria-label="Vai alla home"
+      >
         <Brandmark />
-      </div>
+      </Link>
       <Card radius="xl" padding="36px 40px" style={{ maxWidth: 440, zIndex: 1 }}>
         <h1
           style={{

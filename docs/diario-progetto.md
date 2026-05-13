@@ -36,7 +36,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 **Problema 2 — Le promozioni invisibili.** Dopo login, `/u/home` non aveva alcun link a `/u/promotions`. Davide e Roby sarebbero usciti dalla preview credendo che "non c'è altro" — non avrebbero mai visto il pezzo "vero" di Step 3.
 
-**Fix 2**: aggiunto un CTA secondary sotto la sub copy della home, "Guarda le promozioni del salone" → `/u/promotions`. Reciprocamente, in `/u/promotions` aggiunto link "← Torna alla home" in alto (o brandmark cliccabile, dettaglio cosmetico). Loop esplicito home ↔ promozioni.
+**Fix 2**: aggiunto un CTA primary (icona sparkle) sotto la sub copy della home, "Guarda le promozioni del salone" → `/u/promotions`. Reciprocamente, in `/u/promotions` aggiunto inizialmente un link testuale "← Torna alla home", poi sostituito da **Brandmark cliccabile** dopo test visivo: il link testuale e il Brandmark vicini creavano confusione visiva. Soluzione finale: Brandmark "Grooming Hub" cliccabile → `/u/home`, pattern standard universale. Loop esplicito home ↔ promozioni.
 
 NON è stata aggiunta una nav globale (TopNav + BottomNav come da `proto-dashboard.jsx`): sarebbe sovradimensionata per due sole pagine. Quando arriveranno Dashboard reale, Scheda pet, Prenotazione (Step 6+), la nav globale avrà senso.
 
