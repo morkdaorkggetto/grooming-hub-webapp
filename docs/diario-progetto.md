@@ -13,16 +13,69 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **Schema multi-tenant**: applicato sul DB demo `grooming-hub-demo` (Gate 2 chiuso, 25 aprile 2026). Demo Supabase riattivato manualmente l'11 maggio dopo auto-pause.
 - **DB produzione** `grooming`: intatto, schema vecchio (`clients` legacy), 189 clienti reali. `ACTIVE_HEALTHY`.
 - **App staff sul demo**: rotta — `webapp/src/lib/database.js` contiene 13 chiamate `from('clients')` su tabella droppata da M11-bis, più 3 chiamate a `customer_client_links` (anch'essa droppata) e 48 occorrenze testuali di `client_id`. Refactor previsto al Gate 5.
-- **App customer**: **scaffolding completato + prima schermata funzionante** (Step 1, 2, 3 della roadmap fast-track). Routing top-level pattern catch-all (`/u/*` → CustomerApp, `/*` → StaffApp). AuthProvider + TenantProvider attivi a livello root. Quattro pagine: `/u/login`, `/u/home` (placeholder), `/u/redeem/:token` (placeholder), `/u/promotions` (**funzionante**, RLS verificata via E2E). UI shared base (`Button`, `Card`, `Skeleton`). Build Vite verde (116 moduli). Pre-Gate 3 chiuso, 8 decisioni su 8 prese. Sul demo: 2 customer di test (`mario.rossi@test.example`, `luca.bianchi@test.example`, password `test1234`) e 3 promozioni seed.
+- **App customer**: **scaffolding + prima schermata + rifinitura visiva completati** (Step 1-5 della roadmap fast-track). Routing top-level pattern catch-all (`/u/*` → CustomerApp, `/*` → StaffApp). AuthProvider + TenantProvider attivi a livello root. Cinque pagine: `/u/login` (restyled), `/u/home` (restyled placeholder editorial), `/u/redeem/:token` (placeholder), `/u/promotions` (restyled, RLS verificata), `/u/forgot` (stub). UI shared completa: `Button`, `Card` (upgraded con shadow/radius props), `Skeleton`, `Brandmark`, `Eyebrow`, `Icon` (vocabolario SVG inline), `BackgroundDecor`. Tokens shared centralizzati in `src/shared/tokens/tokens.css` con Fraunces (Google Fonts) e radii completi. Build Vite verde (121 moduli). Pre-Gate 3 chiuso, 8 decisioni su 8 prese. Sul demo: 2 customer di test (`mario.rossi@test.example`, `luca.bianchi@test.example`, password `test1234`) e 3 promozioni seed.
 - **Refactor monorepo-ready**: completato in Step 1 (commit `6948589`). `webapp/src/` ora ha `apps/staff/` + `apps/customer/` + `shared/{supabase,auth,tenant,ui,tokens,utils}/`. Top-level `App.jsx` thin shell con routing catch-all.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
 
-**Prossimo passo**: roadmap fast-track conclusa con Step 4. Preview customer navigabile (URL nel diario, entry 12 maggio Step 4) — in attesa di disabilitazione della Vercel Deployment Protection sul progetto `-aish` per renderla pubblicamente accessibile. Da lì in poi: chiusura del Gate 5 (refactor `database.js` staff + cablaggio StaffApp sui provider shared + rimozione shim Supabase) può procedere in parallelo, sblocca l'app staff sul demo.
+**Prossimo passo**: roadmap fast-track conclusa con Step 5 (rifinitura visiva). Preview customer navigabile e pubblica (Deployment Protection disabilitata). Step 5 ha aggiornato il codice ma non ha redeployato — il deploy attuale (`bp91vkrap`) serve ancora il vecchio aspetto. Un `vercel deploy` rinfresca la preview con la nuova estetica. Dopo: consegna URL a Davide e Roby per primo feedback look & feel. In parallelo: Gate 5 (refactor `database.js` staff) sblocca anche l'app staff sul demo.
 
 ---
 
 ## Cronologia
+
+### 13 maggio 2026 — Step 5 della roadmap fast-track: rifinitura visiva customer app
+
+**Attori**: Luigi (segnalazione di gap visivo), Cowork (analisi reference + prompt), Code (implementazione).
+
+**Contesto**: dopo la verifica visiva di Step 4, Luigi ha segnalato che la preview "non parla la lingua" del bundle Design. Cowork ha riconosciuto un gap di calibrazione: aveva letto i sei markdown del bundle ma mai i file della cartella `reference/` (auth.jsx, proto-auth.jsx, proto-dashboard.jsx, shared-ui.jsx, tokens.css). Quei file contenevano il *vocabolario visivo* del prodotto. Step 5 corregge il gap senza riprodurre pixel-perfect i prototipi: estrae pattern e li applica.
+
+**Verifica preliminare**: `src/apps/customer/pages/Login.jsx` era già pagina dedicata (creata in Step 2). Il "🐶 Grooming Hub — Gestisci i tuoi clienti a quattro zampe" + "Made with ❤️ for groomers" che Luigi aveva visto venivano dalla pagina staff `/login`, raggiunta dal catch-all `/*` → StaffApp se si arriva a `/` senza prefisso `/u`. Step 5 quindi è solo restyle visivo, niente porting di logica.
+
+**Pattern estratti dal bundle reference e applicati**:
+
+- **Fraunces** (font-serif Google Fonts) caricata via `@import` nel nuovo file `src/shared/tokens/tokens.css` — separato da `index.css` per non interferire col Tailwind dello staff. Import linkato in `main.jsx`.
+- **Radii completi** (`--r-sm/-md/-lg/-xl/-full`) centralizzati nei tokens.
+- **Eyebrow** uppercase 11px / letter-spacing 0.22em / weight 700 come marcatore di sezione. Componente nuovo `src/shared/ui/Eyebrow.jsx` con prop `withRule` per la linea breve a sinistra.
+- **Brandmark** customer-side: rounded square primary + paw SVG + wordmark "Grooming Hub" in Fraunces. Componente nuovo `src/shared/ui/Brandmark.jsx`.
+- **BackgroundDecor**: due gradient radiali (primary 12% top-left, secondary 8% bottom-right). Componente nuovo `src/shared/ui/BackgroundDecor.jsx`.
+- **Card upgraded**: shadow discreta (`0 1px 2px + 0 12px 40px -24px`), props `radius` (sm/md/lg/xl) e `padding` configurabili.
+- **Icon vocabulary**: paw, clock, sparkle, heart, whatsapp, logout, ecc. — componente nuovo `src/shared/ui/Icon.jsx` derivato da `shared-ui.jsx` del bundle.
+- **H1 Fraunces** weight 500 letter-spacing negativo, con italic primary sui nomi (es. *"La tua **area personale**."*).
+
+**Pagine restylate**:
+
+- **`/u/login`**: layout AuthCard centrata, H1 Fraunces "Bentornato", sub "Accedi al tuo account per gestire prenotazioni e i tuoi pet", input height 44 con trailing link "Password dimenticata?" → `/u/forgot`. Footer asciutto con link `/u/redeem` ("Hai ricevuto un invito dal salone?"). NIENTE social buttons, NIENTE link "Registrati" pubblico (Decisione 12 Gate 2), NIENTE checkbox "Resta connesso".
+- **`/u/home`**: Brandmark in alto, Eyebrow "BENTORNATO, {NOME}" con rule, H1 Fraunces "La tua area personale." (con italic primary), sub paragraph esplicativo (rimossa la copy dev-facing "Schermata placeholder. La dashboard reale arriva nello step successivo"), CTA secondary outline "Esci" con icona logout in basso a destra.
+- **`/u/promotions`**: Brandmark + Eyebrow "PROMOZIONI" + H1 Fraunces italic "del momento". Card promo arricchita: Eyebrow "Promo" + title Fraunces + body + scadenza con icona clock inline + CTA con icona WhatsApp quando l'URL è `wa.me`. Padding 20, radius lg, ombra discreta.
+
+**Pagina nuova creata**: `/u/forgot` come stub (il link "Password dimenticata?" del login era nello spec ma senza target; meglio uno stub di un link rotto). Il flusso reale `resetPasswordForEmail` resta da implementare in step successivo.
+
+**Decisioni operative di Code in autonomia**:
+
+1. **Responsive via `window.matchMedia + state`** invece di CSS media query. Coerente col pattern inline-style del bundle reference (che usava `viewport === 'mobile'` da useApp state) ma non idiomatico React puro — può dare guai con SSR in futuro. Accettabile per ora.
+2. **Tokens in file dedicato** (`src/shared/tokens/tokens.css`) invece di toccare `src/index.css` (che ha Tailwind dello staff). Più sicuro.
+3. **Stub `/u/forgot`** aggiunto per non lasciare link rotto. Cowork conferma scelta.
+4. **Brandmark wordmark in `--color-text-primary`** invece di colore ereditato. Leggibile su entrambi i fondi (chiaro app, gradient decor).
+
+**Lavori completati**:
+
+- 13 file modificati, +881/-168 (al netto di nuovi file UI shared, le tre pagine restylate, tokens nuovi, stub forgot).
+- Build verde (121 moduli, 1.00s, 0 errori).
+- Commit `bed5eb4`.
+- Smoke test HTTP 200 ancora positivo sul deploy `bp91vkrap` di Step 4 (che però serve il *vecchio* aspetto).
+
+**Aperto**:
+
+- **Redeploy preview**: il deploy `bp91vkrap` serve ancora il bundle di Step 4. Un `vercel deploy` rinfresca con la nuova estetica.
+- **Test visivo del nuovo aspetto** in browser, da fare dopo il redeploy.
+- **Padding chunk size Vite** ancora 589 kB (warning pre-esistente, non bloccante).
+
+**Prossimo passo**:
+
+- Redeploy preview (5 minuti). Poi verifica visiva. Poi consegna URL a Davide e Roby.
+
+---
 
 ### 12 maggio 2026 — Step 4 della roadmap fast-track: vercel link + primo deploy preview
 
@@ -287,3 +340,5 @@ Azione manuale richiesta a Luigi (1 minuto): Vercel Dashboard → progetto `groo
 - **11 maggio 2026** — Diario creato. Sei entry: Step 1 e Step 2 roadmap fast-track, chiusura pre-Gate 3, verifica schema notes + enforcement column-level, terzo round parziale con Davide e Roby (sezioni 2 e 8), apertura diario + archiviazione + sintesi stato dell'arte, entry retroattiva di aprile 2026.
 
 - **12 maggio 2026** — Step 3 e Step 4 della roadmap fast-track: seed customer + seed promozioni sul demo, schermata `/u/promotions` con RLS verificata via E2E REST, vercel link a `grooming-hub-webapp-aish` + primo deploy preview (gated da SSO in attesa di disabilitazione manuale). Settima e ottava entry.
+
+- **13 maggio 2026** — Step 5 della roadmap fast-track: rifinitura visiva customer app basata sui pattern estratti dai prototipi del bundle Design (cartella `reference/`). Fraunces, Eyebrow, Brandmark, BackgroundDecor, Icon vocabulary, Card upgraded. Tre pagine restylate (`/u/login`, `/u/home`, `/u/promotions`) + stub `/u/forgot`. Nona entry.
