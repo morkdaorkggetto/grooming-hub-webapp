@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './shared/auth/AuthProvider';
 import { TenantProvider } from './shared/tenant/TenantProvider';
 import StaffApp from './apps/staff/StaffApp';
@@ -12,6 +12,9 @@ import CustomerApp from './apps/customer/CustomerApp';
  * CustomerApp espongono solo <Routes> interni.
  *
  * Routing scelto in modalità "catch-all":
+ *   /      → redirect a /u/login (per consegnare la preview al salone su un
+ *            URL che atterra sul customer; StaffApp è broken sul demo finché
+ *            Gate 5 non gira)
  *   /u/*   → CustomerApp  (login customer + dashboard + redeem)
  *   /*     → StaffApp     (tutte le rotte staff preservate ai path originali:
  *                          /dashboard, /login, /portal, /calendar, ecc.)
@@ -31,6 +34,7 @@ export default function App() {
       <AuthProvider>
         <TenantProvider>
           <Routes>
+            <Route path="/" element={<Navigate to="/u/login" replace />} />
             <Route path="/u/*" element={<CustomerApp />} />
             <Route path="/*" element={<StaffApp />} />
           </Routes>
