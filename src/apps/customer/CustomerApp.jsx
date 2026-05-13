@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import Forgot from './pages/Forgot';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Promotions from './pages/Promotions';
@@ -25,6 +26,7 @@ export default function CustomerApp() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/u/home" replace />} />
+      <Route path="/forgot" element={<Forgot />} />
       <Route path="/home" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/promotions" element={<Promotions />} />

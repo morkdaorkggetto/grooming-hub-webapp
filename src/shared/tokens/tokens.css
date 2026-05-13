@@ -1,0 +1,39 @@
+/**
+ * tokens.css — design tokens cross-app (customer + staff future-unification).
+ *
+ * Step 5 della roadmap fast-track: estratti dal bundle design
+ * `design_handoff_customer_app/reference/tokens.css`.
+ *
+ * Aggiunge:
+ *   - @import del font serif Fraunces (Google Fonts)
+ *   - radii standard --r-sm/-md/-lg/-xl/-full
+ *   - --font-sans / --font-serif
+ *   - classe utility .gh-eyebrow per gli occhielli di sezione uppercase
+ *
+ * Le variabili `--color-*` esistono già in index.css (Tailwind base layer).
+ * Qui aggiungiamo solo ciò che mancava per la tipografia editoriale customer.
+ *
+ * Importato in main.jsx subito dopo index.css.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
+
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Helvetica Neue', sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 28px;
+  --r-full: 999px;
+}
+
+.gh-eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
