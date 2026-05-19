@@ -18,11 +18,58 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
 
-**Prossimo passo**: preview customer consegnabile. URL pubblico aggiornato `https://grooming-hub-webapp-aish-6joizoj4m-morkdaorkggettos-projects.vercel.app` (atterra su `/u/login` per via dell'hotfix routing). Dopo: consegna a Davide e Roby per primo feedback look & feel via WhatsApp. In parallelo: Gate 5 (refactor `database.js` staff) sblocca anche l'app staff sul demo.
+**Preview consegnata al salone**: `https://grooming-hub-webapp-aish-29dw1o8av-morkdaorkggettos-projects.vercel.app`. Atterra su `/u/login` (redirect top-level). Credenziali test: `mario.rossi@test.example` / `test1234`. Branch `feat/customer-app` pushata su `origin` con 18 commit della giornata 11-13 maggio.
+
+**Prossimo passo**: feedback di Davide e Roby. Le loro osservazioni guideranno o una sessione di rifinitura ulteriore o l'avvio di Step 6+ (Dashboard reale, Scheda pet, Prenotazione). In parallelo: Gate 5 (refactor `database.js` staff) sblocca anche l'app staff sul demo. Sessione "Security hardening" da pianificare prima del merge feat→main su prod (vedi entry di chiusura).
 
 ---
 
 ## Cronologia
+
+### 13 maggio 2026 — Consegna preview customer al salone
+
+**Attori**: Luigi (test visivo + decisioni di calibrazione), Cowork (analisi reference + entry diario), Code (esecuzione fix + deploy + seed).
+
+**Contesto**: chiusura della giornata di lavoro intensiva. Preview customer pronta per primo feedback "look & feel" da Davide e Roby. La consegna è onesta sul perimetro: mostra autenticamente quello che è stato fatto in Step 1-5, niente di più.
+
+**URL preview definitivo**:
+`https://grooming-hub-webapp-aish-29dw1o8av-morkdaorkggettos-projects.vercel.app`
+
+L'URL pelato atterra su `/u/login` (redirect del routing top-level). Credenziali test: `mario.rossi@test.example` / `test1234`.
+
+**Cosa contiene la preview consegnata**:
+
+- `/u/login` con brand customer dedicato (BackgroundDecor a gradient radiali, AuthCard centrata, H1 Fraunces "Bentornato", Field con focus border primary, footer asciutto con link a `/u/redeem`).
+- `/u/home` placeholder editoriale (saluto in Eyebrow, H1 Fraunces "La tua *area personale*" con italic primary, sub esplicativo, CTA primary "Guarda le promozioni" con icon sparkle + CTA secondary outline "Esci").
+- `/u/promotions` funzionante: 2 card promozioni con foto Unsplash placeholder, title Fraunces, body, validità con icon clock inline, CTA WhatsApp deep link sulla prima promo. RLS verificata via E2E REST in Step 3. Brandmark in alto cliccabile → `/u/home`.
+- `/u/forgot` e `/u/redeem/:token` placeholder/stub.
+- Pattern visivo coerente al bundle Design `reference/`: Fraunces, Eyebrow, Brandmark con paw SVG, BackgroundDecor, Card con shadow discreta, Icon vocabulary inline SVG.
+
+**Calibrazioni post-test della giornata** (ognuna nata da una piccola osservazione visiva di Luigi):
+
+1. **Hotfix routing top-level** (commit `937e051`): URL root `/` → `Navigate to="/u/login"`. Senza, chi atterra sull'URL pelato finiva sul login staff, rotto sul demo per Gate 5 mancante.
+2. **Nav minima Home ↔ Promotions** (commit `3260387`): CTA primary su home con icon sparkle "Guarda le promozioni" + link back su promotions. Decisione autonoma di Code: primary filled invece di secondary outline, per gerarchia visiva pulita.
+3. **Brandmark cliccabile** (commit `4da1d29`): sostituisce il link testuale "← Torna alla home" che, accanto al wordmark, creava sovrapposizione visiva. Pattern standard universale (logo cliccabile = home). Applicato a `/u/promotions` e `/u/forgot`, NON a `/u/login` (no home raggiungibile pre-auth) né a `/u/home` (sarebbe no-op).
+4. **H1 unico "Promozioni del momento"** (commit `d2744dc`): rimossa Eyebrow "PROMOZIONI" + `<em>del momento</em>` orfano. Sostituiti con H1 unico Fraunces italic primary tutto sulla stessa riga (o wrap naturale su mobile). Più leggibile, niente registro spezzato fra eyebrow e sotto-frase.
+5. **Foto Unsplash sulle 2 promozioni** (solo seed DB demo, niente commit codice): URL stabili imgix CDN con `cache-control: max-age=31536000`. `Promotions.jsx` aveva già il render `image_url` dallo Step 5, quindi nessun deploy aggiuntivo necessario.
+
+**URL Unsplash per memoria storica** (placeholder, da sostituire con foto reali quando il salone le invierà):
+- "Toelettatura primaverile": `https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80&auto=format&fit=crop`
+- "Cliente del mese": `https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&q=80&auto=format&fit=crop`
+
+**Stato repo a chiusura giornata**: branch `feat/customer-app` con **18 commit locali della giornata 11-13 maggio 2026**, ora pushati su `origin/feat/customer-app` (vedi push action di questa sessione di chiusura). Branch `main` invariata, prod `grooming` Supabase intoccato.
+
+**Aperto**:
+
+- **Feedback Davide e Roby**: messaggio WhatsApp da inviare con l'URL preview + credenziali test + invito ad osservare tono / leggibilità / dettagli + richiesta di 2-3 foto loro per sostituire le Unsplash placeholder. Bozza messaggio nei materiali Cowork dei turni precedenti.
+- **Security hardening (PRIORITÀ ALTA pre-merge prod)**: 30+ avvisi WARN dell'advisor Supabase su entrambi i progetti. Funzioni `SECURITY DEFINER` con `search_path` non pinnato (`accept_customer_invite`, `get_public_pet_card`, `has_tenant_access`, altre), bucket `client-photos` e `pet-avatars` con SELECT troppo larga, leaked password protection disattivata. Demo non urgente (dati finti). Prod ha 189 clienti reali — da chiudere PRIMA di qualunque merge `feat → main`. Sessione dedicata da pianificare: interrogazione completa advisor → categorizzazione → migration `security_hardening` applicata prima sul demo poi su prod.
+- **Gate 5**: refactor `database.js` staff + cablaggio StaffApp sui provider shared + rimozione shim Supabase. Sblocca app staff sul demo. Può procedere in parallelo o dopo primo feedback salone.
+- **Step 6+**: Dashboard reale, Scheda pet, Prenotazione. Da affrontare con calma, in base al feedback salone e all'eventuale terzo round documento partecipato.
+- **Sezioni 2 e 8 documento partecipato**: punti residui (pet difficili da fotografare, convenzioni interne staff, momenti "uffa, di nuovo", cosa non vorreste perdere del gestionale attuale). Non urgenti.
+
+**Prossimo passo**: invio messaggio WhatsApp a Davide e Roby. Attendere feedback (giorni, non ore). Quando arriva: integrazione nel documento partecipato + decisione su iterazione/Step 6.
+
+---
 
 ### 13 maggio 2026 — Hotfix routing top-level + navigazione minima customer
 
@@ -373,4 +420,4 @@ Azione manuale richiesta a Luigi (1 minuto): Vercel Dashboard → progetto `groo
 
 - **12 maggio 2026** — Step 3 e Step 4 della roadmap fast-track: seed customer + seed promozioni sul demo, schermata `/u/promotions` con RLS verificata via E2E REST, vercel link a `grooming-hub-webapp-aish` + primo deploy preview (gated da SSO in attesa di disabilitazione manuale). Settima e ottava entry.
 
-- **13 maggio 2026** — Step 5 della roadmap fast-track: rifinitura visiva customer app basata sui pattern estratti dai prototipi del bundle Design (cartella `reference/`). Fraunces, Eyebrow, Brandmark, BackgroundDecor, Icon vocabulary, Card upgraded. Tre pagine restylate (`/u/login`, `/u/home`, `/u/promotions`) + stub `/u/forgot`. Nona entry. Più: hotfix routing top-level (`/` → `/u/login`) + navigazione minima customer (CTA Home → Promotions + link "Torna alla home"). Decima entry.
+- **13 maggio 2026** — Step 5 della roadmap fast-track: rifinitura visiva customer app basata sui pattern estratti dai prototipi del bundle Design (cartella `reference/`). Fraunces, Eyebrow, Brandmark, BackgroundDecor, Icon vocabulary, Card upgraded. Tre pagine restylate (`/u/login`, `/u/home`, `/u/promotions`) + stub `/u/forgot`. Nona entry. Più: hotfix routing top-level (`/` → `/u/login`) + navigazione minima customer (CTA Home → Promotions + link "Torna alla home"). Decima entry. Più: calibrazioni post-test (Brandmark cliccabile, H1 unico "Promozioni del momento", foto Unsplash placeholder sulle promo) e consegna preview customer al salone — URL definitivo `29dw1o8av`. Branch `feat/customer-app` pushata su `origin` con 18 commit. Undicesima entry — consegna del giorno.
