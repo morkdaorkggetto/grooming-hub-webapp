@@ -234,6 +234,28 @@ La missione naturalistica è qualcosa che vorreste passasse anche attraverso l'a
 
 ---
 
+## 10. Primo riscontro sulla preview dell'app (maggio 2026)
+
+Il 13 maggio 2026 abbiamo consegnato a Davide e Roby una prima preview navigabile dell'app cliente: schermata di login, home placeholder editoriale, schermata promozioni con due card di esempio (Toelettatura primaverile, Cliente del mese). La consegna era esplicitamente una "bozza" — niente pretesa di completezza, solo prima impressione su tono e direzione.
+
+### Risposta di Davide e Roby (informale, via WhatsApp)
+
+«Soddisfatti dell'interfaccia.»
+
+### Nota di contesto (Luigi, maggio 2026)
+
+La preview era volutamente essenziale — login, home placeholder, due card promozioni. Non c'era abbastanza materiale per chiedere osservazioni articolate, e Davide e Roby avrebbero faticato a "valutare" qualcosa di così minimo. Il loro "soddisfatti" registra l'accettazione del registro visivo e del tono, senza entrare nei dettagli che ancora non c'erano. Per ottenere feedback più specifici servirà mostrare loro le schermate successive (Dashboard reale, Scheda pet, Prenotazione) — Step 6+ della roadmap.
+
+### Decisione collaterale — foto Unsplash
+
+Davide e Roby non hanno inviato foto del loro lavoro insieme alla consegna. Le due immagini Unsplash che avevamo individuato come placeholder per le card promozioni vengono **promosse a scelta di Fase 1**: non sono più transitorie. Se in futuro arriveranno foto reali del salone, le sostituiremo, ma il flusso di prodotto non si blocca aspettando. Coerente con la postura del documento: "la fotografia è parte del lavoro del salone, e arriva quando arriva" — non forziamo il loro tempo.
+
+### Punti aperti per ulteriori approfondimenti
+
+Il prossimo riscontro sostanziale arriverà quando avremo mostrato loro la Dashboard reale (Step 6) e la Scheda pet (Step 7). Da lì in poi le osservazioni potranno essere più puntuali — quali campi della scheda pet vedono utili, come reagiscono al flusso "richiesta in attesa di conferma" della prenotazione, eccetera.
+
+---
+
 ## Note operative
 
 Documento aperto. Ogni sezione si rivede quando emergono novità o quando le scelte di prodotto richiedono approfondimenti su un aspetto specifico.
@@ -245,3 +267,5 @@ Documento aperto. Ogni sezione si rivede quando emergono novità o quando le sce
 - *Aprile 2026 — Secondo round*: contributi di Davide e Roby integrati nelle sezioni 3 (completata), 5, 6, 7, 9 (post-scriptum). Aggiunta nota di contesto sulla formazione naturalistica dei proprietari. Sezione 8 (zona grigia) e dettagli puntuali su sezione 2 (foto operativa vs identificativa) restano in attesa di terzo round.
 
 - *Maggio 2026 — Terzo round parziale*: tre domande mirate inviate via WhatsApp da Luigi su foto pet (sezione 2) e note libere su clienti e pet (sezione 8). Risposte di Davide e Roby integrate. Sezione 2 (pet difficili da fotografare, campi critici al primo contatto) e sezione 8 (convenzioni interne, momenti "uffa, di nuovo", cosa non vorreste perdere del gestionale attuale) restano aperte per un eventuale quarto round.
+
+- *Maggio 2026 — Primo riscontro sulla preview dell'app*: nuova sezione 10 con risposta informale di Davide e Roby («soddisfatti dell'interfaccia») e decisione collaterale sulle foto Unsplash promosse a scelta finale di Fase 1.

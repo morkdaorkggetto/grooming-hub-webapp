@@ -1,8 +1,10 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import Book from './pages/Book';
 import Forgot from './pages/Forgot';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Pet from './pages/Pet';
 import Promotions from './pages/Promotions';
 import Redeem from './pages/Redeem';
 
@@ -26,9 +28,11 @@ export default function CustomerApp() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/u/home" replace />} />
+      <Route path="/book" element={<Book />} />
       <Route path="/forgot" element={<Forgot />} />
       <Route path="/home" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/pet/:petId" element={<Pet />} />
       <Route path="/promotions" element={<Promotions />} />
       <Route path="/redeem" element={<Redeem />} />
       <Route path="/redeem/:token" element={<Redeem />} />

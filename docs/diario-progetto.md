@@ -8,7 +8,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 12 maggio 2026.*
+*Aggiornato il 20 maggio 2026.*
 
 - **Schema multi-tenant**: applicato sul DB demo `grooming-hub-demo` (Gate 2 chiuso, 25 aprile 2026). Demo Supabase riattivato manualmente l'11 maggio dopo auto-pause.
 - **DB produzione** `grooming`: intatto, schema vecchio (`clients` legacy), 189 clienti reali. `ACTIVE_HEALTHY`.
@@ -18,13 +18,31 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - **Documento partecipato salone**: tre round completati (terzo parziale, maggio 2026). Sezioni 2 e 8 ora hanno la prima risposta di Davide e Roby; restano aperti alcuni dettagli per un eventuale quarto round (pet difficili da fotografare, convenzioni interne, momenti "uffa, di nuovo" del gestionale).
 - **Bundle Claude Design** (`design_handoff_customer_app/`): parzialmente superato dalle decisioni di Gate 2 e Gate 5. In particolare il signup pubblico previsto dal bundle è incompatibile con la Decisione 12 di Gate 2 ("no autocreazione customer, solo via invito").
 
-**Preview consegnata al salone**: `https://grooming-hub-webapp-aish-29dw1o8av-morkdaorkggettos-projects.vercel.app`. Atterra su `/u/login` (redirect top-level). Credenziali test: `mario.rossi@test.example` / `test1234`. Branch `feat/customer-app` pushata su `origin` con 18 commit della giornata 11-13 maggio.
+**Preview consegnata al salone (13 maggio)**: `https://grooming-hub-webapp-aish-29dw1o8av-morkdaorkggettos-projects.vercel.app`. Atterra su `/u/login` (redirect top-level). Credenziali test: `mario.rossi@test.example` / `test1234`. Branch `feat/customer-app` pushata su `origin` con 19 commit.
 
-**Prossimo passo**: feedback di Davide e Roby. Le loro osservazioni guideranno o una sessione di rifinitura ulteriore o l'avvio di Step 6+ (Dashboard reale, Scheda pet, Prenotazione). In parallelo: Gate 5 (refactor `database.js` staff) sblocca anche l'app staff sul demo. Sessione "Security hardening" da pianificare prima del merge feat→main su prod (vedi entry di chiusura).
+**Primo riscontro Davide e Roby (20 maggio)**: «soddisfatti dell'interfaccia». Risposta informale, asciutta — coerente con la natura essenziale della preview consegnata. Nessuna iterazione richiesta. Niente foto inviate: le due immagini Unsplash sulle promozioni vengono promosse a scelta finale di Fase 1. Dettagli e nota di contesto in `flussi-operativi-salone.md` (nuova sezione 10) e nella entry di cronologia corrispondente.
+
+**Prossimo passo**: Step 6 della roadmap — Dashboard customer reale (sostituisce la `/u/home` placeholder). Sezioni: header con saluto, next appointment card con stato, CTA "Prenota", lista pet del cliente, mini-stack promozioni (riuso `usePromotions`). Decisione 9 Gate 2 applicata: empty state "nessun pet" rimanda a contatto salone via WhatsApp, niente add pet customer-side. Prerequisito leggero: seed di 1-2 pet per Mario Rossi sul demo + 1 appuntamento futuro. Tempo stimato: 2-3 ore Code. In parallelo, da pianificare: Gate 5 (refactor `database.js` staff) e sessione "Security hardening" PRIMA del merge feat→main su prod.
 
 ---
 
 ## Cronologia
+
+### 20 maggio 2026 — Primo riscontro positivo dal salone + avvio Step 6
+
+**Attori**: Luigi (raccolta feedback informale via WhatsApp), Cowork (registrazione).
+
+**Feedback Davide e Roby**: «Soddisfatti dell'interfaccia.» Risposta informale, asciutta. La preview che avevamo consegnato il 13 maggio era volutamente essenziale — login, home placeholder, due card promozioni. Non c'era abbastanza materiale per osservazioni articolate, e probabilmente Davide e Roby avrebbero faticato a "valutare" qualcosa di così minimo. Il loro "soddisfatti" registra accettazione del registro visivo e del tono, non entra nei dettagli che ancora non esistevano. Il prossimo riscontro sostanziale arriverà quando avremo mostrato loro Dashboard reale (Step 6) e Scheda pet (Step 7).
+
+**Decisione collaterale — foto Unsplash promosse a scelta finale Fase 1**: Davide e Roby non hanno mandato foto del loro lavoro. Le due URL Unsplash sulle promozioni attive non sono più transitorie. Se in futuro arriveranno foto reali del salone, sostituiremo; ma il prodotto non si blocca aspettando. Coerente con la postura "la fotografia è parte del lavoro del salone, e arriva quando arriva".
+
+**Documenti aggiornati**:
+- `flussi-operativi-salone.md`: nuova sezione 10 "Primo riscontro sulla preview dell'app (maggio 2026)" con le parole esatte del salone + nota di contesto Cowork + decisione foto.
+- Storico revisioni del documento partecipato aggiornato.
+
+**Prossimo passo**: Step 6 della roadmap — Dashboard customer reale. Sostituisce la `/u/home` placeholder con una dashboard funzionante. Vedi "Prossimo passo" dello "Stato attuale" per il dettaglio.
+
+---
 
 ### 13 maggio 2026 — Consegna preview customer al salone
 
@@ -421,3 +439,5 @@ Azione manuale richiesta a Luigi (1 minuto): Vercel Dashboard → progetto `groo
 - **12 maggio 2026** — Step 3 e Step 4 della roadmap fast-track: seed customer + seed promozioni sul demo, schermata `/u/promotions` con RLS verificata via E2E REST, vercel link a `grooming-hub-webapp-aish` + primo deploy preview (gated da SSO in attesa di disabilitazione manuale). Settima e ottava entry.
 
 - **13 maggio 2026** — Step 5 della roadmap fast-track: rifinitura visiva customer app basata sui pattern estratti dai prototipi del bundle Design (cartella `reference/`). Fraunces, Eyebrow, Brandmark, BackgroundDecor, Icon vocabulary, Card upgraded. Tre pagine restylate (`/u/login`, `/u/home`, `/u/promotions`) + stub `/u/forgot`. Nona entry. Più: hotfix routing top-level (`/` → `/u/login`) + navigazione minima customer (CTA Home → Promotions + link "Torna alla home"). Decima entry. Più: calibrazioni post-test (Brandmark cliccabile, H1 unico "Promozioni del momento", foto Unsplash placeholder sulle promo) e consegna preview customer al salone — URL definitivo `29dw1o8av`. Branch `feat/customer-app` pushata su `origin` con 18 commit. Undicesima entry — consegna del giorno.
+
+- **20 maggio 2026** — Primo riscontro positivo dal salone («soddisfatti dell'interfaccia») + decisione collaterale foto Unsplash promosse a scelta finale Fase 1 + avvio Step 6 (Dashboard customer reale). Aggiornata sezione 10 di `flussi-operativi-salone.md`. Dodicesima entry.
