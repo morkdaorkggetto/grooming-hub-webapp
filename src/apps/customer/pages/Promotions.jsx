@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { usePromotions } from '../hooks/usePromotions';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
-import Brandmark from '../../../shared/ui/Brandmark';
 import Card from '../../../shared/ui/Card';
 import Eyebrow from '../../../shared/ui/Eyebrow';
 import Icon from '../../../shared/ui/Icon';
@@ -15,8 +14,9 @@ import Skeleton from '../../../shared/ui/Skeleton';
  * Pattern dal bundle design + decisione pre-Gate-3 ("Promozioni del momento",
  * sola lettura, niente framing fedeltà).
  *
- * Layout:
- *   - BackgroundDecor + Brandmark (cliccabile → /u/home)
+ * Layout (Step 6.5: rimosso Brandmark interno, ora vive nel TopNav globale
+ * via CustomerNav):
+ *   - BackgroundDecor
  *   - H1 Fraunces italic primary "Promozioni del momento" (unico, no eyebrow
  *     sopra: l'occhiello ripeteva la prima parola dell'H1)
  *   - Sub paragraph "Le iniziative attive del salone."
@@ -190,19 +190,6 @@ export default function Promotions() {
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 980, margin: '0 auto' }}>
         <header style={{ marginBottom: isMobile ? 28 : 40 }}>
-          <Link
-            to="/u/home"
-            style={{
-              display: 'inline-block',
-              textDecoration: 'none',
-              color: 'inherit',
-              cursor: 'pointer',
-              marginBottom: isMobile ? 24 : 32,
-            }}
-            aria-label="Vai alla home"
-          >
-            <Brandmark size={isMobile ? 32 : 36} />
-          </Link>
           <h1
             style={{
               fontFamily: 'var(--font-serif)',

@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
-import Brandmark from '../../../shared/ui/Brandmark';
 import Card from '../../../shared/ui/Card';
 
 /**
@@ -29,19 +28,6 @@ export default function Book() {
       }}
     >
       <BackgroundDecor />
-      <Link
-        to="/u/home"
-        style={{
-          display: 'inline-block',
-          textDecoration: 'none',
-          color: 'inherit',
-          marginBottom: 24,
-          zIndex: 1,
-        }}
-        aria-label="Vai alla home"
-      >
-        <Brandmark />
-      </Link>
       <Card radius="xl" padding="36px 40px" style={{ maxWidth: 440, zIndex: 1 }}>
         <h1
           style={{

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useAuth } from '../../../shared/auth/AuthProvider';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { usePets } from '../hooks/usePets';
 import { useNextAppointment } from '../hooks/useNextAppointment';
 import { usePromotions } from '../hooks/usePromotions';
+import { useCurrentCustomer } from '../hooks/useCurrentCustomer';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
-import Brandmark from '../../../shared/ui/Brandmark';
 import Card from '../../../shared/ui/Card';
 import Eyebrow from '../../../shared/ui/Eyebrow';
 import Icon from '../../../shared/ui/Icon';
@@ -15,27 +15,22 @@ import Skeleton from '../../../shared/ui/Skeleton';
 import StatusBadge from '../../../shared/ui/StatusBadge';
 
 /**
- * /u/home — Dashboard customer reale, Step 6.
+ * /u/home — Dashboard customer reale.
  *
- * Pattern dal bundle Design `proto/proto-dashboard.jsx` adattato a Fase 1
- * (niente Boutique, niente fedeltà/tier).
+ * Step 6.5: rimossi Brandmark interno (ora nel TopNav globale via
+ * CustomerNav), bottone "Esci" (ora nel dropdown avatar), CTA standalone
+ * "Guarda le promozioni" (ora link Promozioni nel TopNav). Saluto editoriale
+ * ora usa customers.first_name via useCurrentCustomer (fix del placeholder
+ * email-derived di Step 6).
  *
  * Composizione:
- *   - Header con Brandmark + Eyebrow "BENTORNATO, {nome}"
+ *   - Eyebrow "BENTORNATO, {nome}"
  *   - Hero editoriale Fraunces:
  *       se nextAppt → "La giornata di *{pet}* inizia *{giorno}*."
  *       altrimenti  → "Bentornato, *{nome}*."
- *   - CTA row: Prenota (primary) + Vedi scheda pet (secondary outline) se 1+ pet
- *   - Card row 3 colonne desktop / stack mobile:
- *       Pet cards / Next appointment card / Mini-promo (top 3)
- *   - Empty states:
- *       no pet → CTA WhatsApp al salone (Decisione 9 Gate 2: no self-service pet)
- *       no appointment → "Nessun appuntamento" + CTA Prenota
- *       no promo → sezione omessa (silenzioso)
- *   - Footer Esci outline
- *
- * Numero WhatsApp salone: hardcoded a +393331112233 (placeholder demo). In
- * Step 7+ verrà letto da `tenants.settings`.
+ *   - CTA primary "Prenota un nuovo appuntamento" + secondary "Vedi scheda pet"
+ *   - Card row: Pet card / Next appt card / Mini-promo (top 3, silenzioso se 0)
+ *   - Empty states (decisione 9 Gate 2 sui pet)
  */
 
 const SALON_WHATSAPP = '+393331112233';
@@ -47,8 +42,8 @@ const DAY_FMT = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeri
 const TIME_FMT = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' });
 const RELATIVE_DAY_FMT = new Intl.RelativeTimeFormat('it-IT', { numeric: 'auto' });
 
-function pickGreetingName(user, customerFirstName) {
-  if (customerFirstName) return customerFirstName;
+function pickGreetingName(customer, user) {
+  if (customer?.first_name) return customer.first_name;
   const local = (user?.email || '').split('@')[0] || '';
   if (!local) return '';
   return local.charAt(0).toUpperCase() + local.slice(1);
@@ -62,7 +57,6 @@ function formatRelativeDay(iso) {
   target.setHours(0, 0, 0, 0);
   const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
   if (diffDays >= -1 && diffDays <= 6) {
-    // "oggi" / "domani" / "tra 3 giorni" / "ieri"
     return RELATIVE_DAY_FMT.format(diffDays, 'day');
   }
   return DAY_FMT.format(new Date(iso));
@@ -113,9 +107,9 @@ function PetAvatar({ name, photo_url, size = 56 }) {
 
 export default function Home() {
   const { loading: authLoading } = useRequireCustomer();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { tenant } = useTenant();
-  const navigate = useNavigate();
+  const { customer } = useCurrentCustomer();
 
   const { data: pets, loading: petsLoading } = usePets();
   const { data: nextAppt, loading: apptLoading } = useNextAppointment();
@@ -130,19 +124,12 @@ export default function Home() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/u/login', { replace: true });
-  };
-
-  const greeting = pickGreetingName(user, null); // first_name fetch rinviato a Step 7+
+  const greeting = pickGreetingName(customer, user);
   const firstPet = pets && pets.length > 0 ? pets[0] : null;
   const hasPets = pets && pets.length > 0;
   const visiblePromos = (promos || []).slice(0, 3);
 
-  // ──────────────────────────────────────────────────────────────────────
-  // Loading state: tutta la pagina con skeleton
-  // ──────────────────────────────────────────────────────────────────────
+  // Loading state generale
   if (authLoading || !user) {
     return (
       <main style={pageStyle}>
@@ -162,11 +149,6 @@ export default function Home() {
     <main style={pageStyle}>
       <BackgroundDecor />
       <div style={{ ...containerStyle, position: 'relative', zIndex: 1 }}>
-        {/* Header */}
-        <header style={{ marginBottom: isMobile ? 24 : 32 }}>
-          <Brandmark size={isMobile ? 32 : 36} />
-        </header>
-
         {/* Eyebrow */}
         <Eyebrow withRule style={{ marginBottom: 14 }}>
           {`Bentornato${greeting ? ', ' + greeting : ''}`}
@@ -197,7 +179,7 @@ export default function Home() {
           </>
         )}
 
-        {/* CTA row */}
+        {/* CTA row — solo prenota + scheda pet (logout/promozioni ora nel TopNav) */}
         <div
           style={{
             display: 'flex',
@@ -221,7 +203,7 @@ export default function Home() {
         </div>
 
         {/* Card row */}
-        <div style={gridStyle(isMobile, !!nextAppt, hasPets, visiblePromos.length > 0)}>
+        <div style={gridStyle(isMobile)}>
           {/* PETS card / empty */}
           {petsLoading ? (
             <SkeletonCard />
@@ -279,12 +261,7 @@ export default function Home() {
                 Non hai ancora un pet registrato. Per aggiungerlo, contatta il
                 salone direttamente.
               </p>
-              <a
-                href={SALON_WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none' }}
-              >
+              <a href={SALON_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                 <span style={primaryBtnStyle}>
                   <Icon name="whatsapp" size={16} />
                   Scrivici su WhatsApp
@@ -390,31 +367,6 @@ export default function Home() {
             </Card>
           )}
         </div>
-
-        {/* Footer */}
-        <footer style={{ marginTop: 48 }}>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            style={{
-              background: 'transparent',
-              color: 'var(--color-text-primary)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--r-md)',
-              padding: '8px 16px',
-              fontSize: 13,
-              fontWeight: 600,
-              fontFamily: 'inherit',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <Icon name="logout" size={14} />
-            Esci
-          </button>
-        </footer>
       </div>
     </main>
   );
@@ -430,10 +382,6 @@ function SkeletonCard() {
     </Card>
   );
 }
-
-// ──────────────────────────────────────────────────────────────────────
-// Style helpers
-// ──────────────────────────────────────────────────────────────────────
 
 const pageStyle = {
   width: '100%',
@@ -508,11 +456,10 @@ const secondaryBtnStyle = {
   cursor: 'pointer',
 };
 
-function gridStyle(isMobile, hasAppt, hasPets, hasPromo) {
+function gridStyle(isMobile) {
   if (isMobile) {
     return { display: 'flex', flexDirection: 'column', gap: 14 };
   }
-  // desktop: 3 cards when all present, sane fallback otherwise via auto-fit
   return {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
