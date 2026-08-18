@@ -23,44 +23,24 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [memberships, setMemberships] = useState([]);
+  const [membershipsUserId, setMembershipsUserId] = useState(null);
+  const [sessionReady, setSessionReady] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // Carica memberships per l'utente attivo
-  const refreshMemberships = async (userId) => {
-    if (!userId) {
-      setMemberships([]);
-      return;
-    }
-    const { data, error } = await supabase
-      .from('tenant_memberships')
-      .select('tenant_id, role, created_at')
-      .eq('user_id', userId);
-    if (error) {
-      console.warn('Errore fetch tenant_memberships:', error.message);
-      setMemberships([]);
-      return;
-    }
-    setMemberships(data || []);
-  };
 
   useEffect(() => {
     let active = true;
 
-    // 1. getSession iniziale
-    supabase.auth.getSession().then(async ({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
       setSession(data.session || null);
-      await refreshMemberships(data.session?.user?.id);
-      if (active) setLoading(false);
+      setSessionReady(true);
     });
 
-    // 2. subscribe ai cambi di sessione (login/logout/refresh)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!active) return;
       setSession(newSession || null);
-      await refreshMemberships(newSession?.user?.id);
     });
 
     return () => {
@@ -68,6 +48,52 @@ export function AuthProvider({ children }) {
       subscription?.unsubscribe();
     };
   }, []);
+
+  const userId = session?.user?.id || null;
+
+  useEffect(() => {
+    if (!sessionReady) return undefined;
+
+    let cancelled = false;
+
+    const refreshMemberships = async () => {
+      setLoading(true);
+
+      if (!userId) {
+        if (!cancelled) {
+          setMemberships([]);
+          setMembershipsUserId(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('tenant_memberships')
+        .select('tenant_id, role, created_at')
+        .eq('user_id', userId);
+
+      if (cancelled) return;
+
+      if (error) {
+        console.warn('Errore fetch tenant_memberships:', error.message);
+        setMemberships([]);
+      } else {
+        setMemberships(data || []);
+      }
+
+      setMembershipsUserId(userId);
+      setLoading(false);
+    };
+
+    refreshMemberships();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionReady, userId]);
+
+  const authLoading = loading || !sessionReady || membershipsUserId !== userId;
 
   const signIn = async (email, password) => {
     return supabase.auth.signInWithPassword({ email, password });
@@ -89,13 +115,13 @@ export function AuthProvider({ children }) {
     () => ({
       session,
       user: session?.user || null,
-      loading,
+      loading: authLoading,
       memberships,
       currentRole,
       signIn,
       signOut,
     }),
-    [session, loading, memberships, currentRole]
+    [session, authLoading, memberships, currentRole]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
