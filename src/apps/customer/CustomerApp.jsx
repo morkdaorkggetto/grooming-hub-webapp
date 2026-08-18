@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import CustomerNav from '../../shared/ui/CustomerNav';
+import { UnsavedChangesProvider } from '../../shared/navigation/UnsavedChangesProvider';
 import Book from './pages/Book';
 import Forgot from './pages/Forgot';
 import Home from './pages/Home';
@@ -28,9 +29,11 @@ import Redeem from './pages/Redeem';
 
 function LoggedInLayout() {
   return (
-    <CustomerNav>
-      <Outlet />
-    </CustomerNav>
+    <UnsavedChangesProvider>
+      <CustomerNav>
+        <Outlet />
+      </CustomerNav>
+    </UnsavedChangesProvider>
   );
 }
 

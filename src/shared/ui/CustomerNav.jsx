@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 import { useCurrentCustomer } from '../../apps/customer/hooks/useCurrentCustomer';
+import { useNavigationGuard } from '../navigation/UnsavedChangesProvider';
 import Brandmark from './Brandmark';
 import Icon from './Icon';
 
@@ -151,6 +152,7 @@ export default function CustomerNav({ children }) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { customer } = useCurrentCustomer();
+  const { confirmNavigation } = useNavigationGuard();
 
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 720 : false
@@ -185,8 +187,13 @@ export default function CustomerNav({ children }) {
   }, [location.pathname]);
 
   const handleLogout = async () => {
+    if (!confirmNavigation()) return;
     await signOut();
     navigate('/u/login', { replace: true });
+  };
+
+  const guardLink = (event) => {
+    if (!confirmNavigation()) event.preventDefault();
   };
 
   const initial = getInitial(customer, user);
@@ -218,6 +225,7 @@ export default function CustomerNav({ children }) {
               <Link
                 key={it.to}
                 to={it.to}
+                onClick={guardLink}
                 style={{
                   textDecoration: 'none',
                   display: 'flex',
@@ -275,7 +283,12 @@ export default function CustomerNav({ children }) {
         }}
       >
         {/* Brandmark cliccabile a sx */}
-        <Link to="/u/home" style={{ textDecoration: 'none', color: 'inherit' }} aria-label="Vai alla home">
+        <Link
+          to="/u/home"
+          onClick={guardLink}
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          aria-label="Vai alla home"
+        >
           <Brandmark size={32} />
         </Link>
 
@@ -287,6 +300,7 @@ export default function CustomerNav({ children }) {
               <Link
                 key={it.to}
                 to={it.to}
+                onClick={guardLink}
                 style={{
                   textDecoration: 'none',
                   padding: '10px 18px',
