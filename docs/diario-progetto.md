@@ -8,7 +8,19 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 20 maggio 2026.*
+*Aggiornato il 18 agosto 2026.*
+
+- **Canone operativo BEA adottato** (18/8): Luigi decide; Cowork tiene diario e verifica con misure; il lavoro nasce in incarichi numerati GH-nn con consegna a registro; Codex implementa; Claude Design compone; deploy e credenziali sono di Luigi. Documento: `docs/06-canone-operativo-portabile.md` (root non versionata). L'attore "Code" (Claude CLI) esce dal flusso.
+- **Ripresa dopo ~3 mesi di fermo**: ultimo commit `90d7e26` del 21/5 (Step 6.5, nav globale customer), pushato, `feat/customer-app` allineata a origin. Stato misurato completo in `stato-arte-misurato-2026-08-18.md` (consegna GH-01).
+- **Schermate Fase 1: 2/4 complete** (Dashboard, Promozioni). Scheda pet e Prenotazione stub. App staff sul demo ancora rotta (Gate 5). Preview `grooming-hub-webapp-aish.vercel.app` risponde.
+- **Non misurabile oggi**: stato Supabase demo/prod — il collegamento MCP di questa sessione vede solo l'org BEA. Riattivazione accesso in carico a Luigi (G1).
+- **Piano verso fine agosto**: 6 giri G1–G6 (Scheda pet → Gate 5+4 → Prenotazione → hardening → migration prod + merge), dipendenze da Davide e Roby nominate per prime — su tutte la **finestra di manutenzione prod da concordare entro il 24/8**. Dettaglio in `stato-arte-misurato-2026-08-18.md`; base tecnica in `piano-completamento-fase1.md` (da promuovere nel canone).
+
+**Prossimo passo**: chiusura G1 — Luigi promuove nel canone i tre documenti (stato arte, piano, diario), ripristina l'accesso Supabase e il demo se in pausa. Poi incarico GH-02 a Codex (Fase A, Scheda pet).
+
+---
+
+## Stato al 20 maggio 2026 (superato, conservato per storia)
 
 - **Schema multi-tenant**: applicato sul DB demo `grooming-hub-demo` (Gate 2 chiuso, 25 aprile 2026). Demo Supabase riattivato manualmente l'11 maggio dopo auto-pause.
 - **DB produzione** `grooming`: intatto, schema vecchio (`clients` legacy), 189 clienti reali. `ACTIVE_HEALTHY`.
@@ -27,6 +39,66 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 ---
 
 ## Cronologia
+
+### 18 agosto 2026 — Adozione del canone operativo BEA + stato dell'arte misurato (GH-01)
+
+**Attori**: Luigi (decisione di riorganizzazione), Cowork (misure + consegna).
+
+**Decisioni prese**:
+- Il progetto adotta il canone operativo maturato in BEA (`docs/06-canone-operativo-portabile.md`). Nuova squadra: Luigi decide/deploya, Cowork verifica/documenta, Codex implementa, Claude Design compone. L'attore "Code" esce dal flusso; le sezioni della skill e di ISTRUZIONI.md sul workflow a tre attori sono superate e andranno revisionate.
+- Scadenza dichiarata: chiusura Fase 1 a fine agosto 2026.
+- **Supabase passa a piano Pro su organizzazione nuova dedicata Grooming Hub** (decisione Luigi, 18/8, raffinata in giornata): org Pro nuova (~$25/mese) con dentro **solo il prod `grooming`**, trasferito previo backup; **il demo `grooming-hub-demo` resta su org free** accettando l'auto-pausa (tollerabile in demo, e la demo è la prova generale delle migration, non un candidato a diventare prod). La prima ipotesi "trasferisco entrambi" è superata per costo (~$10/mese di compute del secondo progetto, senza possibilità di pausa sui piani paid). Motivazione del Pro: basta auto-pausa sul prod, backup giornalieri per i 189 clienti reali, fatturazione separata da BEA. Transfer da eseguire ora, mai sotto la scadenza di G6. Gesti su account e billing: Luigi; Cowork verifica dopo.
+
+**Lavori completati**:
+- Incarico GH-01 consegnato: `stato-arte-misurato-2026-08-18.md` — misure su repo (36 migration, 2/4 schermate, staff rotta: 13 `from('clients')`), preview viva, piano G1–G6, dipendenze D&R nominate per prime.
+
+**Scostamenti dichiarati** (canone: zero scostamenti silenziosi):
+- Il messaggio d'innesto citava `docs/canone-operativo-cowork.md`; il file reale è `docs/06-canone-operativo-portabile.md`.
+- Stato Supabase demo/prod non misurabile: il collegamento MCP della sessione vede solo l'org BEA. Demo presumibilmente in auto-pausa dopo 3 mesi (non verificato).
+- Diario trovato fermo al 20/5 mentre il repo arrivava al 21/5 (`90d7e26`, Step 6.5): la entry unificata Step 6+6.5 non era mai stata scritta. Lezione: la consegna non è chiusa finché il diario non la registra.
+- Build, smoke test autenticato e advisor Supabase non rimisurati oggi: dichiarati come verifiche mancanti in GH-01, da recuperare nei giri.
+
+**GH-02 interrotto da Codex, e l'interruzione era giusta** (18/8, pomeriggio): la policy `pets_customer_update` concede al customer UPDATE full-row; il trigger di M `20260511070742` protegge solo `internal_notes`. Microchip, peso e tutta l'anagrafica pets erano modificabili via API. Controprova Cowork sui file migration: confermato. **Autodenuncia Cowork**: GH-02 affermava «il trigger DB li protegge» — scritto di memoria, non misurato, falso. L'interruzione di Codex ha intercettato l'errore: il canone ha funzionato al primo giro. Consegna in `docs/consegne/GH-02-scheda-pet-interruzione.md`; istituita la cartella `docs/consegne/` con README di convenzione (sede permanente delle consegne Codex).
+
+**Decisione Luigi (18/8)**: migration **whitelist** — per i non-staff ogni colonna di `pets` torna a OLD tranne `owner_notes`, `coat_preferences`, `photo_url`. Scartate la blacklist minima (lasciava scoperta l'anagrafica) e l'accettazione della protezione solo-UI. Nuovo mandato emesso: `docs/incarichi/GH-02-bis-whitelist-e-ripresa.md` (Parte 1 migration + controprove vive, Parte 2 ripresa A1-A4).
+
+**GH-02-bis: Parte 1 riuscita, Parte 2 interrotta su secondo difetto reale** (18/8, sera): migration whitelist `20260818060158` applicata al demo con 4 controprove vive passate (commit `f83e8d4`, locale). A1-A4 preparati localmente ma non committati: l'upload Storage customer fallisce con 403 perché nelle tre policy `pet-avatars customer` il riferimento `name` dentro `EXISTS` è catturato dall'alias `p` → `storage.foldername(p.name)` (il nome del pet!) invece del path. Controprova Cowork sul sorgente: confermato; misurato anche il perimetro — `client-photos` e `staff all` sono sane, il bug è solo nelle 3 policy customer. Fuori-istruzione dichiarati da Codex accettati (metadati prod visti via `list_projects` senza query; REVOKE advisor consolidato nella stessa migration).
+
+**Decisione Luigi (18/8)**: autorizzato GH-02-ter — migration che ricrea le 3 policy qualificando `storage.objects.name`, poi chiusura A1-A4 con verifica browser e commit. Scartato il rinvio di A3 al G5. Incarico: `docs/incarichi/GH-02-ter-fix-storage-e-chiusura.md`.
+
+**Lezione di giornata**: due interruzioni motivate, due difetti veri di schema trovati prima di scrivere codice sopra. Il costo del metodo (tre mandati per una schermata) è il prezzo dell'affidabilità — in BEA lo chiamavano «la controprova della controprova».
+
+**Affinamento convenzione consegne (Luigi, 18/8)**: il README di `docs/consegne/` ora chiede che ogni consegna con blocco includa una **soluzione consigliata a Cowork** — causa misurata, modifica minima, file coinvolti, controprove, rischi residui, e la strada raccomandata se ce n'è più d'una. Proposta informativa, mai autorizzativa. Nato dall'attrito di GH-02-bis, dove il mandato successivo è stato ricostruito dalla diagnosi invece che da una proposta già formata.
+
+**Aperto**: promozione nel canone dei documenti di oggi + `piano-completamento-fase1.md` (untracked) + commit locale `f83e8d4` da pushare a fine giro; ripuntamento collegamento Supabase di Cowork sull'org nuova; finestra manutenzione prod da chiedere a Davide e Roby entro il 24/8.
+
+**GH-02-ter consegnato e verificato** (18/8, sera): migration `20260818063103` corregge le 3 policy Storage (5 controprove vive passate, oggetti di prova ripuliti), A1-A4 completi con verifica browser (7 stati, responsive 390/320 senza overflow, resize foto 1600→1024 misurato). Commit `4d87e22`, `4e57b77`, `3254c95`; HEAD `3254c95`, 4 avanti su origin, nessun push. Verifica Cowork sul repo: commit e tabella file corrispondenti, migration limitata alle 3 policy, scan secret pulito; controprove vive accettate dal registro (MCP Cowork ancora su org BEA). **Scheda pet completa: 3/4 schermate Fase 1.**
+
+**Eccezione diagnosticata da Codex (fuori perimetro, non toccata)**: deadlock su hard reload con sessione esistente — `onAuthStateChange` async in `AuthProvider.jsx` attende `refreshMemberships()` sullo stesso client (caso documentato nella guida Supabase). Skeleton infinito su F5. Soluzione minima consigliata nel registro secondo la convenzione nuova: callback sincrono + `useEffect` separato con guard.
+
+**Decisione Luigi (18/8)**: autorizzato GH-02-quater — fix AuthProvider secondo la soluzione consigliata da Codex, un solo file, 4 controprove, PRIMA del push. Scartato il push immediato con F5 rotto. Incarico: `docs/incarichi/GH-02-quater-fix-authprovider.md`.
+
+**Claude Design entra nel giro (Luigi, 18/8)**: constatato che Codex ha composto la Scheda pet in autonomia (misure Cowork: 45 stili inline, 2 colori fuori token `#3f6658`/`#8f3f49`), il cappello della composizione torna a CD. Brief `docs/incarichi/GH-03-brief-claude-design.md`: Richiesta 1 subito (composizione wizard `/u/book` prima dell'implementazione in G4), Richiesta 2 dopo il redeploy (calibrazione Scheda pet su URL e screenshot veri).
+
+**GH-04 consegnato e verificato** (18/8): sonda staff `staff.sonda@test.example` viva sul demo (commit `8588bdd`, solo seed; 4 controprove passate, baseline Mario rimisurata, due tentativi SQL respinti e dichiarati). Password sonda pubblica e usa-e-getta, smontaggio previsto a chiusura G3 secondo la raccomandazione nel registro. L'account operatore reale (`demo@groominghub.it`, email fittizia) non è stato toccato; Luigi imposta la propria password via SQL Editor (gesto suo).
+
+**Proposta G3 di Codex ricevuta e adottata** (18/8): la sonda ha misurato il sintomo d'ingresso della staff app (`customer_client_links` assente interrogata dal bootstrap). Decisione di calibrazione Cowork: G3 spezzato in **GH-05** (bootstrap 6 punti + refactor `database.js` per Decisioni Gate 5 + 7 pagine staff, nessuna migration) e **GH-06** (migrazione `contacts`→`customers`, test RLS Gate 4, smontaggio sonda). GH-05 parte solo dopo la consegna di GH-02-quater, la cui ultima controprova (routing di ruolo) è ora sbloccata dalla sonda.
+
+**GH-02-quater consegnato e verificato** (18/8): commit `db3e3c2`, diff limitato ad AuthProvider.jsx, callback sincrono, 6 controprove con tempi misurati (reload 404/481/54 ms), routing di ruolo provato con la sonda. **G2 tecnicamente chiuso**: 6 commit locali in attesa del push di Luigi + redeploy preview.
+
+**GH-05 interrotto da Codex — errore di mandato di Cowork, seconda autodenuncia di giornata** (18/8): il mandato chiedeva insieme `addCustomerWithPet` transazionale, controprova UI e nessuna migration — ma sul demo non esiste alcuna RPC (misurato in `pg_proc`) e due INSERT dal browser non sono una transazione. La griglia delle cinque domande, applicata da Codex prima di scrivere, ha trovato anche: `AddClient.jsx` fuori dall'elenco ma necessario; 6 consumer dello shim non elencati; `pets.last_visit_at` inesistente (l'ordinamento della Decisione 1 poggiava su una colonna fantasma); `owner_user_id` NOT NULL con 5 customer su 7 senza account Auth. Lezione: i mandati si scrivono misurando lo schema, non citando i documenti di design.
+
+**Decisione Luigi (18/8)**: adottato il percorso raccomandato da Codex — due atti ordinati: `GH-05-rpc` (migration RPC `add_customer_with_pet`, SECURITY INVOKER, guard staff, 5 controprove tra cui zero-orfani) e `GH-05-bis` (refactor con elenco file completo, ruolo adattato in memoria senza UPDATE al DB, ordinamento derivato da `visits` lato client per il pilota). Scartata l'alternativa a due INSERT compensati.
+
+**Prima conversazione a voce del progetto — prenotazioni con Davide** (18/8, sera): Claude voice mode ha condotto, Davide ha risposto, Luigi presente. **D&R-2 chiusa**: avviso non bloccante sotto i 7 giorni (parola di Davide: «la seconda scelta mi sembra la migliore»); l'app non blocca mai, nemmeno nei periodi di piena («facciamole arrivare tutte e poi rispondiamo noi»). Requisiti nuovi: campi condizioni pelo (da verificare, mai affidabile) ed età se mancante; alert periodi di piena; stato «in attesa di conferma» con risposta su WhatsApp; niente promemoria agli abituali; notifiche solo per promozioni e scatti dei tre livelli fedeltà (conferma di direzione Fase 2, fuori scope Fase 1). Fonte congelata: `flussi-operativi-salone.md` §11 + trascrizione e sintesi in `workflows/conversazioni/2026-08-18-prenotazioni/`. Brief CD (GH-03, Richiesta 1) aggiornato con i requisiti confermati: il wizard è una **richiesta con data desiderata**, non un booking a slot garantiti — semantica da riflettere nella composizione.
+
+**Consegna CD — GH-03 Richiesta 1 (19/8)**: handoff `docs/incarichi/GH-03-R1-handoff.md`, 7 artboard approvati a vista da Luigi. Verifica Cowork: coerente con la §11 congelata su tutti i punti vincolanti; semantica richiesta-non-booking portata fino in fondo (niente stato "conflitto slot", `DesiredDateStrip` senza semantica libero/occupato, CTA "Invia la richiesta"); componenti nuovi dichiarati (`WarmNotice`, `DesiredDateStrip`); zero colori fuori palette. Questioni aperte nominate: prezzi in-app sì/no, vocabolario chips manto e fascia oraria (→ Davide), token `--color-whatsapp` come alias di success (→ Luigi), numero WhatsApp e periodi di piena in `tenants.settings` (→ prodotto/DB, già annotato in §11). **Aperto**: canvas `GH-03 Wizard Prenotazione.html` + `gh03-book.jsx` non ancora nel repo — Luigi li salva in `design_handoff_customer_app/gh03-book/`. La calibrazione Scheda pet (Richiesta 2) resta in attesa del redeploy.
+
+**Decisioni Luigi sulle questioni aperte dell'handoff CD (19/8)**: (1) **niente prezzi in-app** — coerente col posizionamento non transazionale; (2) **vocabolario chips manto di CD confermato** così com'è; (3) **fascia oraria: sì**, come preferenza non vincolante nella richiesta — mattina 9:30–13:00 divisa in **due** fasce, pomeriggio 15:00–19:00 diviso in **tre** fasce (5 chips totali, stesso pattern chips dell'handoff, stessa semantica "desiderata"); (4) token `--color-whatsapp` approvato come alias di `--color-success-text`. Nota di canone: gli orari di apertura sono un dato del salone riferito da Luigi — da confermare con Davide nel prossimo messaggio WhatsApp prima di considerarli congelati (lezione g38→g39: i dati veri hanno fonte citata).
+
+**Prossimo passo**: push G2 (Luigi, con canvas CD salvato in `design_handoff_customer_app/gh03-book/`); Codex esegue GH-05-rpc → verifica → GH-05-bis; il mandato G4 si scriverà sull'handoff CD + decisioni 19/8 (RPC ripensata: `submit_appointment_request`, niente `available_slots`). Da chiedere a Davide e Roby: finestra di manutenzione (entro 24/8), conferma orari di apertura, feedback Scheda pet post-redeploy.
+
+---
 
 ### 20 maggio 2026 — Primo riscontro positivo dal salone + avvio Step 6
 

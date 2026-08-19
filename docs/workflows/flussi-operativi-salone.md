@@ -256,6 +256,52 @@ Il prossimo riscontro sostanziale arriverà quando avremo mostrato loro la Dashb
 
 ---
 
+## 11. Le prenotazioni nell'app clienti (agosto 2026)
+
+*Prima conversazione a voce del progetto: Davide al microfono, con Claude (voice mode) a condurre e Luigi presente. Trascrizione integrale e sintesi confermata in `docs/workflows/conversazioni/2026-08-18-prenotazioni/`. Le citazioni sono parole di Davide, testuali dalla trascrizione.*
+
+### Il principio: l'app raccoglie, il salone decide
+
+> «La scelta dell'appuntamento deve essere rimandata sempre a noi. Non chiudiamo le porte ai clienti, e deve passare sempre comunque il messaggio a noi che valutiamo se è il caso di inserirlo subito, dopo un giorno, dopo una settimana, dopo un mese. Dobbiamo comunque parlare.»
+
+L'app non conferma mai da sola e **non blocca mai** una richiesta — né sotto la settimana di preavviso, né nei periodi di piena:
+
+> «Facciamole arrivare tutte e poi rispondiamo noi.»
+
+### Regola dell'anticipo: avvisare, non bloccare
+
+Messo davanti alla scelta tra blocco sotto i 7 giorni e avviso non bloccante: *«la seconda scelta mi sembra la migliore»*. Come gestiscono oggi le richieste ravvicinate:
+
+> «Controlliamo bene gli appuntamenti, al cliente diamo un appuntamento se è possibile. Se non è possibile lo rimandiamo di uno o due giorni, secondo anche le sue esigenze.»
+
+### Cosa contiene la richiesta
+
+Pet, servizio, data desiderata — più **età del cane** e **condizioni del pelo**:
+
+> «Sono tutte variabili che dobbiamo valutare per capire se lo possiamo inserire, magari incastrarlo tra altri appuntamenti, o se ha bisogno di un appuntamento più lungo dedicato.»
+
+Con un'avvertenza importante sulle condizioni del pelo — dato da raccogliere ma mai affidabile:
+
+> «Parlandoci riusciamo a capire meglio la situazione, perché potrebbe anche dire una bugia, come fanno spesso al telefono con noi. Però facciamola inserire lo stesso… però va verificata.»
+
+Il tempo dall'ultimo appuntamento invece non si chiede: *«Sappiamo tramite l'applicazione da quanto tempo non ce lo porta»* — anche se *«il cane potrebbe avere un pelo in condizioni peggiorate, e quindi magari serve più tempo»*.
+
+### Dopo l'invio
+
+Lato cliente: stato "in attesa di conferma". La risposta vera arriva su WhatsApp, come oggi, e in fretta:
+
+> «Dipende da quanto siamo pieni, ma c'è sempre qualcuno pronto a rispondere anche in pochi minuti.»
+
+### Abituali, notifiche, periodi di piena
+
+Gli abituali passano dalla richiesta normale, *«per non essere opprimenti nei loro confronti»* — niente promemoria automatici. Le notifiche si riservano a **promozioni** e agli scatti dei **tre livelli di fedeltà** previsti (*«che attivano delle premialità»*). Nei periodi critici (Capodanno, Ferragosto, Natale) un **alert di periodo di piena**: *«magari loro potrebbero dover aspettare un po', o magari non avere proprio il posto»* — avviso informativo, la richiesta parte comunque.
+
+### Nota di contesto (Cowork, agosto 2026)
+
+Tre osservazioni per il progetto. **(a)** L'età del cane: per i pet registrati l'app conosce già la data di nascita — coerentemente con il principio di Davide ("non chiedere ciò che l'app sa già"), il campo andrà chiesto solo se mancante in anagrafica. **(b)** I tre livelli di fedeltà citati confermano l'idea già presente nel bundle Design, che però resta **fuori scope Fase 1**: la registriamo come conferma di direzione per la Fase 2, non come requisito attuale. **(c)** L'alert dei periodi di piena richiede che il salone possa definirli: candidato naturale `tenants.settings`, già previsto come lavoro di Fase C.
+
+---
+
 ## Note operative
 
 Documento aperto. Ogni sezione si rivede quando emergono novità o quando le scelte di prodotto richiedono approfondimenti su un aspetto specifico.
@@ -269,3 +315,5 @@ Documento aperto. Ogni sezione si rivede quando emergono novità o quando le sce
 - *Maggio 2026 — Terzo round parziale*: tre domande mirate inviate via WhatsApp da Luigi su foto pet (sezione 2) e note libere su clienti e pet (sezione 8). Risposte di Davide e Roby integrate. Sezione 2 (pet difficili da fotografare, campi critici al primo contatto) e sezione 8 (convenzioni interne, momenti "uffa, di nuovo", cosa non vorreste perdere del gestionale attuale) restano aperte per un eventuale quarto round.
 
 - *Maggio 2026 — Primo riscontro sulla preview dell'app*: nuova sezione 10 con risposta informale di Davide e Roby («soddisfatti dell'interfaccia») e decisione collaterale sulle foto Unsplash promosse a scelta finale di Fase 1.
+
+- *Agosto 2026 — Conversazione a voce sulle prenotazioni*: nuova sezione 11 dalla prima conversazione vocale del progetto (Davide + Claude voice mode + Luigi, 18/8). Chiusa la decisione D&R-2 (avviso non bloccante), definiti i campi della richiesta, lo stato "in attesa di conferma", l'alert dei periodi di piena e la politica notifiche. Fonte integrale in `conversazioni/2026-08-18-prenotazioni/`.
