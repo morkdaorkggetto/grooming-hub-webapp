@@ -5,8 +5,8 @@ import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 const CLIENT_PHOTOS_BUCKET = 'client-photos';
 const BLACKLIST_THRESHOLD = -3;
 const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
-const CONTACT_SOURCES = ['manual', 'whatsapp', 'qr'];
-const CONTACT_STATUSES = ['new', 'contacted', 'converted', 'archived'];
+const ACQUISITION_SOURCES = ['manual', 'whatsapp', 'qr'];
+const CUSTOMER_RELATIONSHIP_STATUSES = ['lead', 'contacted', 'active', 'archived'];
 const REWARD_POINT_REASONS = ['visit', 'manual', 'promotion', 'redeem', 'correction'];
 const PROFILE_ROLES = ['operator', 'customer'];
 const APPROVAL_STATUSES = ['pending', 'approved', 'rejected'];
@@ -14,7 +14,7 @@ const APPOINTMENT_SOURCES = ['operator', 'customer'];
 const STAFF_ROLES = ['owner', 'staff'];
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
-const PET_SELECT = `*, customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, operator_notes, created_at, updated_at), visits(id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
+const PET_SELECT = `*, customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, operator_notes, acquisition_source, relationship_status, created_at, updated_at), visits(id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 
 const generateId = () =>
@@ -162,8 +162,8 @@ const applyPhoto = async (userId, petId, file) => {
 };
 
 export const VALID_APPOINTMENT_STATUSES = [...APPOINTMENT_STATUSES];
-export const VALID_CONTACT_SOURCES = [...CONTACT_SOURCES];
-export const VALID_CONTACT_STATUSES = [...CONTACT_STATUSES];
+export const VALID_ACQUISITION_SOURCES = [...ACQUISITION_SOURCES];
+export const VALID_CUSTOMER_RELATIONSHIP_STATUSES = [...CUSTOMER_RELATIONSHIP_STATUSES];
 export const VALID_REWARD_POINT_REASONS = [...REWARD_POINT_REASONS];
 export const VALID_PROFILE_ROLES = [...PROFILE_ROLES];
 export const VALID_APPOINTMENT_APPROVAL_STATUSES = [...APPROVAL_STATUSES];
@@ -302,46 +302,90 @@ export const getAllPets = async (tenantId = null, filters = {}) => {
 
 export const getAllClients = (filters = {}) => getAllPets(null, filters);
 
-export const getAllContacts = async () => {
+export const getCustomerDirectory = async () => {
   const { tenantId } = await requireStaff();
-  const { data, error } = await supabase.from('contacts').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
-  if (error) throw new Error(`Non riesco a caricare i contatti: ${error.message}`);
-  return data || [];
+  const { data, error } = await supabase
+    .from('customers')
+    .select(`
+      id,
+      tenant_id,
+      user_id,
+      first_name,
+      last_name,
+      email,
+      phone,
+      operator_notes,
+      acquisition_source,
+      relationship_status,
+      created_at,
+      updated_at,
+      pets(id, name, breed, photo_url, created_at)
+    `)
+    .eq('tenant_id', tenantId)
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(`Non riesco a caricare il direttorio clienti: ${error.message}`);
+
+  return (data || []).map((customer) => {
+    const pets = [...(customer.pets || [])].sort((a, b) =>
+      String(a.name || '').localeCompare(String(b.name || ''), 'it')
+    );
+    const pendingPetPattern = /(?:^|\n)\[Lead\] Pet dichiarato: ([^\n]+)/;
+    const pendingPetName = customer.operator_notes?.match(pendingPetPattern)?.[1]?.trim() || '';
+    const visibleNotes = String(customer.operator_notes || '')
+      .replace(pendingPetPattern, '')
+      .trim();
+    return {
+      ...customer,
+      owner_name: customerName(customer),
+      notes: visibleNotes,
+      source: customer.acquisition_source || 'manual',
+      status: customer.relationship_status || (pets.length ? 'active' : 'lead'),
+      pets,
+      pending_pet_name: pendingPetName,
+      pet_name: pets.map((pet) => pet.name).join(', ') || pendingPetName,
+    };
+  });
 };
 
-export const addContact = async (contactData) => {
-  assertDemoWriteAllowed();
-  const { user, tenantId } = await requireStaff();
-  if (!contactData.pet_name?.trim()) throw new Error('Il nome del cane e obbligatorio');
-  const { data, error } = await supabase.from('contacts').insert({
-    id: generateId(), user_id: user.id, tenant_id: tenantId,
-    pet_name: contactData.pet_name.trim(), owner_name: contactData.owner_name?.trim() || null,
-    phone: contactData.phone?.trim() || null,
-    source: CONTACT_SOURCES.includes(contactData.source) ? contactData.source : 'manual',
-    status: 'new', notes: contactData.notes?.trim() || null,
-  }).select('id').single();
-  if (error) throw new Error(`Non riesco ad aggiungere il contatto: ${error.message}`);
-  return data.id;
-};
-
-export const updateContactStatus = async (contactId, status) => {
+export const upsertCustomerLead = async (leadData) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
-  if (!CONTACT_STATUSES.includes(status)) throw new Error('Stato contatto non valido');
-  const { error } = await supabase.from('contacts').update({ status, updated_at: new Date().toISOString() }).eq('id', contactId).eq('tenant_id', tenantId);
-  if (error) throw new Error(`Non riesco ad aggiornare il contatto: ${error.message}`);
+  if (!leadData.owner_name?.trim()) throw new Error('Il nome del proprietario e obbligatorio');
+  if (!leadData.phone?.trim()) throw new Error('Il telefono e obbligatorio');
+  const { firstName, lastName } = splitCustomerName(leadData.owner_name);
+  const source = ACQUISITION_SOURCES.includes(leadData.source) ? leadData.source : 'manual';
+  const noteParts = [
+    leadData.pet_name?.trim() ? `[Lead] Pet dichiarato: ${leadData.pet_name.trim()}` : null,
+    leadData.notes?.trim() || null,
+  ].filter(Boolean);
+  const { data, error } = await supabase.rpc('upsert_customer_lead', {
+    p_tenant_id: tenantId,
+    p_first_name: firstName,
+    p_phone: leadData.phone.trim(),
+    p_last_name: lastName,
+    p_operator_notes: noteParts.join('\n') || null,
+    p_acquisition_source: source,
+    p_relationship_status: 'lead',
+  });
+  if (error) throw new Error(`Non riesco ad aggiungere il lead: ${error.message}`);
+  const result = Array.isArray(data) ? data[0] : data;
+  if (!result?.customer_id) throw new Error('Identificativo customer non disponibile');
+  return result;
 };
 
-export const markContactConverted = async (contactId, petId) => {
+export const updateCustomerRelationshipStatus = async (customerId, status) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
-  await getPetById(petId, tenantId);
-  const { error } = await supabase.from('contacts').update({ status: 'converted', linked_pet_id: petId, updated_at: new Date().toISOString() }).eq('id', contactId).eq('tenant_id', tenantId);
-  if (error) throw new Error(`Non riesco a convertire il contatto: ${error.message}`);
+  if (!CUSTOMER_RELATIONSHIP_STATUSES.includes(status)) {
+    throw new Error('Stato relazione non valido');
+  }
+  const { error } = await supabase
+    .from('customers')
+    .update({ relationship_status: status })
+    .eq('id', customerId)
+    .eq('tenant_id', tenantId);
+  if (error) throw new Error(`Non riesco ad aggiornare lo stato del customer: ${error.message}`);
 };
-
-/** @deprecated Usa markContactConverted; contacts resta solo fino a GH-06. */
-export const convertContactToClient = markContactConverted;
 
 export const addRewardPointMovement = async (petId, pointData) => {
   assertDemoWriteAllowed();
@@ -400,7 +444,12 @@ export const addPetToCustomer = async (customerId, petData) => {
   assertDemoWriteAllowed();
   const { user, tenantId } = await requireStaff();
   if (!petData?.name?.trim()) throw new Error('Il nome del pet e obbligatorio');
-  const { data: customer, error: customerError } = await supabase.from('customers').select('id, tenant_id').eq('id', customerId).eq('tenant_id', tenantId).single();
+  const { data: customer, error: customerError } = await supabase
+    .from('customers')
+    .select('id, tenant_id, operator_notes')
+    .eq('id', customerId)
+    .eq('tenant_id', tenantId)
+    .single();
   if (customerError) throw customerError;
   const { data, error } = await supabase.from('pets').insert({
     tenant_id: customer.tenant_id, customer_id: customer.id, owner_user_id: user.id,
@@ -415,6 +464,24 @@ export const addPetToCustomer = async (customerId, petData) => {
     photo_url: petData.photo_url || null,
   }).select('id').single();
   if (error) throw new Error(`Non riesco ad aggiungere il pet: ${error.message}`);
+
+  const notesWithoutPendingPet = String(customer.operator_notes || '')
+    .replace(/(?:^|\n)\[Lead\] Pet dichiarato: [^\n]+/, '')
+    .trim();
+  const transferredPetNotes = String(petData.internal_notes || '').trim();
+  const operatorNotes = notesWithoutPendingPet === transferredPetNotes
+    ? null
+    : notesWithoutPendingPet || null;
+  const { error: statusError } = await supabase
+    .from('customers')
+    .update({ relationship_status: 'active', operator_notes: operatorNotes })
+    .eq('id', customer.id)
+    .eq('tenant_id', tenantId);
+  if (statusError) {
+    await supabase.from('pets').delete().eq('id', data.id).eq('tenant_id', tenantId);
+    throw new Error(`Pet non confermato: ${statusError.message}`);
+  }
+
   return { pet_id: data.id, ...(await applyPhoto(user.id, data.id, petData.photoFile)) };
 };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { addCustomerWithPet, markContactConverted } from '../lib/database';
+import { addCustomerWithPet, addPetToCustomer } from '../lib/database';
 import ImageCropModal from '../components/ImageCropModal';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import AppHeader from '../components/AppHeader';
@@ -25,12 +25,12 @@ export default function AddClient() {
   const [photoPreview, setPhotoPreview] = useState('');
   const [pendingCropFile, setPendingCropFile] = useState(null);
 
-  const contactConversion = useMemo(() => {
+  const customerConversion = useMemo(() => {
     const state = location.state;
-    if (!state?.sourceContactId) return null;
+    if (!state?.sourceCustomerId) return null;
 
     return {
-      sourceContactId: state.sourceContactId,
+      customerId: state.sourceCustomerId,
       returnTo: state.returnTo || '/contacts',
       petName: state.pet_name || '',
       ownerName: state.owner_name || '',
@@ -48,16 +48,16 @@ export default function AddClient() {
   }, [photoPreview]);
 
   useEffect(() => {
-    if (!contactConversion) return;
+    if (!customerConversion) return;
 
     setFormData((prev) => ({
       ...prev,
-      name: contactConversion.petName,
-      owner: contactConversion.ownerName,
-      phone: contactConversion.phone,
-      notes: contactConversion.notes,
+      name: customerConversion.petName,
+      owner: customerConversion.ownerName,
+      phone: customerConversion.phone,
+      notes: customerConversion.notes,
     }));
-  }, [contactConversion]);
+  }, [customerConversion]);
 
   /**
    * Gestisce upload foto cliente
@@ -119,24 +119,26 @@ export default function AddClient() {
       const lastName = ownerParts.length === 1 ? null : ownerParts.at(-1);
       const forcePetError =
         import.meta.env.DEV && new URLSearchParams(location.search).get('gh05ForcePetError') === '1';
-      const created = await addCustomerWithPet(
-        null,
-        {
-          first_name: firstName,
-          last_name: lastName,
-          phone: formData.phone,
-        },
-        {
-          name: formData.name,
-          breed: formData.breed,
-          internal_notes: formData.notes,
-          photoFile,
-          sex: forcePetError ? 'x' : null,
-        }
-      );
+      const petData = {
+        name: formData.name,
+        breed: formData.breed,
+        internal_notes: formData.notes,
+        photoFile,
+        sex: forcePetError ? 'x' : null,
+      };
+      const created = customerConversion
+        ? await addPetToCustomer(customerConversion.customerId, petData)
+        : await addCustomerWithPet(
+          null,
+          {
+            first_name: firstName,
+            last_name: lastName,
+            phone: formData.phone,
+          },
+          petData
+        );
 
-      if (contactConversion?.sourceContactId) {
-        await markContactConverted(contactConversion.sourceContactId, created.pet_id);
+      if (customerConversion) {
         navigate(`/client/${created.pet_id}`);
         return;
       }
@@ -157,16 +159,16 @@ export default function AddClient() {
    * Annulla e torna a dashboard
    */
   const handleCancel = () => {
-    navigate(contactConversion?.returnTo || '/dashboard');
+    navigate(customerConversion?.returnTo || '/dashboard');
   };
 
   return (
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       <AppHeader
-        title={contactConversion ? 'Converti in cliente' : 'Nuovo cliente'}
+        title={customerConversion ? 'Aggiungi pet al lead' : 'Nuovo cliente'}
         subtitle={
-          contactConversion
-            ? 'Completa i dati essenziali e trasforma il contatto in una scheda cliente pronta all’uso.'
+          customerConversion
+            ? 'Completa i dati del pet e attiva il customer senza creare duplicati.'
             : 'Inserisci i dati essenziali, aggiungi una foto e prepara subito la scheda del cane.'
         }
         maxWidthClass="max-w-2xl"
@@ -204,7 +206,7 @@ export default function AddClient() {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          {contactConversion ? (
+          {customerConversion ? (
             <div
               className="mb-6 p-4 rounded-xl border"
               style={{
@@ -216,11 +218,11 @@ export default function AddClient() {
                 className="text-xs uppercase tracking-[0.2em] font-semibold mb-2"
                 style={{ color: 'var(--color-secondary)' }}
               >
-                Conversione contatto
+                Aggiunta pet
               </p>
               <p style={{ color: 'var(--color-text-primary)' }}>
-                Stai convertendo il contatto di <strong>{contactConversion.petName}</strong>.
-                Dopo il salvataggio il contatto verrà segnato come convertito.
+                Stai aggiungendo il pet dichiarato <strong>{customerConversion.petName || 'senza nome'}</strong>.
+                Dopo il salvataggio il customer resterà lo stesso e passerà allo stato attivo.
               </p>
             </div>
           ) : null}
@@ -305,7 +307,7 @@ export default function AddClient() {
                   setFormData({ ...formData, owner: e.target.value })
                 }
                 required
-                disabled={loading}
+                disabled={loading || Boolean(customerConversion)}
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
                   borderColor: 'var(--color-border)',
@@ -324,7 +326,7 @@ export default function AddClient() {
                 style={{ color: 'var(--color-text-primary)' }}
                 className="block text-sm font-bold mb-2"
               >
-                Telefono
+                Telefono *
               </label>
               <input
                 id="phone"
@@ -334,7 +336,7 @@ export default function AddClient() {
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
-                disabled={loading}
+                disabled={loading || Boolean(customerConversion)}
                 required
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
@@ -491,7 +493,7 @@ export default function AddClient() {
                     Salvataggio...
                   </span>
                 ) : (
-                  contactConversion ? '✅ Converti in cliente' : '✅ Salva Cliente'
+                  customerConversion ? '✅ Aggiungi pet' : '✅ Salva Cliente'
                 )}
               </button>
               <button
@@ -515,7 +517,7 @@ export default function AddClient() {
             style={{ backgroundColor: 'var(--color-bg-main)' }}
           >
             <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
-              💡 <strong>Suggerimento:</strong> Compila il nome e il proprietario
+              💡 <strong>Suggerimento:</strong> Compila il nome, il proprietario e il telefono
               per iniziare. Puoi aggiungere foto e note in seguito se necessario.
             </p>
           </div>

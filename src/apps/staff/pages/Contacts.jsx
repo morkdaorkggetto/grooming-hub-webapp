@@ -2,13 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
 import {
-  addContact,
-  getAllContacts,
-  updateContactStatus,
-  VALID_CONTACT_SOURCES,
+  getCustomerDirectory,
+  updateCustomerRelationshipStatus,
+  upsertCustomerLead,
+  VALID_ACQUISITION_SOURCES,
 } from '../lib/database';
 import { DEMO_MODE } from '../lib/demoMode';
-import { getContactWhatsAppUrl } from '../lib/whatsapp';
+import { getCustomerDirectoryWhatsAppUrl } from '../lib/whatsapp';
 
 const SOURCE_LABELS = {
   manual: 'Manuale',
@@ -17,14 +17,14 @@ const SOURCE_LABELS = {
 };
 
 const STATUS_LABELS = {
-  new: 'Nuovo',
+  lead: 'Lead',
   contacted: 'Contattato',
-  converted: 'Convertito',
+  active: 'Cliente',
   archived: 'Archiviato',
 };
 
 const STATUS_STYLES = {
-  new: {
+  lead: {
     backgroundColor: 'var(--color-warning-bg)',
     color: 'var(--color-text-primary)',
   },
@@ -32,7 +32,7 @@ const STATUS_STYLES = {
     backgroundColor: 'var(--color-info-bg, #EAF1F8)',
     color: 'var(--color-secondary)',
   },
-  converted: {
+  active: {
     backgroundColor: 'var(--color-success-bg)',
     color: 'var(--color-success-text)',
   },
@@ -60,17 +60,18 @@ export default function Contacts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [form, setForm] = useState(INITIAL_FORM);
+  const [selectedPetIds, setSelectedPetIds] = useState({});
 
   useEffect(() => {
-    loadContacts();
+    loadDirectory();
   }, []);
 
-  const loadContacts = async () => {
+  const loadDirectory = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const data = await getAllContacts();
+      const data = await getCustomerDirectory();
       setContacts(data);
     } catch (err) {
       setError(err.message || 'Errore caricamento contatti');
@@ -99,8 +100,9 @@ export default function Contacts() {
   const counts = useMemo(
     () => ({
       all: contacts.length,
-      new: contacts.filter((contact) => contact.status === 'new').length,
+      lead: contacts.filter((contact) => contact.status === 'lead').length,
       contacted: contacts.filter((contact) => contact.status === 'contacted').length,
+      active: contacts.filter((contact) => contact.status === 'active').length,
       archived: contacts.filter((contact) => contact.status === 'archived').length,
     }),
     [contacts]
@@ -112,10 +114,10 @@ export default function Contacts() {
     setError('');
 
     try {
-      await addContact(form);
+      await upsertCustomerLead(form);
       setForm(INITIAL_FORM);
       setShowCreateForm(false);
-      await loadContacts();
+      await loadDirectory();
     } catch (err) {
       setError(err.message || 'Errore creazione contatto');
     } finally {
@@ -123,19 +125,19 @@ export default function Contacts() {
     }
   };
 
-  const handleStatusChange = async (contactId, status) => {
+  const handleStatusChange = async (customerId, status) => {
     setError('');
 
     try {
-      await updateContactStatus(contactId, status);
-      await loadContacts();
+      await updateCustomerRelationshipStatus(customerId, status);
+      await loadDirectory();
     } catch (err) {
       setError(err.message || 'Errore aggiornamento contatto');
     }
   };
 
   const handleOpenWhatsApp = async (contact) => {
-    const whatsappUrl = getContactWhatsAppUrl(contact);
+    const whatsappUrl = getCustomerDirectoryWhatsAppUrl(contact);
     if (!whatsappUrl) {
       setError('Inserisci un numero di telefono per aprire WhatsApp.');
       return;
@@ -143,11 +145,11 @@ export default function Contacts() {
 
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
 
-    if (DEMO_MODE || contact.status !== 'new') return;
+    if (DEMO_MODE || contact.status !== 'lead') return;
 
     try {
-      await updateContactStatus(contact.id, 'contacted');
-      await loadContacts();
+      await updateCustomerRelationshipStatus(contact.id, 'contacted');
+      await loadDirectory();
     } catch (err) {
       setError(err.message || 'Errore aggiornamento contatto');
     }
@@ -156,7 +158,7 @@ export default function Contacts() {
   const handleConvertToClient = (contact) => {
     navigate('/add-client', {
       state: {
-        sourceContactId: contact.id,
+        sourceCustomerId: contact.id,
         pet_name: contact.pet_name || '',
         owner_name: contact.owner_name || '',
         phone: contact.phone || '',
@@ -166,16 +168,17 @@ export default function Contacts() {
     });
   };
 
-  const handleOpenLinkedClient = (contact) => {
-    if (!contact.linked_pet_id) return;
-    navigate(`/client/${contact.linked_pet_id}`);
+  const handleOpenPet = (contact) => {
+    const petId = selectedPetIds[contact.id] || contact.pets[0]?.id;
+    if (!petId) return;
+    navigate(`/client/${petId}`);
   };
 
   return (
     <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
       <AppHeader
         title="Contatti"
-        subtitle="Rubrica veloce per richieste WhatsApp, QR pubblico e nuovi contatti da registrare."
+        subtitle="Direttorio clienti e richieste WhatsApp, QR pubblico e lead da gestire."
         rightContent={
           <button
             onClick={() => setShowCreateForm((prev) => !prev)}
@@ -216,7 +219,7 @@ export default function Contacts() {
             <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
               <label className="block">
                 <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Nome cane *
+                  Nome cane
                 </span>
                 <input
                   type="text"
@@ -225,13 +228,12 @@ export default function Contacts() {
                   className="w-full rounded-xl px-4 py-3 border bg-white"
                   style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   placeholder="Es. Fido"
-                  required
                 />
               </label>
 
               <label className="block">
                 <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Proprietario
+                  Proprietario *
                 </span>
                 <input
                   type="text"
@@ -240,12 +242,13 @@ export default function Contacts() {
                   className="w-full rounded-xl px-4 py-3 border bg-white"
                   style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   placeholder="Es. Luigi Rossi"
+                  required
                 />
               </label>
 
               <label className="block">
                 <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Telefono
+                  Telefono *
                 </span>
                 <input
                   type="tel"
@@ -254,6 +257,7 @@ export default function Contacts() {
                   className="w-full rounded-xl px-4 py-3 border bg-white"
                   style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   placeholder="Es. +39 3331234567"
+                  required
                 />
               </label>
 
@@ -267,7 +271,7 @@ export default function Contacts() {
                   className="w-full rounded-xl px-4 py-3 border bg-white"
                   style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 >
-                  {VALID_CONTACT_SOURCES.map((source) => (
+                  {VALID_ACQUISITION_SOURCES.map((source) => (
                     <option key={source} value={source}>
                       {SOURCE_LABELS[source]}
                     </option>
@@ -295,7 +299,7 @@ export default function Contacts() {
                   className="px-5 py-3 rounded-xl text-white font-semibold disabled:opacity-60"
                   style={{ backgroundColor: 'var(--color-primary)' }}
                 >
-                  {saving ? 'Salvataggio...' : 'Salva contatto'}
+                  {saving ? 'Salvataggio...' : 'Salva lead'}
                 </button>
                 <button
                   type="button"
@@ -329,8 +333,9 @@ export default function Contacts() {
             <div className="flex flex-wrap gap-2 mt-4">
               {[
                 ['all', 'Tutti', counts.all],
-                ['new', 'Nuovi', counts.new],
+                ['lead', 'Lead', counts.lead],
                 ['contacted', 'Contattati', counts.contacted],
+                ['active', 'Clienti', counts.active],
                 ['archived', 'Archiviati', counts.archived],
               ].map(([key, label, count]) => {
                 const isActive = activeFilter === key;
@@ -358,7 +363,7 @@ export default function Contacts() {
                 Da gestire
               </p>
               <p className="text-3xl font-semibold mt-3" style={{ color: 'var(--color-text-primary)' }}>
-                {counts.new}
+                {counts.lead}
               </p>
             </div>
             <div className="rounded-3xl p-5 border" style={{ backgroundColor: 'var(--color-success-bg)', borderColor: 'var(--color-border)' }}>
@@ -388,7 +393,7 @@ export default function Contacts() {
         ) : (
           <div className="grid gap-4">
             {filteredContacts.map((contact) => {
-              const statusStyle = STATUS_STYLES[contact.status] || STATUS_STYLES.new;
+              const statusStyle = STATUS_STYLES[contact.status] || STATUS_STYLES.lead;
               return (
                 <article
                   key={contact.id}
@@ -399,7 +404,7 @@ export default function Contacts() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-3 mb-3">
                         <h2 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                          {contact.pet_name}
+                          {contact.owner_name || 'Cliente senza nome'}
                         </h2>
                         <span
                           className="px-3 py-1 rounded-full text-sm font-semibold"
@@ -418,10 +423,10 @@ export default function Contacts() {
                       <div className="grid sm:grid-cols-3 gap-3 text-sm">
                         <div>
                           <p className="font-medium" style={{ color: 'var(--color-secondary)' }}>
-                            Proprietario
+                            Pet
                           </p>
                           <p style={{ color: 'var(--color-text-primary)' }}>
-                            {contact.owner_name || 'Non indicato'}
+                            {contact.pet_name || 'Da associare'}
                           </p>
                         </div>
                         <div>
@@ -460,30 +465,53 @@ export default function Contacts() {
                         Apri WhatsApp
                       </button>
 
-                      {contact.status !== 'converted' ? (
+                      {contact.pets.length === 0 ? (
                         <button
                           onClick={() => handleConvertToClient(contact)}
                           className="px-4 py-3 rounded-xl font-semibold text-white"
                           style={{ backgroundColor: 'var(--color-primary)' }}
                         >
-                          Converti in cliente
+                          Aggiungi pet
                         </button>
                       ) : null}
 
-                      {contact.status === 'converted' && contact.linked_pet_id ? (
+                      {contact.pets.length > 1 ? (
+                        <label className="block">
+                          <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-secondary)' }}>
+                            Scegli pet
+                          </span>
+                          <select
+                            value={selectedPetIds[contact.id] || contact.pets[0].id}
+                            onChange={(event) =>
+                              setSelectedPetIds((current) => ({
+                                ...current,
+                                [contact.id]: event.target.value,
+                              }))
+                            }
+                            className="w-full rounded-xl px-4 py-3 border bg-white"
+                            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                          >
+                            {contact.pets.map((pet) => (
+                              <option key={pet.id} value={pet.id}>{pet.name}</option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : null}
+
+                      {contact.pets.length > 0 ? (
                         <button
-                          onClick={() => handleOpenLinkedClient(contact)}
+                          onClick={() => handleOpenPet(contact)}
                           className="px-4 py-3 rounded-xl font-medium border"
                           style={{
                             borderColor: 'var(--color-border)',
                             color: 'var(--color-secondary)',
                           }}
                         >
-                          Apri cliente
+                          Apri scheda pet
                         </button>
                       ) : null}
 
-                      {contact.status !== 'contacted' ? (
+                      {contact.pets.length === 0 && contact.status !== 'contacted' ? (
                         <button
                           onClick={() => handleStatusChange(contact.id, 'contacted')}
                           className="px-4 py-3 rounded-xl font-medium border"
@@ -493,17 +521,17 @@ export default function Contacts() {
                         </button>
                       ) : null}
 
-                      {contact.status !== 'new' ? (
+                      {contact.pets.length === 0 && contact.status !== 'lead' ? (
                         <button
-                          onClick={() => handleStatusChange(contact.id, 'new')}
+                          onClick={() => handleStatusChange(contact.id, 'lead')}
                           className="px-4 py-3 rounded-xl font-medium border"
                           style={{ borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
                         >
-                          Riporta a nuovo
+                          Riporta a lead
                         </button>
                       ) : null}
 
-                      {contact.status !== 'archived' ? (
+                      {contact.pets.length === 0 && contact.status !== 'archived' ? (
                         <button
                           onClick={() => handleStatusChange(contact.id, 'archived')}
                           className="px-4 py-3 rounded-xl font-medium text-white"

@@ -147,11 +147,11 @@ export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) =
   return buildWhatsAppUrl(appointment?.client?.phone, message);
 };
 
-export const getContactWhatsAppUrl = (contact) => {
-  const ownerName = contact?.owner_name || 'cliente';
-  const petName = contact?.pet_name || 'il tuo cane';
+export const getCustomerDirectoryWhatsAppUrl = (customer) => {
+  const ownerName = customer?.owner_name || 'cliente';
+  const petName = customer?.pet_name || customer?.pending_pet_name || 'il tuo cane';
   const message = `Buongiorno ${ownerName}, ti contatto da Grooming Hub per ${petName}.`;
-  return buildWhatsAppUrl(contact?.phone, message);
+  return buildWhatsAppUrl(customer?.phone, message);
 };
 
 export const getPublicGroomingHubWhatsAppUrl = ({ petName } = {}) => {
