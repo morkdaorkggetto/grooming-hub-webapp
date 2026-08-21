@@ -334,6 +334,28 @@ async function main() {
     return `${data.length} pet`;
   });
 
+  await runTest(
+    'Portale customer legge il proprio nucleo',
+    '1 customer e 2 pet di Mario',
+    async () => {
+      const [customerResult, petResult] = await Promise.all([
+        mario.client
+          .from('customers')
+          .select('id, first_name, last_name, phone')
+          .eq('id', marioCustomer.id),
+        mario.client
+          .from('pets')
+          .select('id, customer_id, name')
+          .eq('customer_id', marioCustomer.id),
+      ]);
+      assertNoError(customerResult.error, 'Customer proprio dal portale');
+      assertNoError(petResult.error, 'Pet propri dal portale');
+      assert(customerResult.data.length === 1, `Customer propri: ${customerResult.data.length}`);
+      assert(petResult.data.length === 2, `Pet propri: ${petResult.data.length}`);
+      return '1 customer, 2 pet';
+    }
+  );
+
   await createLucaFixture();
 
   await runTest(
@@ -396,6 +418,46 @@ async function main() {
       assert(membershipResult.data.length === 0, 'Mario vede la membership della sonda');
       assert(profileResult.data.length === 0, 'Mario vede il profilo della sonda');
       return '0 membership, 0 profili';
+    }
+  );
+
+  await runTest(
+    'Customer non legge campi direttorio altrui',
+    '0 customer altrui con status, source o note operatore',
+    async () => {
+      const { data, error } = await mario.client
+        .from('customers')
+        .select('id, relationship_status, acquisition_source, operator_notes')
+        .neq('id', marioCustomer.id);
+      assertNoError(error, 'Campi direttorio altrui da Mario');
+      assert(data.length === 0, `Mario vede ${data.length} customer altrui`);
+      return '0 customer altrui';
+    }
+  );
+
+  await runTest(
+    'Customer non modifica campi direttorio propri',
+    'relationship_status e acquisition_source invariati',
+    async () => {
+      const { data: before, error: beforeError } = await mario.client
+        .from('customers')
+        .select('relationship_status, acquisition_source')
+        .eq('id', marioCustomer.id)
+        .single();
+      assertNoError(beforeError, 'Lettura direttorio proprio');
+      const { data: after, error: updateError } = await mario.client
+        .from('customers')
+        .update({ relationship_status: 'archived', acquisition_source: 'qr' })
+        .eq('id', marioCustomer.id)
+        .select('relationship_status, acquisition_source')
+        .single();
+      assertNoError(updateError, 'UPDATE direttorio proprio');
+      assert(
+        after.relationship_status === before.relationship_status &&
+          after.acquisition_source === before.acquisition_source,
+        'Campi direttorio modificati dal customer'
+      );
+      return `invariati (${before.relationship_status}, ${before.acquisition_source || 'null'})`;
     }
   );
 

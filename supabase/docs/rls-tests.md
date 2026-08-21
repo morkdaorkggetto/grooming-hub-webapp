@@ -39,9 +39,12 @@ in caso di errore. Un esito FAIL produce exit code diverso da zero.
 | Login Mario | Sessione API disponibile | UUID fixture Mario atteso | PASS |
 | Login Luca | Sessione API disponibile | UUID fixture Luca atteso | PASS |
 | Lettura staff baseline | 7 pet nel tenant demo | 7 pet | PASS |
+| Portale customer, nucleo proprio | 1 customer e 2 pet di Mario | 1 customer, 2 pet | PASS |
 | Mario verso Luca | 0 customer, 0 pet, 0 visite | 0, 0, 0 | PASS |
 | Luca verso Mario | 0 customer, 0 pet, 0 visite | 0, 0, 0 | PASS |
 | Customer verso sonda | 0 membership, 0 profili staff | 0, 0 | PASS |
+| Campi direttorio customer altrui | 0 righe con status, source o note operatore | 0 righe | PASS |
+| Scrittura campi direttorio propri | `relationship_status` e `acquisition_source` invariati | Invariati (`active`, `manual`) | PASS |
 | RPC staff da customer | SQLSTATE `42501`, nessuna scrittura | `42501`, 0 customer | PASS |
 | Whitelist `microchip` | Valore invariato | Invariato (`null`) | PASS |
 | Whitelist `name` | Valore invariato | Invariato (`Luna`) | PASS |
@@ -54,7 +57,7 @@ in caso di errore. Un esito FAIL produce exit code diverso da zero.
 | Staff fuori tenant | 0 righe da secondo tenant reale | Secondo tenant non disponibile | SKIP |
 | Pulizia fixture | 0 residui marker | 0 pet, 0 visite, 0 customer | PASS |
 
-Totale misurato: **17 PASS, 0 FAIL, 1 SKIP**.
+Totale misurato: **20 PASS, 0 FAIL, 1 SKIP**.
 
 Lo SKIP cross-tenant e esplicito e previsto dal mandato: il progetto demo ha un
 solo tenant. Il test potra diventare una controprova reale quando sara
