@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { supabase, getCurrentUser } from '../lib/supabaseClient';
+import { supabase, getCurrentUser } from '../../../shared/supabase/client';
 import {
   acceptCustomerPortalInvite,
   ensureCustomerProfile,
@@ -29,10 +29,8 @@ export default function CustomerInvite() {
       const user = await getCurrentUser();
       if (!user) return;
 
-      // If the profile was auto-created as operator during email confirmation,
-      // force customer role before accepting the invite.
-      await ensureCustomerProfile(user);
       await acceptCustomerPortalInvite(token);
+      await ensureCustomerProfile(user);
       navigate('/portal', { replace: true });
     } catch (err) {
       setError(err.message || 'Non riesco ad accettare l\'invito.');

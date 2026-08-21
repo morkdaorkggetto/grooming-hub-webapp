@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../../../shared/supabase/client';
 import { ensureCustomerProfile } from '../lib/database';
 import { DEMO_MODE } from '../lib/demoMode';
 

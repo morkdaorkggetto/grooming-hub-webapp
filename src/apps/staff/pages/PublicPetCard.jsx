@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCurrentUser } from '../lib/supabaseClient';
+import { getCurrentUser } from '../../../shared/supabase/client';
 import { getPublicPetCardByToken, getUserProfile } from '../lib/database';
 import { getPublicGroomingHubWhatsAppUrl } from '../lib/whatsapp';
 import { getFidelityBadgeStyle, getFidelityLabel } from '../lib/fidelity';

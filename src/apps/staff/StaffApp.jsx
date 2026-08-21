@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { onAuthStateChange } from './lib/supabaseClient';
+import { onAuthStateChange } from '../../shared/supabase/client';
 import { getUserProfile } from './lib/database';
 import LoginForm from './components/Auth/LoginForm';
 import Dashboard from './pages/Dashboard';
