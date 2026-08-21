@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   addAppointment,
   deleteAppointment,
-  getAllClients,
+  getAllPets,
   getAppointments,
   updateAppointmentApproval,
   updateAppointmentSchedule,
@@ -468,7 +468,7 @@ export default function Calendar() {
     try {
       const { fromIso, toIso } = toIsoDateRange(fromDate, toDate);
       const [clientData, appointmentData] = await Promise.all([
-        getAllClients(),
+        getAllPets(),
         getAppointments({ from: fromIso, to: toIso, includePending: true }),
       ]);
 
@@ -536,7 +536,7 @@ export default function Calendar() {
       const createdDuration = Number(form.durationMinutes) || DEFAULT_DURATION;
 
       await addAppointment({
-        client_id: form.clientId,
+        pet_id: form.clientId,
         scheduled_at: scheduledAt,
         duration_minutes: createdDuration,
         status: 'scheduled',
@@ -1541,7 +1541,7 @@ export default function Calendar() {
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => navigate(`/client/${selectedAppointment.client_id}`)}
+                    onClick={() => navigate(`/client/${selectedAppointment.pet_id}`)}
                     className="px-4 py-2 rounded-lg text-white font-medium"
                     style={{ backgroundColor: 'var(--color-secondary)' }}
                   >
@@ -1549,7 +1549,7 @@ export default function Calendar() {
                   </button>
                   <button
                     onClick={() =>
-                      navigate(`/calendar?clientId=${selectedAppointment.client_id}`, {
+                      navigate(`/calendar?clientId=${selectedAppointment.pet_id}`, {
                         replace: false,
                       })
                     }

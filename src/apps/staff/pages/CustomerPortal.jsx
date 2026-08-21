@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createCustomerAppointmentRequest, getCustomerPortalData } from '../lib/database';
-import { logout } from '../lib/supabaseClient';
+import { logout } from '../../../shared/supabase/client';
 import {
   getBoutiqueOrderWhatsAppUrl,
   getCustomerAppointmentRequestWhatsAppUrl,
@@ -126,14 +126,14 @@ const getDemoPortalClients = () => {
       name: 'Luna',
       notes: 'Preferisce essere accolta con calma. Mantello sensibile: usare prodotti delicati.',
       visits: [
-        { id: 'demo-visit-1', client_id: 'demo-client-luna', date: toLocalDateString(completedAppointment) },
-        { id: 'demo-visit-2', client_id: 'demo-client-luna', date: toLocalDateString(new Date(now.getTime() - 48 * 24 * 60 * 60 * 1000)) },
+        { id: 'demo-visit-1', pet_id: 'demo-client-luna', date: toLocalDateString(completedAppointment) },
+        { id: 'demo-visit-2', pet_id: 'demo-client-luna', date: toLocalDateString(new Date(now.getTime() - 48 * 24 * 60 * 60 * 1000)) },
       ],
       rewardPoints: [],
       rewardPointsTotal: 180,
       nextAppointment: {
         id: 'demo-appointment-next',
-        client_id: 'demo-client-luna',
+        pet_id: 'demo-client-luna',
         scheduled_at: nextAppointment.toISOString(),
         duration_minutes: 90,
         status: 'scheduled',
@@ -144,7 +144,7 @@ const getDemoPortalClients = () => {
       appointments: [
         {
           id: 'demo-appointment-next',
-          client_id: 'demo-client-luna',
+          pet_id: 'demo-client-luna',
           scheduled_at: nextAppointment.toISOString(),
           duration_minutes: 90,
           status: 'scheduled',
@@ -154,7 +154,7 @@ const getDemoPortalClients = () => {
         },
         {
           id: 'demo-appointment-pending',
-          client_id: 'demo-client-luna',
+          pet_id: 'demo-client-luna',
           scheduled_at: pendingAppointment.toISOString(),
           duration_minutes: 180,
           status: 'scheduled',
@@ -164,7 +164,7 @@ const getDemoPortalClients = () => {
         },
         {
           id: 'demo-appointment-completed',
-          client_id: 'demo-client-luna',
+          pet_id: 'demo-client-luna',
           scheduled_at: completedAppointment.toISOString(),
           duration_minutes: 75,
           status: 'completed',
@@ -1181,7 +1181,7 @@ export default function CustomerPortal({ demoPreview = false }) {
         const scheduledAtDate = new Date(`${payload.date}T${payload.time}`);
         const demoAppointment = {
           id: `demo-request-${Date.now()}`,
-          client_id: clientId,
+          pet_id: clientId,
           scheduled_at: scheduledAtDate.toISOString(),
           duration_minutes: Number(payload.duration_minutes) || 60,
           status: 'scheduled',

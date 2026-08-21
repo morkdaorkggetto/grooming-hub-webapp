@@ -9,214 +9,183 @@ const CONTACT_SOURCES = ['manual', 'whatsapp', 'qr'];
 const CONTACT_STATUSES = ['new', 'contacted', 'converted', 'archived'];
 const REWARD_POINT_REASONS = ['visit', 'manual', 'promotion', 'redeem', 'correction'];
 const PROFILE_ROLES = ['operator', 'customer'];
-const APPOINTMENT_APPROVAL_STATUSES = ['pending', 'approved', 'rejected'];
+const APPROVAL_STATUSES = ['pending', 'approved', 'rejected'];
 const APPOINTMENT_SOURCES = ['operator', 'customer'];
+const STAFF_ROLES = ['owner', 'staff'];
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
-const generateId = () => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
+const PET_SELECT = `*, customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, operator_notes, created_at, updated_at), visits(id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
+const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-};
+const generateId = () =>
+  typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-const generateQrToken = () => {
-  const randomPart =
-    typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID().replace(/-/g, '').slice(0, 18)
-      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
-
-  return `ghc_${randomPart}`;
-};
-
-const generateCustomerInviteToken = () => {
-  const randomPart =
+const generateInviteToken = () =>
+  `ghi_${
     typeof crypto !== 'undefined' && crypto.randomUUID
       ? crypto.randomUUID().replace(/-/g, '').slice(0, 28)
-      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 18)}`;
-
-  return `ghi_${randomPart}`;
-};
-
-const getPublicAppOrigin = () => {
-  if (PUBLIC_APP_URL) {
-    return PUBLIC_APP_URL.replace(/\/+$/, '');
-  }
-
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
-  }
-
-  return '';
-};
+      : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 18)}`
+  }`;
 
 const assertDemoWriteAllowed = () => {
-  if (DEMO_MODE) {
-    throw new Error(DEMO_WRITE_BLOCK_MESSAGE);
-  }
+  if (DEMO_MODE) throw new Error(DEMO_WRITE_BLOCK_MESSAGE);
 };
 
-const getFileExtension = (file) => {
-  const extFromName = getFileExtensionFromName(file?.name || '');
-  if (extFromName) return extFromName;
+const getPublicAppOrigin = () =>
+  PUBLIC_APP_URL ? PUBLIC_APP_URL.replace(/\/+$/, '') : window.location.origin;
 
-  const mime = file?.type || '';
-  if (mime === 'image/jpeg') return 'jpg';
-  if (mime === 'image/png') return 'png';
-  if (mime === 'image/webp') return 'webp';
-  if (mime === 'image/gif') return 'gif';
-  if (mime === 'image/heic') return 'heic';
-  if (mime === 'image/heif') return 'heif';
-  return 'jpg';
+const relation = (value) => (Array.isArray(value) ? value[0] || null : value || null);
+const customerName = (customer) =>
+  [customer?.first_name, customer?.last_name].filter(Boolean).join(' ').trim();
+
+const splitCustomerName = (value) => {
+  const parts = String(value || '').trim().split(/\s+/).filter(Boolean);
+  return parts.length < 2
+    ? { firstName: parts[0] || '', lastName: null }
+    : { firstName: parts.slice(0, -1).join(' '), lastName: parts.at(-1) };
 };
 
-const getStoragePathFromPublicUrl = (url) => {
-  if (!url || typeof url !== 'string') return null;
+const normalizePhoneIt = (value) => {
+  const clean = String(value || '').trim().replace(/[\s\-()./]/g, '');
+  if (!clean || clean.startsWith('+')) return clean;
+  if (clean.startsWith('00') && clean.length >= 12) return `+${clean.slice(2)}`;
+  if (clean.startsWith('39') && clean.length >= 11) return `+${clean}`;
+  return `+39${clean}`;
+};
+
+const mapPet = (row) => {
+  if (!row) return null;
+  const customer = relation(row.customer);
+  const visits = [...(row.visits || [])].sort((a, b) =>
+    String(b.date || '').localeCompare(String(a.date || ''))
+  );
+  return {
+    ...row,
+    customer,
+    owner: customerName(customer),
+    phone: customer?.phone || '',
+    email: customer?.email || '',
+    photo: row.photo_url || null,
+    notes: row.internal_notes || '',
+    visits,
+    last_visit_at: visits[0]?.date || null,
+  };
+};
+
+const mapAppointment = (row) => {
+  const pet = mapPet(relation(row?.pet));
+  return row ? { ...row, pet, client: pet } : null;
+};
+
+const getMemberships = async (userId) => {
+  const { data, error } = await supabase
+    .from('tenant_memberships')
+    .select('tenant_id, role, created_at')
+    .eq('user_id', userId)
+    .order('created_at');
+  if (error) throw error;
+  return data || [];
+};
+
+const pickMembership = (memberships, roles = null, tenantId = null) => {
+  const matches = memberships.filter(
+    (item) => (!tenantId || item.tenant_id === tenantId) && (!roles || roles.includes(item.role))
+  );
+  return (
+    matches.find(({ role }) => role === 'owner') ||
+    matches.find(({ role }) => role === 'staff') ||
+    matches.find(({ role }) => role === 'customer') ||
+    null
+  );
+};
+
+const adaptedRole = (role) => (STAFF_ROLES.includes(role) ? 'operator' : role === 'customer' ? 'customer' : null);
+
+const requireContext = async (roles, tenantId = null) => {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Utente non autenticato');
+  const memberships = await getMemberships(user.id);
+  const membership = pickMembership(memberships, roles, tenantId);
+  if (!membership) throw new Error('Accesso negato: membership non disponibile');
+  return { user, memberships, membership, tenantId: membership.tenant_id };
+};
+
+const requireStaff = (tenantId = null) => requireContext(STAFF_ROLES, tenantId);
+const requireCustomer = (tenantId = null) => requireContext(['customer'], tenantId);
+
+const getPetById = async (petId, tenantId = null) => {
+  let query = supabase.from('pets').select(PET_SELECT).eq('id', petId);
+  if (tenantId) query = query.eq('tenant_id', tenantId);
+  const { data, error } = await query.single();
+  if (error) throw error;
+  return mapPet(data);
+};
+
+const fileExtension = (file) => {
+  const fromName = getFileExtensionFromName(file?.name || '');
+  if (fromName) return fromName;
+  return { 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/heic': 'heic', 'image/heif': 'heif' }[file?.type] || 'jpg';
+};
+
+const uploadPhoto = async (userId, petId, file) => {
+  const path = `${userId}/${petId}-${Date.now()}.${fileExtension(file)}`;
+  const { error } = await supabase.storage.from(CLIENT_PHOTOS_BUCKET).upload(path, file, {
+    upsert: false,
+    contentType: getSafeImageMimeType(file),
+  });
+  if (error) throw error;
+  return supabase.storage.from(CLIENT_PHOTOS_BUCKET).getPublicUrl(path).data.publicUrl;
+};
+
+const deletePhoto = async (url) => {
   const marker = `/storage/v1/object/public/${CLIENT_PHOTOS_BUCKET}/`;
-  const idx = url.indexOf(marker);
-  if (idx === -1) return null;
-  return decodeURIComponent(url.slice(idx + marker.length));
-};
-
-const uploadClientPhoto = async (userId, clientId, file) => {
-  const ext = getFileExtension(file);
-  const filePath = `${userId}/${clientId}-${Date.now()}.${ext}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from(CLIENT_PHOTOS_BUCKET)
-    .upload(filePath, file, {
-      upsert: false,
-      contentType: getSafeImageMimeType(file),
-    });
-
-  if (uploadError) throw uploadError;
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from(CLIENT_PHOTOS_BUCKET).getPublicUrl(filePath);
-
-  return publicUrl;
-};
-
-const deleteClientPhotoByUrl = async (url) => {
-  const path = getStoragePathFromPublicUrl(url);
-  if (!path) return;
-
+  const index = typeof url === 'string' ? url.indexOf(marker) : -1;
+  if (index === -1) return;
   const { error } = await supabase.storage
     .from(CLIENT_PHOTOS_BUCKET)
-    .remove([path]);
-
+    .remove([decodeURIComponent(url.slice(index + marker.length))]);
   if (error) throw error;
 };
 
-const getOwnedClient = async (clientId, userId) => {
-  const { data: client, error } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('id', clientId)
-    .single();
-
-  if (error || client.user_id !== userId) {
-    throw new Error('Accesso negato: questo cliente non ti appartiene');
+const applyPhoto = async (userId, petId, file) => {
+  if (!file) return { photoUrl: null, photoUploadError: null };
+  try {
+    const photoUrl = await uploadPhoto(userId, petId, file);
+    const { error } = await supabase.from('pets').update({ photo_url: photoUrl }).eq('id', petId);
+    if (error) throw error;
+    return { photoUrl, photoUploadError: null };
+  } catch (error) {
+    return { photoUrl: null, photoUploadError: error.message };
   }
-
-  return client;
 };
 
-/**
- * Funzioni CRUD per Grooming Hub
- * Migrate dalla versione mobile (SQLite) a Supabase (PostgreSQL)
- *
- * Tutte le funzioni usano async/await e includono error handling
- * RLS policies assicurano che ogni utente veda solo i propri dati
- */
 export const VALID_APPOINTMENT_STATUSES = [...APPOINTMENT_STATUSES];
 export const VALID_CONTACT_SOURCES = [...CONTACT_SOURCES];
 export const VALID_CONTACT_STATUSES = [...CONTACT_STATUSES];
 export const VALID_REWARD_POINT_REASONS = [...REWARD_POINT_REASONS];
 export const VALID_PROFILE_ROLES = [...PROFILE_ROLES];
-export const VALID_APPOINTMENT_APPROVAL_STATUSES = [...APPOINTMENT_APPROVAL_STATUSES];
+export const VALID_APPOINTMENT_APPROVAL_STATUSES = [...APPROVAL_STATUSES];
 export const VALID_APPOINTMENT_SOURCES = [...APPOINTMENT_SOURCES];
-
-async function userHasCustomerClientLinks(userId) {
-  if (!userId) return false;
-
-  const { data, error } = await supabase
-    .from('customer_client_links')
-    .select('customer_user_id')
-    .eq('customer_user_id', userId)
-    .limit(1);
-
-  if (error) throw error;
-
-  return (data || []).length > 0;
-}
-
-async function userOwnsClients(userId) {
-  if (!userId) return false;
-
-  const { data, error } = await supabase
-    .from('clients')
-    .select('id')
-    .eq('user_id', userId)
-    .limit(1);
-
-  if (error) throw error;
-
-  return (data || []).length > 0;
-}
 
 export const getUserProfile = async (userId) => {
   try {
     if (!userId) return null;
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, business_name, role, created_at')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    const [hasOwnedClients, hasCustomerLinks] = await Promise.all([
-      userOwnsClients(userId),
-      userHasCustomerClientLinks(userId),
+    const [{ data: profile, error }, memberships] = await Promise.all([
+      supabase.from('profiles').select('id, business_name, role, created_at').eq('id', userId).maybeSingle(),
+      getMemberships(userId),
     ]);
-
-    if (hasOwnedClients && data?.role !== 'operator') {
-      const { data: repairedProfile, error: repairError } = await supabase
-        .from('profiles')
-        .upsert(
-          {
-            id: userId,
-            business_name: data?.business_name || null,
-            role: 'operator',
-          },
-          { onConflict: 'id' }
-        )
-        .select('id, business_name, role, created_at')
-        .single();
-
-      if (repairError) throw repairError;
-
-      return repairedProfile || { ...data, role: 'operator' };
-    }
-
-    if (!hasOwnedClients && data?.role === 'operator' && hasCustomerLinks) {
-      const { data: repairedProfile, error: repairError } = await supabase
-        .from('profiles')
-        .update({ role: 'customer' })
-        .eq('id', userId)
-        .select('id, business_name, role, created_at')
-        .single();
-
-      if (repairError) throw repairError;
-
-      return repairedProfile || { ...data, role: 'customer' };
-    }
-
-    return data || null;
+    if (error) throw error;
+    const membership = pickMembership(memberships);
+    return {
+      ...(profile || { id: userId, business_name: null, created_at: null }),
+      legacy_role: profile?.role || null,
+      role: adaptedRole(membership?.role),
+      membership_role: membership?.role || null,
+      tenant_id: membership?.tenant_id || null,
+      memberships,
+    };
   } catch (error) {
     console.error('Errore caricamento profilo:', error.message);
     return null;
@@ -224,1476 +193,519 @@ export const getUserProfile = async (userId) => {
 };
 
 export const ensureCustomerProfile = async (user) => {
-  try {
-    if (!user?.id) throw new Error('Utente non autenticato');
-
-    const [existingProfile, hasCustomerLinks, hasOwnedClients] = await Promise.all([
-      getUserProfile(user.id),
-      userHasCustomerClientLinks(user.id),
-      userOwnsClients(user.id),
-    ]);
-
-    if (hasOwnedClients || (existingProfile?.role === 'operator' && !hasCustomerLinks)) {
-      throw new Error('Questo account e\' un account operatore. Usa o crea un account cliente separato.');
-    }
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert(
-        {
-          id: user.id,
-          business_name: user.email?.split('@')[0] || 'Cliente',
-          role: 'customer',
-        },
-        { onConflict: 'id' }
-      )
-      .select('id, business_name, role, created_at')
-      .single();
-
-    if (error) throw error;
-
-    return data;
-  } catch (error) {
-    console.error('Errore profilo cliente:', error.message);
-    throw new Error(`Non riesco a creare il profilo cliente: ${error.message}`);
-  }
+  const profile = await getUserProfile(user?.id);
+  if (!profile) throw new Error('Utente non autenticato');
+  if (profile.role === 'operator') throw new Error('Questo account e un account operatore');
+  if (profile.role !== 'customer') throw new Error('Account cliente non associato a un tenant');
+  return profile;
 };
 
 export const ensureOperatorProfile = async (user) => {
-  try {
-    if (!user?.id) throw new Error('Utente non autenticato');
-
-    const [existingProfile, hasCustomerLinks, hasOwnedClients] = await Promise.all([
-      getUserProfile(user.id),
-      userHasCustomerClientLinks(user.id),
-      userOwnsClients(user.id),
-    ]);
-
-    if (!hasOwnedClients && (existingProfile?.role === 'customer' || hasCustomerLinks)) {
-      throw new Error('Questo account e\' un account cliente. Accedi dall\'area cliente.');
-    }
-
-    if (existingProfile?.role === 'operator') {
-      return existingProfile;
-    }
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert(
-        {
-          id: user.id,
-          business_name: user.email?.split('@')[0] || 'Operatore',
-          role: 'operator',
-        },
-        { onConflict: 'id' }
-      )
-      .select('id, business_name, role, created_at')
-      .single();
-
-    if (error) throw error;
-
-    return data;
-  } catch (error) {
-    console.error('Errore profilo operatore:', error.message);
-    throw new Error(`Non riesco a creare il profilo operatore: ${error.message}`);
-  }
+  const profile = await getUserProfile(user?.id);
+  if (!profile) throw new Error('Utente non autenticato');
+  if (profile.role === 'customer') throw new Error('Questo account e un account cliente');
+  if (profile.role !== 'operator') throw new Error('Account privo di membership staff');
+  return profile;
 };
 
-export const createCustomerPortalInvite = async (clientId, customerEmail = '') => {
+export const createCustomerPortalInvite = async (petId, customerEmail = '') => {
   try {
     assertDemoWriteAllowed();
-
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!clientId) throw new Error('Cliente non valido');
-
-    await getOwnedClient(clientId, user.id);
-
-    const token = generateCustomerInviteToken();
+    const { user, tenantId } = await requireStaff();
+    const pet = await getPetById(petId, tenantId);
+    if (!pet.customer?.phone) throw new Error('Customer associato senza telefono');
+    const token = generateInviteToken();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
-
-    const { data, error } = await supabase
-      .from('customer_invitations')
-      .insert({
-        id: `inv_${generateId().replace(/-/g, '')}`,
-        token,
-        operator_user_id: user.id,
-        client_id: clientId,
-        customer_email: customerEmail || null,
-        expires_at: expiresAt.toISOString(),
-      })
-      .select('id, token, client_id, customer_email, expires_at, created_at')
-      .single();
-
+    const { data, error } = await supabase.from('customer_invitations').insert({
+      id: `inv_${generateId().replace(/-/g, '')}`,
+      token,
+      operator_user_id: user.id,
+      pet_id: petId,
+      tenant_id: tenantId,
+      phone: pet.customer.phone,
+      first_name: pet.customer.first_name,
+      last_name: pet.customer.last_name,
+      customer_email: customerEmail || null,
+      expires_at: expiresAt.toISOString(),
+    }).select('id, token, pet_id, customer_email, expires_at, created_at').single();
     if (error) throw error;
-
-    const origin = getPublicAppOrigin();
-    return {
-      ...data,
-      inviteUrl: `${origin}/portal/invite/${data.token}`,
-    };
+    return { ...data, inviteUrl: `${getPublicAppOrigin()}/portal/invite/${token}` };
   } catch (error) {
-    console.error('Errore invito portale cliente:', error.message);
     throw new Error(`Non riesco a creare l'invito cliente: ${error.message}`);
   }
 };
 
 export const acceptCustomerPortalInvite = async (token) => {
-  try {
-    if (!token) throw new Error('Invito non valido');
-
-    const { data, error } = await supabase.rpc('accept_customer_invite', {
-      p_token: token,
-    });
-
-    if (error) throw error;
-
-    return data;
-  } catch (error) {
-    console.error('Errore accettazione invito cliente:', error.message);
-    throw new Error(`Non riesco ad accettare l'invito: ${error.message}`);
-  }
+  const { data, error } = await supabase.rpc('accept_customer_invite', { p_token: token });
+  if (error) throw new Error(`Non riesco ad accettare l'invito: ${error.message}`);
+  return data;
 };
 
 export const getCustomerPortalData = async () => {
   try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    const { data: links, error: linksError } = await supabase
-      .from('customer_client_links')
-      .select('client_id, operator_user_id, created_at')
-      .eq('customer_user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (linksError) throw linksError;
-
-    const clientIds = [...new Set((links || []).map((link) => link.client_id).filter(Boolean))];
-    if (clientIds.length === 0) {
-      return { clients: [] };
-    }
-
-    const lookbackIso = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-    const [
-      { data: clients, error: clientsError },
-      { data: visits, error: visitsError },
-      { data: appointments, error: appointmentsError },
-      { data: rewardPoints, error: rewardPointsError },
-    ] = await Promise.all([
-      supabase
-        .from('clients')
-        .select('id, name, photo, notes, qr_token, created_at')
-        .in('id', clientIds)
-        .order('name', { ascending: true }),
-      supabase
-        .from('visits')
-        .select('id, client_id, date')
-        .in('client_id', clientIds)
-        .order('date', { ascending: false }),
-      supabase
-        .from('appointments')
-        .select('id, user_id, client_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes')
-        .in('client_id', clientIds)
-        .gte('scheduled_at', lookbackIso)
-        .order('scheduled_at', { ascending: true }),
-      supabase
-        .from('reward_points')
-        .select('id, client_id, points, reason, note, created_at')
-        .in('client_id', clientIds)
-        .order('created_at', { ascending: false }),
+    const { user, tenantId } = await requireCustomer();
+    const { data: customers, error: customerError } = await supabase
+      .from('customers').select('id').eq('tenant_id', tenantId).eq('user_id', user.id);
+    if (customerError) throw customerError;
+    const customerIds = (customers || []).map(({ id }) => id);
+    if (!customerIds.length) return { clients: [] };
+    const { data, error } = await supabase
+      .from('pets').select(PET_SELECT).eq('tenant_id', tenantId).in('customer_id', customerIds);
+    if (error) throw error;
+    const pets = (data || []).map(mapPet);
+    const ids = pets.map(({ id }) => id);
+    if (!ids.length) return { clients: [] };
+    const lookback = new Date(Date.now() - 60 * 86400000).toISOString();
+    const [{ data: appointments, error: appointmentError }, { data: points, error: pointsError }] = await Promise.all([
+      supabase.from('appointments').select('id, pet_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes').in('pet_id', ids).gte('scheduled_at', lookback).order('scheduled_at'),
+      supabase.from('reward_points').select('id, pet_id, points, reason, note, created_at').in('pet_id', ids).order('created_at', { ascending: false }),
     ]);
-
-    if (clientsError) throw clientsError;
-    if (visitsError) throw visitsError;
-    if (appointmentsError) throw appointmentsError;
-    if (rewardPointsError) throw rewardPointsError;
-
-    const visitsByClient = (visits || []).reduce((acc, visit) => {
-      acc[visit.client_id] = acc[visit.client_id] || [];
-      acc[visit.client_id].push(visit);
-      return acc;
-    }, {});
-
-    const appointmentsByClient = (appointments || []).reduce((acc, appointment) => {
-      acc[appointment.client_id] = acc[appointment.client_id] || [];
-      acc[appointment.client_id].push(appointment);
-      return acc;
-    }, {});
-
-    const operatorByClient = (links || []).reduce((acc, link) => {
-      if (!acc[link.client_id] && link.operator_user_id) {
-        acc[link.client_id] = link.operator_user_id;
-      }
-      return acc;
-    }, {});
-
-    const rewardPointsByClient = (rewardPoints || []).reduce((acc, movement) => {
-      acc[movement.client_id] = acc[movement.client_id] || [];
-      acc[movement.client_id].push(movement);
-      return acc;
-    }, {});
-
-    return {
-      clients: (clients || []).map((client) => {
-        const clientRewardPoints = rewardPointsByClient[client.id] || [];
-        const rewardPointsTotal = clientRewardPoints.reduce(
-          (sum, movement) => sum + Number(movement.points || 0),
-          0
-        );
-
-        return {
-          ...client,
-          operator_user_id: operatorByClient[client.id] || null,
-          visits: visitsByClient[client.id] || [],
-          appointments: appointmentsByClient[client.id] || [],
-          nextAppointment:
-            (appointmentsByClient[client.id] || []).find(
-              (appointment) =>
-                appointment.approval_status === 'approved' &&
-                appointment.status === 'scheduled' &&
-                new Date(appointment.scheduled_at).getTime() >= Date.now()
-            ) || null,
-          rewardPoints: clientRewardPoints,
-          rewardPointsTotal,
-        };
-      }),
-    };
+    if (appointmentError) throw appointmentError;
+    if (pointsError) throw pointsError;
+    return { clients: pets.map((pet) => {
+      const petAppointments = (appointments || []).filter(({ pet_id }) => pet_id === pet.id);
+      const rewardPoints = (points || []).filter(({ pet_id }) => pet_id === pet.id);
+      return {
+        ...pet,
+        appointments: petAppointments,
+        nextAppointment: petAppointments.find((item) => item.approval_status === 'approved' && item.status === 'scheduled' && new Date(item.scheduled_at) >= new Date()) || null,
+        rewardPoints,
+        rewardPointsTotal: rewardPoints.reduce((sum, item) => sum + Number(item.points || 0), 0),
+      };
+    }) };
   } catch (error) {
-    console.error('Errore portale cliente:', error.message);
     throw new Error(`Non riesco a caricare il portale cliente: ${error.message}`);
   }
 };
 
-/**
- * Carica tutti i clienti dell'utente corrente con le loro visite
- * @returns {Promise<Array>} Array di clienti con array visite annidate
- */
-export const getAllClients = async () => {
+export const getAllPets = async (tenantId = null, filters = {}) => {
   try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    // Query principale: clienti ordinati per nome
-    const { data: clients, error: clientsError } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('name', { ascending: true });
-
-    if (clientsError) throw clientsError;
-
-    // Per ogni cliente, carica le visite ordinate per data decrescente
-    const clientsWithVisits = await Promise.all(
-      clients.map(async (client) => {
-        const { data: visits, error: visitsError } = await supabase
-          .from('visits')
-          .select('*')
-          .eq('client_id', client.id)
-          .order('date', { ascending: false });
-
-        if (visitsError) throw visitsError;
-
-        return {
-          ...client,
-          visits: visits || [],
-        };
-      })
+    const context = await requireStaff(tenantId);
+    const { data, error } = await supabase.from('pets').select(PET_SELECT).eq('tenant_id', context.tenantId);
+    if (error) throw error;
+    const search = String(filters.search || '').trim().toLowerCase();
+    const pets = (data || []).map(mapPet).filter((pet) =>
+      (!search || [pet.name, pet.breed, pet.owner, pet.phone].some((value) => String(value || '').toLowerCase().includes(search))) &&
+      (typeof filters.isBlacklisted !== 'boolean' || pet.is_blacklisted === filters.isBlacklisted)
     );
-
-    return clientsWithVisits;
-  } catch (error) {
-    console.error('Errore nel caricamento clienti:', error.message);
-    throw new Error(`Non riesco a caricare i clienti: ${error.message}`);
-  }
-};
-
-/**
- * Carica tutti i contatti dell'utente corrente
- * @returns {Promise<Array>}
- */
-export const getAllContacts = async () => {
-  try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    const { data, error } = await supabase
-      .from('contacts')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Errore nel caricamento contatti:', error.message);
-    throw new Error(`Non riesco a caricare i contatti: ${error.message}`);
-  }
-};
-
-/**
- * Aggiunge un nuovo contatto in rubrica
- * @param {Object} contactData
- * @returns {Promise<string>}
- */
-export const addContact = async (contactData) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    if (!contactData.pet_name?.trim()) {
-      throw new Error('Il nome del cane è obbligatorio');
-    }
-
-    const source = CONTACT_SOURCES.includes(contactData.source)
-      ? contactData.source
-      : 'manual';
-
-    const { data, error } = await supabase
-      .from('contacts')
-      .insert({
-        id: generateId(),
-        user_id: user.id,
-        pet_name: contactData.pet_name.trim(),
-        owner_name: contactData.owner_name?.trim() || null,
-        phone: contactData.phone?.trim() || null,
-        source,
-        status: 'new',
-        notes: contactData.notes?.trim() || null,
-      })
-      .select('id')
-      .single();
-
-    if (error) throw error;
-    return data.id;
-  } catch (error) {
-    console.error('Errore aggiungimento contatto:', error.message);
-    throw new Error(`Non riesco ad aggiungere il contatto: ${error.message}`);
-  }
-};
-
-/**
- * Aggiorna lo stato di un contatto
- * @param {string} contactId
- * @param {string} status
- * @returns {Promise<void>}
- */
-export const updateContactStatus = async (contactId, status) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!CONTACT_STATUSES.includes(status)) {
-      throw new Error('Stato contatto non valido');
-    }
-
-    const { error } = await supabase
-      .from('contacts')
-      .update({
-        status,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', contactId)
-      .eq('user_id', user.id);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Errore aggiornamento stato contatto:', error.message);
-    throw new Error(`Non riesco ad aggiornare il contatto: ${error.message}`);
-  }
-};
-
-/**
- * Segna un contatto come convertito e lo collega al cliente creato
- * @param {string} contactId
- * @param {string} clientId
- * @returns {Promise<void>}
- */
-export const convertContactToClient = async (contactId, clientId) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!contactId || !clientId) {
-      throw new Error('Contatto o cliente non valido');
-    }
-
-    const { error } = await supabase
-      .from('contacts')
-      .update({
-        status: 'converted',
-        linked_client_id: clientId,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', contactId)
-      .eq('user_id', user.id);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Errore conversione contatto:', error.message);
-    throw new Error(`Non riesco a convertire il contatto: ${error.message}`);
-  }
-};
-
-/**
- * Crea una voce rubrica già convertita a partire da un cliente creato manualmente
- * @param {string} clientId
- * @param {Object} clientData
- * @returns {Promise<void>}
- */
-export const createContactFromClient = async (clientId, clientData) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!clientId || !clientData?.name?.trim()) {
-      throw new Error('Cliente non valido');
-    }
-
-    const { error } = await supabase.from('contacts').insert({
-      id: generateId(),
-      user_id: user.id,
-      pet_name: clientData.name.trim(),
-      owner_name: clientData.owner?.trim() || null,
-      phone: clientData.phone?.trim() || null,
-      source: 'manual',
-      status: 'converted',
-      notes: clientData.notes?.trim() || null,
-      linked_client_id: clientId,
+    const sortBy = filters.sortBy || 'last_visit_at';
+    const direction = filters.ascending === true ? 1 : -1;
+    return pets.sort((a, b) => {
+      const compared = String(a[sortBy] || '').localeCompare(String(b[sortBy] || ''), 'it');
+      return compared ? compared * direction : String(a.name).localeCompare(String(b.name), 'it');
     });
-
-    if (error) throw error;
   } catch (error) {
-    console.error('Errore creazione contatto da cliente:', error.message);
-    throw new Error(`Non riesco ad aggiungere il cliente in rubrica: ${error.message}`);
+    throw new Error(`Non riesco a caricare i pet: ${error.message}`);
   }
 };
 
-/**
- * Aggiunge un movimento punti premio per un cliente
- * @param {string} clientId
- * @param {{ points: number|string, reason?: string, note?: string }} pointData
- * @returns {Promise<string>}
- */
-export const addRewardPointMovement = async (clientId, pointData) => {
+export const getAllClients = (filters = {}) => getAllPets(null, filters);
+
+export const getAllContacts = async () => {
+  const { tenantId } = await requireStaff();
+  const { data, error } = await supabase.from('contacts').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+  if (error) throw new Error(`Non riesco a caricare i contatti: ${error.message}`);
+  return data || [];
+};
+
+export const addContact = async (contactData) => {
+  assertDemoWriteAllowed();
+  const { user, tenantId } = await requireStaff();
+  if (!contactData.pet_name?.trim()) throw new Error('Il nome del cane e obbligatorio');
+  const { data, error } = await supabase.from('contacts').insert({
+    id: generateId(), user_id: user.id, tenant_id: tenantId,
+    pet_name: contactData.pet_name.trim(), owner_name: contactData.owner_name?.trim() || null,
+    phone: contactData.phone?.trim() || null,
+    source: CONTACT_SOURCES.includes(contactData.source) ? contactData.source : 'manual',
+    status: 'new', notes: contactData.notes?.trim() || null,
+  }).select('id').single();
+  if (error) throw new Error(`Non riesco ad aggiungere il contatto: ${error.message}`);
+  return data.id;
+};
+
+export const updateContactStatus = async (contactId, status) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  if (!CONTACT_STATUSES.includes(status)) throw new Error('Stato contatto non valido');
+  const { error } = await supabase.from('contacts').update({ status, updated_at: new Date().toISOString() }).eq('id', contactId).eq('tenant_id', tenantId);
+  if (error) throw new Error(`Non riesco ad aggiornare il contatto: ${error.message}`);
+};
+
+export const markContactConverted = async (contactId, petId) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  await getPetById(petId, tenantId);
+  const { error } = await supabase.from('contacts').update({ status: 'converted', linked_pet_id: petId, updated_at: new Date().toISOString() }).eq('id', contactId).eq('tenant_id', tenantId);
+  if (error) throw new Error(`Non riesco a convertire il contatto: ${error.message}`);
+};
+
+/** @deprecated Usa markContactConverted; contacts resta solo fino a GH-06. */
+export const convertContactToClient = markContactConverted;
+
+export const addRewardPointMovement = async (petId, pointData) => {
+  assertDemoWriteAllowed();
+  const { user, tenantId } = await requireStaff();
+  await getPetById(petId, tenantId);
+  const points = Number.parseInt(pointData.points, 10);
+  if (!Number.isFinite(points) || points === 0) throw new Error('Inserisci un numero di punti diverso da zero');
+  const { data, error } = await supabase.from('reward_points').insert({
+    id: generateId(), user_id: user.id, pet_id: petId, tenant_id: tenantId, points,
+    reason: REWARD_POINT_REASONS.includes(pointData.reason) ? pointData.reason : 'manual',
+    note: pointData.note?.trim() || null,
+  }).select('id').single();
+  if (error) throw new Error(`Non riesco ad aggiungere i punti premio: ${error.message}`);
+  return data.id;
+};
+
+export const addCustomerWithPet = async (tenantId, customerData, petData) => {
   try {
     assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    const points = Number.parseInt(pointData.points, 10);
-    if (!Number.isFinite(points) || points === 0) {
-      throw new Error('Inserisci un numero di punti diverso da zero');
-    }
-
-    const client = await getOwnedClient(clientId, user.id);
-    const reason = REWARD_POINT_REASONS.includes(pointData.reason)
-      ? pointData.reason
-      : 'manual';
-
-    const { data, error } = await supabase
-      .from('reward_points')
-      .insert({
-        id: generateId(),
-        user_id: user.id,
-        client_id: client.id,
-        points,
-        reason,
-        note: pointData.note?.trim() || null,
-      })
-      .select('id')
-      .single();
-
+    const { user, tenantId: activeTenant } = await requireStaff(tenantId);
+    if (!customerData?.first_name?.trim()) throw new Error('Il nome del proprietario e obbligatorio');
+    if (!customerData?.phone?.trim()) throw new Error('Il telefono del proprietario e obbligatorio');
+    if (!petData?.name?.trim()) throw new Error('Il nome del pet e obbligatorio');
+    const { data, error } = await supabase.rpc('add_customer_with_pet', {
+      p_tenant_id: activeTenant,
+      p_customer_first_name: customerData.first_name.trim(),
+      p_customer_phone: customerData.phone.trim(),
+      p_pet_name: petData.name.trim(),
+      p_customer_last_name: customerData.last_name?.trim() || null,
+      p_customer_email: customerData.email?.trim() || null,
+      p_customer_marketing_opt_in: customerData.marketing_opt_in === true,
+      p_customer_operator_notes: customerData.operator_notes?.trim() || null,
+      p_pet_species: petData.species?.trim() || null,
+      p_pet_breed: petData.breed?.trim() || null,
+      p_pet_birth_date: petData.birth_date || null,
+      p_pet_sex: petData.sex || null,
+      p_pet_microchip: petData.microchip?.trim() || null,
+      p_pet_weight_kg: petData.weight_kg || null,
+      p_pet_neutered: typeof petData.neutered === 'boolean' ? petData.neutered : null,
+      p_pet_color: petData.color?.trim() || null,
+      p_pet_coat_preferences: petData.coat_preferences || null,
+      p_pet_owner_notes: petData.owner_notes?.trim() || null,
+      p_pet_internal_notes: petData.internal_notes?.trim() || null,
+      p_pet_photo_url: petData.photo_url || null,
+    });
     if (error) throw error;
-    return data.id;
+    const created = Array.isArray(data) ? data[0] : data;
+    if (!created?.customer_id || !created?.pet_id) throw new Error('Identificativi creati non disponibili');
+    return { ...created, ...(await applyPhoto(user.id, created.pet_id, petData.photoFile)) };
   } catch (error) {
-    console.error('Errore aggiunta punti premio:', error.message);
-    throw new Error(`Non riesco ad aggiungere i punti premio: ${error.message}`);
+    throw new Error(`Non riesco ad aggiungere customer e pet: ${error.message}`);
   }
 };
 
-/**
- * Aggiunge un nuovo cliente
- * @param {Object} clientData - Dati cliente { name, breed?, owner, phone?, notes?, photo? }
- * @returns {Promise<string>} ID del nuovo cliente
- */
+export const addPetToCustomer = async (customerId, petData) => {
+  assertDemoWriteAllowed();
+  const { user, tenantId } = await requireStaff();
+  if (!petData?.name?.trim()) throw new Error('Il nome del pet e obbligatorio');
+  const { data: customer, error: customerError } = await supabase.from('customers').select('id, tenant_id').eq('id', customerId).eq('tenant_id', tenantId).single();
+  if (customerError) throw customerError;
+  const { data, error } = await supabase.from('pets').insert({
+    tenant_id: customer.tenant_id, customer_id: customer.id, owner_user_id: user.id,
+    name: petData.name.trim(), species: petData.species?.trim() || null,
+    breed: petData.breed?.trim() || null, birth_date: petData.birth_date || null,
+    sex: petData.sex || null, microchip: petData.microchip?.trim() || null,
+    weight_kg: petData.weight_kg || null,
+    neutered: typeof petData.neutered === 'boolean' ? petData.neutered : null,
+    color: petData.color?.trim() || null, coat_preferences: petData.coat_preferences || null,
+    owner_notes: petData.owner_notes?.trim() || null,
+    internal_notes: petData.internal_notes?.trim() || null,
+    photo_url: petData.photo_url || null,
+  }).select('id').single();
+  if (error) throw new Error(`Non riesco ad aggiungere il pet: ${error.message}`);
+  return { pet_id: data.id, ...(await applyPhoto(user.id, data.id, petData.photoFile)) };
+};
+
 export const addClient = async (clientData) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    // Validazione base
-    if (!clientData.name || !clientData.owner) {
-      throw new Error('Nome e proprietario sono obbligatori');
-    }
-
-    const clientId = generateId();
-    const photoUrl = clientData.photoFile
-      ? await uploadClientPhoto(user.id, clientId, clientData.photoFile)
-      : null;
-
-    const { data, error } = await supabase
-      .from('clients')
-      .insert({
-        id: clientId,
-        qr_token: generateQrToken(),
-        user_id: user.id,
-        name: clientData.name,
-        breed: clientData.breed || null,
-        owner: clientData.owner,
-        phone: clientData.phone || null,
-        notes: clientData.notes || null,
-        photo: photoUrl,
-      })
-      .select('id')
-      .single();
-
-    if (error) throw error;
-
-    return data.id;
-  } catch (error) {
-    console.error('Errore aggiungimento cliente:', error.message);
-    throw new Error(`Non riesco ad aggiungere il cliente: ${error.message}`);
-  }
+  const { tenantId } = await requireStaff();
+  const { firstName, lastName } = splitCustomerName(clientData.owner);
+  const result = await addCustomerWithPet(
+    tenantId,
+    { first_name: firstName, last_name: lastName, phone: clientData.phone },
+    { name: clientData.name, breed: clientData.breed, internal_notes: clientData.notes, photoFile: clientData.photoFile }
+  );
+  return result.pet_id;
 };
 
-/**
- * Modifica un cliente esistente
- * @param {string} clientId - ID cliente
- * @param {Object} clientData - Dati aggiornati
- * @returns {Promise<void>}
- */
-export const updateClient = async (clientId, clientData) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    // Validazione
-    if (!clientData.name || !clientData.owner) {
-      throw new Error('Nome e proprietario sono obbligatori');
-    }
-
-    // Verifica che il cliente appartenga all'utente (sicurezza)
-    const { data: client, error: checkError } = await supabase
-      .from('clients')
-      .select('user_id, photo')
-      .eq('id', clientId)
-      .single();
-
-    if (checkError || client.user_id !== user.id) {
-      throw new Error('Accesso negato: questo cliente non ti appartiene');
-    }
-
-    let nextPhotoUrl = client.photo || null;
-
-    if (clientData.photoFile) {
-      if (client.photo) {
-        await deleteClientPhotoByUrl(client.photo);
-      }
-      nextPhotoUrl = await uploadClientPhoto(user.id, clientId, clientData.photoFile);
-    } else if (clientData.removePhoto || clientData.photo === '') {
-      if (client.photo) {
-        await deleteClientPhotoByUrl(client.photo);
-      }
-      nextPhotoUrl = null;
-    }
-
-    const { error } = await supabase
-      .from('clients')
-      .update({
-        name: clientData.name,
-        breed: clientData.breed || null,
-        owner: clientData.owner,
-        phone: clientData.phone || null,
-        notes: clientData.notes || null,
-        photo: nextPhotoUrl,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', clientId);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Errore modifica cliente:', error.message);
-    throw new Error(`Non riesco a modificare il cliente: ${error.message}`);
+export const updateClient = async (petId, input) => {
+  assertDemoWriteAllowed();
+  const { user, tenantId } = await requireStaff();
+  if (!input.name?.trim() || !input.owner?.trim() || !input.phone?.trim()) throw new Error('Nome pet, proprietario e telefono sono obbligatori');
+  const pet = await getPetById(petId, tenantId);
+  if (!pet.customer_id) throw new Error('Customer associato non disponibile');
+  const { firstName, lastName } = splitCustomerName(input.owner);
+  const { error: customerError } = await supabase.from('customers').update({
+    first_name: firstName, last_name: lastName, phone: normalizePhoneIt(input.phone),
+  }).eq('id', pet.customer_id).eq('tenant_id', tenantId);
+  if (customerError) throw customerError;
+  let photoUrl = pet.photo_url;
+  if (input.photoFile) {
+    const uploaded = await uploadPhoto(user.id, petId, input.photoFile);
+    if (photoUrl) await deletePhoto(photoUrl);
+    photoUrl = uploaded;
+  } else if (input.removePhoto || input.photo === '') {
+    if (photoUrl) await deletePhoto(photoUrl);
+    photoUrl = null;
   }
+  const { error } = await supabase.from('pets').update({
+    name: input.name.trim(), breed: input.breed?.trim() || null,
+    internal_notes: input.notes?.trim() || null, photo_url: photoUrl,
+  }).eq('id', petId).eq('tenant_id', tenantId);
+  if (error) throw new Error(`Non riesco a modificare il pet: ${error.message}`);
 };
 
-/**
- * Elimina un cliente e tutte le sue visite (cascata)
- * @param {string} clientId - ID cliente
- * @returns {Promise<void>}
- */
-export const deleteClient = async (clientId) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    // Verifica ownership
-    const { data: client, error: checkError } = await supabase
-      .from('clients')
-      .select('user_id')
-      .eq('id', clientId)
-      .single();
-
-    if (checkError || client.user_id !== user.id) {
-      throw new Error('Accesso negato: questo cliente non ti appartiene');
-    }
-
-    // Elimina visite associate (cascata manuale, oppure PostgreSQL ON DELETE CASCADE)
-    const { error: visitsError } = await supabase
-      .from('visits')
-      .delete()
-      .eq('client_id', clientId);
-
-    if (visitsError) throw visitsError;
-
-    // Elimina cliente
-    const { error: clientError } = await supabase
-      .from('clients')
-      .delete()
-      .eq('id', clientId);
-
-    if (clientError) throw clientError;
-  } catch (error) {
-    console.error('Errore eliminazione cliente:', error.message);
-    throw new Error(`Non riesco a eliminare il cliente: ${error.message}`);
-  }
+export const deleteClient = async (petId) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  const pet = await getPetById(petId, tenantId);
+  if (pet.photo_url) await deletePhoto(pet.photo_url);
+  const { error } = await supabase.from('pets').delete().eq('id', petId).eq('tenant_id', tenantId);
+  if (error) throw new Error(`Non riesco a eliminare il pet: ${error.message}`);
 };
 
-/**
- * Aggiunge una nuova visita per un cliente
- * @param {string} clientId - ID cliente
- * @param {Object} visitData - { date, treatments?, issues?, cost }
- * @returns {Promise<string>} ID della nuova visita
- */
-export const addVisit = async (clientId, visitData) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    // Validazione
-    if (!visitData.cost || visitData.cost <= 0) {
-      throw new Error('Il costo è obbligatorio e deve essere > 0');
-    }
-
-    // Verifica che il cliente appartenga all'utente
-    await getOwnedClient(clientId, user.id);
-
-    const visitId = generateId();
-
-    const { data, error } = await supabase
-      .from('visits')
-      .insert({
-        id: visitId,
-        client_id: clientId,
-        date: visitData.date,
-        treatments: visitData.treatments || null,
-        issues: visitData.issues || null,
-        cost: parseFloat(visitData.cost),
-        discount_percent: visitData.discount_percent || 0,
-      })
-      .select('id')
-      .single();
-
-    if (error) throw error;
-
-    return data.id;
-  } catch (error) {
-    console.error('Errore aggiungimento visita:', error.message);
-    throw new Error(`Non riesco ad aggiungere la visita: ${error.message}`);
-  }
+export const addVisit = async (petId, input) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  await getPetById(petId, tenantId);
+  if (!input.cost || input.cost <= 0) throw new Error('Il costo deve essere maggiore di zero');
+  const { data, error } = await supabase.from('visits').insert({
+    id: generateId(), pet_id: petId, tenant_id: tenantId, date: input.date,
+    treatments: input.treatments || null, issues: input.issues || null,
+    cost: Number.parseFloat(input.cost), discount_percent: input.discount_percent || 0,
+  }).select('id').single();
+  if (error) throw new Error(`Non riesco ad aggiungere la visita: ${error.message}`);
+  return data.id;
 };
 
-/**
- * Elimina una visita
- * @param {string} visitId - ID visita
- * @param {string} clientId - ID cliente (per verifica ownership)
- * @returns {Promise<void>}
- */
-export const deleteVisit = async (visitId, clientId) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    // Verifica ownership del cliente
-    await getOwnedClient(clientId, user.id);
-
-    const { error } = await supabase
-      .from('visits')
-      .delete()
-      .eq('id', visitId);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Errore eliminazione visita:', error.message);
-    throw new Error(`Non riesco a eliminare la visita: ${error.message}`);
-  }
+export const deleteVisit = async (visitId, petId) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  await getPetById(petId, tenantId);
+  const { error } = await supabase.from('visits').delete().eq('id', visitId).eq('tenant_id', tenantId);
+  if (error) throw new Error(`Non riesco a eliminare la visita: ${error.message}`);
 };
 
-/**
- * Aggiorna punteggio no-show del cliente.
- * La blacklist automatica scatta quando il punteggio arriva a -3 o meno.
- * @param {string} clientId
- * @param {number} delta - Valore positivo o negativo da sommare
- * @returns {Promise<Object>} { id, no_show_score, is_blacklisted }
- */
-export const updateClientNoShowScore = async (clientId, delta) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    const client = await getOwnedClient(clientId, user.id);
-    const parsedDelta = Number(delta);
-    if (Number.isNaN(parsedDelta)) {
-      throw new Error('Delta punteggio non valido');
-    }
-
-    const nextScore = (Number(client.no_show_score) || 0) + parsedDelta;
-    const nextBlacklisted = nextScore <= BLACKLIST_THRESHOLD;
-
-    const { data, error } = await supabase
-      .from('clients')
-      .update({
-        no_show_score: nextScore,
-        is_blacklisted: nextBlacklisted,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', clientId)
-      .select('id, no_show_score, is_blacklisted')
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Errore aggiornamento no-show score:', error.message);
-    throw new Error(`Non riesco ad aggiornare il punteggio: ${error.message}`);
-  }
+export const updateClientNoShowScore = async (petId, delta) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  const pet = await getPetById(petId, tenantId);
+  const nextScore = Number(pet.no_show_score || 0) + Number(delta);
+  if (Number.isNaN(nextScore)) throw new Error('Delta punteggio non valido');
+  const { data, error } = await supabase.from('pets').update({
+    no_show_score: nextScore, is_blacklisted: nextScore <= BLACKLIST_THRESHOLD,
+  }).eq('id', petId).eq('tenant_id', tenantId).select('id, no_show_score, is_blacklisted').single();
+  if (error) throw new Error(`Non riesco ad aggiornare il punteggio: ${error.message}`);
+  return data;
 };
 
-/**
- * Forza manualmente lo stato blacklist di un cliente.
- * @param {string} clientId
- * @param {boolean} isBlacklisted
- * @returns {Promise<Object>} { id, no_show_score, is_blacklisted }
- */
-export const setClientBlacklistStatus = async (clientId, isBlacklisted) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    await getOwnedClient(clientId, user.id);
-
-    const { data, error } = await supabase
-      .from('clients')
-      .update({
-        is_blacklisted: !!isBlacklisted,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', clientId)
-      .select('id, no_show_score, is_blacklisted')
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Errore aggiornamento blacklist:', error.message);
-    throw new Error(`Non riesco ad aggiornare la blacklist: ${error.message}`);
-  }
+export const setClientBlacklistStatus = async (petId, isBlacklisted) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  await getPetById(petId, tenantId);
+  const { data, error } = await supabase.from('pets').update({ is_blacklisted: Boolean(isBlacklisted) }).eq('id', petId).eq('tenant_id', tenantId).select('id, no_show_score, is_blacklisted').single();
+  if (error) throw new Error(`Non riesco ad aggiornare la blacklist: ${error.message}`);
+  return data;
 };
 
-/**
- * Crea un appuntamento in calendario.
- * @param {Object} appointmentData
- * @returns {Promise<string>} appointment id
- */
-export const addAppointment = async (appointmentData) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    const status = appointmentData.status || 'scheduled';
-    if (!APPOINTMENT_STATUSES.includes(status)) {
-      throw new Error('Stato appuntamento non valido');
-    }
-
-    if (!appointmentData.client_id || !appointmentData.scheduled_at) {
-      throw new Error('Cliente e data appuntamento sono obbligatori');
-    }
-
-    await getOwnedClient(appointmentData.client_id, user.id);
-    const appointmentId = generateId();
-    const approvalStatus = APPOINTMENT_APPROVAL_STATUSES.includes(appointmentData.approval_status)
-      ? appointmentData.approval_status
-      : 'approved';
-    const appointmentSource = APPOINTMENT_SOURCES.includes(appointmentData.appointment_source)
-      ? appointmentData.appointment_source
-      : 'operator';
-
-    const { data, error } = await supabase
-      .from('appointments')
-      .insert({
-        id: appointmentId,
-        user_id: user.id,
-        client_id: appointmentData.client_id,
-        scheduled_at: appointmentData.scheduled_at,
-        duration_minutes: Number(appointmentData.duration_minutes) || 60,
-        status,
-        approval_status: approvalStatus,
-        appointment_source: appointmentSource,
-        requested_by_customer_id: appointmentData.requested_by_customer_id || null,
-        notes: appointmentData.notes || null,
-        external_calendar: appointmentData.external_calendar || null,
-      })
-      .select('id')
-      .single();
-
-    if (error) throw error;
-
-    if (status === 'no_show') {
-      await updateClientNoShowScore(appointmentData.client_id, -1);
-    }
-
-    return data.id;
-  } catch (error) {
-    console.error('Errore creazione appuntamento:', error.message);
-    throw new Error(`Non riesco a creare l'appuntamento: ${error.message}`);
-  }
+export const addAppointment = async (input) => {
+  assertDemoWriteAllowed();
+  const { user, tenantId } = await requireStaff();
+  const petId = input.pet_id || input.clientId;
+  const status = input.status || 'scheduled';
+  if (!petId || !input.scheduled_at) throw new Error('Pet e data sono obbligatori');
+  if (!APPOINTMENT_STATUSES.includes(status)) throw new Error('Stato appuntamento non valido');
+  await getPetById(petId, tenantId);
+  const { data, error } = await supabase.from('appointments').insert({
+    id: generateId(), user_id: user.id, pet_id: petId, tenant_id: tenantId,
+    scheduled_at: input.scheduled_at, duration_minutes: Number(input.duration_minutes) || 60,
+    status, approval_status: APPROVAL_STATUSES.includes(input.approval_status) ? input.approval_status : 'approved',
+    appointment_source: APPOINTMENT_SOURCES.includes(input.appointment_source) ? input.appointment_source : 'operator',
+    requested_by_customer_id: input.requested_by_customer_id || null,
+    notes: input.notes || null, external_calendar: input.external_calendar || null,
+    service_id: input.service_id || null,
+  }).select('id').single();
+  if (error) throw new Error(`Non riesco a creare l'appuntamento: ${error.message}`);
+  if (status === 'no_show') await updateClientNoShowScore(petId, -1);
+  return data.id;
 };
 
-/**
- * Crea una richiesta appuntamento dal portale cliente.
- * @param {string} clientId
- * @param {{ date: string, time: string, duration_minutes?: number, notes?: string }} requestData
- * @returns {Promise<Object>}
- */
-export const createCustomerAppointmentRequest = async (clientId, requestData = {}) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!clientId) throw new Error('Cliente non valido');
-    if (!requestData.date || !requestData.time) {
-      throw new Error('Data e ora sono obbligatorie');
-    }
-
-    const scheduledAtDate = new Date(`${requestData.date}T${requestData.time}`);
-    if (Number.isNaN(scheduledAtDate.getTime())) {
-      throw new Error('Data o ora richiesta non valide');
-    }
-
-    const duration = Number(requestData.duration_minutes) || 60;
-    if (duration <= 0 || duration > 480) {
-      throw new Error('Durata richiesta non valida');
-    }
-
-    const { data: link, error: linkError } = await supabase
-      .from('customer_client_links')
-      .select('operator_user_id, client_id')
-      .eq('customer_user_id', user.id)
-      .eq('client_id', clientId)
-      .maybeSingle();
-
-    if (linkError) throw linkError;
-    if (!link?.operator_user_id) {
-      throw new Error('Cliente non collegato al tuo account');
-    }
-
-    const { data, error } = await supabase
-      .from('appointments')
-      .insert({
-        id: generateId(),
-        user_id: link.operator_user_id,
-        client_id: clientId,
-        scheduled_at: scheduledAtDate.toISOString(),
-        duration_minutes: duration,
-        status: 'scheduled',
-        approval_status: 'pending',
-        appointment_source: 'customer',
-        requested_by_customer_id: user.id,
-        notes: requestData.notes?.trim() || null,
-      })
-      .select(`
-        id,
-        user_id,
-        client_id,
-        scheduled_at,
-        duration_minutes,
-        status,
-        approval_status,
-        appointment_source,
-        requested_by_customer_id,
-        notes,
-        external_calendar,
-        created_at,
-        updated_at
-      `)
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Errore richiesta appuntamento cliente:', error.message);
-    throw new Error(`Non riesco a inviare la richiesta appuntamento: ${error.message}`);
-  }
+export const createCustomerAppointmentRequest = async (petId, input = {}) => {
+  assertDemoWriteAllowed();
+  const { user, tenantId } = await requireCustomer();
+  if (!input.date || !input.time) throw new Error('Data e ora sono obbligatorie');
+  const scheduledAt = new Date(`${input.date}T${input.time}`);
+  if (Number.isNaN(scheduledAt.getTime())) throw new Error('Data o ora non valide');
+  const duration = Number(input.duration_minutes) || 60;
+  if (duration <= 0 || duration > 480) throw new Error('Durata richiesta non valida');
+  const pet = await getPetById(petId, tenantId);
+  const { data, error } = await supabase.from('appointments').insert({
+    id: generateId(), user_id: pet.owner_user_id, pet_id: petId, tenant_id: tenantId,
+    scheduled_at: scheduledAt.toISOString(), duration_minutes: duration,
+    status: 'scheduled', approval_status: 'pending', appointment_source: 'customer',
+    requested_by_customer_id: user.id, notes: input.notes?.trim() || null,
+  }).select('id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, created_at').single();
+  if (error) throw new Error(`Non riesco a inviare la richiesta appuntamento: ${error.message}`);
+  return data;
 };
 
-/**
- * Carica appuntamenti dell'utente.
- * @param {Object} filters - { from?, to?, includePending?, includeRejected? } ISO datetime
- * @returns {Promise<Array>}
- */
 export const getAppointments = async (filters = {}) => {
-  try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    const includePending = filters.includePending === true;
-    const includeRejected = filters.includeRejected === true;
-
-    let query = supabase
-      .from('appointments')
-      .select(`
-        id,
-        user_id,
-        client_id,
-        scheduled_at,
-        duration_minutes,
-        status,
-        approval_status,
-        appointment_source,
-        requested_by_customer_id,
-        notes,
-        external_calendar,
-        created_at,
-        updated_at,
-        client:clients(id, name, owner, phone, no_show_score, is_blacklisted)
-      `)
-      .eq('user_id', user.id)
-      .order('scheduled_at', { ascending: true });
-
-    if (filters.from) {
-      query = query.gte('scheduled_at', filters.from);
-    }
-    if (filters.to) {
-      query = query.lte('scheduled_at', filters.to);
-    }
-    if (!includePending) {
-      query = query.neq('approval_status', 'pending');
-    }
-    if (!includeRejected) {
-      query = query.neq('approval_status', 'rejected');
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Errore caricamento appuntamenti:', error.message);
-    throw new Error(`Non riesco a caricare il calendario: ${error.message}`);
-  }
+  const { tenantId } = await requireStaff();
+  let query = supabase.from('appointments').select(APPOINTMENT_SELECT).eq('tenant_id', tenantId).order('scheduled_at');
+  if (filters.from) query = query.gte('scheduled_at', filters.from);
+  if (filters.to) query = query.lte('scheduled_at', filters.to);
+  if (filters.includePending !== true) query = query.neq('approval_status', 'pending');
+  if (filters.includeRejected !== true) query = query.neq('approval_status', 'rejected');
+  const { data, error } = await query;
+  if (error) throw new Error(`Non riesco a caricare il calendario: ${error.message}`);
+  return (data || []).map(mapAppointment);
 };
 
 export const getPendingAppointmentRequests = async () => {
-  try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    const { data, error } = await supabase
-      .from('appointments')
-      .select(`
-        id,
-        user_id,
-        client_id,
-        scheduled_at,
-        duration_minutes,
-        status,
-        approval_status,
-        appointment_source,
-        requested_by_customer_id,
-        notes,
-        created_at,
-        client:clients(id, name, owner, phone)
-      `)
-      .eq('user_id', user.id)
-      .eq('approval_status', 'pending')
-      .eq('appointment_source', 'customer')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Errore caricamento richieste appuntamento:', error.message);
-    throw new Error(`Non riesco a caricare le richieste appuntamento: ${error.message}`);
-  }
+  const { tenantId } = await requireStaff();
+  const { data, error } = await supabase.from('appointments').select(APPOINTMENT_SELECT)
+    .eq('tenant_id', tenantId).eq('approval_status', 'pending')
+    .eq('appointment_source', 'customer').order('created_at', { ascending: false });
+  if (error) throw new Error(`Non riesco a caricare le richieste: ${error.message}`);
+  return (data || []).map(mapAppointment);
 };
 
-/**
- * Aggiorna lo stato di un appuntamento.
- * Se passa a no_show applica penalità automatica cliente.
- * Se esce da no_show rimuove la penalità.
- * @param {string} appointmentId
- * @param {'scheduled'|'completed'|'cancelled'|'no_show'} status
- */
+const getStaffAppointment = async (appointmentId, tenantId) => {
+  const { data, error } = await supabase.from('appointments')
+    .select('id, pet_id, tenant_id, status, approval_status, scheduled_at, duration_minutes')
+    .eq('id', appointmentId).eq('tenant_id', tenantId).single();
+  if (error) throw error;
+  return data;
+};
+
 export const updateAppointmentStatus = async (appointmentId, status) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!APPOINTMENT_STATUSES.includes(status)) {
-      throw new Error('Stato appuntamento non valido');
-    }
-
-    const { data: appointment, error: appointmentError } = await supabase
-      .from('appointments')
-      .select('id, user_id, client_id, status, approval_status')
-      .eq('id', appointmentId)
-      .single();
-
-    if (appointmentError || appointment.user_id !== user.id) {
-      throw new Error('Accesso negato: appuntamento non disponibile');
-    }
-    if (appointment.approval_status === 'pending') {
-      throw new Error('Conferma o rifiuta prima la richiesta appuntamento');
-    }
-    if (appointment.approval_status === 'rejected') {
-      throw new Error('Non puoi aggiornare uno slot rifiutato');
-    }
-
-    const previousStatus = appointment.status;
-    const { data, error } = await supabase
-      .from('appointments')
-      .update({
-        status,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', appointmentId)
-      .select('id, client_id, status')
-      .single();
-
-    if (error) throw error;
-
-    if (previousStatus !== 'no_show' && status === 'no_show') {
-      await updateClientNoShowScore(appointment.client_id, -1);
-    }
-
-    if (previousStatus === 'no_show' && status !== 'no_show') {
-      await updateClientNoShowScore(appointment.client_id, 1);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Errore aggiornamento stato appuntamento:', error.message);
-    throw new Error(`Non riesco ad aggiornare lo stato: ${error.message}`);
-  }
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  if (!APPOINTMENT_STATUSES.includes(status)) throw new Error('Stato appuntamento non valido');
+  const appointment = await getStaffAppointment(appointmentId, tenantId);
+  if (appointment.approval_status === 'pending') throw new Error('Conferma o rifiuta prima la richiesta');
+  if (appointment.approval_status === 'rejected') throw new Error('Non puoi aggiornare uno slot rifiutato');
+  const { data, error } = await supabase.from('appointments')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', appointmentId).eq('tenant_id', tenantId)
+    .select('id, pet_id, status').single();
+  if (error) throw new Error(`Non riesco ad aggiornare lo stato: ${error.message}`);
+  if (appointment.status !== 'no_show' && status === 'no_show') await updateClientNoShowScore(appointment.pet_id, -1);
+  if (appointment.status === 'no_show' && status !== 'no_show') await updateClientNoShowScore(appointment.pet_id, 1);
+  return data;
 };
 
-/**
- * Approva o rifiuta una richiesta appuntamento cliente.
- * @param {string} appointmentId
- * @param {'approved'|'rejected'} approvalStatus
- * @returns {Promise<Object>}
- */
 export const updateAppointmentApproval = async (appointmentId, approvalStatus) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!APPOINTMENT_APPROVAL_STATUSES.includes(approvalStatus)) {
-      throw new Error('Stato approvazione non valido');
-    }
-    if (!['approved', 'rejected'].includes(approvalStatus)) {
-      throw new Error('Puoi solo approvare o rifiutare la richiesta');
-    }
-
-    const { data: appointment, error: appointmentError } = await supabase
-      .from('appointments')
-      .select('id, user_id, status, approval_status')
-      .eq('id', appointmentId)
-      .single();
-
-    if (appointmentError || appointment.user_id !== user.id) {
-      throw new Error('Accesso negato: appuntamento non disponibile');
-    }
-    if (appointment.approval_status === approvalStatus) {
-      return appointment;
-    }
-
-    const nextStatus =
-      approvalStatus === 'rejected'
-        ? 'cancelled'
-        : appointment.status === 'cancelled'
-          ? 'scheduled'
-          : appointment.status;
-
-    const { data, error } = await supabase
-      .from('appointments')
-      .update({
-        approval_status: approvalStatus,
-        status: nextStatus,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', appointmentId)
-      .select(`
-        id,
-        user_id,
-        client_id,
-        scheduled_at,
-        duration_minutes,
-        status,
-        approval_status,
-        appointment_source,
-        requested_by_customer_id,
-        notes,
-        external_calendar,
-        created_at,
-        updated_at,
-        client:clients(id, name, owner, phone, no_show_score, is_blacklisted)
-      `)
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Errore approvazione appuntamento:', error.message);
-    throw new Error(`Non riesco ad aggiornare la richiesta: ${error.message}`);
-  }
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  if (!['approved', 'rejected'].includes(approvalStatus)) throw new Error('Puoi solo approvare o rifiutare');
+  const appointment = await getStaffAppointment(appointmentId, tenantId);
+  if (appointment.approval_status === approvalStatus) return appointment;
+  const status = approvalStatus === 'rejected'
+    ? 'cancelled'
+    : appointment.status === 'cancelled' ? 'scheduled' : appointment.status;
+  const { data, error } = await supabase.from('appointments')
+    .update({ approval_status: approvalStatus, status, updated_at: new Date().toISOString() })
+    .eq('id', appointmentId).eq('tenant_id', tenantId).select(APPOINTMENT_SELECT).single();
+  if (error) throw new Error(`Non riesco ad aggiornare la richiesta: ${error.message}`);
+  return mapAppointment(data);
 };
 
-/**
- * Aggiorna data/ora e durata di un appuntamento esistente.
- * @param {string} appointmentId
- * @param {{ scheduled_at: string, duration_minutes?: number }} updates
- * @returns {Promise<Object>}
- */
 export const updateAppointmentSchedule = async (appointmentId, updates) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    if (!updates?.scheduled_at) {
-      throw new Error('La nuova data appuntamento è obbligatoria');
-    }
-
-    const { data: appointment, error: appointmentError } = await supabase
-      .from('appointments')
-      .select('id, user_id, scheduled_at, duration_minutes, client_id, approval_status')
-      .eq('id', appointmentId)
-      .single();
-
-    if (appointmentError || appointment.user_id !== user.id) {
-      throw new Error('Accesso negato: appuntamento non disponibile');
-    }
-    if (appointment.approval_status === 'rejected') {
-      throw new Error('Non puoi spostare uno slot rifiutato');
-    }
-
-    const { data, error } = await supabase
-      .from('appointments')
-      .update({
-        scheduled_at: updates.scheduled_at,
-        duration_minutes: Number(updates.duration_minutes) || appointment.duration_minutes,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', appointmentId)
-      .select(`
-        id,
-        user_id,
-        client_id,
-        scheduled_at,
-        duration_minutes,
-        status,
-        approval_status,
-        appointment_source,
-        requested_by_customer_id,
-        notes,
-        external_calendar,
-        created_at,
-        updated_at,
-        client:clients(id, name, owner, phone, no_show_score, is_blacklisted)
-      `)
-      .single();
-
-    if (error) throw error;
-
-    return data;
-  } catch (error) {
-    console.error('Errore aggiornamento orario appuntamento:', error.message);
-    throw new Error(`Non riesco a spostare l'appuntamento: ${error.message}`);
-  }
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  if (!updates?.scheduled_at) throw new Error('La nuova data e obbligatoria');
+  const appointment = await getStaffAppointment(appointmentId, tenantId);
+  if (appointment.approval_status === 'rejected') throw new Error('Non puoi spostare uno slot rifiutato');
+  const { data, error } = await supabase.from('appointments').update({
+    scheduled_at: updates.scheduled_at,
+    duration_minutes: Number(updates.duration_minutes) || appointment.duration_minutes,
+    updated_at: new Date().toISOString(),
+  }).eq('id', appointmentId).eq('tenant_id', tenantId).select(APPOINTMENT_SELECT).single();
+  if (error) throw new Error(`Non riesco a spostare l'appuntamento: ${error.message}`);
+  return mapAppointment(data);
 };
 
-/**
- * Elimina un appuntamento.
- * @param {string} appointmentId
- */
 export const deleteAppointment = async (appointmentId) => {
-  try {
-    assertDemoWriteAllowed();
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-
-    const { data: appointment, error: appointmentError } = await supabase
-      .from('appointments')
-      .select('id, user_id')
-      .eq('id', appointmentId)
-      .single();
-
-    if (appointmentError || appointment.user_id !== user.id) {
-      throw new Error('Accesso negato: appuntamento non disponibile');
-    }
-
-    const { error } = await supabase
-      .from('appointments')
-      .delete()
-      .eq('id', appointmentId);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Errore eliminazione appuntamento:', error.message);
-    throw new Error(`Non riesco a eliminare l'appuntamento: ${error.message}`);
-  }
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  await getStaffAppointment(appointmentId, tenantId);
+  const { error } = await supabase.from('appointments').delete().eq('id', appointmentId).eq('tenant_id', tenantId);
+  if (error) throw new Error(`Non riesco a eliminare l'appuntamento: ${error.message}`);
 };
 
-/**
- * Esporta tutti i clienti e le visite in formato JSON
- * Utilizzato per backup/share dati
- * @returns {Promise<Object>} Oggetto con clienti e visite annidate
- */
 export const exportData = async () => {
-  try {
-    const clients = await getAllClients();
-    return {
-      exportDate: new Date().toISOString(),
-      clientsCount: clients.length,
-      visitsCount: clients.reduce((sum, c) => sum + (c.visits?.length || 0), 0),
-      data: clients,
-    };
-  } catch (error) {
-    console.error('Errore export dati:', error.message);
-    throw new Error(`Non riesco a esportare i dati: ${error.message}`);
-  }
+  const pets = await getAllPets();
+  return {
+    exportDate: new Date().toISOString(), petsCount: pets.length, clientsCount: pets.length,
+    visitsCount: pets.reduce((sum, pet) => sum + pet.visits.length, 0), data: pets,
+  };
 };
 
-/**
- * Calcola le informazioni di promozione per un cliente
- * Logica: 5 visite → 10%, 10+ visite → 20%
- * @param {Object} client - Oggetto cliente con array visite
- * @returns {Object} { count, discount, message }
- */
 export const getClientPromos = (client) => {
   const count = client.visits?.length || 0;
-  let discount = 0;
-  let message = '';
-
-  if (count >= 10) {
-    discount = 20;
-    message = '🎉 Sconto 20%!';
-  } else if (count >= 5) {
-    discount = 10;
-    message = '🌟 Sconto 10%!';
-  } else if (count > 0) {
-    message = `${10 - count} ${count === 9 ? 'visita' : 'visite'} per lo sconto!`;
-  }
-
-  return { count, discount, message };
+  if (count >= 10) return { count, discount: 20, message: 'Sconto 20%!' };
+  if (count >= 5) return { count, discount: 10, message: 'Sconto 10%!' };
+  return { count, discount: 0, message: count ? `${10 - count} visite per lo sconto!` : '' };
 };
 
-/**
- * Ottiene un singolo cliente per ID
- * @param {string} clientId - ID cliente
- * @returns {Promise<Object>} Oggetto cliente con visite
- */
-export const getClientById = async (clientId) => {
+export const getClientById = async (petId) => {
   try {
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
-
-    const { data: client, error: clientError } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('id', clientId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (clientError) throw clientError;
-
-    const { data: visits, error: visitsError } = await supabase
-      .from('visits')
-      .select('*')
-      .eq('client_id', clientId)
-      .order('date', { ascending: false });
-
-    if (visitsError) throw visitsError;
-
-    const { data: rewardPoints, error: rewardPointsError } = await supabase
-      .from('reward_points')
-      .select('*')
-      .eq('client_id', clientId)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (rewardPointsError) throw rewardPointsError;
-
-    const rewardPointsTotal = (rewardPoints || []).reduce(
-      (sum, movement) => sum + Number(movement.points || 0),
-      0
-    );
-
+    const profile = await getUserProfile(user.id);
+    const pet = await getPetById(petId, profile?.tenant_id || null);
+    const { data, error } = await supabase.from('reward_points').select('*')
+      .eq('pet_id', petId).eq('tenant_id', pet.tenant_id).order('created_at', { ascending: false });
+    if (error) throw error;
     return {
-      ...client,
-      visits: visits || [],
-      rewardPoints: rewardPoints || [],
-      rewardPointsTotal,
+      ...pet, rewardPoints: data || [],
+      rewardPointsTotal: (data || []).reduce((sum, item) => sum + Number(item.points || 0), 0),
     };
   } catch (error) {
-    console.error('Errore caricamento cliente:', error.message);
-    throw new Error(`Non riesco a caricare il cliente: ${error.message}`);
+    throw new Error(`Non riesco a caricare il pet: ${error.message}`);
   }
 };
 
-/**
- * Ottiene i dati rapidi di una card cliente tramite qr_token.
- * Accessibile solo all'utente autenticato proprietario del cliente.
- * @param {string} qrToken
- * @returns {Promise<Object>}
- */
 export const getClientCardByToken = async (qrToken) => {
-  try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!qrToken) throw new Error('QR token non valido');
-
-    const { data: client, error: clientError } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('qr_token', qrToken)
-      .eq('user_id', user.id)
-      .single();
-
-    if (clientError) throw clientError;
-
-    const nowIso = new Date().toISOString();
-
-    const [
-      { data: nextAppointment },
-      { data: lastVisit },
-      { data: visits, error: visitsError },
-      { data: rewardPoints, error: rewardPointsError },
-    ] =
-      await Promise.all([
-        supabase
-          .from('appointments')
-          .select('id, scheduled_at, duration_minutes, status, notes', { head: false })
-          .eq('client_id', client.id)
-          .gte('scheduled_at', nowIso)
-          .order('scheduled_at', { ascending: true })
-          .limit(1)
-          .maybeSingle(),
-        supabase
-          .from('visits')
-          .select('id, date, treatments, issues, cost')
-          .eq('client_id', client.id)
-          .order('date', { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        supabase
-          .from('visits')
-          .select('id, date')
-          .eq('client_id', client.id),
-        supabase
-          .from('reward_points')
-          .select('points')
-          .eq('client_id', client.id)
-          .eq('user_id', user.id),
-      ]);
-
-    if (visitsError) throw visitsError;
-    if (rewardPointsError) throw rewardPointsError;
-
-    const rewardPointsTotal = (rewardPoints || []).reduce(
-      (sum, movement) => sum + Number(movement.points || 0),
-      0
-    );
-
-    return {
-      ...client,
-      nextAppointment: nextAppointment || null,
-      lastVisit: lastVisit || null,
-      visits: visits || [],
-      visitsCount: visits?.length || 0,
-      rewardPointsTotal,
-    };
-  } catch (error) {
-    console.error('Errore caricamento card cliente:', error.message);
-    throw new Error(`Non riesco a caricare la card cliente: ${error.message}`);
-  }
+  if (!qrToken) throw new Error('QR token non valido');
+  const { tenantId } = await requireStaff();
+  const { data, error } = await supabase.from('pets').select(PET_SELECT)
+    .eq('tenant_id', tenantId).eq('qr_token', qrToken).single();
+  if (error) throw new Error(`Non riesco a caricare la card: ${error.message}`);
+  const pet = mapPet(data);
+  const [{ data: nextAppointment }, { data: points, error: pointsError }] = await Promise.all([
+    supabase.from('appointments').select('id, scheduled_at, duration_minutes, status, notes')
+      .eq('pet_id', pet.id).gte('scheduled_at', new Date().toISOString()).order('scheduled_at').limit(1).maybeSingle(),
+    supabase.from('reward_points').select('points').eq('pet_id', pet.id),
+  ]);
+  if (pointsError) throw pointsError;
+  return {
+    ...pet, nextAppointment: nextAppointment || null, lastVisit: pet.visits[0] || null,
+    visitsCount: pet.visits.length,
+    rewardPointsTotal: (points || []).reduce((sum, item) => sum + Number(item.points || 0), 0),
+  };
 };
 
-/**
- * Restituisce la mini-card pubblica associata al QR token.
- * Non richiede autenticazione e usa una RPC Supabase che espone solo dati sicuri.
- * @param {string} qrToken
- * @returns {Promise<Object>}
- */
 export const getPublicPetCardByToken = async (qrToken) => {
-  try {
-    if (!qrToken) throw new Error('QR token non valido');
-
-    const { data, error } = await supabase.rpc('get_public_pet_card', {
-      p_qr_token: qrToken,
-    });
-
-    if (error) throw error;
-    if (!data) throw new Error('Card cliente non disponibile');
-
-    return data;
-  } catch (error) {
-    console.error('Errore caricamento card pubblica:', error.message);
-    throw new Error(`Non riesco a caricare la card pubblica: ${error.message}`);
-  }
+  if (!qrToken) throw new Error('QR token non valido');
+  const { data, error } = await supabase.rpc('get_public_pet_card', { p_qr_token: qrToken });
+  if (error) throw new Error(`Non riesco a caricare la card pubblica: ${error.message}`);
+  if (!data) throw new Error('Card cliente non disponibile');
+  return data;
 };
 
-/**
- * Restituisce il report incassi per una settimana/intervallo.
- * @param {{ from: string, to: string }} range - date in formato YYYY-MM-DD
- * @returns {Promise<Array>}
- */
 export const getWeeklyRevenueReport = async ({ from, to }) => {
-  try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error('Utente non autenticato');
-    if (!from || !to) throw new Error('Intervallo date non valido');
-
-    const { data, error } = await supabase
-      .from('visits')
-      .select(`
-        id,
-        client_id,
-        date,
-        treatments,
-        issues,
-        cost,
-        discount_percent,
-        client:clients(id, name, owner, user_id)
-      `)
-      .gte('date', from)
-      .lte('date', to)
-      .order('date', { ascending: true });
-
-    if (error) throw error;
-
-    return (data || []).filter((visit) => visit.client?.user_id === user.id);
-  } catch (error) {
-    console.error('Errore report settimanale incassi:', error.message);
-    throw new Error(`Non riesco a caricare il report incassi: ${error.message}`);
-  }
+  if (!from || !to) throw new Error('Intervallo date non valido');
+  const { tenantId } = await requireStaff();
+  const { data, error } = await supabase.from('visits').select(`
+    id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent,
+    pet:pets(id, name, breed, customer:customers(id, first_name, last_name, phone))
+  `).eq('tenant_id', tenantId).gte('date', from).lte('date', to).order('date');
+  if (error) throw new Error(`Non riesco a caricare il report incassi: ${error.message}`);
+  return (data || []).map((visit) => {
+    const pet = mapPet(relation(visit.pet));
+    return { ...visit, pet, client: pet };
+  });
 };

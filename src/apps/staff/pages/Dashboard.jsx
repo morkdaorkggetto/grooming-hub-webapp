@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllClients, getPendingAppointmentRequests } from '../lib/database';
-import { getCurrentUser, logout } from '../lib/supabaseClient';
+import { getAllPets, getPendingAppointmentRequests } from '../lib/database';
+import { getCurrentUser, logout } from '../../../shared/supabase/client';
 import AppHeader from '../components/AppHeader';
 import ClientCard from '../components/ClientCard';
 
@@ -80,7 +80,7 @@ export default function Dashboard() {
       setUser(currentUser);
 
       const [data, requestData] = await Promise.all([
-        getAllClients(),
+        getAllPets(),
         getPendingAppointmentRequests(),
       ]);
       setClients(data);

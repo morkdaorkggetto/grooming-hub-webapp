@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { addClient, convertContactToClient, createContactFromClient } from '../lib/database';
+import { addCustomerWithPet, markContactConverted } from '../lib/database';
 import ImageCropModal from '../components/ImageCropModal';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import AppHeader from '../components/AppHeader';
@@ -106,22 +106,44 @@ export default function AddClient() {
       setError('Il proprietario è obbligatorio');
       return;
     }
+    if (!formData.phone.trim()) {
+      setError('Il telefono è obbligatorio');
+      return;
+    }
 
     setLoading(true);
 
     try {
-      const createdClientId = await addClient({
-        ...formData,
-        photoFile,
-      });
+      const ownerParts = formData.owner.trim().split(/\s+/);
+      const firstName = ownerParts.length === 1 ? ownerParts[0] : ownerParts.slice(0, -1).join(' ');
+      const lastName = ownerParts.length === 1 ? null : ownerParts.at(-1);
+      const forcePetError =
+        import.meta.env.DEV && new URLSearchParams(location.search).get('gh05ForcePetError') === '1';
+      const created = await addCustomerWithPet(
+        null,
+        {
+          first_name: firstName,
+          last_name: lastName,
+          phone: formData.phone,
+        },
+        {
+          name: formData.name,
+          breed: formData.breed,
+          internal_notes: formData.notes,
+          photoFile,
+          sex: forcePetError ? 'x' : null,
+        }
+      );
 
       if (contactConversion?.sourceContactId) {
-        await convertContactToClient(contactConversion.sourceContactId, createdClientId);
-        navigate(`/client/${createdClientId}`);
+        await markContactConverted(contactConversion.sourceContactId, created.pet_id);
+        navigate(`/client/${created.pet_id}`);
         return;
       }
 
-      await createContactFromClient(createdClientId, formData);
+      if (created.photoUploadError) {
+        window.alert(`Customer e pet creati. La foto non è stata caricata: ${created.photoUploadError}`);
+      }
 
       navigate('/dashboard');
     } catch (err) {
@@ -203,9 +225,14 @@ export default function AddClient() {
             </div>
           ) : null}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div className="order-1">
+              <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                Padrone
+              </h2>
+            </div>
             {/* Nome (obbligatorio) */}
-            <div>
+            <div className="order-5">
               <label
                 htmlFor="name"
                 style={{ color: 'var(--color-text-primary)' }}
@@ -235,7 +262,7 @@ export default function AddClient() {
             </div>
 
             {/* Razza */}
-            <div>
+            <div className="order-6">
               <label
                 htmlFor="breed"
                 style={{ color: 'var(--color-text-primary)' }}
@@ -261,7 +288,7 @@ export default function AddClient() {
             </div>
 
             {/* Proprietario (obbligatorio) */}
-            <div>
+            <div className="order-2">
               <label
                 htmlFor="owner"
                 style={{ color: 'var(--color-text-primary)' }}
@@ -291,7 +318,7 @@ export default function AddClient() {
             </div>
 
             {/* Telefono */}
-            <div>
+            <div className="order-3">
               <label
                 htmlFor="phone"
                 style={{ color: 'var(--color-text-primary)' }}
@@ -308,16 +335,26 @@ export default function AddClient() {
                   setFormData({ ...formData, phone: e.target.value })
                 }
                 disabled={loading}
+                required
                 className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition"
                 style={{
                   borderColor: 'var(--color-border)',
                   color: 'var(--color-text-primary)',
                 }}
               />
+              <p style={{ color: 'var(--color-secondary)' }} className="text-xs mt-1">
+                Campo obbligatorio
+              </p>
+            </div>
+
+            <div className="order-4">
+              <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                Pet
+              </h2>
             </div>
 
             {/* Note */}
-            <div>
+            <div className="order-7">
               <label
                 htmlFor="notes"
                 style={{ color: 'var(--color-text-primary)' }}
@@ -342,7 +379,7 @@ export default function AddClient() {
             </div>
 
             {/* Foto */}
-            <div>
+            <div className="order-8">
               <label
                 htmlFor="photo"
                 style={{ color: 'var(--color-text-primary)' }}
@@ -422,7 +459,7 @@ export default function AddClient() {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-4 pt-6">
+            <div className="order-9 flex gap-4 pt-6">
               <button
                 type="submit"
                 disabled={loading}

@@ -109,7 +109,7 @@ function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
           </button>
           <button
             type="button"
-            onClick={() => onOpenClient(request.client_id)}
+            onClick={() => onOpenClient(request.pet_id)}
             className="rounded-xl px-4 py-3 text-sm font-bold border"
             style={{
               backgroundColor: '#fff',

@@ -167,8 +167,8 @@ export default function Contacts() {
   };
 
   const handleOpenLinkedClient = (contact) => {
-    if (!contact.linked_client_id) return;
-    navigate(`/client/${contact.linked_client_id}`);
+    if (!contact.linked_pet_id) return;
+    navigate(`/client/${contact.linked_pet_id}`);
   };
 
   return (
@@ -470,7 +470,7 @@ export default function Contacts() {
                         </button>
                       ) : null}
 
-                      {contact.status === 'converted' && contact.linked_client_id ? (
+                      {contact.status === 'converted' && contact.linked_pet_id ? (
                         <button
                           onClick={() => handleOpenLinkedClient(contact)}
                           className="px-4 py-3 rounded-xl font-medium border"

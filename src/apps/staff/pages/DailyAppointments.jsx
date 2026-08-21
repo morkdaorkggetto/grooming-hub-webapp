@@ -292,7 +292,7 @@ export default function DailyAppointments() {
 
           <div className="flex flex-wrap gap-2 xl:justify-end">
             <button
-              onClick={() => navigate(`/client/${appointment.client_id}`)}
+              onClick={() => navigate(`/client/${appointment.pet_id}`)}
               className="px-4 py-2 rounded-lg font-medium text-white"
               style={{ backgroundColor: 'var(--color-secondary)' }}
             >
