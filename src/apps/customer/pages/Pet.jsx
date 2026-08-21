@@ -18,7 +18,6 @@ const DATE_FORMAT = new Intl.DateTimeFormat('it-IT', {
   month: 'long',
   year: 'numeric',
 });
-const MONEY_FORMAT = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' });
 const UNSAVED_MESSAGE = 'Hai modifiche non salvate. Vuoi davvero lasciare la scheda?';
 
 function formatSpecies(species) {
@@ -168,8 +167,6 @@ function TextSection({ title, value, emptyText, editing, onChange, rows = 5 }) {
 
 function VisitRow({ visit, isLast }) {
   const date = new Date(`${visit.date}T00:00:00`);
-  const discount = Number(visit.discount_percent || 0);
-  const cost = Number(visit.cost || 0);
   return (
     <div
       style={{
@@ -191,16 +188,6 @@ function VisitRow({ visit, isLast }) {
         {visit.issues && (
           <div style={{ marginTop: 5, fontSize: 13, lineHeight: 1.5, color: 'var(--color-text-secondary)' }}>
             {visit.issues}
-          </div>
-        )}
-      </div>
-      <div style={{ marginLeft: 'auto', textAlign: 'right', whiteSpace: 'nowrap' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, fontWeight: 500 }}>
-          {MONEY_FORMAT.format(cost)}
-        </div>
-        {discount > 0 && (
-          <div style={{ marginTop: 4, fontSize: 11, color: 'var(--color-text-secondary)' }}>
-            Sconto {discount}%
           </div>
         )}
       </div>
