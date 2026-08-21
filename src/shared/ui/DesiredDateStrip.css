@@ -1,0 +1,61 @@
+.gh-desired-date-strip {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+}
+
+.gh-desired-date {
+  min-width: 0;
+  min-height: 68px;
+  padding: 8px 2px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg-main);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: inherit;
+}
+
+.gh-desired-date[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+
+.gh-desired-date__weekday {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: clip;
+  max-width: 100%;
+}
+
+.gh-desired-date__day {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+@media (max-width: 719px) {
+  .gh-desired-date-strip {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .gh-desired-date-strip > :nth-child(n + 7) {
+    display: none;
+  }
+
+  .gh-desired-date {
+    min-height: 62px;
+    border-radius: 10px;
+  }
+}

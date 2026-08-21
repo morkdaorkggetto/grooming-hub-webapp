@@ -431,10 +431,16 @@ export default function Pet() {
             }}
           >
             {mode === 'viewing' || mode === 'saved' ? (
-              <Button onClick={beginEditing}>
-                <Icon name="pencil" size={16} />
-                Modifica
-              </Button>
+              <>
+                <Link to={`/u/book?petId=${pet.id}`} style={bookingLinkStyle}>
+                  <Icon name="clock" size={16} />
+                  Richiedi appuntamento
+                </Link>
+                <Button onClick={beginEditing}>
+                  <Icon name="pencil" size={16} />
+                  Modifica
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" onClick={cancelEditing} disabled={mode === 'saving'}>Annulla</Button>
@@ -566,6 +572,20 @@ const ghostLinkStyle = {
   border: '1px solid var(--color-border)',
   borderRadius: 'var(--r-md)',
   color: 'var(--color-primary)',
+  fontSize: 15,
+  fontWeight: 600,
+  textDecoration: 'none',
+};
+
+const bookingLinkStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+  padding: '10px 18px',
+  borderRadius: 'var(--r-md, 16px)',
+  background: 'var(--color-primary)',
+  color: '#fff',
   fontSize: 15,
   fontWeight: 600,
   textDecoration: 'none',

@@ -40,6 +40,7 @@
     --color-placeholder: #a58f95;
     --color-link: #5e8580;
     --color-success-text: #4f8b67;
+    --color-whatsapp: var(--color-success-text);
     --color-success-bg: #e3f0e7;
     --color-danger-text: #b85e69;
     --color-danger-bg: #f8e6e9;

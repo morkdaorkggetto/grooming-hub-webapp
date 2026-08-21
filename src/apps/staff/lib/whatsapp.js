@@ -35,6 +35,18 @@ const formatDateTime = (date) =>
     minute: '2-digit',
   });
 
+const formatDesiredDate = (value) => {
+  if (!value) return '';
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('it-IT', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+};
+
 const formatAppointmentRange = ({ scheduledAt, date, time, durationMinutes = 60 } = {}) => {
   const start = scheduledAt
     ? new Date(scheduledAt)
@@ -108,6 +120,7 @@ export const getDraftAppointmentWhatsAppUrl = ({ client, date, time }) => {
 
 export const getCustomerAppointmentRequestWhatsAppUrl = ({
   petName,
+  desiredDate,
   date,
   time,
   durationMinutes,
@@ -118,11 +131,13 @@ export const getCustomerAppointmentRequestWhatsAppUrl = ({
   const clientName = petName || 'il mio cane';
   const when = formatAppointmentRange({ date, time, durationMinutes });
   const requestedWindow = timeWindowLabel || when;
+  const desiredDateText = formatDesiredDate(desiredDate);
+  const dateText = desiredDateText ? ` Data desiderata: ${desiredDateText}.` : '';
   const serviceText = serviceName ? ` Servizio richiesto: ${serviceName}.` : '';
   const noteText = notes ? ` Note: ${notes}.` : '';
   const message = requestedWindow
-    ? `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}, fascia ${requestedWindow}.${serviceText}${noteText}`
-    : `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}.${serviceText}${noteText}`;
+    ? `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}.${dateText} Preferenza oraria: ${requestedWindow}.${serviceText}${noteText}`
+    : `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}.${dateText}${serviceText}${noteText}`;
 
   return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };

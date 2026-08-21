@@ -16,6 +16,7 @@ const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
 const PET_SELECT = `*, customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, operator_notes, acquisition_source, relationship_status, created_at, updated_at), visits(id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
+const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 
 const generateId = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
@@ -77,6 +78,26 @@ const mapPet = (row) => {
 const mapAppointment = (row) => {
   const pet = mapPet(relation(row?.pet));
   return row ? { ...row, pet, client: pet } : null;
+};
+
+const mapAppointmentRequest = (row) => {
+  if (!row) return null;
+  const pet = mapPet(relation(row.pet));
+  const service = relation(row.service);
+  const appointment = relation(row.appointment);
+  return {
+    ...row,
+    request_kind: 'structured',
+    approval_status: row.status,
+    appointment_source: 'customer',
+    scheduled_at: appointment?.scheduled_at || null,
+    duration_minutes: appointment?.duration_minutes || service?.duration_minutes || 60,
+    service,
+    appointment,
+    pet,
+    client: pet,
+    notes: row.coat_condition_notes || null,
+  };
 };
 
 const getMemberships = async (userId) => {
@@ -631,11 +652,46 @@ export const getAppointments = async (filters = {}) => {
 
 export const getPendingAppointmentRequests = async () => {
   const { tenantId } = await requireStaff();
-  const { data, error } = await supabase.from('appointments').select(APPOINTMENT_SELECT)
-    .eq('tenant_id', tenantId).eq('approval_status', 'pending')
-    .eq('appointment_source', 'customer').order('created_at', { ascending: false });
-  if (error) throw new Error(`Non riesco a caricare le richieste: ${error.message}`);
-  return (data || []).map(mapAppointment);
+  const [structuredResult, legacyResult] = await Promise.all([
+    supabase.from('appointment_requests').select(APPOINTMENT_REQUEST_SELECT)
+      .eq('tenant_id', tenantId).eq('status', 'pending')
+      .order('created_at', { ascending: false }),
+    supabase.from('appointments').select(APPOINTMENT_SELECT)
+      .eq('tenant_id', tenantId).eq('approval_status', 'pending')
+      .eq('appointment_source', 'customer').order('created_at', { ascending: false }),
+  ]);
+  if (structuredResult.error) {
+    throw new Error(`Non riesco a caricare le nuove richieste: ${structuredResult.error.message}`);
+  }
+  if (legacyResult.error) {
+    throw new Error(`Non riesco a caricare le richieste precedenti: ${legacyResult.error.message}`);
+  }
+  return [
+    ...(structuredResult.data || []).map(mapAppointmentRequest),
+    ...(legacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
+  ].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+};
+
+export const resolveAppointmentRequest = async (requestId, decision, scheduledAt = null) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  if (!['approved', 'rejected'].includes(decision)) throw new Error('Decisione richiesta non valida');
+  if (decision === 'approved' && !scheduledAt) throw new Error('Data e ora sono obbligatorie');
+
+  const { error: rpcError } = await supabase.rpc('resolve_appointment_request', {
+    p_request_id: requestId,
+    p_decision: decision,
+    p_scheduled_at: decision === 'approved' ? scheduledAt : null,
+  });
+  if (rpcError) throw new Error(`Non riesco ad aggiornare la richiesta: ${rpcError.message}`);
+
+  const { data, error } = await supabase.from('appointment_requests')
+    .select(APPOINTMENT_REQUEST_SELECT)
+    .eq('id', requestId)
+    .eq('tenant_id', tenantId)
+    .single();
+  if (error) throw new Error(`Richiesta aggiornata ma non rileggibile: ${error.message}`);
+  return mapAppointmentRequest(data);
 };
 
 const getStaffAppointment = async (appointmentId, tenantId) => {

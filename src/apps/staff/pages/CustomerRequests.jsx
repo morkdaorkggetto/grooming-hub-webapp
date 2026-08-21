@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getPendingAppointmentRequests,
+  resolveAppointmentRequest,
   updateAppointmentApproval,
 } from '../lib/database';
 import { getAppointmentApprovalWhatsAppUrl } from '../lib/whatsapp';
@@ -25,6 +26,28 @@ const formatCreatedAt = (iso) =>
     minute: '2-digit',
   });
 
+const formatDesiredDate = (value) =>
+  new Date(`${value}T12:00:00`).toLocaleDateString('it-IT', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+
+const TIME_PREFERENCE_LABELS = {
+  morning: 'Mattina (9–13)',
+  afternoon: 'Pomeriggio (13–19)',
+  flexible: 'Per me è uguale',
+};
+
+const COAT_CONDITION_LABELS = {
+  some_knots: 'Qualche nodo',
+  very_matted: 'Molto annodato',
+  heavy_shedding: 'Perde tanto pelo',
+  sensitive_skin: 'Cute sensibile',
+  clean_long: 'Pulito, solo lungo',
+};
+
 const getRequestService = (notes = '') => {
   const match = String(notes).match(/Servizio richiesto:\s*([^.]*)/i);
   return match?.[1]?.trim() || 'Appuntamento cliente';
@@ -36,8 +59,14 @@ const getRequestWindow = (notes = '') => {
 };
 
 function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
-  const service = getRequestService(request.notes);
-  const windowLabel = getRequestWindow(request.notes);
+  const isStructured = request.request_kind === 'structured';
+  const service = request.service?.name || getRequestService(request.notes);
+  const windowLabel = isStructured
+    ? TIME_PREFERENCE_LABELS[request.time_preference] || 'Nessuna preferenza'
+    : getRequestWindow(request.notes);
+  const coatLabels = (request.coat_condition_codes || [])
+    .map((value) => COAT_CONDITION_LABELS[value] || value)
+    .join(', ');
   const isUpdating = updatingId === request.id;
 
   return (
@@ -68,10 +97,20 @@ function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
           </p>
 
           <div className="grid sm:grid-cols-3 gap-3 mt-5">
-            <InfoTile label="Quando" value={formatDateTime(request.scheduled_at)} />
+            <InfoTile
+              label={isStructured ? 'Data desiderata' : 'Quando'}
+              value={isStructured ? formatDesiredDate(request.desired_date) : formatDateTime(request.scheduled_at)}
+            />
             <InfoTile label="Servizio" value={service} />
             <InfoTile label="Fascia" value={windowLabel || `${request.duration_minutes || 60} minuti`} />
           </div>
+
+          {isStructured ? (
+            <div className="grid sm:grid-cols-2 gap-3 mt-3">
+              <InfoTile label="Manto" value={coatLabels || 'Indicazione libera'} />
+              <InfoTile label="Età dichiarata" value={request.declared_pet_age || 'Già presente in anagrafica'} />
+            </div>
+          ) : null}
 
           {request.notes ? (
             <div
@@ -79,7 +118,7 @@ function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
               style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)' }}
             >
               <p className="text-xs uppercase tracking-[0.16em] font-bold mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-                Note richiesta
+                {isStructured ? 'Dettagli sul manto' : 'Note richiesta'}
               </p>
               <p className="text-sm whitespace-pre-line" style={{ color: 'var(--color-secondary)' }}>
                 {request.notes}
@@ -141,6 +180,88 @@ function InfoTile({ label, value }) {
   );
 }
 
+function ApprovalDialog({ request, busy, onClose, onConfirm }) {
+  const defaultTime = request.time_preference === 'afternoon' ? '13:00' : '09:00';
+  const [date, setDate] = useState(request.desired_date || '');
+  const [time, setTime] = useState(defaultTime);
+  const today = new Date();
+  const minDate = `${today.getFullYear()}-${`${today.getMonth() + 1}`.padStart(2, '0')}-${`${today.getDate()}`.padStart(2, '0')}`;
+
+  const submit = (event) => {
+    event.preventDefault();
+    if (!date || !time) return;
+    const scheduledAt = new Date(`${date}T${time}`);
+    if (Number.isNaN(scheduledAt.getTime())) return;
+    onConfirm(scheduledAt.toISOString());
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center p-4" style={{ backgroundColor: 'rgba(43,37,37,.45)' }}>
+      <form
+        onSubmit={submit}
+        className="w-full max-w-md rounded-2xl border p-6 shadow-xl"
+        style={{ backgroundColor: 'var(--color-surface-main)', borderColor: 'var(--color-border)' }}
+      >
+        <p className="text-xs uppercase tracking-[0.16em] font-bold" style={{ color: 'var(--color-text-secondary)' }}>
+          Conferma appuntamento
+        </p>
+        <h2 className="text-2xl font-bold mt-2" style={{ color: 'var(--color-text-primary)' }}>
+          Scegli giorno e ora precisi
+        </h2>
+        <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+          {request.client?.name || 'Pet'} · preferenza cliente: {TIME_PREFERENCE_LABELS[request.time_preference] || 'nessuna'}.
+        </p>
+
+        <div className="grid sm:grid-cols-2 gap-3 mt-5">
+          <label className="text-sm font-bold">
+            Giorno
+            <input
+              type="date"
+              min={minDate}
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+              required
+              className="mt-2 w-full rounded-xl border px-3 py-3 font-normal"
+              style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)' }}
+            />
+          </label>
+          <label className="text-sm font-bold">
+            Ora
+            <input
+              type="time"
+              value={time}
+              onChange={(event) => setTime(event.target.value)}
+              required
+              className="mt-2 w-full rounded-xl border px-3 py-3 font-normal"
+              style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)' }}
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            className="rounded-xl border px-4 py-3 text-sm font-bold disabled:opacity-60"
+            style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+          >
+            Annulla
+          </button>
+          <button
+            type="submit"
+            disabled={busy || !date || !time}
+            className="rounded-xl px-4 py-3 text-sm font-bold text-white disabled:opacity-60"
+            style={{ backgroundColor: '#16a34a' }}
+          >
+            {busy ? 'Confermo...' : 'Conferma e prepara WhatsApp'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function CustomerRequests() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
@@ -148,6 +269,7 @@ export default function CustomerRequests() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [updatingId, setUpdatingId] = useState('');
+  const [approvalRequest, setApprovalRequest] = useState(null);
 
   const loadRequests = async () => {
     setLoading(true);
@@ -176,20 +298,24 @@ export default function CustomerRequests() {
     return {
       total: requests.length,
       nextWeek: requests.filter((request) => {
-        const scheduledAt = new Date(request.scheduled_at);
-        return scheduledAt >= today && scheduledAt <= nextSevenDays;
+        const requestDate = request.desired_date
+          ? new Date(`${request.desired_date}T12:00:00`)
+          : new Date(request.scheduled_at);
+        return requestDate >= today && requestDate <= nextSevenDays;
       }).length,
       withPhone: requests.filter((request) => Boolean(request.client?.phone)).length,
     };
   }, [requests]);
 
-  const handleApproval = async (request, approvalStatus) => {
+  const performApproval = async (request, approvalStatus, scheduledAt = null) => {
     setError('');
     setSuccess('');
 
     try {
       setUpdatingId(request.id);
-      const updatedRequest = await updateAppointmentApproval(request.id, approvalStatus);
+      const updatedRequest = request.request_kind === 'structured'
+        ? await resolveAppointmentRequest(request.id, approvalStatus, scheduledAt)
+        : await updateAppointmentApproval(request.id, approvalStatus);
       const whatsappUrl = getAppointmentApprovalWhatsAppUrl(updatedRequest, approvalStatus);
 
       if (whatsappUrl) {
@@ -203,12 +329,23 @@ export default function CustomerRequests() {
           ? 'Richiesta approvata. WhatsApp di conferma pronto.'
           : 'Richiesta rifiutata. WhatsApp per nuova fascia pronto.'
       );
+      setApprovalRequest(null);
       await loadRequests();
     } catch (err) {
       setError(err.message || 'Non riesco ad aggiornare la richiesta.');
     } finally {
       setUpdatingId('');
     }
+  };
+
+  const handleApproval = (request, approvalStatus) => {
+    if (request.request_kind === 'structured' && approvalStatus === 'approved') {
+      setError('');
+      setSuccess('');
+      setApprovalRequest(request);
+      return;
+    }
+    performApproval(request, approvalStatus);
   };
 
   const handleOpenClient = (clientId) => {
@@ -219,6 +356,14 @@ export default function CustomerRequests() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-bg-main)' }}>
+      {approvalRequest ? (
+        <ApprovalDialog
+          request={approvalRequest}
+          busy={updatingId === approvalRequest.id}
+          onClose={() => setApprovalRequest(null)}
+          onConfirm={(scheduledAt) => performApproval(approvalRequest, 'approved', scheduledAt)}
+        />
+      ) : null}
       <AppHeader
         title="Richieste clienti"
         subtitle="Un unico punto per gestire richieste arrivate dall'area cliente."

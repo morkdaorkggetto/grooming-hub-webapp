@@ -5,13 +5,22 @@ import { getCurrentUser, logout } from '../../../shared/supabase/client';
 import AppHeader from '../components/AppHeader';
 import ClientCard from '../components/ClientCard';
 
-const formatRequestDateTime = (iso) =>
-  new Date(iso).toLocaleString('it-IT', {
+const formatRequestTiming = (request) => {
+  if (request.desired_date) {
+    const desiredDate = new Date(`${request.desired_date}T12:00:00`).toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+    });
+    return `${desiredDate} · data desiderata`;
+  }
+
+  return new Date(request.scheduled_at).toLocaleString('it-IT', {
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
   });
+};
 
 /**
  * Dashboard — Pagina principale
@@ -334,7 +343,7 @@ export default function Dashboard() {
                         color: '#7c2d12',
                       }}
                     >
-                      {request.client?.name || 'Cliente'} · {formatRequestDateTime(request.scheduled_at)}
+                      {request.client?.name || 'Cliente'} · {formatRequestTiming(request)}
                     </span>
                   ))}
                 </div>

@@ -1,59 +1,416 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
+import { useUnsavedChanges } from '../../../shared/navigation/UnsavedChangesProvider';
+import { useTenant } from '../../../shared/tenant/TenantProvider';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
 import Card from '../../../shared/ui/Card';
+import DesiredDateStrip from '../../../shared/ui/DesiredDateStrip';
+import Eyebrow from '../../../shared/ui/Eyebrow';
+import Icon from '../../../shared/ui/Icon';
+import Skeleton from '../../../shared/ui/Skeleton';
+import StatusBadge from '../../../shared/ui/StatusBadge';
+import WarmNotice from '../../../shared/ui/WarmNotice';
+import {
+  getCustomerAppointmentRequestWhatsAppUrl,
+  getPublicGroomingHubWhatsAppUrl,
+} from '../../staff/lib/whatsapp';
+import { usePets } from '../hooks/usePets';
+import { getBookingServices, submitAppointmentRequest } from '../lib/booking';
+import { getBookingFullPeriod } from '../lib/bookingDates';
+import './Book.css';
 
-/**
- * /u/book — placeholder Step 6.
- *
- * Il wizard di prenotazione (pet → servizio → data/ora → conferma, con RPC
- * available_slots + book_appointment) arriva in Step 8. Per ora basta una
- * pagina che non rompe i CTA "Prenota un nuovo appuntamento" della dashboard.
- */
-export default function Book() {
-  useRequireCustomer();
+const UNSAVED_MESSAGE = 'Hai una richiesta non inviata. Vuoi davvero lasciare la pagina?';
+
+const TIME_PREFERENCES = [
+  { value: 'morning', label: 'Mattina (9–13)' },
+  { value: 'afternoon', label: 'Pomeriggio (13–19)' },
+  { value: 'flexible', label: 'Per me è uguale' },
+];
+
+const COAT_CONDITIONS = [
+  { value: 'some_knots', label: 'Qualche nodo' },
+  { value: 'very_matted', label: 'Molto annodato' },
+  { value: 'heavy_shedding', label: 'Perde tanto pelo' },
+  { value: 'sensitive_skin', label: 'Cute sensibile' },
+  { value: 'clean_long', label: 'Pulito, solo lungo' },
+];
+
+const SERVICE_ICONS = ['drop', 'scissors', 'sparkle', 'bath'];
+const DATE_LABEL = new Intl.DateTimeFormat('it-IT', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+});
+
+const toLocalDateValue = (date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const createDateOptions = () => Array.from({ length: 12 }, (_, index) => {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + index + 1);
+  return { date, value: toLocalDateValue(date) };
+});
+
+const formatDesiredDate = (value) => value
+  ? DATE_LABEL.format(new Date(`${value}T12:00:00`))
+  : 'Non scelta';
+
+const formatDuration = (minutes) => {
+  if (!minutes) return '';
+  if (minutes < 60) return `circa ${minutes} min`;
+  if (minutes % 60 === 0) {
+    const hours = minutes / 60;
+    return hours === 1 ? 'circa 1 ora' : `circa ${hours} ore`;
+  }
+  return `circa ${Math.floor(minutes / 60)} h ${minutes % 60} min`;
+};
+
+function StepHead({ number, title, hint }) {
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: 'var(--color-bg-main)',
-        position: 'relative',
-        padding: '40px 24px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxSizing: 'border-box',
-      }}
-    >
+    <div className="gh-book-step-head">
+      <span className="gh-book-step-number">{number}</span>
+      <div>
+        <h2>{title}</h2>
+        {hint ? <p>{hint}</p> : null}
+      </div>
+    </div>
+  );
+}
+
+function SelectChip({ selected, onClick, children }) {
+  return (
+    <button type="button" className="gh-book-chip" aria-pressed={selected} onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+
+function PetChoice({ pet, selected, onClick }) {
+  return (
+    <button type="button" className="gh-book-choice gh-book-pet-choice" aria-pressed={selected} onClick={onClick}>
+      {pet.photo_url ? (
+        <img src={pet.photo_url} alt="" className="gh-book-pet-avatar" />
+      ) : (
+        <span className="gh-book-pet-avatar gh-book-pet-initial" aria-hidden="true">
+          {(pet.name || '?').charAt(0).toUpperCase()}
+        </span>
+      )}
+      <span className="gh-book-choice-copy">
+        <strong>{pet.name}</strong>
+        <small>{pet.breed || 'Razza non indicata'}</small>
+      </span>
+      {selected ? <Icon name="check" size={18} /> : null}
+    </button>
+  );
+}
+
+function ServiceChoice({ service, selected, icon, onClick }) {
+  return (
+    <button type="button" className="gh-book-choice gh-book-service-choice" aria-pressed={selected} onClick={onClick}>
+      <span className="gh-book-service-icon" aria-hidden="true"><Icon name={icon} size={18} /></span>
+      <span className="gh-book-choice-copy">
+        <strong>{service.name}</strong>
+        <small>{formatDuration(service.duration_minutes)}</small>
+      </span>
+    </button>
+  );
+}
+
+function SummaryRow({ label, value }) {
+  return (
+    <div className="gh-book-summary-row">
+      <span>{label}</span>
+      <strong>{value || 'Da scegliere'}</strong>
+    </div>
+  );
+}
+
+function LoadingBook() {
+  return (
+    <main className="gh-book-page">
       <BackgroundDecor />
-      <Card radius="xl" padding="36px 40px" style={{ maxWidth: 440, zIndex: 1 }}>
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 26,
-            fontWeight: 500,
-            lineHeight: 1.15,
-            letterSpacing: '-0.015em',
-            margin: '0 0 12px',
-          }}
-        >
-          Prenotazione
-        </h1>
-        <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
-          Il wizard di prenotazione arriverà nello step successivo: sceglierai
-          il pet, il servizio (Bagno o Toelettatura Completa), la data e
-          l'ora. Per il momento, contatta il salone direttamente per fissare
-          un nuovo appuntamento.
+      <div className="gh-book-shell">
+        <Skeleton width={190} height={12} />
+        <Skeleton width="45%" height={52} style={{ marginTop: 20 }} />
+        <div className="gh-book-loading-grid">
+          <Skeleton height={520} style={{ borderRadius: 20 }} />
+          <Skeleton height={310} style={{ borderRadius: 20 }} />
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function BookingResult({ submission }) {
+  const whatsappUrl = getCustomerAppointmentRequestWhatsAppUrl({
+    petName: submission.pet.name,
+    desiredDate: submission.desiredDate,
+    serviceName: submission.service.name,
+    timeWindowLabel: submission.timePreference?.label,
+    notes: submission.coatNotes,
+  });
+
+  return (
+    <main className="gh-book-page gh-book-result-page">
+      <BackgroundDecor />
+      <section className="gh-book-result">
+        <div className="gh-book-result-icon" aria-hidden="true"><Icon name="whatsapp" size={38} /></div>
+        <StatusBadge status="scheduled" approvalStatus="pending" />
+        <h1>Ci pensiamo noi da qui.</h1>
+        <p className="gh-book-result-copy">
+          La tua richiesta è arrivata al salone. Ti scriviamo noi su WhatsApp con giorno e ora —
+          di solito in pochi minuti. Se preferisci anticiparci, il numero è sempre lo stesso.
         </p>
-        <Link
-          to="/u/home"
-          style={{ color: 'var(--color-link)', fontWeight: 600, textDecoration: 'none', fontSize: 14 }}
-        >
-          ← Torna alla home
-        </Link>
-      </Card>
+        <Card padding={22} radius="lg" elevated={false} style={{ width: '100%', borderRadius: 20 }}>
+          <SummaryRow label="Pet" value={submission.pet.name} />
+          <SummaryRow label="Servizio" value={submission.service.name} />
+          <SummaryRow label="Data desiderata" value={formatDesiredDate(submission.desiredDate)} />
+          <SummaryRow label="Preferenza" value={submission.timePreference?.label || 'Nessuna preferenza'} />
+        </Card>
+        <div className="gh-book-result-actions">
+          <a className="gh-book-whatsapp-button" href={whatsappUrl} target="_blank" rel="noreferrer">
+            <Icon name="whatsapp" size={18} /> Scrivici su WhatsApp
+          </a>
+          <Link className="gh-book-ghost-link" to="/u/home">Torna alla home</Link>
+        </div>
+        <p className="gh-book-calendar-note">
+          Quando il salone conferma, qui troverai anche “Aggiungi al calendario” (.ics).
+        </p>
+      </section>
+    </main>
+  );
+}
+
+export default function Book() {
+  const { loading: authLoading } = useRequireCustomer();
+  const { tenantId } = useTenant();
+  const { data: pets, loading: petsLoading, error: petsError } = usePets();
+  const [searchParams] = useSearchParams();
+  const [services, setServices] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
+  const [servicesError, setServicesError] = useState(null);
+  const [petId, setPetId] = useState('');
+  const [serviceId, setServiceId] = useState('');
+  const [desiredDate, setDesiredDate] = useState('');
+  const [timePreference, setTimePreference] = useState('');
+  const [coatConditions, setCoatConditions] = useState([]);
+  const [coatNotes, setCoatNotes] = useState('');
+  const [declaredAge, setDeclaredAge] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submission, setSubmission] = useState(null);
+
+  const dateOptions = useMemo(createDateOptions, []);
+  const requestedPetId = searchParams.get('petId') || '';
+  const selectedPet = pets.find((pet) => pet.id === petId) || null;
+  const selectedService = services.find((service) => service.id === serviceId) || null;
+  const selectedTimePreference = TIME_PREFERENCES.find((item) => item.value === timePreference) || null;
+  const selectedCoatLabels = COAT_CONDITIONS.filter((item) => coatConditions.includes(item.value)).map((item) => item.label);
+  const needsDeclaredAge = Boolean(selectedPet && !selectedPet.birth_date);
+
+  useEffect(() => {
+    if (!tenantId) return undefined;
+    let active = true;
+    setServicesLoading(true);
+    setServicesError(null);
+    getBookingServices(tenantId)
+      .then((rows) => { if (active) setServices(rows); })
+      .catch((error) => {
+        if (active) {
+          setServices([]);
+          setServicesError(error);
+        }
+      })
+      .finally(() => { if (active) setServicesLoading(false); });
+    return () => { active = false; };
+  }, [tenantId]);
+
+  useEffect(() => {
+    if (petId || petsLoading) return;
+    if (requestedPetId && pets.some((pet) => pet.id === requestedPetId)) setPetId(requestedPetId);
+  }, [petId, pets, petsLoading, requestedPetId]);
+
+  useEffect(() => {
+    if (selectedPet?.birth_date) setDeclaredAge('');
+  }, [selectedPet?.birth_date]);
+
+  const hasCoatCondition = coatConditions.length > 0 || Boolean(coatNotes.trim());
+  const canSubmit = Boolean(petId && serviceId && desiredDate && hasCoatCondition && (!needsDeclaredAge || declaredAge.trim()));
+  const isDirty = !submission && Boolean(
+    (petId && petId !== requestedPetId)
+    || serviceId
+    || desiredDate
+    || timePreference
+    || coatConditions.length
+    || coatNotes
+    || declaredAge
+  );
+  useUnsavedChanges(isDirty, UNSAVED_MESSAGE);
+
+  const selectedDate = desiredDate ? new Date(`${desiredDate}T12:00:00`) : null;
+  const daysAhead = selectedDate
+    ? Math.floor((selectedDate.getTime() - new Date().setHours(0, 0, 0, 0)) / 86400000)
+    : null;
+  const fullPeriod = getBookingFullPeriod(desiredDate);
+
+  const toggleCoatCondition = (value) => {
+    setCoatConditions((current) => current.includes(value)
+      ? current.filter((item) => item !== value)
+      : [...current, value]);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      await submitAppointmentRequest({
+        tenantId, petId, serviceId, desiredDate, timePreference,
+        coatConditionCodes: coatConditions,
+        coatConditionNotes: coatNotes,
+        declaredPetAge: needsDeclaredAge ? declaredAge : '',
+      });
+      setSubmission({
+        pet: selectedPet,
+        service: selectedService,
+        desiredDate,
+        timePreference: selectedTimePreference,
+        coatLabels: selectedCoatLabels,
+        coatNotes: coatNotes.trim(),
+      });
+    } catch (error) {
+      setSubmitError(error.message || 'Invio non riuscito');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (authLoading || petsLoading || servicesLoading) return <LoadingBook />;
+  if (submission) return <BookingResult submission={submission} />;
+
+  const whatsappFallback = getPublicGroomingHubWhatsAppUrl({ petName: selectedPet?.name });
+
+  return (
+    <main className="gh-book-page">
+      <BackgroundDecor />
+      <div className="gh-book-shell">
+        <header className="gh-book-header">
+          <Eyebrow>Richiesta di appuntamento</Eyebrow>
+          <h1>Quando ce lo porti?</h1>
+          <p>
+            Dicci cosa serve e quando preferiresti passare. Poi ci pensiamo noi: ti confermiamo
+            giorno e ora su WhatsApp.
+          </p>
+        </header>
+
+        {petsError ? <div className="gh-book-error" role="alert">Non riusciamo a caricare i tuoi pet. Riprova tra un momento.</div> : null}
+
+        {servicesError || services.length === 0 ? (
+          <Card padding={28} radius="lg" style={{ maxWidth: 620, borderRadius: 20 }}>
+            <h2 className="gh-book-empty-title">Qui non carica, ma noi ci siamo.</h2>
+            <p className="gh-book-empty-copy">Scrivici su WhatsApp e prenotiamo a voce, come sempre.</p>
+            <a className="gh-book-whatsapp-button" href={whatsappFallback} target="_blank" rel="noreferrer">
+              <Icon name="whatsapp" size={18} /> Scrivici su WhatsApp
+            </a>
+          </Card>
+        ) : (
+          <form className="gh-book-layout" onSubmit={handleSubmit}>
+            <div className="gh-book-form-column">
+              <section className="gh-book-step">
+                <StepHead number="1" title="Per chi?" />
+                <div className="gh-book-pet-grid">
+                  {pets.map((pet) => <PetChoice key={pet.id} pet={pet} selected={pet.id === petId} onClick={() => setPetId(pet.id)} />)}
+                </div>
+                {needsDeclaredAge ? (
+                  <div className="gh-book-age-block">
+                    <label htmlFor="declared-pet-age">Quanti anni ha {selectedPet.name}?</label>
+                    <p>Non ce l’hai ancora detto — ci serve solo la prima volta.</p>
+                    <input id="declared-pet-age" value={declaredAge} maxLength={80} placeholder="Es. 3 anni" onChange={(event) => setDeclaredAge(event.target.value)} />
+                  </div>
+                ) : null}
+              </section>
+
+              <section className="gh-book-step">
+                <StepHead number="2" title="Cosa serve?" hint="In negozio decidiamo insieme i dettagli." />
+                <div className="gh-book-service-grid">
+                  {services.map((service, index) => (
+                    <ServiceChoice key={service.id} service={service} selected={service.id === serviceId} icon={SERVICE_ICONS[index % SERVICE_ICONS.length]} onClick={() => setServiceId(service.id)} />
+                  ))}
+                </div>
+              </section>
+
+              <section className="gh-book-step">
+                <StepHead number="3" title="Quando ti andrebbe bene?" />
+                <DesiredDateStrip dates={dateOptions} value={desiredDate} onChange={setDesiredDate} />
+                <p className="gh-book-date-hint">È la data che <em>preferiresti</em> — la confermiamo noi insieme all’orario.</p>
+                <div className="gh-book-chip-row" aria-label="Preferenza oraria facoltativa">
+                  {TIME_PREFERENCES.map((item) => (
+                    <SelectChip key={item.value} selected={timePreference === item.value} onClick={() => setTimePreference((current) => current === item.value ? '' : item.value)}>
+                      {item.label}
+                    </SelectChip>
+                  ))}
+                </div>
+                <p className="gh-book-time-hint">L’orario preciso lo concordiamo noi su WhatsApp.</p>
+                {daysAhead !== null && daysAhead < 7 ? (
+                  <WarmNotice title="Sei un po’ a corto di preavviso.">
+                    La richiesta parte lo stesso — faremo il possibile per trovarti spazio, e ti diciamo subito su WhatsApp come siamo messi.
+                  </WarmNotice>
+                ) : null}
+                {fullPeriod ? (
+                  <WarmNotice icon="bell" title={`Periodo pieno (${fullPeriod}):`}>
+                    stanno arrivando più richieste del solito, quindi potremmo metterci un po’ di più a risponderti. Mandala comunque — le leggiamo tutte.
+                  </WarmNotice>
+                ) : null}
+              </section>
+
+              <section className="gh-book-step">
+                <StepHead number="4" title={`Come sta il pelo di ${selectedPet?.name || 'chi ci porterai'}?`} hint="Ci aiuta a prepararci — poi lo guardiamo insieme all’arrivo." />
+                <div className="gh-book-chip-row" aria-label="Condizioni del manto">
+                  {COAT_CONDITIONS.map((item) => (
+                    <SelectChip key={item.value} selected={coatConditions.includes(item.value)} onClick={() => toggleCoatCondition(item.value)}>
+                      {item.label}
+                    </SelectChip>
+                  ))}
+                </div>
+                <label className="gh-book-notes-label" htmlFor="coat-notes">Vuoi aggiungere altro? (facoltativo)</label>
+                <textarea id="coat-notes" rows={4} maxLength={500} value={coatNotes} onChange={(event) => setCoatNotes(event.target.value)} />
+              </section>
+
+              {submitError ? (
+                <div className="gh-book-error" role="alert">
+                  <strong>Non siamo riusciti a inviare la richiesta.</strong>{' '}
+                  Riprova tra un momento — o scrivici direttamente su WhatsApp, va benissimo uguale.
+                </div>
+              ) : null}
+            </div>
+
+            <aside className="gh-book-summary-column">
+              <Card padding={24} radius="lg" style={{ borderRadius: 20 }}>
+                <Eyebrow style={{ marginBottom: 16 }}>La tua richiesta</Eyebrow>
+                <SummaryRow label="Pet" value={selectedPet?.name} />
+                <SummaryRow label="Servizio" value={selectedService?.name} />
+                <SummaryRow label="Data desiderata" value={desiredDate ? formatDesiredDate(desiredDate) : ''} />
+                <SummaryRow label="Manto" value={selectedCoatLabels.join(', ') || coatNotes.trim()} />
+                <p className="gh-book-summary-message">Ti rispondiamo noi su WhatsApp con giorno e ora — di solito in pochi minuti.</p>
+                <button className="gh-book-submit" type="submit" disabled={!canSubmit || submitting}>
+                  {submitting ? 'Invio in corso…' : 'Invia la richiesta'}
+                </button>
+              </Card>
+            </aside>
+
+            {canSubmit ? (
+              <button className="gh-book-mobile-submit" type="submit" disabled={submitting}>
+                {submitting ? 'Invio in corso…' : 'Invia la richiesta'}
+              </button>
+            ) : null}
+          </form>
+        )}
+      </div>
     </main>
   );
 }

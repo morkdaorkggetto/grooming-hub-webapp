@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const EXPECTED_PROJECT_REF = 'qttpinkslhenxrsbhhhg';
 const MARKER = '[DEMO GH-06]';
+const APPOINTMENT_REQUEST_MARKER = '[DEMO GH-08]';
 const FIXTURE_PHONE = '+393339906001';
 const FIXTURE_VISIT_ID = 'gh-06-rls-luca-visit';
 const OWN_STORAGE_FILE = 'gh-06-rls-own.png';
@@ -33,6 +34,8 @@ let fixtureVisit = null;
 let originalOwnerNotes = null;
 let originalInternalNotes = null;
 const storagePaths = new Set();
+const appointmentRequestIds = new Set();
+const appointmentIds = new Set();
 
 function loadLocalEnv() {
   const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -116,6 +119,23 @@ async function removeStoragePath(client, objectPath) {
 }
 
 async function cleanupStaleFixtures() {
+  const { data: staleRequests, error: staleRequestReadError } = await staff.client
+    .from('appointment_requests')
+    .select('id, appointment_id')
+    .ilike('coat_condition_notes', `${APPOINTMENT_REQUEST_MARKER}%`);
+  assertNoError(staleRequestReadError, 'Lettura richieste appuntamento pregresse');
+
+  const staleRequestIds = (staleRequests || []).map((item) => item.id);
+  const staleAppointmentIds = (staleRequests || []).map((item) => item.appointment_id).filter(Boolean);
+  if (staleRequestIds.length) {
+    const { error } = await staff.client.from('appointment_requests').delete().in('id', staleRequestIds);
+    assertNoError(error, 'Pulizia richieste appuntamento pregresse');
+  }
+  if (staleAppointmentIds.length) {
+    const { error } = await staff.client.from('appointments').delete().in('id', staleAppointmentIds);
+    assertNoError(error, 'Pulizia appuntamenti GH-08 pregressi');
+  }
+
   const { data: markedPets, error: petReadError } = await staff.client
     .from('pets')
     .select('id, tenant_id')
@@ -232,6 +252,23 @@ async function createLucaFixture() {
 async function cleanupCurrentRun() {
   const cleanupErrors = [];
 
+  if (staff?.client) {
+    if (appointmentIds.size) {
+      const { error } = await staff.client
+        .from('appointments')
+        .delete()
+        .in('id', [...appointmentIds]);
+      if (error) cleanupErrors.push(`appointments GH-08: ${error.message}`);
+    }
+    if (appointmentRequestIds.size) {
+      const { error } = await staff.client
+        .from('appointment_requests')
+        .delete()
+        .in('id', [...appointmentRequestIds]);
+      if (error) cleanupErrors.push(`appointment requests: ${error.message}`);
+    }
+  }
+
   if (mario?.client && marioPet?.id) {
     const { error } = await mario.client
       .from('pets')
@@ -294,14 +331,15 @@ async function cleanupCurrentRun() {
   }
 
   if (!staff?.client || !tenantId) return;
-  const [{ data: pets }, { data: visits }, { data: customers }] = await Promise.all([
+  const [{ data: pets }, { data: visits }, { data: customers }, { data: requests }] = await Promise.all([
     staff.client.from('pets').select('id').ilike('name', `${MARKER}%`),
     staff.client.from('visits').select('id').ilike('treatments', `${MARKER}%`),
     staff.client.from('customers').select('id').eq('phone', FIXTURE_PHONE),
+    staff.client.from('appointment_requests').select('id').ilike('coat_condition_notes', `${APPOINTMENT_REQUEST_MARKER}%`),
   ]);
-  const measured = `${pets?.length || 0} pet, ${visits?.length || 0} visite, ${customers?.length || 0} customer`;
+  const measured = `${pets?.length || 0} pet, ${visits?.length || 0} visite, ${customers?.length || 0} customer, ${requests?.length || 0} richieste`;
   addResult(
-    pets?.length === 0 && visits?.length === 0 && customers?.length === 0 ? 'PASS' : 'FAIL',
+    pets?.length === 0 && visits?.length === 0 && customers?.length === 0 && requests?.length === 0 ? 'PASS' : 'FAIL',
     'Pulizia fixture',
     '0 residui marker',
     measured
@@ -477,6 +515,129 @@ async function main() {
     assertNoError(readError, 'Verifica scritture RPC');
     assert(customers.length === 0, `Customer creati dalla RPC negata: ${customers.length}`);
     return '42501, 0 customer';
+  });
+
+  let appointmentRequest = null;
+  const desiredDate = new Date();
+  desiredDate.setDate(desiredDate.getDate() + 3);
+  const desiredDateValue = desiredDate.toISOString().slice(0, 10);
+
+  await runTest('Mario invia richiesta appuntamento', 'richiesta pending sul proprio pet', async () => {
+    const { data: service, error: serviceError } = await mario.client
+      .from('services')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('display_order')
+      .limit(1)
+      .single();
+    assertNoError(serviceError, 'Servizio booking');
+    const { data, error } = await mario.client.rpc('submit_appointment_request', {
+      p_tenant_id: tenantId,
+      p_pet_id: marioPet.id,
+      p_service_id: service.id,
+      p_desired_date: desiredDateValue,
+      p_time_preference: 'morning',
+      p_coat_condition_codes: ['some_knots'],
+      p_coat_condition_notes: `${APPOINTMENT_REQUEST_MARKER} richiesta RLS`,
+      p_declared_pet_age: null,
+    });
+    assertNoError(error, 'RPC submit_appointment_request');
+    assert(data?.id, 'ID richiesta assente');
+    assert(data.status === 'pending', `Stato atteso pending, ricevuto ${data.status}`);
+    appointmentRequest = data;
+    appointmentRequestIds.add(data.id);
+    return `${data.id}, pending`;
+  });
+
+  await runTest('Staff legge richiesta Mario', '1 richiesta con campi strutturati', async () => {
+    const { data, error } = await staff.client
+      .from('appointment_requests')
+      .select('id, pet_id, desired_date, time_preference, coat_condition_codes, status')
+      .eq('id', appointmentRequest.id)
+      .single();
+    assertNoError(error, 'Richiesta Mario via staff');
+    assert(data.pet_id === marioPet.id, 'Pet richiesta non corrisponde');
+    assert(data.desired_date === desiredDateValue, 'Data desiderata non corrisponde');
+    assert(data.time_preference === 'morning', 'Preferenza oraria non corrisponde');
+    assert(data.coat_condition_codes.includes('some_knots'), 'Condizione manto assente');
+    return '1 richiesta strutturata';
+  });
+
+  await runTest('Luca non vede richiesta Mario', '0 richieste', async () => {
+    const { data, error } = await luca.client
+      .from('appointment_requests')
+      .select('id')
+      .eq('id', appointmentRequest.id);
+    assertNoError(error, 'Richiesta Mario da Luca');
+    assert(data.length === 0, `Luca vede ${data.length} richieste`);
+    return '0 richieste';
+  });
+
+  await runTest('Mario non cambia stato richiesta', '0 righe aggiornate, stato pending', async () => {
+    const { data: updateRows, error: updateError } = await mario.client
+      .from('appointment_requests')
+      .update({ status: 'rejected' })
+      .eq('id', appointmentRequest.id)
+      .select('id');
+    assertNoError(updateError, 'Tentativo UPDATE stato customer');
+    assert(updateRows.length === 0, `Mario ha aggiornato ${updateRows.length} righe`);
+    const { data, error } = await staff.client
+      .from('appointment_requests')
+      .select('status')
+      .eq('id', appointmentRequest.id)
+      .single();
+    assertNoError(error, 'Verifica stato richiesta');
+    assert(data.status === 'pending', `Stato modificato a ${data.status}`);
+    return '0 righe, pending';
+  });
+
+  await runTest('Luca non invia richiesta per pet Mario', 'SQLSTATE 42501', async () => {
+    const { data: service, error: serviceError } = await luca.client
+      .from('services')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .limit(1)
+      .single();
+    assertNoError(serviceError, 'Servizio booking Luca');
+    const { error } = await luca.client.rpc('submit_appointment_request', {
+      p_tenant_id: tenantId,
+      p_pet_id: marioPet.id,
+      p_service_id: service.id,
+      p_desired_date: desiredDateValue,
+      p_time_preference: 'flexible',
+      p_coat_condition_codes: ['clean_long'],
+      p_coat_condition_notes: `${APPOINTMENT_REQUEST_MARKER} cross customer`,
+      p_declared_pet_age: null,
+    });
+    assert(error, 'Luca ha inviato una richiesta per Mario');
+    assert(error.code === '42501', `Atteso 42501, ricevuto ${error.code || error.message}`);
+    return '42501';
+  });
+
+  await runTest('Staff converte richiesta atomicamente', 'request approved e appointment collegato', async () => {
+    const scheduledAt = new Date(`${desiredDateValue}T10:00:00`).toISOString();
+    const { data, error } = await staff.client.rpc('resolve_appointment_request', {
+      p_request_id: appointmentRequest.id,
+      p_decision: 'approved',
+      p_scheduled_at: scheduledAt,
+    });
+    assertNoError(error, 'RPC resolve_appointment_request');
+    assert(data.status === 'approved', `Stato atteso approved, ricevuto ${data.status}`);
+    assert(data.appointment_id, 'Appointment collegato assente');
+    appointmentIds.add(data.appointment_id);
+    const { data: appointment, error: appointmentError } = await staff.client
+      .from('appointments')
+      .select('id, pet_id, service_id, approval_status, appointment_source, requested_by_customer_id')
+      .eq('id', data.appointment_id)
+      .single();
+    assertNoError(appointmentError, 'Appointment convertito');
+    assert(appointment.pet_id === marioPet.id, 'Pet appointment non corrisponde');
+    assert(appointment.approval_status === 'approved', 'Appointment non approvato');
+    assert(appointment.appointment_source === 'customer', 'Fonte appointment non customer');
+    assert(appointment.requested_by_customer_id === mario.user.id, 'Richiedente appointment non corrisponde');
+    return `${data.appointment_id}, approved`;
   });
 
   for (const [column, attemptedValue] of [

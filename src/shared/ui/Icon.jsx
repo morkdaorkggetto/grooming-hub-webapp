@@ -26,6 +26,27 @@ const PATHS = {
       <path d="M12 7v5l3 2" />
     </g>
   ),
+  bell: (
+    <g>
+      <path d="M6 16h12l-1.5-2.5V10a4.5 4.5 0 0 0-9 0v3.5z" />
+      <path d="M10 19h4" />
+    </g>
+  ),
+  drop: <path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11z" />,
+  scissors: (
+    <g>
+      <circle cx="6" cy="7" r="3" />
+      <circle cx="6" cy="17" r="3" />
+      <path d="M8.5 8.5L20 3M8.5 15.5L20 21M10 12h10" />
+    </g>
+  ),
+  bath: (
+    <g>
+      <path d="M4 11h16v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" />
+      <path d="M7 11V7a3 3 0 0 1 6 0" />
+      <path d="M9 19v2M17 19v2" />
+    </g>
+  ),
   sparkle: (
     <g>
       <path d="M12 3v6M12 15v6M3 12h6M15 12h6" />
