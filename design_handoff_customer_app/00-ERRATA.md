@@ -13,6 +13,7 @@
 | 7 | `.ics` alla prenotazione | `.ics` solo post-conferma del salone | Handoff GH-03-R1 §4 |
 | 8 | Palette: qualunque colore non presente in `tokens.css` | I 2 hex introdotti in implementazione (`#3f6658`, `#8f3f49`) NON sono del bundle: da ricondurre ai token (mandato GH-09) | Misura Cowork 21/8 |
 | 9 | — (novità, non superamento) | Token nuovo `--color-whatsapp` come alias di `--color-success-text` | Decisione Luigi 19/8 su proposta CD |
+| 10 | — (nota di sicurezza, non compositiva) | 5 funzioni `SECURITY DEFINER` restano intenzionalmente esposte anche dopo hardening: `get_public_pet_card` (QR pubblico), `accept_customer_invite` (invito autenticato), `has_tenant_access` / `has_tenant_any_staff_access` (helper RLS chiamati dalle policy). Non sono un debito da chiudere — sono contratto | Decisione Cowork GH-10, 24/8 |
 
 **Cosa del bundle resta pienamente valido**: tokens.css, shared-ui, proto-dashboard/auth/core come riferimento compositivo, `pet-page.jsx` per la Scheda pet (al netto delle voci 3 e 8 — e col dettaglio *operatore in riga visita* candidato all'adozione in GH-09).
 
