@@ -23,11 +23,18 @@
     'Helvetica Neue', sans-serif;
   --font-serif: 'Fraunces', Georgia, serif;
 
+  --font-size-pet-hero: 56px;
+  --font-size-pet-hero-mobile: 40px;
+
   --r-sm: 10px;
   --r-md: 16px;
   --r-lg: 24px;
   --r-xl: 28px;
   --r-full: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(43, 37, 37, 0.04);
+  --shadow-md: 0 4px 16px rgba(43, 37, 37, 0.06);
+  --shadow-lg: 0 12px 32px rgba(43, 37, 37, 0.1);
 }
 
 .gh-eyebrow {

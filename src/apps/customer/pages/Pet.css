@@ -1,0 +1,414 @@
+.gh-pet-page {
+  min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  padding: 38px 24px 70px;
+  background: var(--color-bg-main);
+  color: var(--color-text-primary);
+}
+
+.gh-pet-page--message { display: grid; place-items: center; }
+
+.gh-pet-shell {
+  width: min(100%, 1040px);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.gh-pet-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 28px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.gh-pet-back-link svg { transform: rotate(180deg); }
+
+.gh-pet-hero {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 34px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.gh-pet-avatar-wrap {
+  width: 140px;
+  height: 140px;
+  position: relative;
+}
+
+.gh-pet-avatar {
+  width: 140px;
+  height: 140px;
+  display: block;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  object-fit: cover;
+  box-shadow: var(--shadow-lg);
+}
+
+.gh-pet-avatar--empty {
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-family: var(--font-serif);
+  font-size: 58px;
+  font-weight: 500;
+}
+
+.gh-pet-photo-button {
+  width: 38px;
+  height: 38px;
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-full);
+  background: var(--color-surface-main);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+
+.gh-pet-photo-button:disabled,
+.gh-pet-text-action:disabled { cursor: not-allowed; opacity: 0.5; }
+.gh-pet-file-input { display: none; }
+.gh-pet-hero-copy { min-width: 0; }
+
+.gh-pet-hero h1 {
+  margin: 8px 0 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-pet-hero);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.gh-pet-hero-copy > p {
+  margin: 11px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.gh-pet-photo-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.gh-pet-feedback { min-height: 30px; margin-bottom: 4px; }
+
+.gh-pet-feedback-message {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gh-pet-feedback-message--success { color: var(--color-success-text); }
+.gh-pet-feedback-message--error { color: var(--color-danger-text); }
+
+.gh-pet-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 48px;
+  align-items: start;
+}
+
+.gh-pet-content { min-width: 0; }
+
+.gh-pet-section {
+  padding: 30px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.gh-pet-section--first { padding-top: 20px; border-top: 0; }
+
+.gh-pet-section-heading {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.gh-pet-section-heading h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.gh-pet-text-action {
+  min-height: 32px;
+  padding: 4px 7px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gh-pet-data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 28px;
+}
+
+.gh-pet-data-field {
+  min-width: 0;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.gh-pet-data-label {
+  margin-bottom: 5px;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.gh-pet-data-value {
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.gh-pet-readonly-note,
+.gh-pet-section-copy,
+.gh-pet-visit-note,
+.gh-pet-visit-count { color: var(--color-text-secondary); }
+.gh-pet-readonly-note { margin: 14px 0 0; font-size: 12px; }
+
+.gh-pet-section-copy {
+  min-height: 44px;
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.gh-pet-section-copy--empty { font-style: italic; }
+
+.gh-pet-textarea {
+  width: 100%;
+  min-height: 124px;
+  padding: 13px 14px;
+  resize: vertical;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-sm);
+  outline: none;
+  background: var(--color-surface-main);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.gh-pet-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
+}
+
+.gh-pet-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.gh-pet-action,
+.gh-pet-booking-link {
+  min-height: 44px;
+  padding: 0 17px;
+  border-radius: var(--r-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.gh-pet-action--primary,
+.gh-pet-booking-link {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-surface-main);
+}
+
+.gh-pet-action--ghost {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-primary);
+}
+
+.gh-pet-action:disabled { cursor: not-allowed; opacity: 0.5; }
+.gh-pet-visit-count { font-size: 12px; }
+.gh-pet-visits { margin-top: 2px; }
+
+.gh-pet-visit {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 18px;
+  padding: 17px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.gh-pet-visit--last { border-bottom: 0; }
+
+.gh-pet-visit-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1px;
+  font-family: var(--font-serif);
+  text-align: center;
+}
+
+.gh-pet-visit-day { font-size: 24px; font-weight: 500; line-height: 1; }
+
+.gh-pet-visit-month {
+  margin-top: 5px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gh-pet-visit-copy { min-width: 0; }
+.gh-pet-visit-service { font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+.gh-pet-visit-note { margin-top: 5px; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.gh-pet-visit-loading { display: grid; gap: 14px; padding-top: 12px; }
+.gh-pet-visits-error p { margin: 0 0 12px; color: var(--color-danger-text); }
+
+.gh-pet-booking-sidebar { position: sticky; top: 116px; padding-top: 20px; }
+.gh-pet-booking-link { width: 100%; min-height: 50px; text-align: center; }
+
+.gh-pet-message-card {
+  width: min(100%, 480px);
+  padding: 32px;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  background: var(--color-surface-main);
+  box-shadow: var(--shadow-md);
+}
+
+.gh-pet-message-card h1 {
+  margin: 12px 0 10px;
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.gh-pet-message-card > p { margin: 0 0 20px; color: var(--color-text-secondary); line-height: 1.6; }
+.gh-pet-message-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.gh-pet-loading-hero { display: flex; gap: 28px; align-items: center; margin-top: 34px; }
+.gh-pet-loading-copy { flex: 1; display: grid; gap: 12px; }
+.gh-pet-loading-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 42px; margin-top: 42px; }
+
+@media (hover: hover) {
+  .gh-pet-back-link:hover,
+  .gh-pet-text-action:hover { color: var(--color-primary-hover); }
+  .gh-pet-action--primary:hover,
+  .gh-pet-booking-link:hover {
+    border-color: var(--color-primary-hover);
+    background: var(--color-primary-hover);
+    transform: translateY(-1px);
+  }
+  .gh-pet-action--ghost:hover { background: var(--color-surface-soft); transform: translateY(-1px); }
+}
+
+@media (max-width: 719px) {
+  .gh-pet-page { padding: 24px 16px 176px; }
+  .gh-pet-back-link { margin-bottom: 22px; }
+  .gh-pet-hero {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+  .gh-pet-avatar-wrap,
+  .gh-pet-avatar { width: 88px; height: 88px; }
+  .gh-pet-avatar { border-radius: 18px; }
+  .gh-pet-avatar--empty { font-size: 36px; }
+  .gh-pet-photo-button { width: 34px; height: 34px; right: -6px; bottom: -6px; }
+  .gh-pet-hero h1 { font-size: var(--font-size-pet-hero-mobile); }
+  .gh-pet-hero-copy > p { margin-top: 7px; font-size: 12px; }
+  .gh-pet-layout { display: block; }
+  .gh-pet-section { padding: 26px 0; }
+  .gh-pet-section--first { padding-top: 14px; }
+  .gh-pet-section-heading h2 { font-size: 20px; }
+  .gh-pet-data-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; }
+  .gh-pet-data-value { font-size: 13px; }
+  .gh-pet-edit-actions { justify-content: stretch; }
+  .gh-pet-edit-actions .gh-pet-action { flex: 1 1 120px; }
+  .gh-pet-visit { grid-template-columns: 48px minmax(0, 1fr); gap: 13px; }
+  .gh-pet-visit-day { font-size: 22px; }
+  .gh-pet-booking-sidebar {
+    position: fixed;
+    top: auto;
+    left: 16px;
+    right: 16px;
+    bottom: 92px;
+    z-index: 35;
+    padding: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: calc(var(--r-md) + 6px);
+    background: var(--color-surface-main);
+    box-shadow: var(--shadow-lg);
+  }
+  .gh-pet-booking-link { min-height: 48px; }
+  .gh-pet-message-card { padding: 26px 22px; }
+  .gh-pet-loading-hero { gap: 18px; }
+  .gh-pet-loading-hero > :first-child { width: 88px !important; height: 88px !important; }
+  .gh-pet-loading-grid { display: block; margin-top: 34px; }
+  .gh-pet-loading-grid > * { width: 100%; margin-bottom: 18px; }
+}
+
+@media (max-width: 359px) {
+  .gh-pet-page { padding-inline: 14px; }
+  .gh-pet-hero { grid-template-columns: 76px minmax(0, 1fr); gap: 14px; }
+  .gh-pet-avatar-wrap,
+  .gh-pet-avatar { width: 76px; height: 76px; }
+  .gh-pet-avatar--empty { font-size: 32px; }
+  .gh-pet-data-grid { grid-template-columns: 1fr; }
+  .gh-pet-booking-sidebar { left: 14px; right: 14px; }
+}
