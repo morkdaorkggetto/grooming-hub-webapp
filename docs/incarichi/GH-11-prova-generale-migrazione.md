@@ -34,6 +34,12 @@ Ogni atto: applicato, misurato, annotato. Un fallimento NON si aggira: si correg
 3. L'app (build feat) puntata temporaneamente al progetto temporaneo in locale: login staff con account migrato di prova, dashboard con i dati veri migrati, spot-check di 5 clienti reali confrontati con la vecchia app.
 4. **Il numero che conta**: durata totale della catena, misurata — dimensiona la finestra del 27-28.
 
+## Ripresa autorizzata (24/8, dopo interruzione ai prerequisiti)
+
+Il progetto temporaneo esiste ed è `ACTIVE_HEALTHY`: **`grooming-prova-generale`, ref `xkieyzuhtpiysjugtdik`**, org `morkdaorkggetto's Org`. Il collegamento Supabase di Cowork lo vede già. Prima di procedere, Codex verifichi con il proprio collegamento (stesso meccanismo già usato per il demo) di vedere anch'esso questo ref — se non lo vede, fermarsi e riportarlo come nuovo prerequisito, non aggirarlo.
+
+Da qui riparte la Fase 1 come descritta sopra: dichiarare di nuovo le impronte dei tre dump del 21/8 prima del restore, poi restore schema → dati → auth sul temporaneo, poi controprova di cardinalità. Nessuna password va incollata in chat o nel repository.
+
 ## Chiusura
 
 Registro completo (atti, misure, durate, correzioni fatte alle varianti prod, casi manuali residui = 0) → **l'atto G6 si scrive da questo registro**. Smontaggio del progetto temporaneo dichiarato. Niente push senza ok.

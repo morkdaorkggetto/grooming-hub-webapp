@@ -35,3 +35,34 @@ Il push resta un gesto di Luigi.
 *Regola precedente superata (era: «salvo istruzione diversa le consegne
 restano locali»). La nuova convenzione consolida quanto già fatto da Codex in
 GH-08 con `bdecf94`.*
+
+## Aggiornamento 24/8/2026 (decisione Luigi) — i mandati non si incollano
+
+**Regola di sistema, permanente.** Gli incarichi non vengono più consegnati per
+copia-incolla. Il mandato vive come file in `docs/incarichi/`; Luigi dice
+soltanto a Codex di **eseguire l'ultimo elaborato**, e Codex lo trova da sé
+nella root del progetto su cui è aperto.
+
+**Definizione di «ultimo elaborato»**: il `GH-NN` di numero più alto presente in
+`docs/incarichi/` che non abbia un registro corrispondente in `docs/consegne/`.
+Deterministica, calcolabile da Codex, si autocorregge man mano che le consegne
+arrivano.
+
+**Prerequisito**: il mandato deve essere raggiungibile da Codex, quindi
+**prima il push di Luigi, poi l'ordine di eseguire**. Coincide con la coda già
+stabilita il 21/8 (un gesto solo a fine giro), quindi non aggiunge cerimonia.
+
+**In testa a ogni mandato** va dichiarato il progetto di appartenenza e la root.
+**Primo atto di ogni sessione Codex**: dichiarare nel registro su quale root sta
+lavorando. Se non corrisponde, fermarsi.
+
+**Motivazione misurata (24/8)**: un mandato GH-11 incollato nella sessione Codex
+di un altro progetto è stato **eseguito con successo sul database giusto**, perché
+il collegamento Supabase è unico per account. L'isolamento fra progetti stava
+nella mano che incollava, non nell'infrastruttura. Con questa regola
+l'indirizzamento passa alla root del progetto — un confine fisico — e il guasto
+peggiore possibile diventa «non trovo nessun task nuovo»: risultato nullo,
+innocuo e visibile, invece di un'azione sbagliata riuscita in silenzio.
+
+**Conseguenza per Cowork**: non produce più blocchi di testo da incollare;
+chiude indicando dove sta il mandato e che serve il push.
