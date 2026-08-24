@@ -66,3 +66,19 @@ innocuo e visibile, invece di un'azione sbagliata riuscita in silenzio.
 
 **Conseguenza per Cowork**: non produce più blocchi di testo da incollare;
 chiude indicando dove sta il mandato e che serve il push.
+
+### Eccezione: mandati depositati ma non attivati (24/8)
+
+Un mandato può essere **scritto in anticipo** e restare in attesa di condizioni
+esterne (decisioni, verifiche umane, finestre operative). Poiché vive nella
+stessa cartella di quelli eseguibili, «ultimo elaborato» da solo non basta a
+distinguerlo.
+
+**Regola**: un mandato che agisce sulla **produzione**, o che dipende da
+cancelli non ancora soddisfatti, porta in testa un blocco
+`⛔ NON ESEGUIBILE SU ORDINE GENERICO` e richiede un'istruzione **esplicita e
+nominativa** di Luigi. Raggiunto per scorrimento numerico, Codex si ferma, lo
+dichiara, e considera corrente il primo `GH-NN` precedente ancora privo di
+registro.
+
+*Nato da GH-14 (atto G6): scritto il 24/8 con i cancelli ancora aperti.*

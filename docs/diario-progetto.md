@@ -222,7 +222,24 @@ Codex ha rispettato il checkpoint (lezione GH-08 assorbita) e ha nominato una so
 
 **Aperto per Luigi prima di G6**: confronto manuale delle 5 schede reali estratte nel registro §7 (Signora capodichino/Ariel, Davide e Nunzia/Nobu, Moglie polleria/Rocky, JackRussel, Carnevale/Schila) contro la vecchia app in produzione — è l'unica verifica che Cowork e Codex non possono fare, perché nessuno dei due vede il prod. Password staff sul solo temporaneo impostata da Codex su autorizzazione di Luigi, consegnata via Appunti e mai stampata; muore con lo smontaggio.
 
-**Prossimo passo**: (a) push; (b) spot-check di Luigi sulle 5 schede; (c) **mandato G6** scritto per trascrizione dal §9 di GH-13; (d) riautorizzare il connettore Cowork su `Webapp_Project` — senza, non posso misurare il prod durante G6; (e) ripulire il §3 Grooming da `BEA_ScuolaMusica/_temp_updates/108-registro-ultimi-task-codex.md`.
+**Connettore Cowork riportato su `Webapp_Project` e PROD VERIFICATO IMMUTATO** (24/8): riautorizzazione riuscita al secondo tentativo — il primo era un falso positivo, Luigi aveva concesso il «consenti sempre» dell'app, che riguarda i permessi di chiamata e non l'organizzazione coperta dalla concessione Supabase. Distinzione da ricordare: sono due pannelli diversi.
+
+Misura diretta sul prod `azgehoseiojodltcttfb`, confronto con la fotografia del 21/8 su cui è calibrata l'intera ricetta:
+
+| | dump 21/8 | prod oggi |
+|---|---:|---:|
+| clients | 296 | **296** |
+| visits | 464 | **464** |
+| contacts | 301 | **301** |
+| utenti auth | 6 | **6** |
+| appointments | 17 | **17** |
+| profiles | 4 | **4** |
+
+Zero clients creati o modificati dopo il 21/8, zero visite. Ultimo cliente creato l'8/8, ultima modifica il 12/8, ultima visita il 13/8 — tutto **precedente** al dump, coerente con il salone in ferie. Migration registrate: 10, ultima `20260423123000`, cioè ancora pre-Gate 2.
+
+**Conseguenza**: la prova generale è rappresentativa, il dump del 21/8 è una fotografia fedele, e **l'atto G6 si scrive per trascrizione** dal §9 di GH-13 senza ricalibrare nulla.
+
+**Prossimo passo**: (a) spot-check di Luigi sulle 5 schede contro la vecchia app — ultimo cancello umano; (b) **mandato G6**; (c) al momento dell'atto, autorizzare anche il collegamento di Codex su `Webapp_Project` (è distinto dal mio) e toglierlo subito dopo; (d) ripulire il §3 Grooming da `BEA_ScuolaMusica/_temp_updates/108-registro-ultimi-task-codex.md`. **Decisione aperta post-G6**: separare la produzione Grooming in un'organizzazione dedicata — non per costo ma perché, quando il prodotto sarà venduto ad altri saloni, i dati di produzione dei clienti non possono condividere unità di accesso e fatturazione con gli altri lavori.
 
 ---
 
