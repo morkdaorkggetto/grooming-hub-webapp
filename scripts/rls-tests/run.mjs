@@ -4,20 +4,31 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 
-const EXPECTED_PROJECT_REF = 'qttpinkslhenxrsbhhhg';
-const MARKER = '[DEMO GH-06]';
-const APPOINTMENT_REQUEST_MARKER = '[DEMO GH-08]';
-const FIXTURE_PHONE = '+393339906001';
-const FIXTURE_VISIT_ID = 'gh-06-rls-luca-visit';
-const OWN_STORAGE_FILE = 'gh-06-rls-own.png';
-const FOREIGN_STORAGE_FILE = 'gh-06-rls-foreign.png';
-const FOREIGN_TENANT_FILE = 'gh-06-rls-foreign-tenant.png';
+const EXPECTED_PROJECT_REF = process.env.GH_RLS_EXPECTED_PROJECT_REF || 'qttpinkslhenxrsbhhhg';
+const EXPECTED_BASELINE_PETS = Number(process.env.GH_RLS_EXPECTED_PET_COUNT || '7');
+const SUITE_LABEL = process.env.GH_RLS_SUITE_LABEL || 'GH-06 - Suite RLS demo';
+const MARKER = process.env.GH_RLS_MARKER || '[DEMO GH-06]';
+const APPOINTMENT_REQUEST_MARKER = process.env.GH_RLS_APPOINTMENT_MARKER || '[DEMO GH-08]';
+const FIXTURE_PHONE = process.env.GH_RLS_FIXTURE_PHONE || '+393339906001';
+const FIXTURE_VISIT_ID = process.env.GH_RLS_FIXTURE_VISIT_ID || 'gh-06-rls-luca-visit';
+const OWN_STORAGE_FILE = process.env.GH_RLS_OWN_STORAGE_FILE || 'gh-06-rls-own.png';
+const FOREIGN_STORAGE_FILE = process.env.GH_RLS_FOREIGN_STORAGE_FILE || 'gh-06-rls-foreign.png';
+const FOREIGN_TENANT_FILE = process.env.GH_RLS_FOREIGN_TENANT_FILE || 'gh-06-rls-foreign-tenant.png';
 const FOREIGN_TENANT_ID = '00000000-0000-4000-8000-000000000606';
 
 const ACCOUNTS = {
-  mario: { email: 'mario.rossi@test.example', passwordEnv: 'GH_RLS_MARIO_PASSWORD' },
-  luca: { email: 'luca.bianchi@test.example', passwordEnv: 'GH_RLS_LUCA_PASSWORD' },
-  staff: { email: 'staff.sonda@test.example', passwordEnv: 'GH_RLS_STAFF_PASSWORD' },
+  mario: {
+    email: process.env.GH_RLS_MARIO_EMAIL || 'mario.rossi@test.example',
+    passwordEnv: 'GH_RLS_MARIO_PASSWORD',
+  },
+  luca: {
+    email: process.env.GH_RLS_LUCA_EMAIL || 'luca.bianchi@test.example',
+    passwordEnv: 'GH_RLS_LUCA_PASSWORD',
+  },
+  staff: {
+    email: process.env.GH_RLS_STAFF_EMAIL || 'staff.sonda@test.example',
+    passwordEnv: 'GH_RLS_STAFF_PASSWORD',
+  },
 };
 
 const results = [];
@@ -362,13 +373,16 @@ async function main() {
   await cleanupStaleFixtures();
   await loadContext();
 
-  await runTest('Staff legge baseline pet', '7 pet nel tenant demo', async () => {
+  await runTest('Staff legge baseline pet', `${EXPECTED_BASELINE_PETS} pet nel tenant`, async () => {
     const { data, error } = await staff.client
       .from('pets')
       .select('id')
       .eq('tenant_id', tenantId);
     assertNoError(error, 'Lettura pet staff');
-    assert(data.length === 7, `Attesi 7 pet, misurati ${data.length}`);
+    assert(
+      data.length === EXPECTED_BASELINE_PETS,
+      `Attesi ${EXPECTED_BASELINE_PETS} pet, misurati ${data.length}`
+    );
     return `${data.length} pet`;
   });
 
@@ -753,7 +767,7 @@ try {
   }
 }
 
-console.log('\nGH-06 - Suite RLS demo');
+console.log(`\n${SUITE_LABEL}`);
 console.log(`Progetto: ${EXPECTED_PROJECT_REF}`);
 console.log('');
 for (const result of results) {
