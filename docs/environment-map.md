@@ -1,10 +1,18 @@
-> **⚠ Da rivedere — segnalazione 11 maggio 2026.**
->
-> Documento spostato qui da `/docs/` (root) in occasione della creazione del diario di progetto. Contenuto **parzialmente datato**: i comandi `supabase link` indicano `cd /Users/luigimaisto/Desktop/grooming-hub-web` ma il progetto Supabase vive in `webapp/`, e attualmente il link CLI è attivo **solo** nel worktree subordinato `webapp/.claude/worktrees/kind-faraday-956d1a/`, non nel main worktree. La mappa Vercel demo/prod è coerente con quanto rilevato l'11 maggio 2026 ma va riverificata con cura. Aggiornamento da pianificare in sessione dedicata.
-
 # Mappa ambienti Grooming Hub
 
 Nota veloce per orientarsi tra demo e produzione senza dover ricostruire tutto ogni volta.
+
+## Assetto account Supabase (fonte: screenshot dashboard di Luigi, 21 agosto 2026)
+
+| Organizzazione | Piano | Progetti | Note |
+|---|---|---|---|
+| `morkdaorkggetto's Org` | Free | `grooming` (prod, Nano, eu-central-2) · `grooming-hub-demo` (Nano, eu-north-1) | Assetto storico: la prod fu messa su free contando sull'uso quotidiano per evitare l'auto-pausa |
+| `Webapp_Project` | **Pro** | `bea-scuola-musica` (Micro) · `caveabay-prenotazioni` (Nano) | Org Pro esistente, NON è del progetto Grooming |
+| `cantiere` | Free | — | |
+
+**Decisione 21/8 (Luigi)**: `grooming` si trasferisce in `Webapp_Project` (Pro) — costo +~$10/mese (Nano fatturato come Micro nelle org a pagamento; il credito incluso è già assorbito da BEA). Supera la decisione 18/8 dell'org dedicata (+$25), presa quando l'assetto reale non era noto. Il demo resta su `morkdaorkggetto's Org` (free, auto-pausa tollerata). Sequenza: dump di sicurezza PRIMA del transfer.
+
+**Errore corretto**: versioni precedenti dei documenti collocavano i progetti Grooming in "webapp_project" — falso: `Webapp_Project` è l'org Pro di BEA/Caveabay. Questa tabella è la fonte; in caso di conflitto con altri documenti, vince questa.
 
 ## Vercel
 

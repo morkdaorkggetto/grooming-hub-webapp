@@ -1,6 +1,8 @@
 # Incarico GH-05-bis — Gate 5, refactor staff (ripresa corretta)
 
 **Per:** Codex · **Da:** Luigi (via Cowork) · **Data:** 18 agosto 2026
+**AGGIORNAMENTO 21/8 — GH-05-rpc consegnato e verificato** (commit `a3d40e8`, migration `20260821031654`). Base di partenza: HEAD corrente post-rpc. Le **5 indicazioni operative** della consegna GH-05-rpc (§ Indicazioni operative) sono adottate come parte di questo mandato: wrapper sottile senza compensazioni DELETE client-side; telefono reso obbligatorio in `AddClient.jsx` (è `NOT NULL` a schema) mantenendo il layout; split nome/cognome col criterio del backfill M11-bis; controprova di atomicità UI con `p_pet_sex='x'` → atteso `23514` e 0 customer; upload foto dichiarato passo successivo alla creazione, mai cancellazioni compensative silenziose su errore storage.
+
 **Secondo atto ordinato**: parte solo a consegna GH-05-rpc verificata. Sostituisce GH-05, i cui difetti di mandato (contraddizione RPC/no-migration, elenco file incompleto, colonna `last_visit_at` inesistente) sono riconosciuti come errori di Cowork e corretti qui. Perimetro DB: demo solo per controprove, **nessuna nuova migration**. Prod intoccabile. Niente push. Base: HEAD post GH-05-rpc, da dichiarare.
 
 ## File autorizzati (elenco completo, dalla misura di Codex)

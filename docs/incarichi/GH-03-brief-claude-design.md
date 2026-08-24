@@ -24,9 +24,17 @@ Grooming Hub ha adottato il canone operativo BEA: Luigi decide, Cowork verifica 
 
 Flusso base già deciso: pet → servizio → data → conferma, con `?petId=` per preselezione dalla scheda pet. Pagina esito con possibilità `.ics` alla conferma. Empty state che rimanda a WhatsApp senza tono d'errore.
 
+**AGGIORNAMENTO 21/8 sera — preferenza oraria (fonte: Davide via Luigi, congelata in §11 flussi)**: orario continuato 9–19; i clienti dicono «mattina» o «pomeriggio». Sotto la strip delle date: **tre chip facoltative** — «Mattina (9–13)», «Pomeriggio (13–19)», «Per me è uguale» — micro-copy «l'orario preciso lo concordiamo noi su WhatsApp». Nessuna griglia oraria, nessun orario puntuale. La regola interna "ultima lavorazione avviabile alle 18" NON compare nel modulo.
+
 Da te: composizione delle schermate del wizard (desktop + mobile con BottomNav), gerarchia tipografica per gli step, pattern di selezione slot, il linguaggio della conferma "in attesa del salone" (che deve suonare come accoglienza, non come pratica in coda), stati (loading, conflitto slot, errore submit), micro-copy in italiano nel tono del brand. Output: handoff markdown con riferimenti ai componenti/token esistenti sopra elencati; se servono token o componenti nuovi, dichiarali in una sezione a parte con motivazione.
 
-## Richiesta 2 — Calibrazione Scheda pet (dopo il redeploy, con URL e screenshot)
+## Richiesta 2 — ANNULLATA (21/8 sera)
+
+Scoperta di Luigi: la composizione della Scheda pet esiste già nel bundle (`reference/pet-page.jsx`, 847 righe + §04.2 + specifiche token). La calibrazione non richiede quindi un nuovo passaggio da CD: diventa un allineamento misurabile implementazione-vs-prototipo, in carico a Codex con mandato dedicato. Eccezioni dichiarate al prototipo: niente prezzi (decisione 21/8 supera il bundle datato), le funzionalità nuove (edit inline, guard, upload foto) si conservano, i 2 colori fuori palette si riconducono ai token. CD rientra per le composizioni future (restyling staff, Fase 2). Il testo originale della richiesta resta sotto per storia.
+
+## ~~Richiesta 2 — Calibrazione Scheda pet (dopo il redeploy, con URL e screenshot)~~
+
+**AGGIORNAMENTO 21/8 — vincolo nuovo, deciso da Luigi sul test dal vivo**: **nessun prezzo sul lato customer, mai** — nemmeno lo storico nelle righe visite (Davide non fissa prezzi in anticipo: dipendono dalle condizioni del pet; il prezzo storico in app crea ancoraggio). La riga visita va ricomposta senza importo: nella calibrazione indica cosa la sostituisce (es. servizio + durata, o nota descrittiva).
 
 La Scheda pet (`/u/pet/:id`) è stata implementata da Codex senza passaggio di composizione: hero (foto/iniziale + nome Fraunces), anagrafica read-only, preferenze toelettatura, note del proprietario editabili inline (viewing→editing→saving→saved), storico visite. Misure Cowork: 45 blocchi di stile inline e **2 colori fuori token** (`#3f6658`, `#8f3f49`) introdotti ad hoc. Quando Luigi ti darà URL preview e screenshot: critica di composizione (gerarchia, ritmo verticale, coerenza col resto), verdetto sui 2 colori (adottarli come token nuovi o ricondurli alla palette), e correzioni prescrittive che Codex possa applicare senza interpretare.
 

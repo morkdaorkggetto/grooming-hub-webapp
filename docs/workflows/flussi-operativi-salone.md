@@ -296,6 +296,12 @@ Lato cliente: stato "in attesa di conferma". La risposta vera arriva su WhatsApp
 
 Gli abituali passano dalla richiesta normale, *«per non essere opprimenti nei loro confronti»* — niente promemoria automatici. Le notifiche si riservano a **promozioni** e agli scatti dei **tre livelli di fedeltà** previsti (*«che attivano delle premialità»*). Nei periodi critici (Capodanno, Ferragosto, Natale) un **alert di periodo di piena**: *«magari loro potrebbero dover aspettare un po', o magari non avere proprio il posto»* — avviso informativo, la richiesta parte comunque.
 
+### Orari e preferenza oraria (integrazione del 21 agosto, riferita da Luigi da conversazione con Davide)
+
+Il salone fa **orario continuato 9:00–19:00**; l'ultima ora utile per *avviare* una lavorazione è le 18:00 — regola operativa interna, che governa la conferma degli appuntamenti ma non compare nel modulo cliente. I clienti, quando esprimono una preferenza, dicono quasi sempre «mattina» o «pomeriggio».
+
+**Decisione conseguente (Luigi, 21/8)**: nel modulo di richiesta la preferenza oraria è facoltativa, resa con tre chip — «Mattina (9–13)», «Pomeriggio (13–19)», «Per me è uguale» — con micro-copy «l'orario preciso lo concordiamo noi su WhatsApp». Supera la prima ipotesi a cinque fasce del 19/8, costruita su orari non ancora confermati dalla fonte.
+
 ### Nota di contesto (Cowork, agosto 2026)
 
 Tre osservazioni per il progetto. **(a)** L'età del cane: per i pet registrati l'app conosce già la data di nascita — coerentemente con il principio di Davide ("non chiedere ciò che l'app sa già"), il campo andrà chiesto solo se mancante in anagrafica. **(b)** I tre livelli di fedeltà citati confermano l'idea già presente nel bundle Design, che però resta **fuori scope Fase 1**: la registriamo come conferma di direzione per la Fase 2, non come requisito attuale. **(c)** L'alert dei periodi di piena richiede che il salone possa definirli: candidato naturale `tenants.settings`, già previsto come lavoro di Fase C.

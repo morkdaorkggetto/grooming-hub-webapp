@@ -25,5 +25,13 @@ a Codex autorizzazioni operative permanenti. Branch, ambienti, database,
 migration, seed, commit, push, merge e deploy restano soggetti al perimetro e
 alle conferme esplicite del singolo incarico.
 
-Salvo istruzione diversa, le consegne restano locali: commit e push non sono
-impliciti nella loro creazione.
+**Aggiornamento 21/8/2026 (decisione Luigi)**: il registro va **committato nello
+stesso commit del codice** cui si riferisce (o in un commit documentale
+consecutivo `docs: record GH-NN delivery` se il codice è stato committato
+prima). Motivazione: il codice e la sua prova viaggiano insieme, il repo è la
+memoria unica, nessuna finestra in cui il push contiene codice senza registro.
+Il push resta un gesto di Luigi.
+
+*Regola precedente superata (era: «salvo istruzione diversa le consegne
+restano locali»). La nuova convenzione consolida quanto già fatto da Codex in
+GH-08 con `bdecf94`.*
