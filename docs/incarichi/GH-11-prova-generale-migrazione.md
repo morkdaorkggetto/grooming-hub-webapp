@@ -9,9 +9,9 @@
 2. Creare il **progetto temporaneo** `grooming-prova-generale` nell'org free `morkdaorkggetto's Org` (lo slot c'è: liberato dal transfer). Regione indifferente, password DB nel password manager.
 3. Fornire a Codex l'accesso al progetto temporaneo (stesso meccanismo del demo). Il temporaneo è **usa-e-getta dichiarato**: si smonta a prova conclusa.
 
-## Fase 0 — Preflight contacts (Cowork, sul prod, sola lettura)
+## Fase 0 — Ricognizione prod grezza (Cowork, sola lettura)
 
-Le 10 misure della checklist §8 di GH-07-bis sulle 301 righe reali: cardinalità e impronte, telefoni nulli/malformati/duplicati post-normalizzazione, distribuzione match per priorità, conflitti, lead puri, valori fuori dominio, note duplicate vs divergenti, conteggi attesi. Esito: report nel registro + elenco dei casi da risolvere a mano PRIMA della finestra (attesi ~13). Le risoluzioni manuali le decide Luigi caso per caso.
+**GIÀ FATTA il 24/8** — riportata a diario. Prod è pre-Gate 2: 10 migration, ultima `20260423123000`; `contacts`/`clients`/`visits` senza `tenant_id`, `contacts.linked_client_id`, zero `pets`/`customers`/`tenants`/`tenant_memberships`; helper `normalize_phone_it` e `has_tenant_access` assenti. **Il preflight §8 GH-07-bis originale non è eseguibile sui dati grezzi**: le sue regole parlano la lingua post-Gate 2. Si esegue perciò dopo la ricostruzione (Fase 2), quando le helper e la struttura nuova esistono nel progetto temporaneo.
 
 ## Fase 1 — Ricostruzione (Codex, sul temporaneo)
 
@@ -20,9 +20,10 @@ Restore dei tre dump nel progetto temporaneo (schema → dati → auth; metodo a
 ## Fase 2 — La catena completa (Codex, sul temporaneo)
 
 Applicare nell'ordine l'intera catena che il prod riceverà in G6:
-1. le migration dello schema multi-tenant nella **variante prod-safe** (backfill `clients`→`customers`+`pets` con `legacy_client_id`, seed memberships da `profiles.role`, riferimento: sezione prod di `migration-plan.md`);
-2. le migration di Fase 1 (whitelist, storage fix, RPC, campi GH-07-bis nella **variante senza guardia demo**, hardening GH-10 variante prod);
-3. il backfill contacts con le regole GH-07-bis, alimentato dagli esiti del preflight (i casi manuali risolti da Luigi entrano come atti espliciti).
+1. le migration dello schema multi-tenant nella **variante prod-safe** (backfill `clients`→`customers`+`pets` con `legacy_client_id`, seed memberships da `profiles.role`, riferimento: sezione prod di `migration-plan.md`); include l'introduzione degli helper `normalize_phone_it`, `has_tenant_access`, ecc.
+2. **Preflight §8 GH-07-bis sui dati appena ricostruiti**: le 10 misure originali eseguite ora che le regole esistono. Report nel registro + elenco dei ~13 casi residui che richiedono decisione manuale di Luigi.
+3. le migration di Fase 1 (whitelist, storage fix, RPC, campi GH-07-bis nella **variante senza guardia demo**, hardening GH-10 variante prod);
+4. il backfill contacts con le regole GH-07-bis, alimentato dagli esiti del preflight (i casi manuali risolti da Luigi entrano come atti espliciti).
 
 Ogni atto: applicato, misurato, annotato. Un fallimento NON si aggira: si corregge la variante prod e si può ripartire da capo (il temporaneo si ricrea dal dump — è il suo scopo).
 
