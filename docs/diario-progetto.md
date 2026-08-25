@@ -249,7 +249,39 @@ Zero clients creati o modificati dopo il 21/8, zero visite. Ultimo cliente creat
 
 **Ordine del restyling deciso di conseguenza**: primo giro **Dashboard, scheda cliente, registrazione visita** — le tre schermate da cui passano davvero le 176 visite recenti. **Calendario al giro successivo**, dopo la risposta di Davide e quando si vedrà se le richieste lo riempiono: è la schermata più costosa dell'app (1.572 righe) e rivestirla al buio sarebbe lo spreco maggiore possibile.
 
-**Prossimo passo**: (a) spot-check di Luigi sulle 5 schede contro la vecchia app — ultimo cancello umano; (b) **mandato G6**; (c) al momento dell'atto, autorizzare anche il collegamento di Codex su `Webapp_Project` (è distinto dal mio) e toglierlo subito dopo; (d) ripulire il §3 Grooming da `BEA_ScuolaMusica/_temp_updates/108-registro-ultimi-task-codex.md`. **Decisione aperta post-G6**: separare la produzione Grooming in un'organizzazione dedicata — non per costo ma perché, quando il prodotto sarà venduto ad altri saloni, i dati di produzione dei clienti non possono condividere unità di accesso e fatturazione con gli altri lavori.
+### 25 agosto 2026 — La veste del gestionale (GH-16 → GH-17)
+
+**GH-16 Fase 1 consegnata, checkpoint rispettato** (25/8): tabella di confronto fra la composizione CD e il codice reale delle tre superfici, zero file applicativi toccati (verificato da Cowork). Risposta misurata alla domanda §9.7 di CD: **le cinque aree operative sono tutte vive**, nessuna porta a una pagina vuota. Nessuna divergenza rispetto alla verifica schema dei campi ⚠. Otto decisioni sollevate e non risolte d'ufficio.
+
+**Scoperta di Fase 1: `AddVisit.jsx` era una pagina murata.** La stringa `add-visit` compare nel codice **una volta sola**, nella registrazione della rotta: nessun pulsante, nessun link. Le 464 visite dello storico sono state registrate tutte dal form dentro `ClientDetail.jsx`. Stavamo per rivestire una stanza a cui nessuno arriva. La terza tappa è stata perciò riscritta: non «rivesti `AddVisit`» ma «estrai il form e fallo usare da entrambe le superfici».
+
+**Le otto decisioni, risolte da Luigi** (25/8, su raccomandazione Cowork): sesta tile Dashboard respinta (una visita non è registrabile senza aver prima scelto un cliente: la tile aggiungerebbe un passo, non lo toglierebbe); alert pending mantenuto, slot odierni no; CTA nuovo cliente ferma, FAB mobile ammesso perché additivo; sezioni della scheda invariate — l'handoff dice sette, il bundle sei, il codice sei più due condizionali, **vince il codice**; scroll unico su mobile, le tre viste di CD rimandate a lei perché ne specifichi la navigazione; ordine delle sei azioni invariato, dichiaratamente il caso «sembra migliorabile, si segnala e non si corregge»; form visita condiviso; `Button` esteso e non duplicato in `Btn`.
+
+**Correzione Cowork ai nomi dei token, prima che facesse danni**: la tabella colori di Fase 1 proponeva destinazioni `--gh-warning-text`, `--gh-secondary`, `--gh-danger-text` e simili. **Non esistono.** CD ne ha autorizzati tre soli — `--gh-bridge`, `--gh-border-60`, `--gh-border-35` — e tutto il resto conserva il nome `--color-*`. Creare una famiglia `--gh-*` parallela sarebbe stato introdurre colori nuovi sotto altro nome, cioè violare il vincolo rispettandolo alla lettera.
+
+**GH-17 CONSEGNATO — il gestionale ha la veste nuova** (25/8): quattro commit, uno per tappa (`d5ab7b4` fondazione, `6d6b8ba` Dashboard, `84c0727` scheda, `926a621` form condiviso).
+
+| Superficie | Righe | Stili inline | Hex |
+|---|---|---|---|
+| Dashboard | 659 → **377** | 43 → **0** | → **0** |
+| Scheda cliente | 1.235 → **746** | 105 → **0** | → **0** |
+| Registrazione visita | 361 → **133** | 28 → **0** | → **0** |
+
+Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout è uscito dal JSX ed è finito in `gh15-staff.css`, che è il primo foglio di stile che il gestionale abbia mai avuto. I tre token nuovi in `index.css`, un solo breakpoint a 640px, cifre tabulari, nove combinazioni schermata × larghezza tutte passate senza overflow e senza bersagli sotto 44px.
+
+**Giudizio di Codex accolto**: il FAB nuovo cliente era autorizzato ma **non è stato usato** — alle larghezze minime avrebbe coperto parte dell'ultima area operativa. Decisione dichiarata con motivo, coerente col §7.10 di CD («nessuna FAB sopra un'azione primaria»).
+
+**Sospetto Cowork verificato e rientrato**: il registro dichiarava di aver normalizzato a zero la spaziatura fra lettere, e CD aveva vincolato l'eyebrow da 9.5px a esistere **solo** con `letter-spacing: .19em`. Misura diretta sul CSS: l'eyebrow conserva `0.19em`; è stata azzerata solo la spaziatura **negativa** dei titoli. Nessuna regressione.
+
+**RISCHIO APERTO — l'app customer non è stata riprovata dopo la modifica delle fondamenta condivise.** GH-17 ha modificato `Card`, `Icon`, `Skeleton`, `Eyebrow`, `StatusBadge`, `WarmNotice` e `Button`. Misura Cowork: **sette pagine customer li importano** (Home, Login, Promotions, Pet, Book, Redeem, Forgot). Le controprove hanno coperto le sole tre superfici staff. Le estensioni sono dichiarate retrocompatibili e la build è verde, ma la build intercetta gli errori di importazione, non le regressioni visive. **Da chiudere prima di qualunque passo verso la produzione**: l'app customer è finita, verificata e prossima al rilascio, e le sue fondamenta sono state toccate senza riguardarla.
+
+**Terzo difetto di mandato di Cowork, stessa famiglia dei precedenti** (autodenuncia): GH-17 chiedeva come controprova «registrazione di una visita di prova dal gesto reale, poi rimossa» e **contemporaneamente vietava ogni uso del database**. Contraddizione. Codex l'ha dichiarata invece di scegliere in silenzio quale metà obbedire. Il filo è visibile: GH-05 aveva un elenco file incompleto, GH-13 ometteva il prerequisito `service_id`, GH-17 si contraddice sulla verifica. **I miei mandati sono più deboli proprio dove prescrivono come verificare** — da guardare la prossima volta che ne scrivo uno.
+
+**Prossimo passo**: micro-mandato che chiude entrambi gli aperti in un colpo, perché entrambi richiedono il demo — regressione visiva delle sette pagine customer e ciclo reale di registrazione visita marcato `[DEMO][GH-17]` con rimozione nella stessa sessione.
+
+---
+
+**Prossimo passo (catena produzione)**: (a) spot-check di Luigi sulle 5 schede contro la vecchia app — ultimo cancello umano; (b) **mandato G6**; (c) al momento dell'atto, autorizzare anche il collegamento di Codex su `Webapp_Project` (è distinto dal mio) e toglierlo subito dopo; (d) ripulire il §3 Grooming da `BEA_ScuolaMusica/_temp_updates/108-registro-ultimi-task-codex.md`. **Decisione aperta post-G6**: separare la produzione Grooming in un'organizzazione dedicata — non per costo ma perché, quando il prodotto sarà venduto ad altri saloni, i dati di produzione dei clienti non possono condividere unità di accesso e fatturazione con gli altri lavori.
 
 ---
 
