@@ -24,20 +24,22 @@ export default function Card({
   padding = 20,
   elevated = true,
   style,
+  staff = false,
+  className = '',
   ...rest
 }) {
   const cardStyle = {
-    background: 'var(--color-surface-main, #fbf6f3)',
-    border: '1px solid var(--color-border, #cfc1c4)',
-    borderRadius: RADIUS_MAP[radius] || RADIUS_MAP.lg,
+    background: staff ? '#fff' : 'var(--color-surface-main)',
+    border: `1px solid ${staff ? 'var(--gh-border-60)' : 'var(--color-border)'}`,
+    borderRadius: staff ? 'var(--gh-r-panel)' : (RADIUS_MAP[radius] || RADIUS_MAP.lg),
     padding: typeof padding === 'number' ? `${padding}px` : padding,
-    boxShadow: elevated
-      ? '0 1px 2px rgba(43,37,37,.04), 0 12px 40px -24px rgba(43,37,37,.25)'
+    boxShadow: elevated && !staff
+      ? 'var(--shadow-md)'
       : 'none',
     ...(style || {}),
   };
   return (
-    <div style={cardStyle} {...rest}>
+    <div className={`${staff ? 'gh-card--staff' : ''} ${className}`.trim()} style={cardStyle} {...rest}>
       {children}
     </div>
   );

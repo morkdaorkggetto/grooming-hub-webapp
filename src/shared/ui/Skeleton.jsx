@@ -24,7 +24,7 @@ function ensureKeyframes() {
   injected = true;
 }
 
-export default function Skeleton({ width = '100%', height = 16, style, ...rest }) {
+export default function Skeleton({ width = '100%', height = 16, staff = false, className = '', style, ...rest }) {
   ensureKeyframes();
   const skStyle = {
     display: 'inline-block',
@@ -32,10 +32,17 @@ export default function Skeleton({ width = '100%', height = 16, style, ...rest }
     height: typeof height === 'number' ? `${height}px` : height,
     borderRadius: '8px',
     background:
-      'linear-gradient(90deg, var(--color-surface-soft, #f3ece8) 0%, var(--color-surface-muted, #e5d7d8) 50%, var(--color-surface-soft, #f3ece8) 100%)',
+      'linear-gradient(90deg, var(--color-surface-soft) 0%, var(--color-surface-muted) 50%, var(--color-surface-soft) 100%)',
     backgroundSize: '200px 100%',
     animation: 'gh-skeleton-shimmer 1.4s ease-in-out infinite',
     ...(style || {}),
   };
-  return <span style={skStyle} aria-hidden="true" {...rest} />;
+  return (
+    <span
+      className={`${staff ? 'gh-skeleton--staff' : ''} ${className}`.trim()}
+      style={skStyle}
+      aria-hidden="true"
+      {...rest}
+    />
+  );
 }

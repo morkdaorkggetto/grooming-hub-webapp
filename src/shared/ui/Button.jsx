@@ -1,4 +1,5 @@
 import React from 'react';
+import Icon from './Icon';
 
 /**
  * Button — componente shared minimal Step 2.
@@ -34,17 +35,17 @@ const baseStyle = {
 
 const variantStyles = {
   primary: {
-    background: 'var(--color-primary, #6f9792)',
+    background: 'var(--color-primary)',
     color: '#fff',
   },
   secondary: {
-    background: 'var(--color-secondary, #67383f)',
+    background: 'var(--color-secondary)',
     color: '#fff',
   },
   ghost: {
     background: 'transparent',
-    color: 'var(--color-primary, #6f9792)',
-    border: '1px solid var(--color-border, #cfc1c4)',
+    color: 'var(--color-primary)',
+    border: '1px solid var(--color-border)',
   },
 };
 
@@ -55,19 +56,60 @@ export default function Button({
   type = 'button',
   onClick,
   children,
+  staff = false,
+  icon,
+  wide = false,
+  className = '',
+  style: customStyle,
   ...rest
 }) {
   const isInactive = loading || disabled;
+
+  if (staff) {
+    const staffVariant = ['primary', 'secondary', 'outline', 'ghost', 'success', 'danger', 'whatsapp'].includes(
+      variant
+    )
+      ? variant
+      : 'primary';
+    return (
+      <button
+        type={type}
+        onClick={onClick}
+        disabled={isInactive}
+        className={`gh-btn gh-btn--${staffVariant}${wide ? ' gh-btn--wide' : ''} ${className}`.trim()}
+        style={customStyle}
+        {...rest}
+      >
+        {loading ? (
+          '…'
+        ) : (
+          <>
+            {icon && <Icon name={icon} size={15} stroke={1.9} />}
+            {children}
+          </>
+        )}
+      </button>
+    );
+  }
+
   const style = {
     ...baseStyle,
     ...(variantStyles[variant] || variantStyles.primary),
     opacity: isInactive ? 0.6 : 1,
     cursor: isInactive ? 'not-allowed' : 'pointer',
+    ...(customStyle || {}),
   };
 
   return (
-    <button type={type} onClick={onClick} disabled={isInactive} style={style} {...rest}>
-      {loading ? '…' : children}
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={isInactive}
+      className={className}
+      style={style}
+      {...rest}
+    >
+      {loading ? '…' : <>{icon && <Icon name={icon} size={16} />}{children}</>}
     </button>
   );
 }

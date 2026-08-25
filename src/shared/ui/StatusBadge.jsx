@@ -32,7 +32,37 @@ const FALLBACK = {
   dot: '#7f6f73',
 };
 
-export default function StatusBadge({ status, approvalStatus = 'approved', compact = false, style = {} }) {
+const STAFF_STATES = {
+  attivo: { label: 'Attivo', tone: 'success' },
+  rischio: { label: 'A rischio', tone: 'warning' },
+  blacklist: { label: 'Blacklist', tone: 'danger' },
+  confermato: { label: 'Confermato', tone: 'success' },
+  attesa: { label: 'In attesa', tone: 'warning' },
+  noshow: { label: 'No-show', tone: 'danger' },
+};
+
+export default function StatusBadge({
+  status,
+  approvalStatus = 'approved',
+  compact = false,
+  staff = false,
+  state,
+  label,
+  className = '',
+  style = {},
+}) {
+  if (staff) {
+    const staffState = STAFF_STATES[state] || STAFF_STATES.attivo;
+    return (
+      <span
+        className={`gh-state-tag gh-state-tag--${staffState.tone} ${className}`.trim()}
+        style={style}
+      >
+        {label || staffState.label}
+      </span>
+    );
+  }
+
   const key = `${status || 'scheduled'}:${approvalStatus || 'approved'}`;
   const s = MAP[key] || FALLBACK;
 
@@ -51,6 +81,7 @@ export default function StatusBadge({ status, approvalStatus = 'approved', compa
         letterSpacing: '0.02em',
         ...style,
       }}
+      className={className}
     >
       <span
         aria-hidden="true"

@@ -83,9 +83,41 @@ const PATHS = {
       <path d="M13.5 7l3.5 3.5" />
     </g>
   ),
+  search: (
+    <g>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </g>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
+  calendar: (
+    <g>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </g>
+  ),
+  user: (
+    <g>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+    </g>
+  ),
+  qr: (
+    <g>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20v1" />
+    </g>
+  ),
+  trash: (
+    <g>
+      <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+    </g>
+  ),
 };
 
-export default function Icon({ name, size = 18, stroke = 1.75, style = {}, ...rest }) {
+export default function Icon({ name, size = 18, stroke = 1.75, style = {}, className = '', ...rest }) {
   return (
     <svg
       width={size}
@@ -96,6 +128,7 @@ export default function Icon({ name, size = 18, stroke = 1.75, style = {}, ...re
       strokeWidth={stroke}
       strokeLinecap="round"
       strokeLinejoin="round"
+      className={className}
       style={{ flexShrink: 0, ...style }}
       aria-hidden="true"
       {...rest}

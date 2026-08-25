@@ -49,6 +49,9 @@
     --color-warning-text: #7f5d60;
     --color-demo-banner-bg: #2b2525;
     --color-demo-banner-text: #fbf6f3;
+    --gh-bridge: #f7f1ea;
+    --gh-border-60: rgba(207, 193, 196, 0.6);
+    --gh-border-35: rgba(207, 193, 196, 0.35);
   }
 
   body {
