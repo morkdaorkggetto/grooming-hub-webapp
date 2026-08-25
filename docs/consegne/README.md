@@ -67,6 +67,23 @@ innocuo e visibile, invece di un'azione sbagliata riuscita in silenzio.
 **Conseguenza per Cowork**: non produce più blocchi di testo da incollare;
 chiude indicando dove sta il mandato e che serve il push.
 
+### Due serie distinte: `GH-` per Codex, `CD-` per Claude Design (24/8)
+
+**Decisione Luigi.** Gli incarichi ai due attori usano prefissi diversi e contatori separati:
+
+| Prefisso | Destinatario | Natura | Esito |
+|---|---|---|---|
+| `GH-nn` | **Codex** | mandato di implementazione | codice + registro in `consegne/` |
+| `CD-nn` | **Claude Design** | brief di composizione | handoff + bundle di riferimento |
+
+**Conseguenza sulla regola «ultimo elaborato»**: si applica **solo alla serie `GH-`**. Codex non deve mai considerare un `CD-` come lavoro proprio. Questo elimina alla radice l'ambiguità, invece di affidarla alla lettura attenta.
+
+Le misure di supporto prodotte da Cowork non sono incarichi e conservano il nome del mandato che servono (esempio: `GH-15-verifica-schema-campi-dubbi.md`).
+
+**Eccezioni storiche, non si rinominano**: `GH-03-brief-claude-design.md` e `GH-15-brief-claude-design-veste-staff.md` erano brief per Claude Design nati dentro la serie `GH-`, quando la distinzione non esisteva. Restano com'è: sono citati da troppi registri e riscrivere la storia costerebbe più della piccola irregolarità. Il prossimo brief a Claude Design sarà `CD-01`.
+
+*Nato dalla domanda di Luigi del 24/8: «GH-15 è di CD?». Se la domanda si pone, il nome non sta facendo il suo lavoro.*
+
 ### Eccezione: mandati depositati ma non attivati (24/8)
 
 Un mandato può essere **scritto in anticipo** e restare in attesa di condizioni
