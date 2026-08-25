@@ -99,7 +99,7 @@ export function StatStrip({ items, columns }) {
   return (
     <div
       className="gh-stat-strip"
-      style={{ gridTemplateColumns: columns || `repeat(${items.length}, minmax(0, 1fr))` }}
+      style={{ '--gh-stat-columns': columns || items.length }}
     >
       {items.map((item) => (
         <div
