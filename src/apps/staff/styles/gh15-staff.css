@@ -364,6 +364,7 @@
 }
 
 .gh-search__input {
+  height: 100%;
   min-width: 0;
   flex: 1;
   border: 0;
@@ -535,6 +536,7 @@
 .gh-client-head,
 .gh-client-row {
   display: grid;
+  width: 100%;
   grid-template-columns: minmax(180px, 1.5fr) minmax(150px, 1.4fr) minmax(120px, 0.9fr) 84px 84px 20px;
   gap: 12px;
 }
@@ -1197,7 +1199,7 @@
 }
 
 .gh-bridge-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.62fr);
+  grid-template-columns: 1fr;
 }
 
 .gh-bridge-form {
@@ -1292,6 +1294,58 @@
   opacity: 0;
 }
 
+.gh-add-visit-shell {
+  display: flex;
+  width: min(700px, 100%);
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gh-add-visit-client {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.gh-add-visit-client .gh-panel-title {
+  margin-top: 2px;
+}
+
+.gh-visit-editor {
+  display: block;
+}
+
+.gh-visit-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gh-visit-date-field {
+  margin-top: 2px;
+}
+
+.gh-visit-cost-field {
+  max-width: 220px;
+}
+
+.gh-visit-cost-field .gh-field {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.gh-visit-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 1px solid var(--gh-border-35);
+}
+
 .gh-error-state__action {
   margin-top: 9px;
 }
@@ -1332,8 +1386,8 @@
   }
 
   .gh-pill {
-    min-height: 40px;
-    height: 40px;
+    min-height: 44px;
+    height: 44px;
   }
 
   .gh-stat-strip {
@@ -1477,14 +1531,13 @@
   }
 
   .gh-qr-image {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
+    width: 112px;
+    height: 112px;
   }
 
   .gh-qr-image img {
-    width: min(180px, 100%);
-    height: min(180px, 100%);
+    width: 100%;
+    height: 100%;
   }
 
   .gh-inline-actions .gh-btn,
@@ -1498,6 +1551,15 @@
 
   .gh-visit-row__issues {
     display: block;
+  }
+
+  .gh-visit-cost-field {
+    max-width: none;
+  }
+
+  .gh-visit-form__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
   }
 
   .gh-visit-row {

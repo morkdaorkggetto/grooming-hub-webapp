@@ -63,7 +63,7 @@ export function Panel({
   );
 }
 
-export function Field({ label, area = false, as, className = '', children, ...props }) {
+export function Field({ label, area = false, as, className = '', children, inputRef, ...props }) {
   const Control = as || (area ? 'textarea' : 'input');
   const controlClassName = joinClasses('gh-field', area && 'gh-field--area');
   return (
@@ -74,9 +74,9 @@ export function Field({ label, area = false, as, className = '', children, ...pr
         </Eyebrow>
       )}
       {Control === 'input' ? (
-        <input className={controlClassName} {...props} />
+        <input ref={inputRef} className={controlClassName} {...props} />
       ) : (
-        <Control className={controlClassName} {...props}>{children}</Control>
+        <Control ref={inputRef} className={controlClassName} {...props}>{children}</Control>
       )}
     </label>
   );

@@ -8,7 +8,6 @@ import {
   ClientRow,
   EmptyState,
   ErrorState,
-  Fab,
   Hero,
   HeroButton,
   Panel,
@@ -373,7 +372,6 @@ export default function Dashboard() {
         </Panel>
       </main>
 
-      <Fab label="Nuovo Cliente" onClick={() => navigate('/add-client')} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ImageCropModal from '../components/ImageCropModal';
+import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {
   Button,
   EmptyState,
@@ -47,13 +48,6 @@ const REWARD_REASON_LABELS = {
   correction: 'Correzione',
 };
 
-const emptyVisitForm = () => ({
-  date: new Date().toISOString().split('T')[0],
-  treatments: '',
-  issues: '',
-  cost: '',
-});
-
 const formatVisitDate = (dateString) => {
   try {
     return new Date(`${dateString}T12:00:00`).toLocaleDateString('it-IT', {
@@ -79,7 +73,7 @@ export default function ClientDetail() {
   const [customerInvite, setCustomerInvite] = useState(null);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
   const [pendingEditCropFile, setPendingEditCropFile] = useState(null);
-  const [visitForm, setVisitForm] = useState(emptyVisitForm);
+  const [visitForm, setVisitForm] = useState(createEmptyVisitForm);
   const [editForm, setEditForm] = useState({
     name: '',
     breed: '',
@@ -162,7 +156,7 @@ export default function ClientDetail() {
     try {
       await addVisit(clientId, visitForm);
       setShowAddVisitModal(false);
-      setVisitForm(emptyVisitForm());
+      setVisitForm(createEmptyVisitForm());
       loadClient();
     } catch (err) {
       setError(err.message);
@@ -621,50 +615,14 @@ export default function ClientDetail() {
               </div>
               <Button staff variant="ghost" onClick={() => setShowAddVisitModal(false)}>Chiudi</Button>
             </div>
-            <form onSubmit={handleAddVisit}>
-              <div className="gh-modal__body gh-visit-form">
-                {error && (
-                  <ErrorState body={`${error}. I dati inseriti nel form restano disponibili.`} />
-                )}
-                <Field
-                  label="Data"
-                  type="date"
-                  value={visitForm.date}
-                  onChange={(event) => setVisitForm({ ...visitForm, date: event.target.value })}
-                  required
-                />
-                <Field
-                  label="Trattamenti"
-                  area
-                  rows="3"
-                  value={visitForm.treatments}
-                  onChange={(event) => setVisitForm({ ...visitForm, treatments: event.target.value })}
-                  placeholder="Es. Bagno, taglio, asciugatura..."
-                />
-                <Field
-                  label="Problematiche"
-                  area
-                  rows="3"
-                  value={visitForm.issues}
-                  onChange={(event) => setVisitForm({ ...visitForm, issues: event.target.value })}
-                  placeholder="Es. Pelle irritata, nodi..."
-                />
-                <Field
-                  label="Costo (€) *"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={visitForm.cost}
-                  onChange={(event) => setVisitForm({ ...visitForm, cost: event.target.value })}
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-              <div className="gh-modal__foot">
-                <Button staff variant="outline" onClick={() => setShowAddVisitModal(false)}>Annulla</Button>
-                <Button staff variant="primary" type="submit" icon="check">Salva Visita</Button>
-              </div>
-            </form>
+            <VisitForm
+              modal
+              value={visitForm}
+              onChange={setVisitForm}
+              onSubmit={handleAddVisit}
+              onCancel={() => setShowAddVisitModal(false)}
+              error={error}
+            />
           </section>
         </div>
       )}
