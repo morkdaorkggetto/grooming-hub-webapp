@@ -63,8 +63,9 @@ export function Panel({
   );
 }
 
-export function Field({ label, area = false, className = '', ...props }) {
-  const Control = area ? 'textarea' : 'input';
+export function Field({ label, area = false, as, className = '', children, ...props }) {
+  const Control = as || (area ? 'textarea' : 'input');
+  const controlClassName = joinClasses('gh-field', area && 'gh-field--area');
   return (
     <label className={joinClasses('gh-field-wrap', className)}>
       {label && (
@@ -72,7 +73,11 @@ export function Field({ label, area = false, className = '', ...props }) {
           {label}
         </Eyebrow>
       )}
-      <Control className={joinClasses('gh-field', area && 'gh-field--area')} {...props} />
+      {Control === 'input' ? (
+        <input className={controlClassName} {...props} />
+      ) : (
+        <Control className={controlClassName} {...props}>{children}</Control>
+      )}
     </label>
   );
 }
@@ -223,9 +228,15 @@ export function ClientRow({ client, tier, state, visitsText, lastVisit, onClick 
   );
 }
 
-export function Fab({ label, icon = 'plus', ...props }) {
+export function Fab({ label, icon = 'plus', always = false, ...props }) {
   return (
-    <button className="gh-fab" type="button" aria-label={label} title={label} {...props}>
+    <button
+      className={joinClasses('gh-fab', always && 'gh-fab--always')}
+      type="button"
+      aria-label={label}
+      title={label}
+      {...props}
+    >
       <Icon name={icon} size={24} stroke={2.2} />
     </button>
   );

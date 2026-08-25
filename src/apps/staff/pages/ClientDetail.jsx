@@ -1,31 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import ImageCropModal from '../components/ImageCropModal';
 import {
-  getClientById,
-  updateClient,
-  deleteClient,
-  addVisit,
-  deleteVisit,
-  getClientPromos,
-  updateClientNoShowScore,
-  setClientBlacklistStatus,
-  addRewardPointMovement,
-  createCustomerPortalInvite,
+  Button,
+  EmptyState,
+  ErrorState,
+  Fab,
+  FidelityBadge,
+  Field,
+  Hero,
+  HeroButton,
+  Panel,
+  PetAvatar,
+  ScoreScale,
+  SkeletonRow,
+  VisitRow,
+} from '../components/StaffKit';
+import {
   VALID_REWARD_POINT_REASONS,
+  addRewardPointMovement,
+  addVisit,
+  createCustomerPortalInvite,
+  deleteClient,
+  deleteVisit,
+  getClientById,
+  getClientPromos,
+  setClientBlacklistStatus,
+  updateClient,
+  updateClientNoShowScore,
 } from '../lib/database';
-import { getClientWhatsAppUrl } from '../lib/whatsapp';
+import { getFidelityTierSnapshot } from '../lib/fidelity';
+import { isSupportedImageFile } from '../lib/imageFiles';
 import {
   getClientCardCode,
   getClientCardPath,
   getClientCardUrl,
   getClientQrImageUrl,
 } from '../lib/qrCode';
-import { getFidelityTierSnapshot } from '../lib/fidelity';
-import ImageCropModal from '../components/ImageCropModal';
-import PromoBadge from '../components/PromoBadge';
-import VisitCard from '../components/VisitCard';
-import { isSupportedImageFile } from '../lib/imageFiles';
-import AppHeader from '../components/AppHeader';
+import { getClientWhatsAppUrl } from '../lib/whatsapp';
 
 const REWARD_REASON_LABELS = {
   visit: 'Visita',
@@ -35,10 +47,25 @@ const REWARD_REASON_LABELS = {
   correction: 'Correzione',
 };
 
-/**
- * ClientDetail — Pagina dettaglio cliente
- * Mostra: info cliente, visite, promozioni, form per nuova visita/modifica
- */
+const emptyVisitForm = () => ({
+  date: new Date().toISOString().split('T')[0],
+  treatments: '',
+  issues: '',
+  cost: '',
+});
+
+const formatVisitDate = (dateString) => {
+  try {
+    return new Date(`${dateString}T12:00:00`).toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return dateString;
+  }
+};
+
 export default function ClientDetail() {
   const { clientId } = useParams();
   const navigate = useNavigate();
@@ -52,16 +79,7 @@ export default function ClientDetail() {
   const [customerInvite, setCustomerInvite] = useState(null);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
   const [pendingEditCropFile, setPendingEditCropFile] = useState(null);
-
-  // Form aggiunta visita
-  const [visitForm, setVisitForm] = useState({
-    date: new Date().toISOString().split('T')[0],
-    treatments: '',
-    issues: '',
-    cost: '',
-  });
-
-  // Form modifica cliente
+  const [visitForm, setVisitForm] = useState(emptyVisitForm);
   const [editForm, setEditForm] = useState({
     name: '',
     breed: '',
@@ -78,25 +96,19 @@ export default function ClientDetail() {
     note: '',
   });
 
-  /**
-   * Carica cliente all'avvio
-   */
   useEffect(() => {
     loadClient();
   }, [clientId]);
 
   useEffect(() => {
     return () => {
-      if (editPhotoPreview) {
-        URL.revokeObjectURL(editPhotoPreview);
-      }
+      if (editPhotoPreview) URL.revokeObjectURL(editPhotoPreview);
     };
   }, [editPhotoPreview]);
 
   const loadClient = async () => {
     setLoading(true);
     setError('');
-
     try {
       const data = await getClientById(clientId);
       setClient(data);
@@ -110,9 +122,7 @@ export default function ClientDetail() {
         photoFile: null,
         removePhoto: false,
       });
-      if (editPhotoPreview) {
-        URL.revokeObjectURL(editPhotoPreview);
-      }
+      if (editPhotoPreview) URL.revokeObjectURL(editPhotoPreview);
       setEditPhotoPreview('');
     } catch (err) {
       setError(err.message || 'Errore nel caricamento cliente');
@@ -121,99 +131,66 @@ export default function ClientDetail() {
     }
   };
 
-  /**
-   * Gestisce upload foto nel form di modifica cliente
-   */
-  const handleEditPhotoSelect = (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
+  const handleEditPhotoSelect = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
     if (!file) return;
-
     if (!isSupportedImageFile(file)) {
       setError('Seleziona un file immagine valido');
       return;
     }
-
     setPendingEditCropFile(file);
   };
 
-  const handleEditCropCancel = () => {
-    setPendingEditCropFile(null);
-  };
-
   const handleEditCropConfirm = ({ file, previewUrl }) => {
-    if (editPhotoPreview) {
-      URL.revokeObjectURL(editPhotoPreview);
-    }
-
+    if (editPhotoPreview) URL.revokeObjectURL(editPhotoPreview);
     setEditPhotoPreview(previewUrl);
-    setEditForm((prev) => ({
-      ...prev,
+    setEditForm((previous) => ({
+      ...previous,
       photoFile: file,
       removePhoto: false,
     }));
     setPendingEditCropFile(null);
   };
 
-  /**
-   * Aggiunge nuova visita
-   */
-  const handleAddVisit = async (e) => {
-    e.preventDefault();
-
+  const handleAddVisit = async (event) => {
+    event.preventDefault();
     if (!visitForm.cost || parseFloat(visitForm.cost) <= 0) {
       setError('Il costo deve essere un numero positivo');
       return;
     }
-
     try {
       await addVisit(clientId, visitForm);
       setShowAddVisitModal(false);
-      setVisitForm({
-        date: new Date().toISOString().split('T')[0],
-        treatments: '',
-        issues: '',
-        cost: '',
-      });
-      loadClient(); // Ricarica client con nuova visita
+      setVisitForm(emptyVisitForm());
+      loadClient();
     } catch (err) {
       setError(err.message);
     }
   };
 
-  /**
-   * Elimina una visita
-   */
   const handleDeleteVisit = async (visitId) => {
     if (!window.confirm('Sei sicuro di voler eliminare questa visita?')) return;
-
     try {
       await deleteVisit(visitId, clientId);
-      loadClient(); // Ricarica
+      loadClient();
     } catch (err) {
       setError(err.message);
     }
   };
 
-  /**
-   * Aggiorna cliente
-   */
-  const handleUpdateClient = async (e) => {
-    e.preventDefault();
-
+  const handleUpdateClient = async (event) => {
+    event.preventDefault();
     if (!editForm.name || !editForm.owner) {
       setError('Nome e proprietario sono obbligatori');
       return;
     }
-
     try {
       await updateClient(clientId, editForm);
-      if (editPhotoPreview) {
-        URL.revokeObjectURL(editPhotoPreview);
-      }
+      if (editPhotoPreview) URL.revokeObjectURL(editPhotoPreview);
       setEditPhotoPreview('');
       setShowEditModal(false);
-      loadClient(); // Ricarica
+      loadClient();
     } catch (err) {
       setError(err.message);
     }
@@ -221,9 +198,7 @@ export default function ClientDetail() {
 
   const handleOpenEditModal = () => {
     if (!client) return;
-    if (editPhotoPreview) {
-      URL.revokeObjectURL(editPhotoPreview);
-    }
+    if (editPhotoPreview) URL.revokeObjectURL(editPhotoPreview);
     setEditPhotoPreview('');
     setEditForm({
       name: client.name,
@@ -238,13 +213,8 @@ export default function ClientDetail() {
     setShowEditModal(true);
   };
 
-  /**
-   * Elimina cliente
-   */
   const handleDeleteClient = async () => {
-    if (!window.confirm('Eliminerai il cliente e tutte le sue visite. Sei sicuro?'))
-      return;
-
+    if (!window.confirm('Eliminerai il cliente e tutte le sue visite. Sei sicuro?')) return;
     try {
       await deleteClient(clientId);
       navigate('/dashboard');
@@ -271,16 +241,11 @@ export default function ClientDetail() {
     }
   };
 
-  const handleAddRewardPoints = async (e) => {
-    e.preventDefault();
-
+  const handleAddRewardPoints = async (event) => {
+    event.preventDefault();
     try {
       await addRewardPointMovement(clientId, rewardForm);
-      setRewardForm({
-        points: '',
-        reason: 'manual',
-        note: '',
-      });
+      setRewardForm({ points: '', reason: 'manual', note: '' });
       setShowRewardModal(false);
       await loadClient();
     } catch (err) {
@@ -294,7 +259,6 @@ export default function ClientDetail() {
       setError('Inserisci un numero di telefono per usare WhatsApp.');
       return;
     }
-
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -303,7 +267,6 @@ export default function ClientDetail() {
       setError('QR cliente non disponibile. Applica prima la migration dedicata.');
       return;
     }
-
     navigate(getClientCardPath(client.qr_token));
   };
 
@@ -311,10 +274,7 @@ export default function ClientDetail() {
     try {
       const invite = await createCustomerPortalInvite(clientId, customerInviteEmail.trim());
       setCustomerInvite(invite);
-
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(invite.inviteUrl);
-      }
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(invite.inviteUrl);
     } catch (err) {
       setError(err.message || 'Errore creazione invito cliente');
     }
@@ -325,909 +285,502 @@ export default function ClientDetail() {
       setError('QR cliente non disponibile. Applica prima la migration dedicata.');
       return;
     }
-
     window.open(getClientCardUrl(client.qr_token, { print: true }), '_blank', 'noopener,noreferrer');
   };
 
-  // Loading state
+  const closeEditModal = () => {
+    if (editPhotoPreview) URL.revokeObjectURL(editPhotoPreview);
+    setEditPhotoPreview('');
+    setShowEditModal(false);
+  };
+
+  const removeEditPhoto = () => {
+    if (editPhotoPreview) URL.revokeObjectURL(editPhotoPreview);
+    setEditPhotoPreview('');
+    setEditForm((previous) => ({
+      ...previous,
+      photo: '',
+      photoFile: null,
+      removePhoto: true,
+    }));
+  };
+
   if (loading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: 'var(--color-bg-main)' }}
-      >
-        <div className="text-center">
-          <div
-            className="animate-spin h-12 w-12 rounded-full border-4 border-solid mx-auto mb-4"
-            style={{
-              borderColor: 'var(--color-primary)',
-              borderTopColor: 'transparent',
-            }}
-          ></div>
-          <p style={{ color: 'var(--color-secondary)' }}>Caricamento cliente...</p>
-        </div>
+      <div className="gh-page">
+        <Hero title="Scheda cliente" subtitle="Caricamento della scheda completa" />
+        <main className="gh-page-shell gh-detail-stack" aria-busy="true">
+          <Panel eyebrow="Cliente" title="Caricamento dati" flush>
+            {Array.from({ length: 6 }, (_, index) => <SkeletonRow key={index} />)}
+          </Panel>
+        </main>
       </div>
     );
   }
 
   if (!client) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: 'var(--color-bg-main)' }}
-      >
-        <div className="text-center">
-          <p style={{ color: 'var(--color-secondary)' }}>Cliente non trovato</p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="mt-4 px-4 py-2 rounded-lg text-white font-medium"
-            style={{ backgroundColor: 'var(--color-primary)' }}
-          >
-            Torna alla lista
-          </button>
-        </div>
+      <div className="gh-page">
+        <Hero title="Scheda cliente" subtitle="La scheda richiesta non è disponibile" />
+        <main className="gh-page-shell">
+          <Panel>
+            <EmptyState
+              title="Cliente non trovato"
+              body="Torna all’archivio e apri una scheda disponibile."
+              action={
+                <Button staff variant="primary" onClick={() => navigate('/dashboard')}>
+                  Torna alla lista
+                </Button>
+              }
+            />
+          </Panel>
+        </main>
       </div>
     );
   }
 
   const promo = getClientPromos(client);
   const fidelity = getFidelityTierSnapshot(client);
+  const currentTier = fidelity.currentTier?.key || 'base';
+  const visitsTotal = client.visits?.length || 0;
+  const visitsValue = client.visits?.reduce((sum, visit) => sum + Number(visit.cost || 0), 0) || 0;
 
   return (
-    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen pb-20">
-      <AppHeader
+    <div className="gh-page gh-detail-page">
+      <Hero
         title="Scheda cliente"
         subtitle={`${client.name} · ${client.owner}${client.breed ? ` · ${client.breed}` : ''}`}
-        maxWidthClass="max-w-4xl"
-        rightContent={
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 rounded-xl text-sm font-medium transition"
-            style={{
-              backgroundColor: 'rgba(251, 246, 243, 0.16)',
-              color: '#FBF6F3',
-              border: '1px solid rgba(251, 246, 243, 0.22)',
-            }}
-          >
-            ← Indietro
-          </button>
-        }
+        right={<HeroButton onClick={() => navigate('/dashboard')}>← Indietro</HeroButton>}
       />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* Errore */}
+      <main className="gh-page-shell gh-detail-stack">
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
-              {error}
-            </p>
-            <button
-              onClick={() => setError('')}
-              className="mt-2 text-sm underline"
-              style={{ color: 'var(--color-danger-text)' }}
-            >
-              Chiudi
-            </button>
-          </div>
+          <ErrorState
+            title="Operazione non completata"
+            body={`${error}. La scheda e i dati già inseriti restano visibili.`}
+            action={
+              <Button staff variant="danger" className="gh-error-state__action" onClick={() => setError('')}>
+                Chiudi
+              </Button>
+            }
+          />
         )}
 
-        {/* Client Header Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex flex-col sm:flex-row gap-6">
-            {/* Foto */}
-            <div
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0 overflow-hidden"
-              style={{ backgroundColor: 'var(--color-primary)' }}
-            >
-              {client.photo ? (
-                <img
-                  src={client.photo}
-                  alt={client.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                '🐕'
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="flex-1">
-              <h2
-                className="text-3xl font-bold mb-2"
-                style={{ color: 'var(--color-text-primary)' }}
-              >
-                {client.name}
-              </h2>
-              <p style={{ color: 'var(--color-secondary)' }} className="mb-3 text-lg">
-                {client.breed || 'Razza non specificata'}
-              </p>
-              <div className="space-y-2 mb-4">
-                <p style={{ color: 'var(--color-secondary)' }}>
-                  👤 <strong>{client.owner}</strong>
-                </p>
-                {client.phone && (
-                  <p style={{ color: 'var(--color-secondary)' }}>📱 {client.phone}</p>
-                )}
+        <Panel className="gh-identity-panel">
+          <div className="gh-identity">
+            <PetAvatar name={client.name} photo={client.photo} size={112} tier={currentTier} />
+            <div className="gh-identity__copy">
+              <div className="gh-identity__title-line">
+                <div>
+                  <h2 className="gh-pet-name">{client.name}</h2>
+                  <p className="gh-identity__breed">{client.breed || 'Razza non specificata'}</p>
+                </div>
+                <FidelityBadge tier={currentTier} />
               </div>
-
-              {/* Action buttons */}
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={handleOpenEditModal}
-                  className="px-4 py-2 rounded-lg font-medium transition text-white"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
-                >
-                  ✏️ Modifica
-                </button>
-                <button
+              <div className="gh-identity__meta">
+                <span><strong>{client.owner}</strong></span>
+                {client.phone && <span className="gh-num">{client.phone}</span>}
+              </div>
+              <div className="gh-identity__actions">
+                <Button staff variant="primary" icon="pencil" onClick={handleOpenEditModal}>
+                  Modifica
+                </Button>
+                <Button
+                  staff
+                  variant="secondary"
+                  icon="calendar"
                   onClick={() => navigate(`/calendar?clientId=${clientId}`)}
-                  className="px-4 py-2 rounded-lg font-medium transition text-white"
-                  style={{ backgroundColor: 'var(--color-secondary)' }}
                 >
-                  📅 Appuntamento
-                </button>
-                <button
-                  onClick={handleOpenWhatsApp}
-                  className="px-4 py-2 rounded-lg font-medium transition text-white"
-                  style={{ backgroundColor: '#16a34a' }}
-                >
+                  Appuntamento
+                </Button>
+                <Button staff variant="whatsapp" icon="whatsapp" onClick={handleOpenWhatsApp}>
                   WhatsApp
-                </button>
-                <button
-                  onClick={handleOpenClientCard}
-                  className="px-4 py-2 rounded-lg font-medium transition text-white"
-                  style={{ backgroundColor: '#2563eb' }}
-                >
+                </Button>
+                <Button staff variant="outline" icon="qr" onClick={handleOpenClientCard}>
                   QR Card
-                </button>
-                <button
-                  onClick={handleDeleteClient}
-                  className="px-4 py-2 rounded-lg font-medium transition text-white bg-red-500 hover:bg-red-600"
-                >
-                  🗑️ Elimina
-                </button>
+                </Button>
+                <Button staff variant="danger" icon="trash" onClick={handleDeleteClient}>
+                  Elimina
+                </Button>
               </div>
             </div>
           </div>
-        </div>
+        </Panel>
 
-        {/* Promozione visite legacy: non mostrarla quando la fidelity usa punti manuali. */}
-        {fidelity.mode !== 'points' && promo.count > 0 && <PromoBadge promo={promo} />}
+        {fidelity.mode !== 'points' && promo.count > 0 && (
+          <Panel className="gh-promo-panel" eyebrow="Promozione visite" title={promo.message}>
+            <p className="gh-body">
+              {promo.discount > 0
+                ? `Sconto disponibile: ${promo.discount}%`
+                : 'Il vantaggio si aggiorna automaticamente con le visite registrate.'}
+            </p>
+          </Panel>
+        )}
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
-            🏅 Fidelity cliente
-          </h3>
-          <p style={{ color: 'var(--color-secondary)' }} className="mb-5">
-            Livello attuale:{' '}
-            <strong>
-              {fidelity.currentTier ? fidelity.currentTier.label : 'Base'}
-            </strong>
-            {fidelity.nextTier && (
-              <>
-                {' '}· Mancano{' '}
-                <strong>
-                  {fidelity.mode === 'points'
-                    ? `${fidelity.nextTier.remainingPoints} punti`
-                    : `${fidelity.nextTier.remainingVisits} visite`}
-                </strong>{' '}
-                per{' '}
-                <strong>{fidelity.nextTier.label}</strong>
-              </>
-            )}
-          </p>
-
-          <div
-            className="rounded-2xl p-5 mb-5 border"
-            style={{
-              backgroundColor: 'var(--color-bg-main)',
-              borderColor: 'var(--color-border)',
-            }}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <p
-                  className="text-xs uppercase tracking-[0.2em] font-bold mb-2"
-                  style={{ color: 'var(--color-secondary)' }}
-                >
-                  Punti premio
-                </p>
-                <p className="text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                  {fidelity.rewardPointsTotal}
-                </p>
-                <p className="text-sm mt-2" style={{ color: 'var(--color-secondary)' }}>
-                  {fidelity.mode === 'points'
-                    ? 'Il livello fidelity è calcolato sui punti premio.'
-                    : 'Nessun punto ancora assegnato: la card usa ancora il fallback sulle visite.'}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowRewardModal(true)}
-                className="px-5 py-3 rounded-xl font-bold text-white"
-                style={{ backgroundColor: 'var(--color-primary)' }}
-              >
-                Aggiungi / rimuovi punti
-              </button>
+        <Panel
+          eyebrow="Fidelity cliente"
+          title={`Livello ${fidelity.currentTier?.label || 'Base'}`}
+          right={
+            <Button staff variant="outline" onClick={() => setShowRewardModal(true)}>
+              Aggiungi / rimuovi punti
+            </Button>
+          }
+        >
+          <div className="gh-fidelity-summary">
+            <div>
+              <span className="gh-eyebrow--staff">Punti premio</span>
+              <div className="gh-stat-num">{fidelity.rewardPointsTotal}</div>
             </div>
+            <p className="gh-meta">
+              {fidelity.mode === 'points'
+                ? 'Il livello fidelity è calcolato sui punti premio.'
+                : 'Nessun punto ancora assegnato: la card usa ancora il fallback sulle visite.'}
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {fidelity.tiers.map((tier) => (
-              <div
-                key={tier.key}
-                className="rounded-2xl border p-5"
-                style={{
-                  backgroundColor: tier.style.backgroundColor,
-                  borderColor: tier.style.borderColor,
-                }}
-              >
-                <p
-                  className="text-lg font-bold mb-2"
-                  style={{ color: tier.style.textColor }}
-                >
-                  {tier.label}
-                </p>
-                <p style={{ color: tier.style.textColor }} className="text-sm">
-                  {fidelity.mode === 'points'
-                    ? `${tier.pointsRequired} punti`
-                    : `${tier.visitsRequired} visite in ${tier.monthsWindow} mesi`}
-                </p>
-                <p
-                  style={{ color: tier.style.textColor }}
-                  className="text-2xl font-bold mt-3"
-                >
-                  {fidelity.mode === 'points'
-                    ? Math.min(fidelity.rewardPointsTotal, tier.pointsRequired)
-                    : tier.visitsInWindow}
-                </p>
-                <p style={{ color: tier.style.textColor }} className="text-sm mt-1">
-                  {tier.achieved
-                    ? 'Obiettivo raggiunto'
-                    : fidelity.mode === 'points'
-                      ? `${tier.remainingPoints} punti mancanti`
-                      : `${tier.remainingVisits} visite mancanti`}
-                </p>
-              </div>
-            ))}
+          <div className="gh-tier-list">
+            {fidelity.tiers.map((tier) => {
+              const current = fidelity.mode === 'points'
+                ? Math.min(fidelity.rewardPointsTotal, tier.pointsRequired)
+                : tier.visitsInWindow;
+              const total = fidelity.mode === 'points' ? tier.pointsRequired : tier.visitsRequired;
+              return (
+                <div className="gh-tier-row" key={tier.key}>
+                  <FidelityBadge tier={tier.key} compact />
+                  <div className="gh-tier-row__progress">
+                    <progress max={total} value={Math.min(current, total)} />
+                    <span className="gh-meta gh-num">
+                      {fidelity.mode === 'points'
+                        ? `${current} / ${total} punti`
+                        : `${current} / ${total} visite in ${tier.monthsWindow} mesi`}
+                    </span>
+                  </div>
+                  <span className="gh-meta gh-num">
+                    {tier.achieved
+                      ? 'Raggiunto'
+                      : fidelity.mode === 'points'
+                        ? `${tier.remainingPoints} mancanti`
+                        : `${tier.remainingVisits} mancanti`}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
-          {client.rewardPoints?.length > 0 ? (
-            <div className="mt-6">
-              <p
-                className="text-sm font-bold mb-3"
-                style={{ color: 'var(--color-text-primary)' }}
-              >
-                Ultimi movimenti punti
-              </p>
-              <div className="space-y-2">
-                {client.rewardPoints.slice(0, 5).map((movement) => (
-                  <div
-                    key={movement.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border px-4 py-3"
-                    style={{ borderColor: 'var(--color-border)' }}
-                  >
+          {client.rewardPoints?.length > 0 && (
+            <div className="gh-reward-list">
+              <span className="gh-eyebrow--staff">Ultimi movimenti punti</span>
+              {client.rewardPoints.slice(0, 5).map((movement) => {
+                const positive = Number(movement.points) > 0;
+                return (
+                  <div className="gh-reward-row" key={movement.id}>
                     <div>
-                      <p
-                        className="font-semibold"
-                        style={{ color: 'var(--color-text-primary)' }}
-                      >
-                        {REWARD_REASON_LABELS[movement.reason] || movement.reason}
-                      </p>
-                      {movement.note ? (
-                        <p className="text-sm" style={{ color: 'var(--color-secondary)' }}>
-                          {movement.note}
-                        </p>
-                      ) : null}
+                      <strong>{REWARD_REASON_LABELS[movement.reason] || movement.reason}</strong>
+                      {movement.note && <p className="gh-meta">{movement.note}</p>}
                     </div>
-                    <div className="sm:text-right">
-                      <p
-                        className="font-bold"
-                        style={{
-                          color:
-                            Number(movement.points) > 0
-                              ? 'var(--color-success-text)'
-                              : 'var(--color-danger-text)',
-                        }}
-                      >
-                        {Number(movement.points) > 0 ? '+' : ''}
-                        {movement.points} punti
-                      </p>
-                      <p className="text-xs" style={{ color: 'var(--color-secondary)' }}>
+                    <div className="gh-reward-row__value">
+                      <strong className={positive ? 'gh-text-success' : 'gh-text-danger'}>
+                        {positive ? '+' : ''}{movement.points} punti
+                      </strong>
+                      <span className="gh-meta gh-num">
                         {new Date(movement.created_at).toLocaleDateString('it-IT')}
-                      </p>
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          ) : null}
-        </div>
+          )}
+        </Panel>
 
-        {/* Note */}
         {client.notes && (
-          <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-6 mb-6">
-            <h3 style={{ color: 'var(--color-text-primary)' }} className="font-bold mb-2">
-              📝 Note Importanti
-            </h3>
-            <p style={{ color: 'var(--color-secondary)' }} className="whitespace-pre-wrap">
-              {client.notes}
-            </p>
-          </div>
+          <Panel className="gh-notes-panel" eyebrow="Note importanti" title="Indicazioni operatore">
+            <p className="gh-body gh-pre-wrap">{client.notes}</p>
+          </Panel>
         )}
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="flex-1">
-              <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
-                🪪 Card identificativa QR
-              </h3>
-              <p style={{ color: 'var(--color-secondary)' }} className="mb-2">
-                Codice card: <strong>{getClientCardCode(client.qr_token)}</strong>
-              </p>
-              <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-4">
+        <Panel className="gh-detail-half" eyebrow="Card identificativa QR" title={`Codice ${getClientCardCode(client.qr_token)}`}>
+          <div className="gh-qr-layout">
+            <div className="gh-qr-copy">
+              <p className="gh-body">
                 Il QR apre la card cliente pubblica. Se sei in area operatore, puoi continuare dalla scheda completa.
               </p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={handleOpenClientCard}
-                  className="px-4 py-2 rounded-lg font-medium text-white"
-                  style={{ backgroundColor: '#2563eb' }}
-                >
+              <div className="gh-inline-actions">
+                <Button staff variant="secondary" icon="arrow" onClick={handleOpenClientCard}>
                   Apri area operatore
-                </button>
-                <button
-                  onClick={handlePrintClientCard}
-                  className="px-4 py-2 rounded-lg font-medium text-white"
-                  style={{ backgroundColor: 'var(--color-secondary)' }}
-                >
+                </Button>
+                <Button staff variant="outline" icon="qr" onClick={handlePrintClientCard}>
                   Stampa card
-                </button>
+                </Button>
               </div>
             </div>
-
             {client.qr_token && (
-              <div
-                className="rounded-2xl border p-4 bg-white shadow-sm"
-                style={{ borderColor: '#ead7c5' }}
-              >
-                <img
-                  src={getClientQrImageUrl(client.qr_token, 180)}
-                  alt={`QR ${client.name}`}
-                  className="w-40 h-40 bg-white rounded-xl"
-                />
+              <div className="gh-qr-image">
+                <img src={getClientQrImageUrl(client.qr_token, 180)} alt={`QR ${client.name}`} />
               </div>
             )}
           </div>
-        </div>
+        </Panel>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-            <div className="flex-1">
-              <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
-                Area cliente digitale
-              </h3>
-              <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-4">
+        <Panel className="gh-detail-half" bridge eyebrow="Area cliente digitale" title="Collega questa scheda a un account">
+          <div className="gh-bridge-layout">
+            <div>
+              <p className="gh-body">
                 Genera un link riservato per collegare questa scheda cane a un account cliente.
-                Il cliente vedra solo card, fidelity, prossimo appuntamento e contatto WhatsApp.
+                Il cliente vedrà solo card, fidelity, prossimo appuntamento e contatto WhatsApp.
               </p>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
+              <div className="gh-bridge-form">
+                <Field
+                  aria-label="Email cliente opzionale"
                   type="email"
                   value={customerInviteEmail}
                   onChange={(event) => setCustomerInviteEmail(event.target.value)}
                   placeholder="Email cliente opzionale"
-                  className="flex-1 px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
-                <button
-                  onClick={handleCreateCustomerInvite}
-                  className="px-5 py-3 rounded-lg font-bold text-white"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
-                >
+                <Button staff variant="primary" onClick={handleCreateCustomerInvite}>
                   Genera invito
-                </button>
+                </Button>
               </div>
             </div>
-
-            {customerInvite ? (
-              <div
-                className="lg:w-80 rounded-2xl border p-4"
-                style={{ backgroundColor: 'var(--color-bg-main)', borderColor: 'var(--color-border)' }}
-              >
-                <p className="text-xs uppercase tracking-[0.2em] font-bold mb-2" style={{ color: 'var(--color-secondary)' }}>
-                  Link invito
-                </p>
-                <p className="text-sm break-all" style={{ color: 'var(--color-text-primary)' }}>
-                  {customerInvite.inviteUrl}
-                </p>
-                <p className="text-xs mt-3" style={{ color: 'var(--color-secondary)' }}>
-                  Link copiato negli appunti. Scade tra 30 giorni.
-                </p>
+            {customerInvite && (
+              <div className="gh-invite-result">
+                <span className="gh-eyebrow--staff">Link invito</span>
+                <p className="gh-invite-result__url">{customerInvite.inviteUrl}</p>
+                <p className="gh-meta">Link copiato negli appunti. Scade tra 30 giorni.</p>
               </div>
-            ) : null}
+            )}
           </div>
-        </div>
+        </Panel>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h3 style={{ color: 'var(--color-text-primary)' }} className="text-xl font-bold mb-3">
-            ⚖️ Affidabilita appuntamenti
-          </h3>
-          <p style={{ color: 'var(--color-secondary)' }} className="mb-4">
-            Score attuale: <strong>{client.no_show_score ?? 0}</strong> · Stato:{' '}
-            <strong>{client.is_blacklisted ? 'BLACKLIST' : 'Attivo'}</strong>
-          </p>
-          <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-4">
-            Regola automatica: da -3 in giu il cliente entra in blacklist.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => handleAdjustNoShowScore(-1)}
-              className="px-4 py-2 rounded-lg font-medium text-white"
-              style={{ backgroundColor: '#e11d48' }}
-            >
+        <Panel
+          eyebrow="Affidabilità appuntamenti"
+          title={`Score ${client.no_show_score ?? 0} · ${client.is_blacklisted ? 'BLACKLIST' : 'Attivo'}`}
+        >
+          <div className="gh-score-copy">
+            <ScoreScale />
+            <p className="gh-meta">Regola automatica: da -3 in giù il cliente entra in blacklist.</p>
+          </div>
+          <div className="gh-inline-actions gh-score-actions">
+            <Button staff variant="danger" onClick={() => handleAdjustNoShowScore(-1)}>
               Segna No-show (-1)
-            </button>
-            <button
-              onClick={() => handleAdjustNoShowScore(1)}
-              className="px-4 py-2 rounded-lg font-medium text-white"
-              style={{ backgroundColor: '#16a34a' }}
-            >
+            </Button>
+            <Button staff variant="success" icon="check" onClick={() => handleAdjustNoShowScore(1)}>
               Segna Presenza (+1)
-            </button>
-            <button
-              onClick={handleToggleBlacklist}
-              className="px-4 py-2 rounded-lg font-medium text-white"
-              style={{ backgroundColor: client.is_blacklisted ? '#2563eb' : '#b91c1c' }}
-            >
+            </Button>
+            <Button staff variant="ghost" onClick={handleToggleBlacklist}>
               {client.is_blacklisted ? 'Rimuovi da blacklist' : 'Inserisci in blacklist'}
-            </button>
+            </Button>
           </div>
-        </div>
+        </Panel>
 
-        {/* Visite */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3
-            style={{ color: 'var(--color-text-primary)' }}
-            className="text-2xl font-bold mb-6 flex items-center"
-          >
-            📅 Visite ({client.visits?.length || 0})
-          </h3>
-
-          {client.visits && client.visits.length > 0 ? (
-            <div className="space-y-4">
-              {client.visits.map((visit) => (
-                <VisitCard
-                  key={visit.id}
-                  visit={visit}
-                  onDelete={() => handleDeleteVisit(visit.id)}
-                />
-              ))}
-            </div>
+        <Panel
+          eyebrow="Visite"
+          title={`${visitsTotal} registrate · ${visitsValue.toLocaleString('it-IT', {
+            style: 'currency',
+            currency: 'EUR',
+          })} nel periodo`}
+          flush
+          right={
+            <Button staff variant="ghost" icon="plus" onClick={() => setShowAddVisitModal(true)}>
+              Registra
+            </Button>
+          }
+        >
+          {client.visits?.length > 0 ? (
+            client.visits.map((visit) => (
+              <VisitRow
+                key={visit.id}
+                visit={visit}
+                date={formatVisitDate(visit.date)}
+                onDelete={() => handleDeleteVisit(visit.id)}
+              />
+            ))
           ) : (
-            <p style={{ color: 'var(--color-secondary)' }} className="italic text-center py-8">
-              Nessuna visita registrata
-            </p>
+            <EmptyState
+              title="Nessuna visita registrata"
+              body="Registra la prima visita da qui, anche se il lavoro è già stato concluso."
+              action={
+                <Button staff variant="primary" icon="plus" onClick={() => setShowAddVisitModal(true)}>
+                  Registra la prima visita
+                </Button>
+              }
+            />
           )}
-        </div>
+        </Panel>
       </main>
 
-      {/* FAB Aggiungi Visita */}
-      <button
-        onClick={() => setShowAddVisitModal(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full text-white text-2xl shadow-lg transform transition duration-200 hover:scale-110 flex items-center justify-center"
-        style={{ backgroundColor: 'var(--color-primary)' }}
-      >
-        +
-      </button>
+      <Fab label="Registra visita" always onClick={() => setShowAddVisitModal(true)} />
 
-      {/* Modal Aggiungi Visita */}
       {showAddVisitModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50 sm:items-center sm:justify-center">
-          <div
-            className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 sm:p-8 shadow-2xl max-h-96 overflow-y-auto"
-            style={{ backgroundColor: '#ffffff' }}
-          >
-            <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold mb-6">
-              Nuova Visita
-            </h2>
-
-            <form onSubmit={handleAddVisit} className="space-y-4">
-              {/* Data */}
+        <div className="gh-modal-scrim" role="presentation">
+          <section className="gh-modal" role="dialog" aria-modal="true" aria-labelledby="visit-modal-title">
+            <div className="gh-modal__head">
               <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Data
-                </label>
-                <input
+                <span className="gh-eyebrow--staff gh-eyebrow--accent">Registra visita</span>
+                <h2 className="gh-panel-title" id="visit-modal-title">{client.name}</h2>
+              </div>
+              <Button staff variant="ghost" onClick={() => setShowAddVisitModal(false)}>Chiudi</Button>
+            </div>
+            <form onSubmit={handleAddVisit}>
+              <div className="gh-modal__body gh-visit-form">
+                {error && (
+                  <ErrorState body={`${error}. I dati inseriti nel form restano disponibili.`} />
+                )}
+                <Field
+                  label="Data"
                   type="date"
                   value={visitForm.date}
-                  onChange={(e) =>
-                    setVisitForm({ ...visitForm, date: e.target.value })
-                  }
+                  onChange={(event) => setVisitForm({ ...visitForm, date: event.target.value })}
                   required
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
-              </div>
-
-              {/* Trattamenti */}
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Trattamenti
-                </label>
-                <textarea
+                <Field
+                  label="Trattamenti"
+                  area
+                  rows="3"
                   value={visitForm.treatments}
-                  onChange={(e) =>
-                    setVisitForm({ ...visitForm, treatments: e.target.value })
-                  }
+                  onChange={(event) => setVisitForm({ ...visitForm, treatments: event.target.value })}
                   placeholder="Es. Bagno, taglio, asciugatura..."
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  rows="3"
                 />
-              </div>
-
-              {/* Problematiche */}
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Problematiche
-                </label>
-                <textarea
+                <Field
+                  label="Problematiche"
+                  area
+                  rows="3"
                   value={visitForm.issues}
-                  onChange={(e) =>
-                    setVisitForm({ ...visitForm, issues: e.target.value })
-                  }
+                  onChange={(event) => setVisitForm({ ...visitForm, issues: event.target.value })}
                   placeholder="Es. Pelle irritata, nodi..."
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  rows="3"
                 />
-              </div>
-
-              {/* Costo */}
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Costo (€) *
-                </label>
-                <input
+                <Field
+                  label="Costo (€) *"
                   type="number"
                   step="0.01"
                   min="0"
                   value={visitForm.cost}
-                  onChange={(e) =>
-                    setVisitForm({ ...visitForm, cost: e.target.value })
-                  }
+                  onChange={(event) => setVisitForm({ ...visitForm, cost: event.target.value })}
                   placeholder="0.00"
                   required
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
-
-              {/* Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 py-3 rounded-lg font-bold text-white transition"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
-                >
-                  Salva Visita
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddVisitModal(false)}
-                  className="flex-1 py-3 rounded-lg font-bold border-2 transition"
-                  style={{
-                    borderColor: 'var(--color-primary)',
-                    color: 'var(--color-text-primary)',
-                  }}
-                >
-                  Annulla
-                </button>
+              <div className="gh-modal__foot">
+                <Button staff variant="outline" onClick={() => setShowAddVisitModal(false)}>Annulla</Button>
+                <Button staff variant="primary" type="submit" icon="check">Salva Visita</Button>
               </div>
             </form>
-          </div>
+          </section>
         </div>
       )}
 
-      {/* Modal Modifica Cliente */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50 sm:items-center sm:justify-center">
-          <div
-            className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 sm:p-8 shadow-2xl max-h-96 overflow-y-auto"
-            style={{ backgroundColor: '#ffffff' }}
-          >
-            <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold mb-6">
-              Modifica Cliente
-            </h2>
-
-            <form onSubmit={handleUpdateClient} className="space-y-4">
-              {/* Nome */}
+        <div className="gh-modal-scrim" role="presentation">
+          <section className="gh-modal gh-modal--narrow" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+            <div className="gh-modal__head">
               <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Nome *
-                </label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, name: e.target.value })
-                  }
-                  required
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                />
+                <span className="gh-eyebrow--staff gh-eyebrow--accent">Scheda cliente</span>
+                <h2 className="gh-panel-title" id="edit-modal-title">Modifica Cliente</h2>
               </div>
-
-              {/* Razza */}
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Razza
-                </label>
-                <input
-                  type="text"
-                  value={editForm.breed}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, breed: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                />
-              </div>
-
-              {/* Proprietario */}
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Proprietario *
-                </label>
-                <input
-                  type="text"
-                  value={editForm.owner}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, owner: e.target.value })
-                  }
-                  required
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                />
-              </div>
-
-              {/* Telefono */}
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Telefono
-                </label>
-                <input
-                  type="tel"
-                  value={editForm.phone}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, phone: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                />
-              </div>
-
-              {/* Note */}
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Note
-                </label>
-                <textarea
-                  value={editForm.notes}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, notes: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  rows="3"
-                />
-              </div>
-
-              {/* Foto */}
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Foto del cane
-                </label>
-
-                {(editForm.photo || editPhotoPreview) && (
-                  <div className="mb-3 relative">
-                    <img
-                      src={editPhotoPreview || editForm.photo}
-                      alt="Anteprima foto"
-                      className="w-full h-40 object-cover rounded-lg border-2"
-                      style={{ borderColor: 'var(--color-primary)' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (editPhotoPreview) {
-                          URL.revokeObjectURL(editPhotoPreview);
-                        }
-                        setEditPhotoPreview('');
-                        setEditForm((prev) => ({
-                          ...prev,
-                          photo: '',
-                          photoFile: null,
-                          removePhoto: true,
-                        }));
-                      }}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
-                    >
-                      ✕
-                    </button>
-                  </div>
+              <Button staff variant="ghost" onClick={closeEditModal}>Chiudi</Button>
+            </div>
+            <form onSubmit={handleUpdateClient}>
+              <div className="gh-modal__body gh-form-stack">
+                {error && (
+                  <ErrorState body={`${error}. Le modifiche inserite restano disponibili.`} />
                 )}
+                <Field label="Nome *" value={editForm.name} onChange={(event) => setEditForm({ ...editForm, name: event.target.value })} required />
+                <Field label="Razza" value={editForm.breed} onChange={(event) => setEditForm({ ...editForm, breed: event.target.value })} />
+                <Field label="Proprietario *" value={editForm.owner} onChange={(event) => setEditForm({ ...editForm, owner: event.target.value })} required />
+                <Field label="Telefono" type="tel" value={editForm.phone} onChange={(event) => setEditForm({ ...editForm, phone: event.target.value })} />
+                <Field label="Note" area rows="3" value={editForm.notes} onChange={(event) => setEditForm({ ...editForm, notes: event.target.value })} />
 
-                <div
-                  className="border-2 border-dashed rounded-lg p-4 text-center"
-                  style={{ borderColor: 'var(--color-primary)' }}
-                >
-                  <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
-                    {editForm.photo || editPhotoPreview
-                      ? 'Sostituisci foto del cane'
-                      : 'Aggiungi foto del cane'}
-                  </p>
-                  <div className="mt-3 flex flex-col sm:flex-row gap-3 justify-center">
-                    <div
-                      className="relative px-4 py-2 rounded-lg font-medium text-white transition inline-flex items-center justify-center overflow-hidden"
-                      style={{ backgroundColor: 'var(--color-primary)' }}
-                    >
-                      <input
-                        id="edit-photo-camera"
-                        type="file"
-                        accept="image/*,.heic,.heif"
-                        capture="environment"
-                        onChange={handleEditPhotoSelect}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                      />
-                      Scatta foto
+                <div>
+                  <span className="gh-eyebrow--staff gh-field-label">Foto del cane</span>
+                  {(editForm.photo || editPhotoPreview) && (
+                    <div className="gh-edit-photo-preview">
+                      <img src={editPhotoPreview || editForm.photo} alt="Anteprima foto" />
+                      <Button staff variant="danger" icon="trash" onClick={removeEditPhoto} aria-label="Rimuovi foto" />
                     </div>
-                    <div
-                      className="relative px-4 py-2 rounded-lg font-medium border-2 transition inline-flex items-center justify-center overflow-hidden"
-                      style={{ borderColor: 'var(--color-primary)', color: 'var(--color-text-primary)' }}
-                    >
-                      <input
-                        id="edit-photo-gallery"
-                        type="file"
-                        accept="image/*,.heic,.heif"
-                        onChange={handleEditPhotoSelect}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                      />
-                      Galleria
+                  )}
+                  <div className="gh-photo-picker">
+                    <p className="gh-meta">
+                      {editForm.photo || editPhotoPreview ? 'Sostituisci foto del cane' : 'Aggiungi foto del cane'}
+                    </p>
+                    <div className="gh-inline-actions">
+                      <label className="gh-btn gh-btn--primary gh-file-button">
+                        <input type="file" accept="image/*,.heic,.heif" capture="environment" onChange={handleEditPhotoSelect} />
+                        Scatta foto
+                      </label>
+                      <label className="gh-btn gh-btn--outline gh-file-button">
+                        <input type="file" accept="image/*,.heic,.heif" onChange={handleEditPhotoSelect} />
+                        Galleria
+                      </label>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 py-3 rounded-lg font-bold text-white transition"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
-                >
-                  Salva Modifiche
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (editPhotoPreview) {
-                      URL.revokeObjectURL(editPhotoPreview);
-                    }
-                    setEditPhotoPreview('');
-                    setShowEditModal(false);
-                  }}
-                  className="flex-1 py-3 rounded-lg font-bold border-2 transition"
-                  style={{
-                    borderColor: 'var(--color-primary)',
-                    color: 'var(--color-text-primary)',
-                  }}
-                >
-                  Annulla
-                </button>
+              <div className="gh-modal__foot">
+                <Button staff variant="outline" onClick={closeEditModal}>Annulla</Button>
+                <Button staff variant="primary" type="submit">Salva Modifiche</Button>
               </div>
             </form>
-          </div>
+          </section>
         </div>
       )}
 
       {showRewardModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50 sm:items-center sm:justify-center">
-          <div
-            className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 sm:p-8 shadow-2xl max-h-96 overflow-y-auto"
-            style={{ backgroundColor: '#ffffff' }}
-          >
-            <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold mb-2">
-              Punti premio
-            </h2>
-            <p style={{ color: 'var(--color-secondary)' }} className="text-sm mb-6">
-              Usa valori positivi per assegnare punti, negativi per riscatti o correzioni.
-            </p>
-
-            <form onSubmit={handleAddRewardPoints} className="space-y-4">
+        <div className="gh-modal-scrim" role="presentation">
+          <section className="gh-modal gh-modal--narrow" role="dialog" aria-modal="true" aria-labelledby="reward-modal-title">
+            <div className="gh-modal__head">
               <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Punti *
-                </label>
-                <input
+                <span className="gh-eyebrow--staff gh-eyebrow--accent">Fidelity</span>
+                <h2 className="gh-panel-title" id="reward-modal-title">Punti premio</h2>
+              </div>
+              <Button staff variant="ghost" onClick={() => setShowRewardModal(false)}>Chiudi</Button>
+            </div>
+            <form onSubmit={handleAddRewardPoints}>
+              <div className="gh-modal__body gh-form-stack">
+                {error && (
+                  <ErrorState body={`${error}. Il movimento inserito resta disponibile.`} />
+                )}
+                <p className="gh-meta">Usa valori positivi per assegnare punti, negativi per riscatti o correzioni.</p>
+                <Field
+                  label="Punti *"
                   type="number"
                   step="1"
                   value={rewardForm.points}
-                  onChange={(e) =>
-                    setRewardForm({ ...rewardForm, points: e.target.value })
-                  }
+                  onChange={(event) => setRewardForm({ ...rewardForm, points: event.target.value })}
                   placeholder="Es. 25 oppure -50"
                   required
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
-              </div>
-
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Motivo
-                </label>
-                <select
+                <Field
+                  as="select"
+                  label="Motivo"
                   value={rewardForm.reason}
-                  onChange={(e) =>
-                    setRewardForm({ ...rewardForm, reason: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-lg border-2 bg-white"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                  onChange={(event) => setRewardForm({ ...rewardForm, reason: event.target.value })}
                 >
                   {VALID_REWARD_POINT_REASONS.map((reason) => (
-                    <option key={reason} value={reason}>
-                      {REWARD_REASON_LABELS[reason] || reason}
-                    </option>
+                    <option key={reason} value={reason}>{REWARD_REASON_LABELS[reason] || reason}</option>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Nota
-                </label>
-                <textarea
-                  value={rewardForm.note}
-                  onChange={(e) =>
-                    setRewardForm({ ...rewardForm, note: e.target.value })
-                  }
-                  placeholder="Dettaglio facoltativo"
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                </Field>
+                <Field
+                  label="Nota"
+                  area
                   rows="3"
+                  value={rewardForm.note}
+                  onChange={(event) => setRewardForm({ ...rewardForm, note: event.target.value })}
+                  placeholder="Dettaglio facoltativo"
                 />
               </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 py-3 rounded-lg font-bold text-white transition"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
-                >
-                  Salva movimento
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowRewardModal(false)}
-                  className="flex-1 py-3 rounded-lg font-bold border-2 transition"
-                  style={{
-                    borderColor: 'var(--color-primary)',
-                    color: 'var(--color-text-primary)',
-                  }}
-                >
-                  Annulla
-                </button>
+              <div className="gh-modal__foot">
+                <Button staff variant="outline" onClick={() => setShowRewardModal(false)}>Annulla</Button>
+                <Button staff variant="primary" type="submit">Salva movimento</Button>
               </div>
             </form>
-          </div>
+          </section>
         </div>
       )}
 
       <ImageCropModal
         open={Boolean(pendingEditCropFile)}
         file={pendingEditCropFile}
-        onCancel={handleEditCropCancel}
+        onCancel={() => setPendingEditCropFile(null)}
         onConfirm={handleEditCropConfirm}
       />
     </div>
