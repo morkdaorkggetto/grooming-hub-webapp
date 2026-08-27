@@ -53,7 +53,15 @@ export default function Redeem() {
           </p>
         )}
         <p style={{ marginTop: 24, fontSize: 14 }}>
-          <Link to="/u/login" style={{ color: 'var(--color-link, #5e8580)' }}>
+          <Link
+            to="/u/login"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: 44,
+              color: 'var(--color-link, #5e8580)',
+            }}
+          >
             Hai già un account? Accedi
           </Link>
         </p>

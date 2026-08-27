@@ -34,7 +34,7 @@ export default function Card({
     borderRadius: staff ? 'var(--gh-r-panel)' : (RADIUS_MAP[radius] || RADIUS_MAP.lg),
     padding: typeof padding === 'number' ? `${padding}px` : padding,
     boxShadow: elevated && !staff
-      ? 'var(--shadow-md)'
+      ? '0 1px 2px rgba(43,37,37,.04), 0 12px 40px -24px rgba(43,37,37,.25)'
       : 'none',
     ...(style || {}),
   };

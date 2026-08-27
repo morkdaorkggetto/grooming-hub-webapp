@@ -277,7 +277,40 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Terzo difetto di mandato di Cowork, stessa famiglia dei precedenti** (autodenuncia): GH-17 chiedeva come controprova «registrazione di una visita di prova dal gesto reale, poi rimossa» e **contemporaneamente vietava ogni uso del database**. Contraddizione. Codex l'ha dichiarata invece di scegliere in silenzio quale metà obbedire. Il filo è visibile: GH-05 aveva un elenco file incompleto, GH-13 ometteva il prerequisito `service_id`, GH-17 si contraddice sulla verifica. **I miei mandati sono più deboli proprio dove prescrivono come verificare** — da guardare la prossima volta che ne scrivo uno.
 
-**Prossimo passo**: micro-mandato che chiude entrambi gli aperti in un colpo, perché entrambi richiedono il demo — regressione visiva delle sette pagine customer e ciclo reale di registrazione visita marcato `[DEMO][GH-17]` con rimozione nella stessa sessione.
+**Prossimo passo**: micro-mandato che chiude entrambi gli aperti in un colpo, perché entrambi richiedono il demo — regressione visiva delle sette pagine customer e ciclo reale di registrazione visita marcato `[DEMO][GH-17]` con rimozione nella stessa sessione. Emesso come `GH-18`.
+
+**Il login staff era fuori perimetro, ed è un buco mio** (25/8): Luigi aveva chiesto a voce a Claude Design di comporre anche la schermata di accesso. Misura Cowork sul bundle consegnato: del login **non c'è traccia** — non nell'handoff, non in un file di composizione, non una classe CSS. Il brief `GH-15` che avevo scritto io nomina tre schermate e il login non c'è; CD ha composto contro il brief scritto. E quando ho verificato l'handoff sui nove requisiti l'ho confrontato di nuovo con il mio stesso brief, quindi **una schermata mancante era invisibile per costruzione**. È il buco fra una richiesta detta e un mandato scritto: esattamente ciò che il canone dovrebbe impedire. Da recuperare con un `CD-01` breve — il kit esiste già, a CD resta la sola scelta del registro (accoglienza editoriale come il login clienti, oppure porta di servizio asciutta).
+
+**Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
+
+**Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 25 agosto 2026 — Davide e Roby sul calendario: risposta alla §9.1 di CD
+
+**Fonte**: incontro diretto di Luigi con Davide e Roby, riferito la sera stessa. Congela la domanda aperta che CD aveva lasciato al §9.1 del suo handoff e che Cowork aveva posto come prerequisito del giro calendario.
+
+**La risposta non è «calendario-primo» né «come adesso»: è che il calendario si riempie da due direzioni.**
+
+- **In avanti**: le richieste dei clienti, una volta confermate, vengono registrate assegnando **data e orario**. L'orario lo decide il salone al momento della conferma, perché **dipende dalle condizioni del pet e non è determinabile a priori**. Conferma definitiva del modello «richiesta, non prenotazione a slot»: non esiste una durata prevedibile su cui costruire una griglia.
+- **All'indietro**: chi arriva direttamente in negozio col pet viene registrato come si fa oggi, e quella lavorazione **integra il calendario a posteriori**.
+
+**Perché lo vogliono** (parole loro): per avere un quadro chiaro di clienti, incassi, promozioni e status del cliente. Il calendario non è quindi solo un'agenda: è il punto dove convergono le due strade e da cui si legge l'andamento. Dichiarato come assetto **transitorio**, «almeno finché il meccanismo non sarà rodato».
+
+**Conseguenza compositiva: il calendario conterrà tre oggetti di natura diversa**, non due come CD aveva ipotizzato al §10.
+
+| Oggetto | Certezza temporale | Forma |
+|---|---|---|
+| Richiesta pendente | giorno desiderato + fascia | banda, non blocco |
+| Appuntamento confermato | data e ora assegnate dal salone | blocco a ora certa |
+| Lavorazione registrata a posteriori | **solo il giorno** | segno sulla giornata, senza ora |
+
+**Vincolo di schema misurato, da risolvere PRIMA che CD componga**: `visits.date` è di tipo **`date`, senza orario**. Una lavorazione registrata a posteriori quindi **non ha un'ora** e non è collocabile in una griglia oraria. Due strade: aggiungere un orario alle visite (mandato dati separato, con backfill e decisione sulle 464 storiche che un'ora non ce l'hanno), oppure comporre il calendario perché regga oggetti privi di ora. La seconda è coerente con la pratica reale — loro registrano a lavoro finito, non cronometrano — ed è anche la più onesta: un'ora inventata sarebbe un dato finto che sembra vero.
+
+Nota di convergenza: richieste e lavorazioni a posteriori hanno lo **stesso problema visivo** — non stanno a un'ora precisa. Solo gli appuntamenti confermati sono blocchi. La forma «banda» che CD proponeva per le richieste serve quindi a due dei tre oggetti.
+
+**Precisazione del salone che ribalta il senso di un campo** (Davide e Roby via Luigi, 25/8): quello che il cliente indica — bagno, taglio, toelettatura completa — **non è un servizio che seleziona da un listino, è un'esigenza che segnala**. Le lavorazioni le consigliano o dispongono Davide e Roby **dopo aver valutato di persona** condizioni del pelo, caratteristiche del pet e abitudini. Conseguenze: (a) la parola «Servizio» usata oggi nel wizard clienti (`Book.jsx`, due occorrenze) e nella vista richieste staff (`CustomerRequests.jsx`) ha il **registro sbagliato** — suggerisce un menu da cui si ordina — e va sostituita con il vocabolario dell'indicazione; (b) **ciò che il cliente chiede e ciò che viene fatto sono dati distinti che possono legittimamente differire**: la richiesta porta l'esigenza, la visita porta `treatments`, testo libero scritto dal salone — trattarli come lo stesso campo sarebbe un errore di modello; (c) conferma strutturale del perché non può esistere una griglia a slot, né un preventivo: se la lavorazione si decide guardando il pet, durata e prezzo non sono prevedibili. Conferma anche a posteriori la scelta di GH-16 di tenere `treatments` come testo libero invece di agganciarlo al catalogo.
+
+**BLOCCO DI LANCIO INDIVIDUATO — l'app clienti nascerebbe muta** (25/8, misura Cowork): `appointment_requests.service_id` è **NOT NULL** e referenzia `services`. Sul progetto di prova, che è la fotografia della produzione dopo G6, **`services` ha zero righe** (sul demo ce ne sono due, di prova: per questo lì il wizard funzionava). Al lancio un cliente che apre la prenotazione non avrebbe nulla da indicare e non potrebbe inviare la richiesta. **Serve l'elenco reale delle esigenze, nel linguaggio dei clienti, da farsi dare da Davide** e caricare in `services` prima di G6 — senza prezzi, coerentemente col modello «solo incassi». Nomi confermati come direzione da Luigi: bagno, taglio, toelettatura completa. Aggiunto ai cancelli di G6.
 
 ---
 

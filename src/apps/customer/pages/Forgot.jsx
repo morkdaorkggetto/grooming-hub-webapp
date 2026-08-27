@@ -30,7 +30,9 @@ export default function Forgot() {
       <Link
         to="/u/home"
         style={{
-          display: 'inline-block',
+          display: 'inline-flex',
+          alignItems: 'center',
+          minHeight: 44,
           textDecoration: 'none',
           color: 'inherit',
           cursor: 'pointer',
@@ -68,6 +70,9 @@ export default function Forgot() {
         <Link
           to="/u/login"
           style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            minHeight: 44,
             color: 'var(--color-link)',
             fontWeight: 600,
             textDecoration: 'none',

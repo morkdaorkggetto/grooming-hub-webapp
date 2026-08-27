@@ -160,7 +160,7 @@
 .gh-book-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 
 .gh-book-chip {
-  min-height: 38px;
+  min-height: 44px;
   padding: 8px 13px;
   border: 1px solid var(--color-border);
   border-radius: 999px;

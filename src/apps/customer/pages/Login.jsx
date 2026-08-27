@@ -147,6 +147,9 @@ export default function Login() {
               <Link
                 to="/u/forgot"
                 style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  minHeight: 44,
                   fontSize: 12,
                   color: 'var(--color-link)',
                   textDecoration: 'none',
@@ -220,6 +223,9 @@ export default function Login() {
           <Link
             to="/u/redeem"
             style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: 44,
               color: 'var(--color-link)',
               fontWeight: 600,
               textDecoration: 'none',
