@@ -285,6 +285,20 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 27 agosto 2026 — GH-18 chiuso: il dubbio era fondato
+
+**La regressione c'era davvero.** GH-18 nasceva da un sospetto di Cowork — GH-17 aveva modificato sette componenti condivisi e le controprove avevano guardato solo le tre superfici staff, mentre sette pagine customer li importano. Misura: **l'ombra delle `Card` dell'app clienti era cambiata**, e la modifica alla variante staff si era propagata al customer. Ripristinata l'ombra a due livelli pre-GH-17. Il mandato che «poteva non trovare niente» ha trovato esattamente ciò per cui era stato scritto.
+
+**E ha trovato anche altro, che non cercava**: bersagli tattili **preesistenti da 16-38 px** su sei file customer — link di Login, Forgot e Redeem, ritorno/foto/azioni della scheda pet, chip del wizard. Non erano regressioni di GH-17: erano lì da sempre, sotto la soglia dei 44 px che ci siamo dati, ed erano sopravvissuti a tutte le controprove precedenti perché ogni giro misurava solo le pagine che toccava. Corretti senza cambiare copy, colore o flusso.
+
+**Matrice completa**: 7 pagine customer × 3 larghezze = **21 PASS**, zero overflow, zero sovrapposizioni, zero bersagli sotto 44 px, zero errori console. Confronto puntuale col bundle: raggi 24/28, eyebrow 11 px a `.22em`, geometrie skeleton, `WarmNotice`, colori — tutto invariato tranne l'ombra corretta.
+
+**Ciclo visita reale eseguito** su Luna: baseline 3 visite → salvataggio dal modal della scheda (4) → salvataggio dalla rotta diretta (5) → **cancellazione di entrambe dal pulsante reale, ritorno a 3, zero righe marcate**. Il form condiviso di GH-17 regge entrambe le superfici e salva lo stesso contratto dati. Teardown della sonda con zero residui su sei tabelle.
+
+**Quinto difetto di Cowork, e stavolta era un'indicazione operativa** (autodenuncia): avevo detto a Luigi di mettere la password dell'account staff in `.env.local` sotto `GH_RLS_STAFF_PASSWORD`, citando `supabase/docs/rls-tests.md`. **Sbagliato**: quella variabile appartiene alla fixture GH-04, che GH-06 aveva smontato — non a `demo@groominghub.it`. Codex non ha reimpostato nulla e ha trovato la strada giusta da solo: riapplicare il seed idempotente già versionato, usare la sonda, rismontarla con la guardia esistente. Il filo dei miei difetti si allunga e resta coerente: **sbaglio dove prescrivo il come, non il cosa** — elenco file in GH-05, prerequisito in GH-13, contraddizione in GH-17, `git add -A` nello script, e ora il nome di una variabile.
+
+**Nota di metodo sull'incidente dello script**: le correzioni GH-18 e la sonda temporanea erano finite nel commit `a3d3b41` insieme ai documenti CD-01, per colpa del `git add -A` di `salva.sh`. Decisione di Luigi: **non riscrivere la cronologia** — il ramo era già pubblicato — riprendere da `eaf3bdc` e rimuovere la sonda nel commit finale. Codex ha elencato nel registro anche i file finiti lì per errore, così la consegna resta equivalente alla misura reale invece che alla cronologia. Lo script è stato corretto: ora salva i soli documenti e mostra il resto sotto avviso senza toccarlo.
+
 ### 25 agosto 2026 — Davide e Roby sul calendario: risposta alla §9.1 di CD
 
 **Fonte**: incontro diretto di Luigi con Davide e Roby, riferito la sera stessa. Congela la domanda aperta che CD aveva lasciato al §9.1 del suo handoff e che Cowork aveva posto come prerequisito del giro calendario.
