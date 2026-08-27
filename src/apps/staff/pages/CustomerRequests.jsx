@@ -6,7 +6,18 @@ import {
   updateAppointmentApproval,
 } from '../lib/database';
 import { getAppointmentApprovalWhatsAppUrl } from '../lib/whatsapp';
-import AppHeader from '../components/AppHeader';
+import {
+  Button,
+  EmptyState,
+  ErrorState,
+  Field,
+  Hero,
+  HeroButton,
+  Panel,
+  SkeletonRow,
+  StateTag,
+  StatStrip,
+} from '../components/StaffKit';
 
 const formatDateTime = (iso) =>
   new Date(iso).toLocaleString('it-IT', {
@@ -70,33 +81,23 @@ function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
   const isUpdating = updatingId === request.id;
 
   return (
-    <article
-      className="rounded-[26px] border p-5 sm:p-6 shadow-sm"
-      style={{ backgroundColor: 'var(--color-surface-main)', borderColor: 'var(--color-border)' }}
-    >
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span
-              className="inline-flex rounded-full px-3 py-1 text-xs font-bold"
-              style={{ backgroundColor: '#fef3c7', color: '#92400e' }}
-            >
-              In attesa
-            </span>
-            <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+    <Panel className="gh-request-card">
+      <div className="gh-request-row">
+        <div className="gh-request-copy">
+          <div className="gh-request-tags">
+            <StateTag tone="warning">In attesa</StateTag>
+            <span className="gh-meta gh-num">
               Arrivata il {formatCreatedAt(request.created_at)}
             </span>
           </div>
 
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {request.client?.name || 'Cliente'}
-          </h2>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-secondary)' }}>
+          <h2 className="gh-row-title">{request.client?.name || 'Cliente'}</h2>
+          <p className="gh-body">
             {request.client?.owner || 'Proprietario non indicato'}
             {request.client?.phone ? ` · ${request.client.phone}` : ''}
           </p>
 
-          <div className="grid sm:grid-cols-3 gap-3 mt-5">
+          <div className="gh-request-info-grid gh-request-info-grid--three">
             <InfoTile
               label={isStructured ? 'Data desiderata' : 'Quando'}
               value={isStructured ? formatDesiredDate(request.desired_date) : formatDateTime(request.scheduled_at)}
@@ -106,76 +107,41 @@ function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
           </div>
 
           {isStructured ? (
-            <div className="grid sm:grid-cols-2 gap-3 mt-3">
+            <div className="gh-request-info-grid">
               <InfoTile label="Manto" value={coatLabels || 'Indicazione libera'} />
               <InfoTile label="Età dichiarata" value={request.declared_pet_age || 'Già presente in anagrafica'} />
             </div>
           ) : null}
 
           {request.notes ? (
-            <div
-              className="rounded-2xl border p-4 mt-4"
-              style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)' }}
-            >
-              <p className="text-xs uppercase tracking-[0.16em] font-bold mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+            <div className="gh-request-notes">
+              <p className="gh-eyebrow--staff">
                 {isStructured ? 'Dettagli sul manto' : 'Note richiesta'}
               </p>
-              <p className="text-sm whitespace-pre-line" style={{ color: 'var(--color-secondary)' }}>
-                {request.notes}
-              </p>
+              <p className="gh-body gh-pre-wrap">{request.notes}</p>
             </div>
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-2 lg:min-w-[220px]">
-          <button
-            type="button"
-            onClick={() => onApproval(request, 'approved')}
-            disabled={isUpdating}
-            className="rounded-xl px-4 py-3 text-sm font-bold text-white disabled:opacity-60"
-            style={{ backgroundColor: '#16a34a' }}
-          >
+        <div className="gh-request-actions">
+          <Button staff wide variant="success" onClick={() => onApproval(request, 'approved')} disabled={isUpdating}>
             {isUpdating ? 'Aggiorno...' : 'Approva e WhatsApp'}
-          </button>
-          <button
-            type="button"
-            onClick={() => onApproval(request, 'rejected')}
-            disabled={isUpdating}
-            className="rounded-xl px-4 py-3 text-sm font-bold text-white disabled:opacity-60"
-            style={{ backgroundColor: '#e11d48' }}
-          >
+          </Button>
+          <Button staff wide variant="danger" onClick={() => onApproval(request, 'rejected')} disabled={isUpdating}>
             {isUpdating ? 'Aggiorno...' : 'Rifiuta e WhatsApp'}
-          </button>
-          <button
-            type="button"
-            onClick={() => onOpenClient(request.pet_id)}
-            className="rounded-xl px-4 py-3 text-sm font-bold border"
-            style={{
-              backgroundColor: '#fff',
-              borderColor: 'var(--color-border)',
-              color: 'var(--color-secondary)',
-            }}
-          >
-            Apri scheda cane
-          </button>
+          </Button>
+          <Button staff wide variant="outline" onClick={() => onOpenClient(request.pet_id)}>Apri scheda cane</Button>
         </div>
       </div>
-    </article>
+    </Panel>
   );
 }
 
 function InfoTile({ label, value }) {
   return (
-    <div
-      className="rounded-2xl border p-4"
-      style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)' }}
-    >
-      <p className="text-xs uppercase tracking-[0.16em] font-bold" style={{ color: 'var(--color-text-secondary)' }}>
-        {label}
-      </p>
-      <p className="text-sm font-bold mt-2" style={{ color: 'var(--color-text-primary)' }}>
-        {value}
-      </p>
+    <div className="gh-request-info">
+      <p className="gh-eyebrow--staff">{label}</p>
+      <p className="gh-request-info__value">{value}</p>
     </div>
   );
 }
@@ -196,66 +162,24 @@ function ApprovalDialog({ request, busy, onClose, onConfirm }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center p-4" style={{ backgroundColor: 'rgba(43,37,37,.45)' }}>
-      <form
-        onSubmit={submit}
-        className="w-full max-w-md rounded-2xl border p-6 shadow-xl"
-        style={{ backgroundColor: 'var(--color-surface-main)', borderColor: 'var(--color-border)' }}
-      >
-        <p className="text-xs uppercase tracking-[0.16em] font-bold" style={{ color: 'var(--color-text-secondary)' }}>
-          Conferma appuntamento
-        </p>
-        <h2 className="text-2xl font-bold mt-2" style={{ color: 'var(--color-text-primary)' }}>
-          Scegli giorno e ora precisi
-        </h2>
-        <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+    <div className="gh-dialog-backdrop">
+      <form onSubmit={submit} className="gh-dialog" role="dialog" aria-modal="true" aria-labelledby="gh-approval-title">
+        <p className="gh-eyebrow--staff">Conferma appuntamento</p>
+        <h2 className="gh-panel-title" id="gh-approval-title">Scegli giorno e ora precisi</h2>
+        <p className="gh-body">
           {request.client?.name || 'Pet'} · preferenza cliente: {TIME_PREFERENCE_LABELS[request.time_preference] || 'nessuna'}.
         </p>
 
-        <div className="grid sm:grid-cols-2 gap-3 mt-5">
-          <label className="text-sm font-bold">
-            Giorno
-            <input
-              type="date"
-              min={minDate}
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
-              required
-              className="mt-2 w-full rounded-xl border px-3 py-3 font-normal"
-              style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)' }}
-            />
-          </label>
-          <label className="text-sm font-bold">
-            Ora
-            <input
-              type="time"
-              value={time}
-              onChange={(event) => setTime(event.target.value)}
-              required
-              className="mt-2 w-full rounded-xl border px-3 py-3 font-normal"
-              style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)' }}
-            />
-          </label>
+        <div className="gh-dialog-fields">
+          <Field label="Giorno" type="date" min={minDate} value={date} onChange={(event) => setDate(event.target.value)} required />
+          <Field label="Ora" type="time" value={time} onChange={(event) => setTime(event.target.value)} required />
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={busy}
-            className="rounded-xl border px-4 py-3 text-sm font-bold disabled:opacity-60"
-            style={{ backgroundColor: '#fff', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
-          >
-            Annulla
-          </button>
-          <button
-            type="submit"
-            disabled={busy || !date || !time}
-            className="rounded-xl px-4 py-3 text-sm font-bold text-white disabled:opacity-60"
-            style={{ backgroundColor: '#16a34a' }}
-          >
+        <div className="gh-dialog-actions">
+          <Button staff type="button" variant="outline" onClick={onClose} disabled={busy}>Annulla</Button>
+          <Button staff type="submit" variant="success" disabled={busy || !date || !time}>
             {busy ? 'Confermo...' : 'Conferma e prepara WhatsApp'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
@@ -355,7 +279,7 @@ export default function CustomerRequests() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-bg-main)' }}>
+    <div className="gh-page gh-requests-page">
       {approvalRequest ? (
         <ApprovalDialog
           request={approvalRequest}
@@ -364,93 +288,41 @@ export default function CustomerRequests() {
           onConfirm={(scheduledAt) => performApproval(approvalRequest, 'approved', scheduledAt)}
         />
       ) : null}
-      <AppHeader
+      <Hero
         title="Richieste clienti"
         subtitle="Un unico punto per gestire richieste arrivate dall'area cliente."
-        rightContent={
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 rounded-xl text-sm font-bold text-white"
-            style={{ backgroundColor: 'rgba(251,246,243,0.16)', border: '1px solid rgba(251,246,243,0.22)' }}
-          >
-            Dashboard
-          </button>
-        }
+        right={<HeroButton onClick={() => navigate('/dashboard')}>Dashboard</HeroButton>}
       />
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {error ? (
-          <div className="mb-6 rounded-2xl border p-4 bg-red-50 border-red-200">
-            <p className="font-medium" style={{ color: 'var(--color-danger-text)' }}>
-              {error}
-            </p>
-          </div>
-        ) : null}
+      <main className="gh-page-shell gh-requests-stack">
+        {error ? <ErrorState title="Le richieste restano da gestire" body={error} /> : null}
+        {success ? <div className="gh-success-state" role="status">{success}</div> : null}
 
-        {success ? (
-          <div className="mb-6 rounded-2xl border p-4 bg-green-50 border-green-200">
-            <p className="font-medium" style={{ color: 'var(--color-success-text)' }}>
-              {success}
-            </p>
-          </div>
-        ) : null}
+        <StatStrip items={[
+          { label: 'Da gestire', value: stats.total },
+          { label: 'Entro 7 giorni', value: stats.nextWeek },
+          { label: 'Con WhatsApp', value: stats.withPhone },
+        ]} />
 
-        <section className="grid md:grid-cols-3 gap-4 mb-8">
-          <InfoTile label="Da gestire" value={stats.total} />
-          <InfoTile label="Entro 7 giorni" value={stats.nextWeek} />
-          <InfoTile label="Con WhatsApp" value={stats.withPhone} />
-        </section>
-
-        <section
-          className="rounded-[28px] border p-5 sm:p-6 shadow-sm mb-8"
-          style={{ backgroundColor: 'var(--color-surface-soft)', borderColor: 'var(--color-border)' }}
+        <Panel
+          bridge
+          eyebrow="Pipeline cliente"
+          title="Appuntamenti ora, boutique dopo"
+          right={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>}
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.22em] font-bold mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-                Pipeline cliente
-              </p>
-              <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                Appuntamenti ora, boutique dopo
-              </h2>
-              <p className="text-sm mt-2 max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>
+          <div className="gh-request-pipeline">
+              <p className="gh-body">
                 Questa pagina gestisce le richieste appuntamento reali. Quando gli ordini boutique avranno tabelle dedicate, finiranno qui nello stesso flusso operativo.
               </p>
-            </div>
-            <button
-              type="button"
-              onClick={loadRequests}
-              className="rounded-xl px-5 py-3 text-sm font-bold border"
-              style={{
-                backgroundColor: '#fff',
-                borderColor: 'var(--color-border)',
-                color: 'var(--color-secondary)',
-              }}
-            >
-              Aggiorna
-            </button>
           </div>
-        </section>
+        </Panel>
 
         {loading ? (
-          <div className="text-center py-16">
-            <p style={{ color: 'var(--color-secondary)' }}>Caricamento richieste...</p>
-          </div>
+          <Panel flush>{Array.from({ length: 4 }, (_, index) => <SkeletonRow key={index} />)}</Panel>
         ) : requests.length === 0 ? (
-          <div
-            className="rounded-[28px] border p-10 text-center"
-            style={{ backgroundColor: 'var(--color-surface-main)', borderColor: 'var(--color-border)' }}
-          >
-            <h2 className="text-2xl font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
-              Nessuna richiesta in attesa
-            </h2>
-            <p className="text-sm max-w-xl mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
-              Quando un cliente invia una richiesta appuntamento dall'area cliente, comparira' qui per approvazione o rifiuto.
-            </p>
-          </div>
+          <Panel><EmptyState title="Nessuna richiesta in attesa" body="Quando un cliente invia una richiesta appuntamento dall'area cliente, comparira' qui per approvazione o rifiuto." action={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>} /></Panel>
         ) : (
-          <div className="space-y-4">
+          <div className="gh-request-list">
             {requests.map((request) => (
               <RequestCard
                 key={request.id}

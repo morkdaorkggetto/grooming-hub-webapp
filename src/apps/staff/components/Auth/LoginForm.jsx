@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../../../shared/supabase/client';
 import { DEMO_MODE } from '../../lib/demoMode';
 import { ensureOperatorProfile } from '../../lib/database';
+import { Button, ErrorState, Field, Panel } from '../StaffKit';
 
 /**
  * LoginForm — Componente autenticazione
@@ -192,238 +193,61 @@ export default function LoginForm({ currentUser = null, currentRole = null, onSu
 
   if (currentUser && !currentRole) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4"
-        style={{
-          background: 'linear-gradient(135deg, var(--color-bg-main) 0%, var(--color-surface-muted) 100%)',
-        }}
-      >
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-              🐕 Grooming Hub
-            </h1>
-            <p className="text-sm" style={{ color: 'var(--color-secondary)' }}>
-              Accesso operatori
-            </p>
+      <div className="gh-page gh-login-page">
+        <section className="gh-login-shell">
+          <div className="gh-login-brand">
+            <h1 className="gh-login-title">🐕 Grooming Hub</h1>
+            <p className="gh-login-subtitle">Accesso operatori</p>
           </div>
 
-          <div
-            className="bg-white rounded-2xl shadow-lg p-8"
-            style={{
-              borderTop: '4px solid var(--color-primary)',
-              boxShadow: '0 18px 40px rgba(91, 67, 54, 0.10)',
-            }}
-          >
-            <h2 className="text-2xl font-bold mb-3 text-center" style={{ color: 'var(--color-text-primary)' }}>
-              Completa accesso
-            </h2>
-            <p className="text-sm text-center mb-6" style={{ color: 'var(--color-secondary)' }}>
-              Sessione attiva ({currentUser.email}). Completa l'accesso all'area operatori.
-            </p>
-
-            {error && (
-              <div
-                className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200"
-                style={{ color: 'var(--color-danger-text)' }}
-              >
-                <p className="text-sm font-medium">{error}</p>
-              </div>
-            )}
-
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={handleContinueAsOperator}
-                disabled={loading}
-                className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-60"
-                style={{ backgroundColor: 'var(--color-primary)' }}
-              >
-                Continua come operatore
-              </button>
-              <button
-                type="button"
-                onClick={handleLogout}
-                disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold border"
-                style={{ borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
-              >
-                Esci
-              </button>
+          <Panel className="gh-login-card">
+            <div className="gh-login-heading">
+              <h2 className="gh-login-card-title">Completa accesso</h2>
+              <p className="gh-body">Sessione attiva ({currentUser.email}). Completa l'accesso all'area operatori.</p>
             </div>
-          </div>
-        </div>
+            {error && <ErrorState title="La sessione resta disponibile" body={error} />}
+            <div className="gh-login-actions">
+              <Button staff wide type="button" onClick={handleContinueAsOperator} disabled={loading}>Continua come operatore</Button>
+              <Button staff wide type="button" variant="outline" onClick={handleLogout} disabled={loading}>Esci</Button>
+            </div>
+          </Panel>
+        </section>
       </div>
     );
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{
-        background: 'linear-gradient(135deg, var(--color-bg-main) 0%, var(--color-surface-muted) 100%)',
-      }}
-    >
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            🐕 Grooming Hub
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--color-secondary)' }}>
-            Gestisci i tuoi clienti a quattro zampe
-          </p>
+    <div className="gh-page gh-login-page">
+      <section className="gh-login-shell">
+        <div className="gh-login-brand">
+          <h1 className="gh-login-title">🐕 Grooming Hub</h1>
+          <p className="gh-login-subtitle">Gestisci i tuoi clienti a quattro zampe</p>
         </div>
 
-        {/* Card Form */}
-        <div
-          className="bg-white rounded-2xl shadow-lg p-8"
-          style={{
-            borderTop: '4px solid var(--color-primary)',
-            boxShadow: '0 18px 40px rgba(91, 67, 54, 0.10)',
-          }}
-        >
-          <h2
-            className="text-2xl font-bold mb-6 text-center"
-            style={{ color: 'var(--color-text-primary)' }}
-          >
-            {isSignUp ? 'Crea Account' : 'Accedi'}
-          </h2>
+        <Panel className="gh-login-card">
+          <h2 className="gh-login-card-title">{isSignUp ? 'Crea Account' : 'Accedi'}</h2>
+          {error && <ErrorState title="Email e password restano inserite" body={error} />}
+          {successMessage && <div className="gh-success-state" role="status">{successMessage}</div>}
 
-          {/* Messaggio di errore */}
-          {error && (
-            <div
-              className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200"
-              style={{ color: 'var(--color-danger-text)' }}
-            >
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          )}
-
-          {/* Messaggio di successo */}
-          {successMessage && (
-            <div
-              className="mb-4 p-4 rounded-lg bg-green-50 border border-green-200"
-              style={{ color: 'var(--color-success-text)' }}
-            >
-              <p className="text-sm font-medium">{successMessage}</p>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium mb-2"
-                style={{ color: 'var(--color-text-primary)' }}
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="esempio@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition"
-                style={{
-                  borderColor: 'var(--color-border)',
-                  focusRingColor: 'var(--color-primary)',
-                  color: 'var(--color-text-primary)',
-                  backgroundColor: 'var(--color-surface-main)',
-                }}
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium mb-2"
-                style={{ color: 'var(--color-text-primary)' }}
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                placeholder="Almeno 6 caratteri"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-                className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition"
-                style={{
-                  borderColor: 'var(--color-border)',
-                  focusRingColor: 'var(--color-primary)',
-                  color: 'var(--color-text-primary)',
-                  backgroundColor: 'var(--color-surface-main)',
-                }}
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="gh-login-form">
+            <Field id="email" label="Email" type="email" placeholder="esempio@email.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
+            <Field id="password" label="Password" type="password" placeholder="Almeno 6 caratteri" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} />
 
             {!isSignUp && (
-              <div className="text-right -mt-2">
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  disabled={loading}
-                  className="text-sm underline"
-                  style={{ color: 'var(--color-secondary)' }}
-                >
-                  Password dimenticata?
-                </button>
+              <div className="gh-login-forgot">
+                <button type="button" onClick={handleForgotPassword} disabled={loading} className="gh-login-link">Password dimenticata?</button>
               </div>
             )}
 
-            {/* Pulsante Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-lg font-bold text-white transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: 'var(--color-primary)' }}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Caricamento...
-                </span>
-              ) : isSignUp ? (
-                'Registrati'
-              ) : (
-                'Accedi'
-              )}
-            </button>
+            <Button staff wide type="submit" disabled={loading}>
+              {loading ? 'Caricamento...' : isSignUp ? 'Registrati' : 'Accedi'}
+            </Button>
           </form>
 
-          {/* Toggle tra SignUp e SignIn */}
           {!DEMO_MODE && (
-            <div className="mt-6 text-center">
-              <p style={{ color: 'var(--color-secondary)' }} className="text-sm">
-                {isSignUp
-                  ? 'Hai già un account? '
-                  : 'Non hai un account? '}
+            <div className="gh-login-toggle">
+              <p className="gh-body">
+                {isSignUp ? 'Hai già un account? ' : 'Non hai un account? '}
                 <button
                   type="button"
                   onClick={() => {
@@ -431,25 +255,20 @@ export default function LoginForm({ currentUser = null, currentRole = null, onSu
                     setError('');
                     setSuccessMessage('');
                   }}
-                  className="font-bold underline hover:opacity-80 transition"
-                  style={{ color: 'var(--color-primary)' }}
+                  className="gh-login-link"
                 >
                   {isSignUp ? 'Accedi' : 'Registrati'}
                 </button>
               </p>
             </div>
           )}
-        </div>
+        </Panel>
 
-        {/* Footer info */}
-        <div
-          className="mt-6 text-center text-xs"
-          style={{ color: 'var(--color-secondary)' }}
-        >
+        <footer className="gh-login-footer">
           <p>🔒 I tuoi dati sono protetti con Supabase</p>
-          <p className="mt-1">Made with ❤️ for groomers</p>
-        </div>
-      </div>
+          <p>Made with ❤️ for groomers</p>
+        </footer>
+      </section>
     </div>
   );
 }

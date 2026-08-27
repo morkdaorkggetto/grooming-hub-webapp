@@ -9,7 +9,18 @@ import {
   getAppointmentApprovalWhatsAppUrl,
   getAppointmentWhatsAppUrl,
 } from '../lib/whatsapp';
-import AppHeader from '../components/AppHeader';
+import {
+  Button,
+  EmptyState,
+  ErrorState,
+  Field,
+  Hero,
+  HeroButton,
+  Panel,
+  SkeletonRow,
+  StateTag,
+  StatStrip,
+} from '../components/StaffKit';
 
 const toLocalDateString = (date) => {
   const year = date.getFullYear();
@@ -37,58 +48,13 @@ const getAppointmentEnd = (appointment) => {
   return new Date(start.getTime() + appointment.duration_minutes * 60000);
 };
 
-const getCardStyle = (appointment) => {
-  if (appointment.approval_status === 'pending') {
-    return {
-      backgroundColor: '#fef3c7',
-      borderColor: '#f59e0b',
-      titleColor: '#92400e',
-      textColor: '#78350f',
-    };
-  }
-
-  if (appointment.approval_status === 'rejected') {
-    return {
-      backgroundColor: '#f3f4f6',
-      borderColor: '#9ca3af',
-      titleColor: '#4b5563',
-      textColor: '#6b7280',
-    };
-  }
-
-  if (appointment.status === 'completed') {
-    return {
-      backgroundColor: '#dcfce7',
-      borderColor: '#22c55e',
-      titleColor: 'var(--color-success-text)',
-      textColor: 'var(--color-success-text)',
-    };
-  }
-
-  if (appointment.status === 'cancelled') {
-    return {
-      backgroundColor: '#f3f4f6',
-      borderColor: '#9ca3af',
-      titleColor: '#4b5563',
-      textColor: '#6b7280',
-    };
-  }
-
-  if (appointment.status === 'no_show') {
-    return {
-      backgroundColor: '#fff1f2',
-      borderColor: '#e11d48',
-      titleColor: '#9f1239',
-      textColor: '#be123c',
-    };
-  }
-
-  return {
-    backgroundColor: '#fee2e2',
-    borderColor: '#ef4444',
-    titleColor: 'var(--color-danger-text)',
-    textColor: '#b91c1c',
-  };
+const getAppointmentTone = (appointment) => {
+  if (appointment.approval_status === 'pending') return 'warning';
+  if (appointment.approval_status === 'rejected') return 'neutral';
+  if (appointment.status === 'completed') return 'success';
+  if (appointment.status === 'cancelled') return 'neutral';
+  if (appointment.status === 'no_show') return 'danger';
+  return 'danger';
 };
 
 const getStatusLabel = (appointment) => {
@@ -102,14 +68,6 @@ const getStatusLabel = (appointment) => {
 
 const getSourceLabel = (appointment) =>
   appointment.appointment_source === 'customer' ? 'Richiesta cliente' : 'Inserito operatore';
-
-const getSourceStyle = (appointment) => {
-  if (appointment.appointment_source === 'customer') {
-    return { backgroundColor: '#e0e7ff', color: '#3730a3' };
-  }
-
-  return { backgroundColor: '#ede9fe', color: '#6d28d9' };
-};
 
 export default function DailyAppointments() {
   const navigate = useNavigate();
@@ -231,7 +189,7 @@ export default function DailyAppointments() {
   };
 
   const renderAppointmentRow = (appointment) => {
-    const cardStyle = getCardStyle(appointment);
+    const tone = getAppointmentTone(appointment);
     const timeRange = `${formatTimeOnly(appointment.scheduled_at)} - ${formatTimeOnly(
       getAppointmentEnd(appointment).toISOString()
     )}`;
@@ -240,232 +198,92 @@ export default function DailyAppointments() {
       appointment.approval_status === 'approved' && appointment.status === 'scheduled';
 
     return (
-      <div
-        key={appointment.id}
-        className="rounded-2xl border p-4 lg:p-5"
-        style={{
-          backgroundColor: cardStyle.backgroundColor,
-          borderColor: cardStyle.borderColor,
-        }}
-      >
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span
-                className="px-3 py-1 rounded-full text-xs font-bold"
-                style={{ backgroundColor: '#ffffff', color: cardStyle.titleColor }}
-              >
-                {timeRange}
-              </span>
-              <span
-                className="px-3 py-1 rounded-full text-xs font-bold"
-                style={{ backgroundColor: 'rgba(255,255,255,0.85)', color: cardStyle.titleColor }}
-              >
-                {getStatusLabel(appointment)}
-              </span>
-              <span
-                className="px-3 py-1 rounded-full text-xs font-bold"
-                style={getSourceStyle(appointment)}
-              >
+      <Panel key={appointment.id} className={`gh-appointment-card gh-appointment-card--${tone}`}>
+        <div className="gh-appointment-row">
+          <div className="gh-appointment-copy">
+            <div className="gh-appointment-tags">
+              <span className="gh-time-tag gh-num">{timeRange}</span>
+              <StateTag tone={tone}>{getStatusLabel(appointment)}</StateTag>
+              <StateTag tone={appointment.appointment_source === 'customer' ? 'customer' : 'operator'}>
                 {getSourceLabel(appointment)}
-              </span>
+              </StateTag>
             </div>
-
-            <h3 style={{ color: cardStyle.titleColor }} className="text-xl font-bold">
-              {appointment.client?.name || 'Cliente'}
-            </h3>
-            <p style={{ color: cardStyle.textColor }} className="text-sm mt-1">
-              Proprietario: <strong>{appointment.client?.owner || '-'}</strong>
-            </p>
-            <p style={{ color: cardStyle.textColor }} className="text-sm">
-              Telefono: {appointment.client?.phone || 'non disponibile'}
-            </p>
-            <p style={{ color: cardStyle.textColor }} className="text-sm">
-              Durata: {appointment.duration_minutes} min
-            </p>
-            {appointment.notes && (
-              <p style={{ color: cardStyle.textColor }} className="text-sm mt-2">
-                Note: {appointment.notes}
-              </p>
-            )}
+            <h3 className="gh-row-title">{appointment.client?.name || 'Cliente'}</h3>
+            <p className="gh-body">Proprietario: <strong>{appointment.client?.owner || '-'}</strong></p>
+            <p className="gh-body">Telefono: {appointment.client?.phone || 'non disponibile'}</p>
+            <p className="gh-body">Durata: <span className="gh-num">{appointment.duration_minutes} min</span></p>
+            {appointment.notes && <p className="gh-appointment-notes gh-pre-wrap">Note: {appointment.notes}</p>}
           </div>
 
-          <div className="flex flex-wrap gap-2 xl:justify-end">
-            <button
-              onClick={() => navigate(`/client/${appointment.pet_id}`)}
-              className="px-4 py-2 rounded-lg font-medium text-white"
-              style={{ backgroundColor: 'var(--color-secondary)' }}
-            >
-              Apri cliente
-            </button>
-            <button
-              onClick={() => handleWhatsApp(appointment)}
-              className="px-4 py-2 rounded-lg font-medium text-white"
-              style={{ backgroundColor: '#16a34a' }}
-            >
-              WhatsApp
-            </button>
+          <div className="gh-appointment-actions">
+            <Button staff variant="secondary" onClick={() => navigate(`/client/${appointment.pet_id}`)}>Apri cliente</Button>
+            <Button staff variant="whatsapp" onClick={() => handleWhatsApp(appointment)}>WhatsApp</Button>
             {isPendingRequest ? (
               <>
-                <button
-                  onClick={() => handleApproval(appointment, 'approved')}
-                  disabled={updatingId === appointment.id}
-                  className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ backgroundColor: '#15803d' }}
-                >
+                <Button staff variant="success" onClick={() => handleApproval(appointment, 'approved')} disabled={updatingId === appointment.id}>
                   {updatingId === appointment.id ? 'Aggiorno...' : 'Approva'}
-                </button>
-                <button
-                  onClick={() => handleApproval(appointment, 'rejected')}
-                  disabled={updatingId === appointment.id}
-                  className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ backgroundColor: '#be123c' }}
-                >
+                </Button>
+                <Button staff variant="danger" onClick={() => handleApproval(appointment, 'rejected')} disabled={updatingId === appointment.id}>
                   {updatingId === appointment.id ? 'Aggiorno...' : 'Rifiuta'}
-                </button>
+                </Button>
               </>
             ) : (
-              <button
-                onClick={() => handleMarkCompleted(appointment.id)}
-                disabled={updatingId === appointment.id || !canMarkCompleted}
-                className="px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#15803d' }}
-              >
+              <Button staff variant="success" onClick={() => handleMarkCompleted(appointment.id)} disabled={updatingId === appointment.id || !canMarkCompleted}>
                 {updatingId === appointment.id ? 'Aggiorno...' : 'Completato'}
-              </button>
+              </Button>
             )}
           </div>
         </div>
-      </div>
+      </Panel>
     );
   };
 
   return (
-    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
-      <AppHeader
+    <div className="gh-page gh-daily-page">
+      <Hero
         title="Operatività giornaliera"
         subtitle="Lista appuntamenti del giorno."
-        rightContent={
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 rounded-xl text-sm font-medium transition"
-            style={{
-              backgroundColor: 'rgba(251, 246, 243, 0.16)',
-              color: '#FBF6F3',
-              border: '1px solid rgba(251, 246, 243, 0.22)',
-            }}
-          >
-            ← Dashboard
-          </button>
-        }
+        right={<HeroButton onClick={() => navigate('/dashboard')}>← Dashboard</HeroButton>}
       />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {error && (
-          <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
-              {error}
-            </p>
-          </div>
-        )}
+      <main className="gh-page-shell gh-daily-stack">
+        {error && <ErrorState title="L'elenco non è stato modificato" body={error} />}
+        {success && <div className="gh-success-state" role="status">{success}</div>}
 
-        {success && (
-          <div className="p-4 rounded-lg border" style={{ backgroundColor: '#ecfdf5', borderColor: '#bbf7d0' }}>
-            <p style={{ color: 'var(--color-success-text)' }} className="font-medium">
-              {success}
-            </p>
-          </div>
-        )}
-
-        <section className="bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex flex-col lg:flex-row gap-4 lg:items-end lg:justify-between">
+        <Panel>
+          <div className="gh-date-toolbar">
             <div>
-              <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium mb-1">
-                Giorno selezionato
-              </p>
-              <h2 style={{ color: 'var(--color-text-primary)' }} className="text-2xl font-bold capitalize">
+              <p className="gh-eyebrow--staff">Giorno selezionato</p>
+              <h2 className="gh-panel-title gh-capitalize">
                 {formatLongDate(selectedDate)}
               </h2>
             </div>
-
-            <div className="flex flex-wrap gap-2 items-end">
-              <div>
-                <label style={{ color: 'var(--color-text-primary)' }} className="block text-sm font-medium mb-2">
-                  Data
-                </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="px-3 py-2 rounded-lg border-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                />
-              </div>
-              <button
-                onClick={() => setSelectedDate(toLocalDateString(new Date()))}
-                className="px-4 py-2 rounded-lg font-medium text-white"
-                style={{ backgroundColor: '#2563eb' }}
-              >
-                Oggi
-              </button>
+            <div className="gh-date-toolbar__controls">
+              <Field label="Data" type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+              <Button staff onClick={() => setSelectedDate(toLocalDateString(new Date()))}>Oggi</Button>
             </div>
           </div>
-        </section>
+        </Panel>
 
-        <section className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
-              Totale appuntamenti
-            </p>
-            <p style={{ color: 'var(--color-text-primary)' }} className="text-3xl font-bold mt-2">
-              {counters.total}
-            </p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
-              Richieste in attesa
-            </p>
-            <p style={{ color: '#92400e' }} className="text-3xl font-bold mt-2">
-              {counters.pendingRequests}
-            </p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
-              Programmati
-            </p>
-            <p style={{ color: 'var(--color-danger-text)' }} className="text-3xl font-bold mt-2">
-              {counters.scheduledApproved}
-            </p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
-              Completati
-            </p>
-            <p style={{ color: 'var(--color-success-text)' }} className="text-3xl font-bold mt-2">
-              {counters.completed}
-            </p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-5">
-            <p style={{ color: 'var(--color-secondary)' }} className="text-sm font-medium">
-              Altri stati
-            </p>
-            <p style={{ color: '#7c2d12' }} className="text-3xl font-bold mt-2">
-              {counters.other}
-            </p>
-          </div>
-        </section>
+        <StatStrip columns={5} items={[
+          { label: 'Totale appuntamenti', value: counters.total },
+          { label: 'Richieste in attesa', value: counters.pendingRequests },
+          { label: 'Programmati', value: counters.scheduledApproved },
+          { label: 'Completati', value: counters.completed },
+          { label: 'Altri stati', value: counters.other },
+        ]} />
 
-        <section className="space-y-4">
+        <section className="gh-appointment-list">
           {loading ? (
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <p style={{ color: 'var(--color-secondary)' }}>Caricamento appuntamenti...</p>
-            </div>
+            <Panel flush>{Array.from({ length: 5 }, (_, index) => <SkeletonRow key={index} />)}</Panel>
           ) : appointments.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <p style={{ color: 'var(--color-secondary)' }} className="italic">
-                Nessun appuntamento per il giorno selezionato.
-              </p>
-            </div>
+            <Panel>
+              <EmptyState
+                title="Nessun appuntamento per il giorno selezionato."
+                body="Scegli un'altra data oppure torna a oggi per controllare l'operatività corrente."
+                action={<Button staff onClick={() => setSelectedDate(toLocalDateString(new Date()))}>Vai a oggi</Button>}
+              />
+            </Panel>
           ) : (
             appointments.map(renderAppointmentRow)
           )}

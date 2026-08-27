@@ -1,6 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AppHeader from '../components/AppHeader';
+import {
+  Button,
+  EmptyState,
+  ErrorState,
+  Field,
+  Hero,
+  HeroButton,
+  Panel,
+  Pill,
+  SearchBar,
+  SkeletonRow,
+  StateTag,
+  StatStrip,
+} from '../components/StaffKit';
 import {
   getCustomerDirectory,
   updateCustomerRelationshipStatus,
@@ -23,24 +36,7 @@ const STATUS_LABELS = {
   archived: 'Archiviato',
 };
 
-const STATUS_STYLES = {
-  lead: {
-    backgroundColor: 'var(--color-warning-bg)',
-    color: 'var(--color-text-primary)',
-  },
-  contacted: {
-    backgroundColor: 'var(--color-info-bg, #EAF1F8)',
-    color: 'var(--color-secondary)',
-  },
-  active: {
-    backgroundColor: 'var(--color-success-bg)',
-    color: 'var(--color-success-text)',
-  },
-  archived: {
-    backgroundColor: 'var(--color-surface-muted)',
-    color: 'var(--color-secondary)',
-  },
-};
+const STATUS_TONES = { lead: 'warning', contacted: 'neutral', active: 'success', archived: 'neutral' };
 
 const INITIAL_FORM = {
   pet_name: '',
@@ -174,377 +170,95 @@ export default function Contacts() {
     navigate(`/client/${petId}`);
   };
 
+  const filters = [
+    ['all', 'Tutti', counts.all],
+    ['lead', 'Lead', counts.lead],
+    ['contacted', 'Contattati', counts.contacted],
+    ['active', 'Clienti', counts.active],
+    ['archived', 'Archiviati', counts.archived],
+  ];
+
   return (
-    <div style={{ backgroundColor: 'var(--color-bg-main)' }} className="min-h-screen">
-      <AppHeader
+    <div className="gh-page gh-directory-page">
+      <Hero
         title="Contatti"
         subtitle="Direttorio clienti e richieste WhatsApp, QR pubblico e lead da gestire."
-        rightContent={
-          <button
-            onClick={() => setShowCreateForm((prev) => !prev)}
-            className="px-4 py-2 rounded-xl text-sm font-medium transition"
-            style={{
-              backgroundColor: 'rgba(251, 246, 243, 0.16)',
-              color: '#FBF6F3',
-              border: '1px solid rgba(251, 246, 243, 0.22)',
-            }}
-          >
+        right={(
+          <HeroButton onClick={() => setShowCreateForm((prev) => !prev)}>
             {showCreateForm ? 'Chiudi form' : 'Nuovo contatto'}
-          </button>
-        }
+          </HeroButton>
+        )}
       />
 
-      <main className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
-        {error ? (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-            <p style={{ color: 'var(--color-danger-text)' }} className="font-medium">
-              {error}
-            </p>
-          </div>
-        ) : null}
+      <main className="gh-page-shell gh-directory-stack">
+        {error && <ErrorState title="I dati inseriti restano nel form" body={error} />}
 
-        {showCreateForm ? (
-          <section className="bg-white rounded-3xl shadow-lg border p-6 mb-6" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="flex items-start justify-between gap-4 mb-5">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] font-bold" style={{ color: 'var(--color-secondary)' }}>
-                  Nuovo contatto
-                </p>
-                <h2 className="text-2xl font-semibold mt-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Inserisci una richiesta in rubrica
-                </h2>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-              <label className="block">
-                <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Nome cane
-                </span>
-                <input
-                  type="text"
-                  value={form.pet_name}
-                  onChange={(e) => setForm((prev) => ({ ...prev, pet_name: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 border bg-white"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  placeholder="Es. Fido"
-                />
-              </label>
-
-              <label className="block">
-                <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Proprietario *
-                </span>
-                <input
-                  type="text"
-                  value={form.owner_name}
-                  onChange={(e) => setForm((prev) => ({ ...prev, owner_name: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 border bg-white"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  placeholder="Es. Luigi Rossi"
-                  required
-                />
-              </label>
-
-              <label className="block">
-                <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Telefono *
-                </span>
-                <input
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 border bg-white"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  placeholder="Es. +39 3331234567"
-                  required
-                />
-              </label>
-
-              <label className="block">
-                <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Origine
-                </span>
-                <select
-                  value={form.source}
-                  onChange={(e) => setForm((prev) => ({ ...prev, source: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 border bg-white"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                >
-                  {VALID_ACQUISITION_SOURCES.map((source) => (
-                    <option key={source} value={source}>
-                      {SOURCE_LABELS[source]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block md:col-span-2">
-                <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Note
-                </span>
-                <textarea
-                  value={form.notes}
-                  onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 border bg-white min-h-[120px]"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  placeholder="Richiesta, appunto veloce o dettaglio utile"
-                />
-              </label>
-
-              <div className="md:col-span-2 flex flex-wrap gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-5 py-3 rounded-xl text-white font-semibold disabled:opacity-60"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
-                >
-                  {saving ? 'Salvataggio...' : 'Salva lead'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setForm(INITIAL_FORM);
-                    setShowCreateForm(false);
-                  }}
-                  className="px-5 py-3 rounded-xl font-medium border"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
-                >
-                  Annulla
-                </button>
+        {showCreateForm && (
+          <Panel eyebrow="Nuovo contatto" title="Inserisci una richiesta in rubrica">
+            <form onSubmit={handleSubmit} className="gh-directory-form">
+              <Field label="Nome cane" value={form.pet_name} onChange={(e) => setForm((prev) => ({ ...prev, pet_name: e.target.value }))} placeholder="Es. Fido" />
+              <Field label="Proprietario *" value={form.owner_name} onChange={(e) => setForm((prev) => ({ ...prev, owner_name: e.target.value }))} placeholder="Es. Luigi Rossi" required />
+              <Field label="Telefono *" type="tel" value={form.phone} onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))} placeholder="Es. +39 3331234567" required />
+              <Field label="Origine" as="select" value={form.source} onChange={(e) => setForm((prev) => ({ ...prev, source: e.target.value }))}>
+                {VALID_ACQUISITION_SOURCES.map((source) => <option key={source} value={source}>{SOURCE_LABELS[source]}</option>)}
+              </Field>
+              <Field className="gh-directory-form__wide" label="Note" area value={form.notes} onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))} placeholder="Richiesta, appunto veloce o dettaglio utile" />
+              <div className="gh-directory-form__wide gh-inline-actions">
+                <Button staff type="submit" loading={saving}>Salva lead</Button>
+                <Button staff type="button" variant="ghost" onClick={() => { setForm(INITIAL_FORM); setShowCreateForm(false); }}>Annulla</Button>
               </div>
             </form>
-          </section>
-        ) : null}
+          </Panel>
+        )}
 
-        <section className="grid md:grid-cols-[1.2fr_0.8fr] gap-6 mb-6">
-          <div className="bg-white rounded-3xl shadow-lg border p-6" style={{ borderColor: 'var(--color-border)' }}>
-            <p className="text-xs uppercase tracking-[0.24em] font-bold mb-3" style={{ color: 'var(--color-secondary)' }}>
-              Ricerca e filtri
-            </p>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-2xl px-4 py-3 border bg-white"
-              style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-              placeholder="Cerca per cane, proprietario, telefono o note"
-            />
-            <div className="flex flex-wrap gap-2 mt-4">
-              {[
-                ['all', 'Tutti', counts.all],
-                ['lead', 'Lead', counts.lead],
-                ['contacted', 'Contattati', counts.contacted],
-                ['active', 'Clienti', counts.active],
-                ['archived', 'Archiviati', counts.archived],
-              ].map(([key, label, count]) => {
-                const isActive = activeFilter === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setActiveFilter(key)}
-                    className="px-4 py-2 rounded-full text-sm font-medium border transition"
-                    style={{
-                      borderColor: isActive ? 'transparent' : 'var(--color-border)',
-                      backgroundColor: isActive ? 'var(--color-primary)' : '#fffaf6',
-                      color: isActive ? '#fff' : 'var(--color-secondary)',
-                    }}
-                  >
-                    {label} · {count}
-                  </button>
-                );
-              })}
+        <div className="gh-directory-overview">
+          <Panel eyebrow="Ricerca e filtri">
+            <SearchBar value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Cerca per cane, proprietario, telefono o note" />
+            <div className="gh-pill-list gh-directory-filters">
+              {filters.map(([key, label, count]) => <Pill key={key} count={count} pressed={activeFilter === key} onClick={() => setActiveFilter(key)}>{label}</Pill>)}
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-3xl p-5 border" style={{ backgroundColor: 'var(--color-surface-main)', borderColor: 'var(--color-border)' }}>
-              <p className="text-xs uppercase tracking-[0.24em] font-bold" style={{ color: 'var(--color-secondary)' }}>
-                Da gestire
-              </p>
-              <p className="text-3xl font-semibold mt-3" style={{ color: 'var(--color-text-primary)' }}>
-                {counts.lead}
-              </p>
-            </div>
-            <div className="rounded-3xl p-5 border" style={{ backgroundColor: 'var(--color-success-bg)', borderColor: 'var(--color-border)' }}>
-              <p className="text-xs uppercase tracking-[0.24em] font-bold" style={{ color: 'var(--color-secondary)' }}>
-                Contattati
-              </p>
-              <p className="text-3xl font-semibold mt-3" style={{ color: 'var(--color-text-primary)' }}>
-                {counts.contacted}
-              </p>
-            </div>
-          </div>
-        </section>
+          </Panel>
+          <StatStrip items={[{ label: 'Da gestire', value: counts.lead }, { label: 'Contattati', value: counts.contacted }]} />
+        </div>
 
         {loading ? (
-          <div className="bg-white rounded-3xl shadow-lg border p-8 text-center" style={{ borderColor: 'var(--color-border)' }}>
-            <p style={{ color: 'var(--color-secondary)' }}>Caricamento contatti...</p>
-          </div>
+          <Panel flush>{Array.from({ length: 5 }, (_, index) => <SkeletonRow key={index} />)}</Panel>
         ) : filteredContacts.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-lg border p-8 text-center" style={{ borderColor: 'var(--color-border)' }}>
-            <h2 className="text-2xl font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
-              Nessun contatto da mostrare
-            </h2>
-            <p style={{ color: 'var(--color-secondary)' }}>
-              Aggiungi il primo contatto oppure cambia filtro per vedere richieste archiviate o già gestite.
-            </p>
-          </div>
+          <Panel><EmptyState title="Nessun contatto da mostrare" body="Aggiungi il primo contatto oppure cambia filtro per vedere richieste archiviate o già gestite." action={<Button staff onClick={() => setShowCreateForm(true)}>Nuovo contatto</Button>} /></Panel>
         ) : (
-          <div className="grid gap-4">
-            {filteredContacts.map((contact) => {
-              const statusStyle = STATUS_STYLES[contact.status] || STATUS_STYLES.lead;
-              return (
-                <article
-                  key={contact.id}
-                  className="bg-white rounded-3xl shadow-lg border p-6"
-                  style={{ borderColor: 'var(--color-border)' }}
-                >
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-3 mb-3">
-                        <h2 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                          {contact.owner_name || 'Cliente senza nome'}
-                        </h2>
-                        <span
-                          className="px-3 py-1 rounded-full text-sm font-semibold"
-                          style={statusStyle}
-                        >
-                          {STATUS_LABELS[contact.status]}
-                        </span>
-                        <span
-                          className="px-3 py-1 rounded-full text-sm font-medium"
-                          style={{ backgroundColor: '#fffaf6', color: 'var(--color-secondary)' }}
-                        >
-                          {SOURCE_LABELS[contact.source] || contact.source}
-                        </span>
-                      </div>
-
-                      <div className="grid sm:grid-cols-3 gap-3 text-sm">
-                        <div>
-                          <p className="font-medium" style={{ color: 'var(--color-secondary)' }}>
-                            Pet
-                          </p>
-                          <p style={{ color: 'var(--color-text-primary)' }}>
-                            {contact.pet_name || 'Da associare'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="font-medium" style={{ color: 'var(--color-secondary)' }}>
-                            Telefono
-                          </p>
-                          <p style={{ color: 'var(--color-text-primary)' }}>
-                            {contact.phone || 'Non indicato'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="font-medium" style={{ color: 'var(--color-secondary)' }}>
-                            Creato il
-                          </p>
-                          <p style={{ color: 'var(--color-text-primary)' }}>
-                            {new Date(contact.created_at).toLocaleDateString('it-IT')}
-                          </p>
-                        </div>
-                      </div>
-
-                      {contact.notes ? (
-                        <div className="mt-4 rounded-2xl p-4" style={{ backgroundColor: 'var(--color-bg-main)' }}>
-                          <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-secondary)' }}>
-                            {contact.notes}
-                          </p>
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div className="w-full lg:w-auto lg:min-w-[240px] flex flex-col gap-3">
-                      <button
-                        onClick={() => handleOpenWhatsApp(contact)}
-                        className="px-4 py-3 rounded-xl text-white font-semibold"
-                        style={{ backgroundColor: '#16a34a' }}
-                      >
-                        Apri WhatsApp
-                      </button>
-
-                      {contact.pets.length === 0 ? (
-                        <button
-                          onClick={() => handleConvertToClient(contact)}
-                          className="px-4 py-3 rounded-xl font-semibold text-white"
-                          style={{ backgroundColor: 'var(--color-primary)' }}
-                        >
-                          Aggiungi pet
-                        </button>
-                      ) : null}
-
-                      {contact.pets.length > 1 ? (
-                        <label className="block">
-                          <span className="block text-sm font-medium mb-2" style={{ color: 'var(--color-secondary)' }}>
-                            Scegli pet
-                          </span>
-                          <select
-                            value={selectedPetIds[contact.id] || contact.pets[0].id}
-                            onChange={(event) =>
-                              setSelectedPetIds((current) => ({
-                                ...current,
-                                [contact.id]: event.target.value,
-                              }))
-                            }
-                            className="w-full rounded-xl px-4 py-3 border bg-white"
-                            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                          >
-                            {contact.pets.map((pet) => (
-                              <option key={pet.id} value={pet.id}>{pet.name}</option>
-                            ))}
-                          </select>
-                        </label>
-                      ) : null}
-
-                      {contact.pets.length > 0 ? (
-                        <button
-                          onClick={() => handleOpenPet(contact)}
-                          className="px-4 py-3 rounded-xl font-medium border"
-                          style={{
-                            borderColor: 'var(--color-border)',
-                            color: 'var(--color-secondary)',
-                          }}
-                        >
-                          Apri scheda pet
-                        </button>
-                      ) : null}
-
-                      {contact.pets.length === 0 && contact.status !== 'contacted' ? (
-                        <button
-                          onClick={() => handleStatusChange(contact.id, 'contacted')}
-                          className="px-4 py-3 rounded-xl font-medium border"
-                          style={{ borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
-                        >
-                          Segna contattato
-                        </button>
-                      ) : null}
-
-                      {contact.pets.length === 0 && contact.status !== 'lead' ? (
-                        <button
-                          onClick={() => handleStatusChange(contact.id, 'lead')}
-                          className="px-4 py-3 rounded-xl font-medium border"
-                          style={{ borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
-                        >
-                          Riporta a lead
-                        </button>
-                      ) : null}
-
-                      {contact.pets.length === 0 && contact.status !== 'archived' ? (
-                        <button
-                          onClick={() => handleStatusChange(contact.id, 'archived')}
-                          className="px-4 py-3 rounded-xl font-medium text-white"
-                          style={{ backgroundColor: 'var(--color-secondary)' }}
-                        >
-                          Archivia
-                        </button>
-                      ) : null}
-                    </div>
+          <div className="gh-contact-list">
+            {filteredContacts.map((contact) => (
+              <Panel
+                className="gh-contact-card"
+                title={contact.owner_name || 'Cliente senza nome'}
+                right={<div className="gh-contact-card__tags"><StateTag tone={STATUS_TONES[contact.status] || 'warning'}>{STATUS_LABELS[contact.status]}</StateTag><span className="gh-contact-source">{SOURCE_LABELS[contact.source] || contact.source}</span></div>}
+                key={contact.id}
+              >
+                <div className="gh-contact-card__layout">
+                  <div className="gh-contact-card__copy">
+                    <dl className="gh-contact-facts">
+                      <div><dt>Pet</dt><dd>{contact.pet_name || 'Da associare'}</dd></div>
+                      <div><dt>Telefono</dt><dd className="gh-num">{contact.phone || 'Non indicato'}</dd></div>
+                      <div><dt>Creato il</dt><dd className="gh-num">{new Date(contact.created_at).toLocaleDateString('it-IT')}</dd></div>
+                    </dl>
+                    {contact.notes && <p className="gh-contact-notes gh-pre-wrap">{contact.notes}</p>}
                   </div>
-                </article>
-              );
-            })}
+                  <div className="gh-contact-card__actions">
+                    <Button staff wide variant="whatsapp" onClick={() => handleOpenWhatsApp(contact)}>Apri WhatsApp</Button>
+                    {contact.pets.length === 0 && <Button staff wide onClick={() => handleConvertToClient(contact)}>Aggiungi pet</Button>}
+                    {contact.pets.length > 1 && (
+                      <Field label="Scegli pet" as="select" value={selectedPetIds[contact.id] || contact.pets[0].id} onChange={(event) => setSelectedPetIds((current) => ({ ...current, [contact.id]: event.target.value }))}>
+                        {contact.pets.map((pet) => <option key={pet.id} value={pet.id}>{pet.name}</option>)}
+                      </Field>
+                    )}
+                    {contact.pets.length > 0 && <Button staff wide variant="outline" onClick={() => handleOpenPet(contact)}>Apri scheda pet</Button>}
+                    {contact.pets.length === 0 && contact.status !== 'contacted' && <Button staff wide variant="outline" onClick={() => handleStatusChange(contact.id, 'contacted')}>Segna contattato</Button>}
+                    {contact.pets.length === 0 && contact.status !== 'lead' && <Button staff wide variant="ghost" onClick={() => handleStatusChange(contact.id, 'lead')}>Riporta a lead</Button>}
+                    {contact.pets.length === 0 && contact.status !== 'archived' && <Button staff wide variant="secondary" onClick={() => handleStatusChange(contact.id, 'archived')}>Archivia</Button>}
+                  </div>
+                </div>
+              </Panel>
+            ))}
           </div>
         )}
       </main>

@@ -1346,6 +1346,735 @@
   border-top: 1px solid var(--gh-border-35);
 }
 
+/* GH-21: residue staff surfaces, composed from the existing kit. */
+
+.gh-row-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+.gh-capitalize {
+  text-transform: capitalize;
+}
+
+.gh-success-state {
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--color-success-text) 35%, transparent);
+  border-radius: var(--gh-r-field);
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.gh-state-tag--neutral,
+.gh-state-tag--operator {
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+}
+
+.gh-state-tag--customer {
+  background: var(--gh-bridge);
+  color: var(--color-primary);
+}
+
+.gh-directory-stack,
+.gh-daily-stack,
+.gh-requests-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gh-directory-form,
+.gh-add-client-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.gh-directory-form__wide {
+  grid-column: 1 / -1;
+}
+
+.gh-directory-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(250px, 1fr);
+  gap: 14px;
+}
+
+.gh-directory-filters {
+  margin-top: 10px;
+}
+
+.gh-contact-list,
+.gh-appointment-list,
+.gh-request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gh-contact-card__tags,
+.gh-appointment-tags,
+.gh-request-tags,
+.gh-client-tile__tags,
+.gh-client-tile__states {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gh-contact-source {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.gh-contact-card__layout,
+.gh-appointment-row,
+.gh-request-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: start;
+  gap: 16px;
+}
+
+.gh-contact-card__copy,
+.gh-appointment-copy,
+.gh-request-copy {
+  min-width: 0;
+}
+
+.gh-contact-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.gh-contact-facts dt {
+  color: var(--color-text-secondary);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+}
+
+.gh-contact-facts dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.gh-contact-notes,
+.gh-appointment-notes {
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px solid var(--gh-border-35);
+  color: var(--color-text-secondary);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.gh-contact-card__actions,
+.gh-appointment-actions,
+.gh-request-actions {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gh-add-client-shell {
+  display: flex;
+  width: min(820px, 100%);
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gh-add-client-context {
+  margin-bottom: 16px;
+  padding: 12px 13px;
+  border-left: 3px solid var(--color-primary);
+  background: var(--gh-bridge);
+}
+
+.gh-add-client-context .gh-body {
+  margin-top: 5px;
+}
+
+.gh-add-client-form,
+.gh-add-client-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.gh-add-client-form {
+  gap: 18px;
+}
+
+.gh-add-client-section {
+  gap: 10px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--gh-border-35);
+}
+
+.gh-add-client-section .gh-meta {
+  margin-top: 4px;
+}
+
+.gh-add-client-photo-preview {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  border: 1px solid var(--gh-border-60);
+  border-radius: var(--gh-r-field);
+}
+
+.gh-add-client-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gh-add-client-photo-preview .gh-btn {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+}
+
+.gh-add-client-photo-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gh-add-client-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.gh-add-client-tip {
+  margin-top: 14px;
+  color: var(--color-text-secondary);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.gh-date-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gh-date-toolbar .gh-panel-title {
+  margin-top: 4px;
+}
+
+.gh-date-toolbar__controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+}
+
+.gh-date-toolbar__controls .gh-field-wrap {
+  width: 170px;
+}
+
+.gh-appointment-card {
+  border-left-width: 4px;
+}
+
+.gh-appointment-card--warning {
+  border-left-color: var(--color-warning-text);
+}
+
+.gh-appointment-card--success {
+  border-left-color: var(--color-success-text);
+}
+
+.gh-appointment-card--danger {
+  border-left-color: var(--color-danger-text);
+}
+
+.gh-appointment-card--neutral {
+  border-left-color: var(--color-text-secondary);
+}
+
+.gh-time-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 7px;
+  border: 1px solid var(--gh-border-60);
+  border-radius: 5px;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.gh-appointment-copy .gh-row-title,
+.gh-request-copy .gh-row-title {
+  margin-top: 9px;
+}
+
+.gh-appointment-copy .gh-body,
+.gh-request-copy .gh-body {
+  margin-top: 3px;
+  color: var(--color-text-secondary);
+}
+
+.gh-request-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.gh-request-info-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gh-request-info {
+  min-width: 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--gh-border-60);
+}
+
+.gh-request-info__value {
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.gh-request-notes {
+  margin-top: 13px;
+  padding: 11px 0 0 12px;
+  border-top: 1px solid var(--gh-border-35);
+  border-left: 3px solid var(--color-primary);
+}
+
+.gh-request-notes .gh-body {
+  margin-top: 5px;
+}
+
+.gh-request-pipeline {
+  max-width: 760px;
+}
+
+.gh-dialog-backdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  padding: 16px;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-text-primary) 45%, transparent);
+}
+
+.gh-dialog {
+  width: min(460px, 100%);
+  padding: 20px;
+  border: 1px solid var(--gh-border-60);
+  border-radius: var(--gh-r-panel);
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+}
+
+.gh-dialog > .gh-panel-title,
+.gh-dialog > .gh-body {
+  margin-top: 7px;
+}
+
+.gh-dialog-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 17px;
+}
+
+.gh-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.gh-login-page {
+  display: grid;
+  min-height: 100vh;
+  padding: 28px 16px;
+  place-items: center;
+  background: var(--color-surface-soft);
+}
+
+.gh-login-shell {
+  width: min(430px, 100%);
+}
+
+.gh-login-brand {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.gh-login-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.gh-login-subtitle,
+.gh-login-footer {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.gh-login-subtitle {
+  margin-top: 7px;
+}
+
+.gh-login-card {
+  border-top: 4px solid var(--color-primary);
+}
+
+.gh-login-card .gh-panel__body {
+  padding: 24px;
+}
+
+.gh-login-card-title {
+  margin: 0 0 18px;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-align: center;
+}
+
+.gh-login-heading {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.gh-login-heading .gh-login-card-title {
+  margin-bottom: 7px;
+}
+
+.gh-login-form,
+.gh-login-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gh-login-card .gh-error-state,
+.gh-login-card .gh-success-state {
+  margin-bottom: 12px;
+}
+
+.gh-login-forgot {
+  margin-top: -4px;
+  text-align: right;
+}
+
+.gh-login-link {
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.gh-login-toggle,
+.gh-login-footer {
+  text-align: center;
+}
+
+.gh-login-toggle {
+  margin-top: 18px;
+}
+
+.gh-login-footer {
+  margin-top: 15px;
+  line-height: 1.6;
+}
+
+.gh-card-state-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
+
+.gh-card-state-shell .gh-panel {
+  width: min(520px, 100%);
+}
+
+.gh-card-print-shell {
+  width: min(920px, 100%);
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+.gh-card-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.gh-card-toolbar .gh-body {
+  margin-top: 5px;
+  color: var(--color-text-secondary);
+}
+
+.gh-card-toolbar__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.gh-print-card__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(250px, 0.8fr);
+}
+
+.gh-print-card__main,
+.gh-print-card__qr {
+  padding: 28px;
+}
+
+.gh-print-card__identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.gh-print-card__breed {
+  margin: 4px 0 7px;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+.gh-print-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 24px;
+  border-top: 1px solid var(--gh-border-35);
+  border-bottom: 1px solid var(--gh-border-35);
+}
+
+.gh-card-metric {
+  min-width: 0;
+  padding: 13px 10px;
+}
+
+.gh-card-metric + .gh-card-metric {
+  border-left: 1px solid var(--gh-border-35);
+}
+
+.gh-card-metric__value {
+  margin: 5px 0;
+  font-family: var(--font-serif);
+  font-size: 25px;
+}
+
+.gh-card-metric .gh-fidelity-badge,
+.gh-card-metric .gh-body {
+  margin-top: 6px;
+}
+
+.gh-print-card__note {
+  margin-top: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gh-border-35);
+}
+
+.gh-print-card__note .gh-row-title,
+.gh-print-card__note .gh-body {
+  margin-top: 5px;
+}
+
+.gh-print-card__note--accent {
+  padding-left: 12px;
+  border-left: 3px solid var(--color-primary);
+}
+
+.gh-print-card__qr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border-left: 1px solid var(--gh-border-60);
+  background: var(--color-surface-soft);
+  text-align: center;
+}
+
+.gh-print-card__qr-image {
+  width: 224px;
+  height: 224px;
+  padding: 10px;
+  border: 1px solid var(--gh-border-60);
+  border-radius: var(--gh-r-field);
+  background: #fff;
+}
+
+.gh-print-card__qr .gh-row-title {
+  margin-top: 14px;
+}
+
+.gh-print-card__url {
+  max-width: 100%;
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+  color: var(--color-text-secondary);
+  font-size: 11.5px;
+}
+
+.gh-client-tile {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid var(--gh-border-60);
+  border-top: 4px solid var(--color-primary);
+  border-radius: var(--gh-r-panel);
+  background: #fff;
+}
+
+.gh-client-tile--danger {
+  border-top-color: var(--color-danger-text);
+}
+
+.gh-client-tile--success {
+  border-top-color: var(--color-success-text);
+}
+
+.gh-client-tile__photo {
+  display: flex;
+  min-height: 116px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 17px;
+  background: var(--color-surface-muted);
+}
+
+.gh-client-tile__body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.gh-client-tile__head,
+.gh-client-tile__foot,
+.gh-visit-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gh-client-tile__name {
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gh-client-tile__tags,
+.gh-client-tile__owner,
+.gh-client-tile__states {
+  margin-top: 11px;
+}
+
+.gh-client-tile__foot {
+  align-items: center;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--gh-border-35);
+}
+
+.gh-client-tile__open {
+  color: var(--color-primary);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.gh-visit-card {
+  padding: 14px 14px 14px 16px;
+  border: 1px solid var(--gh-border-60);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--gh-r-field);
+  background: var(--color-surface-soft);
+}
+
+.gh-visit-card__section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--gh-border-35);
+}
+
+.gh-visit-card__section .gh-body {
+  margin-top: 4px;
+  color: var(--color-text-secondary);
+}
+
+.gh-visit-card__section--danger,
+.gh-visit-card__section--danger .gh-body {
+  color: var(--color-danger-text);
+}
+
+.gh-visit-card__empty {
+  margin-top: 12px;
+  font-style: italic;
+}
+
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+
+  body,
+  .gh-qr-card-page {
+    background: #fff !important;
+  }
+
+  .gh-card-print-shell {
+    width: 100%;
+    padding: 0;
+  }
+}
+
 .gh-error-state__action {
   margin-top: 9px;
 }
@@ -1586,5 +2315,151 @@
   .gh-day-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gh-directory-form,
+  .gh-directory-overview,
+  .gh-contact-card__layout,
+  .gh-add-client-grid,
+  .gh-add-client-actions,
+  .gh-appointment-row,
+  .gh-request-row,
+  .gh-request-info-grid,
+  .gh-request-info-grid--three,
+  .gh-dialog-fields,
+  .gh-print-card__grid,
+  .gh-print-card__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .gh-contact-card .gh-panel__head,
+  .gh-request-card .gh-panel__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .gh-contact-facts {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .gh-contact-card__actions .gh-btn,
+  .gh-appointment-actions .gh-btn,
+  .gh-request-actions .gh-btn {
+    width: 100%;
+  }
+
+  .gh-add-client-photo-preview {
+    height: 180px;
+  }
+
+  .gh-add-client-actions {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gh-date-toolbar,
+  .gh-card-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .gh-date-toolbar__controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .gh-date-toolbar__controls .gh-field-wrap {
+    width: 100%;
+  }
+
+  .gh-date-toolbar__controls .gh-btn {
+    width: 100%;
+  }
+
+  .gh-request-info {
+    min-height: 44px;
+  }
+
+  .gh-dialog-backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .gh-dialog {
+    width: 100%;
+    max-height: 100vh;
+    overflow-y: auto;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: var(--gh-r-panel) var(--gh-r-panel) 0 0;
+  }
+
+  .gh-dialog-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .gh-login-page {
+    padding: 18px 13px;
+  }
+
+  .gh-login-card .gh-panel__body {
+    padding: 20px 16px;
+  }
+
+  .gh-login-link {
+    min-height: 44px;
+  }
+
+  .gh-card-toolbar__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+
+  .gh-card-toolbar__actions .gh-btn {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .gh-print-card__main,
+  .gh-print-card__qr {
+    padding: 18px;
+  }
+
+  .gh-print-card__identity {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .gh-print-card__stats {
+    border-bottom: 0;
+  }
+
+  .gh-card-metric + .gh-card-metric {
+    border-top: 1px solid var(--gh-border-35);
+    border-left: 0;
+  }
+
+  .gh-print-card__qr {
+    border-top: 1px solid var(--gh-border-60);
+    border-left: 0;
+  }
+
+  .gh-print-card__qr-image {
+    width: min(224px, 100%);
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .gh-client-tile__photo {
+    min-height: 104px;
+  }
+
+  .gh-visit-card__head .gh-btn {
+    width: 46px;
+    flex: 0 0 46px;
   }
 }

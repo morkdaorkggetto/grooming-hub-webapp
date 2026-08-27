@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from './StaffKit';
 
 /**
  * VisitCard — Componente card visita
@@ -25,90 +26,33 @@ export default function VisitCard({ visit, onDelete }) {
   };
 
   return (
-    <div
-      className="border-l-4 p-5 rounded-lg"
-      style={{
-        borderColor: 'var(--color-primary)',
-        backgroundColor: 'var(--color-bg-main)',
-      }}
-    >
-      {/* Header: data e costo */}
-      <div className="flex items-start justify-between mb-4">
+    <article className="gh-visit-card">
+      <div className="gh-visit-card__head">
         <div>
-          {/* Data */}
-          <p
-            style={{ color: 'var(--color-text-primary)' }}
-            className="text-sm font-bold mb-1"
-          >
-            📅 {formatDate(visit.date)}
-          </p>
-
-          {/* Costo */}
-          <p
-            style={{ color: 'var(--color-primary)' }}
-            className="text-2xl font-bold"
-          >
-            €{parseFloat(visit.cost).toFixed(2)}
-          </p>
+          <p className="gh-row-title gh-num">📅 {formatDate(visit.date)}</p>
+          <p className="gh-price gh-num">€{parseFloat(visit.cost).toFixed(2)}</p>
         </div>
 
-        {/* Delete button */}
         {onDelete && (
-          <button
-            onClick={onDelete}
-            className="p-2 rounded-lg hover:bg-red-100 transition"
-            title="Elimina visita"
-          >
-            <span className="text-xl text-red-500">🗑️</span>
-          </button>
+          <Button staff variant="ghost" icon="trash" aria-label="Elimina visita" title="Elimina visita" onClick={onDelete} />
         )}
       </div>
 
-      {/* Trattamenti */}
       {visit.treatments && (
-        <div className="mb-4">
-          <p
-            style={{ color: 'var(--color-text-primary)' }}
-            className="text-xs font-bold mb-1 uppercase"
-          >
-            Trattamenti
-          </p>
-          <p
-            style={{ color: 'var(--color-secondary)' }}
-            className="text-sm whitespace-pre-wrap"
-          >
-            {visit.treatments}
-          </p>
+        <div className="gh-visit-card__section">
+          <p className="gh-eyebrow--staff">Trattamenti</p>
+          <p className="gh-body gh-pre-wrap">{visit.treatments}</p>
         </div>
       )}
 
-      {/* Problematiche */}
       {visit.issues && (
-        <div>
-          <p
-            style={{ color: '#d4534a' }}
-            className="text-xs font-bold mb-1 uppercase"
-          >
-            ⚠️ Problematiche
-          </p>
-          <p
-            style={{ color: '#d4534a' }}
-            className="text-sm whitespace-pre-wrap"
-          >
-            {visit.issues}
-          </p>
+        <div className="gh-visit-card__section gh-visit-card__section--danger">
+          <p className="gh-eyebrow--staff">⚠️ Problematiche</p>
+          <p className="gh-body gh-pre-wrap">{visit.issues}</p>
         </div>
       )}
 
-      {/* Empty state */}
-      {!visit.treatments && !visit.issues && (
-        <p
-          style={{ color: 'var(--color-secondary)' }}
-          className="text-sm italic"
-        >
-          Nessun dettaglio registrato
-        </p>
-      )}
-    </div>
+      {!visit.treatments && !visit.issues && <p className="gh-meta gh-visit-card__empty">Nessun dettaglio registrato</p>}
+    </article>
   );
 }
