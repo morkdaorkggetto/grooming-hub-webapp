@@ -17,6 +17,8 @@ const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 const PET_SELECT = `*, customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, operator_notes, acquisition_source, relationship_status, created_at, updated_at), visits(id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
+const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
+const CALENDAR_PET_SELECT = `id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone)`;
 
 const generateId = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
@@ -98,6 +100,12 @@ const mapAppointmentRequest = (row) => {
     client: pet,
     notes: row.coat_condition_notes || null,
   };
+};
+
+const mapCalendarVisit = (row) => {
+  if (!row) return null;
+  const pet = mapPet(relation(row.pet));
+  return { ...row, pet, client: pet };
 };
 
 const getMemberships = async (userId) => {
@@ -322,6 +330,21 @@ export const getAllPets = async (tenantId = null, filters = {}) => {
 };
 
 export const getAllClients = (filters = {}) => getAllPets(null, filters);
+
+export const getCalendarPetOptions = async () => {
+  try {
+    const { tenantId } = await requireStaff();
+    const { data, error } = await supabase
+      .from('pets')
+      .select(CALENDAR_PET_SELECT)
+      .eq('tenant_id', tenantId)
+      .order('name');
+    if (error) throw error;
+    return (data || []).map(mapPet);
+  } catch (error) {
+    throw new Error(`Non riesco a caricare i pet del calendario: ${error.message}`);
+  }
+};
 
 export const getCustomerDirectory = async () => {
   const { tenantId } = await requireStaff();
@@ -648,6 +671,72 @@ export const getAppointments = async (filters = {}) => {
   const { data, error } = await query;
   if (error) throw new Error(`Non riesco a caricare il calendario: ${error.message}`);
   return (data || []).map(mapAppointment);
+};
+
+export const getCalendarWeekData = async ({ from, to } = {}) => {
+  if (!from || !to) throw new Error('La settimana del calendario e obbligatoria');
+
+  const { tenantId } = await requireStaff();
+  const fromIso = new Date(`${from}T00:00:00`).toISOString();
+  const toIso = new Date(`${to}T23:59:59.999`).toISOString();
+
+  const [appointmentsResult, structuredResult, legacyResult, visitsResult] = await Promise.all([
+    supabase
+      .from('appointments')
+      .select(APPOINTMENT_SELECT)
+      .eq('tenant_id', tenantId)
+      .gte('scheduled_at', fromIso)
+      .lte('scheduled_at', toIso)
+      .neq('approval_status', 'pending')
+      .neq('approval_status', 'rejected')
+      .order('scheduled_at'),
+    supabase
+      .from('appointment_requests')
+      .select(APPOINTMENT_REQUEST_SELECT)
+      .eq('tenant_id', tenantId)
+      .eq('status', 'pending')
+      .gte('desired_date', from)
+      .lte('desired_date', to)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('appointments')
+      .select(APPOINTMENT_SELECT)
+      .eq('tenant_id', tenantId)
+      .eq('approval_status', 'pending')
+      .eq('appointment_source', 'customer')
+      .gte('scheduled_at', fromIso)
+      .lte('scheduled_at', toIso)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('visits')
+      .select(CALENDAR_VISIT_SELECT)
+      .eq('tenant_id', tenantId)
+      .gte('date', from)
+      .lte('date', to)
+      .order('date'),
+  ]);
+
+  if (appointmentsResult.error) {
+    throw new Error(`Non riesco a caricare gli appuntamenti: ${appointmentsResult.error.message}`);
+  }
+  if (structuredResult.error) {
+    throw new Error(`Non riesco a caricare le richieste: ${structuredResult.error.message}`);
+  }
+  if (legacyResult.error) {
+    throw new Error(`Non riesco a caricare le richieste precedenti: ${legacyResult.error.message}`);
+  }
+  if (visitsResult.error) {
+    throw new Error(`Non riesco a caricare le lavorazioni: ${visitsResult.error.message}`);
+  }
+
+  return {
+    appointments: (appointmentsResult.data || []).map(mapAppointment),
+    requests: [
+      ...(structuredResult.data || []).map(mapAppointmentRequest),
+      ...(legacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
+    ].sort((left, right) => String(right.created_at || '').localeCompare(String(left.created_at || ''))),
+    visits: (visitsResult.data || []).map(mapCalendarVisit),
+  };
 };
 
 export const getPendingAppointmentRequests = async () => {

@@ -17,7 +17,7 @@ const normalizePhone = (phone) => {
   return digits;
 };
 
-const buildWhatsAppUrl = (phone, message) => {
+export const buildWhatsAppUrl = (phone, message) => {
   const normalizedPhone = normalizePhone(phone);
   if (!normalizedPhone) return '';
 
@@ -98,26 +98,6 @@ export const getAppointmentWhatsAppUrl = (appointment) => {
   return buildWhatsAppUrl(appointment?.client?.phone, message);
 };
 
-export const getDraftAppointmentWhatsAppUrl = ({ client, date, time }) => {
-  const clientName = client?.name || 'il tuo cane';
-  const ownerName = client?.owner || 'cliente';
-  const when = date && time
-    ? new Date(`${date}T${time}`).toLocaleString('it-IT', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : '';
-
-  const message = when
-    ? `Buongiorno ${ownerName}, ti propongo l'appuntamento per ${clientName} il ${when}. Fammi sapere se va bene.`
-    : `Buongiorno ${ownerName}, ti contatto da Grooming Hub per fissare un appuntamento per ${clientName}.`;
-
-  return buildWhatsAppUrl(client?.phone, message);
-};
-
 export const getCustomerAppointmentRequestWhatsAppUrl = ({
   petName,
   desiredDate,
@@ -142,7 +122,7 @@ export const getCustomerAppointmentRequestWhatsAppUrl = ({
   return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };
 
-export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) => {
+export const getAppointmentApprovalWhatsAppMessage = (appointment, approvalStatus) => {
   const clientName = appointment?.client?.name || 'il tuo cane';
   const ownerName = appointment?.client?.owner || 'cliente';
   const when = formatAppointmentRange({
@@ -150,17 +130,20 @@ export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) =
     durationMinutes: appointment?.duration_minutes,
   });
 
-  const message =
-    approvalStatus === 'approved'
+  return approvalStatus === 'approved'
       ? when
         ? `Buongiorno ${ownerName}, la richiesta registrata in Grooming Hub per ${clientName} è confermata nella fascia ${when}.`
         : `Buongiorno ${ownerName}, la richiesta registrata in Grooming Hub per ${clientName} è confermata.`
       : when
         ? `Buongiorno ${ownerName}, la fascia richiesta in Grooming Hub per ${clientName} (${when}) non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`
         : `Buongiorno ${ownerName}, la fascia richiesta in Grooming Hub per ${clientName} non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`;
-
-  return buildWhatsAppUrl(appointment?.client?.phone, message);
 };
+
+export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) =>
+  buildWhatsAppUrl(
+    appointment?.client?.phone,
+    getAppointmentApprovalWhatsAppMessage(appointment, approvalStatus)
+  );
 
 export const getCustomerDirectoryWhatsAppUrl = (customer) => {
   const ownerName = customer?.owner_name || 'cliente';
