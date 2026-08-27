@@ -285,6 +285,30 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 27 agosto 2026 — GH-21, gli orari, e la durata che non è del servizio
+
+**GH-21 consegnato: refactor ottimo, controprove non eseguite.** Otto file da **3.128 a 1.784 righe**, **246 stili inline a 0**, **52 colori letterali a 0**. `AppHeader` teal passa da cinque consumatori a **uno solo** (`WeeklyRevenue`, fuori perimetro dichiarato). Dentro c'è anche il **login staff**, che «non era mai stato in perimetro» e che ora ha la veste **senza essere passato da Claude Design** — prova che il kit è ormai la composizione, come previsto scrivendo il mandato.
+
+**Ma il registro dichiara in chiusura che le controprove non sono state fatte**: nessuna verifica sulle tre larghezze, nessuna prova dei flussi reali dal gesto, nessun ciclo di creazione cliente sul demo. Verificate solo costruibilità e refactor. Consegna accettata da Luigi come chiusura del giro, **con il buco dichiarato e non nascosto** — che è il comportamento giusto.
+
+**Rischio residuo nominato**: fra gli otto file c'è `AddClient`, che crea i clienti passando dalla RPC atomica di GH-05. Una rottura lì non si vede guardando: la scopre Davide il primo giorno che aggiunge un cane. Stesso profilo di GH-18, che «poteva non trovare niente» e trovò una regressione vera. Giro corto di sola verifica da programmare.
+
+**Orari di chiusura** (fonte: Davide e Roby via Luigi): chiuso **domenica** e **lunedì mattina**. Verifica Cowork su 464 visite: **domenica zero, confermato**; lunedì 71 visite, quindi la chiusura è davvero solo mattutina — ma **non verificabile dai dati**, perché `visits.date` non ha l'ora. Mandato `GH-22` emesso, con il vincolo strutturale che gli orari vivano nella configurazione del tenant e non nel codice: il secondo salone avrà giorni diversi, e una costante sarebbe un difetto che si scopre nel momento peggiore.
+
+**LA DURATA NON È UNA PROPRIETÀ DEL SERVIZIO** — risposta di Davide, 27/8, che chiude una questione aperta e ne apre una di modello:
+
+> «bagnetto pelo raso 45 minuti/1 ora, bagnetto barboncino o maltese 1 e 15 minuti quando sta bene, bagnetto quando sta rovinato 1.30/2h, mediamente 2h ma anche 2,5h cani grandi 2/3h»
+
+Dipende da **tre variabili insieme** — tipo di pelo, condizione del pelo, taglia — e spazia da **45 minuti a 3 ore**, un fattore quattro. È una proprietà del **cane in quel giorno**, esattamente come il prezzo. `services.duration_minutes` è NOT NULL e modella la durata come attributo del servizio: **strutturalmente sbagliato**, e va gestito sapendolo.
+
+**Scoperta collaterale che pesa**: il wizard mostra «Bagno · circa 1 ora», ma Davide dice «mediamente 2h». **Non è un arrotondamento: è la metà.** Mostriamo al cliente il caso migliore spacciandolo per il normale. E l'origine di quel numero è stata misurata: `const DEFAULT_DURATION = 60` in `Calendar.jsx` — su 17 appuntamenti storici, **14 hanno esattamente 60 minuti**, cioè il valore che il modulo proponeva e che nessuno ha mai cambiato; le tre volte in cui qualcuno ci ha pensato ha scritto 45, 90 e **180**. Stessa famiglia del testo di rifiuto: sembra del salone perché è sempre stato lì, ma l'abbiamo scritto noi.
+
+**Conseguenza funzionale, non estetica**: quella durata finisce in `appointments.duration_minutes` e **alimenta il rilevamento dei conflitti**. Se ogni lavorazione occupa un'ora in agenda mentre nella realtà ne occupa due, il calendario **tacerà su sovrapposizioni vere**.
+
+**Decisione Luigi (27/8)**: al cliente si mostra una **forbice** nelle parole di Davide — «da 45 minuti a 2 ore, dipende dal pelo e da com'è messo» — e la durata reale la decide lo staff **al momento della conferma**, che è l'unico istante in cui qualcuno ha visto il cane. Identico al trattamento del prezzo. Entra in `GH-22`, che tocca già il wizard.
+
+**Contraddizione latente da sciogliere quando si popola `services`**: `price_cents` è NOT NULL, ma i prezzi non esistono come listino. Qualcuno dovrà scrivere un numero — presumibilmente zero — e conviene sia una decisione presa e annotata, non un valore messo lì per far passare il vincolo.
+
 ### 27 agosto 2026 — GH-19 e GH-20: il calendario torna vivo, e il cerchio si chiude
 
 **GH-19, inventario funzionale**: trenta funzioni censite dentro le 1.572 righe, ciascuna con esito dichiarato. Conferma del rischio per cui la fase era stata chiesta — **la composizione CD non copriva tutto**: creazione manuale, controllo conflitti, riprogrammazione, stati finali, promemoria, export. Una vista che nessuno guarda da quattro mesi avrebbe potuto perdere pezzi in silenzio fino a novembre. Scoperto anche un quarto stato non rappresentato (`no_show`) e l'assenza di qualunque legame fra visite e appuntamenti, che vieta la fusione di due righe dello stesso pet nello stesso giorno. Dodici decisioni sollevate, nessuna risolta d'ufficio.
