@@ -1,0 +1,273 @@
+.gh-redeem-page {
+  min-height: 100vh;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 88px 24px 40px;
+  box-sizing: border-box;
+  background: var(--color-bg-main);
+}
+
+.gh-redeem-brand {
+  position: absolute;
+  top: 28px;
+  left: 40px;
+  z-index: 1;
+}
+
+.gh-redeem-shell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 480px);
+}
+
+.gh-redeem-card,
+.gh-redeem-message {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 36px 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-xl);
+  background: var(--color-surface-main);
+  box-shadow: 0 22px 56px color-mix(in srgb, var(--color-text-primary) 12%, transparent);
+}
+
+.gh-redeem-eyebrow {
+  margin: 0 0 10px;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.gh-redeem-card h1,
+.gh-redeem-message h1 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.12;
+}
+
+.gh-redeem-copy {
+  margin: 12px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.gh-redeem-segments {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 24px 0 20px;
+  padding: 4px;
+  border-radius: var(--r-md);
+  background: var(--color-surface-soft);
+}
+
+.gh-redeem-segments button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gh-redeem-segments button[aria-pressed='true'] {
+  border-color: var(--color-border);
+  background: var(--color-surface-main);
+  color: var(--color-text-primary);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+}
+
+.gh-redeem-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gh-redeem-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gh-redeem-form input {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  outline: none;
+  background: var(--color-surface-main);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 14px;
+}
+
+.gh-redeem-form input::placeholder {
+  color: var(--color-placeholder);
+}
+
+.gh-redeem-form input:focus-visible,
+.gh-redeem-segments button:focus-visible,
+.gh-redeem-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.gh-redeem-alert {
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--color-danger-text) 45%, transparent);
+  border-radius: var(--r-sm);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.gh-redeem-button {
+  min-height: 48px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.gh-redeem-button--primary {
+  background: var(--color-primary);
+  color: var(--color-surface-main);
+}
+
+.gh-redeem-button--primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.gh-redeem-button--secondary {
+  border-color: var(--color-border);
+  background: var(--color-surface-main);
+  color: var(--color-text-primary);
+}
+
+.gh-redeem-button:disabled {
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  cursor: wait;
+}
+
+.gh-redeem-footnote {
+  margin: 18px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.gh-redeem-message {
+  text-align: center;
+}
+
+.gh-redeem-message-icon,
+.gh-redeem-spinner {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+
+.gh-redeem-message--success .gh-redeem-message-icon {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.gh-redeem-message--warning .gh-redeem-message-icon {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.gh-redeem-message--danger .gh-redeem-message-icon {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.gh-redeem-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.gh-redeem-spinner::after {
+  content: '';
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: gh-redeem-spin 0.8s linear infinite;
+}
+
+@keyframes gh-redeem-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 639px) {
+  .gh-redeem-page {
+    align-items: start;
+    padding: 24px 18px 32px;
+  }
+
+  .gh-redeem-brand {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-bottom: 20px;
+  }
+
+  .gh-redeem-shell {
+    align-self: start;
+  }
+
+  .gh-redeem-card,
+  .gh-redeem-message {
+    padding: 28px 20px;
+    border-radius: var(--r-lg);
+    box-shadow: none;
+  }
+
+  .gh-redeem-card h1,
+  .gh-redeem-message h1 {
+    font-size: 27px;
+  }
+
+  .gh-redeem-segments {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gh-redeem-spinner::after { animation: none; }
+}

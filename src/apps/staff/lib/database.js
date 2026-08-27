@@ -259,7 +259,7 @@ export const createCustomerPortalInvite = async (petId, customerEmail = '') => {
       expires_at: expiresAt.toISOString(),
     }).select('id, token, pet_id, customer_email, expires_at, created_at').single();
     if (error) throw error;
-    return { ...data, inviteUrl: `${getPublicAppOrigin()}/portal/invite/${token}` };
+    return { ...data, inviteUrl: `${getPublicAppOrigin()}/u/redeem/${token}` };
   } catch (error) {
     throw new Error(`Non riesco a creare l'invito cliente: ${error.message}`);
   }

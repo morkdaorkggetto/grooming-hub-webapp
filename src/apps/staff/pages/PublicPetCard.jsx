@@ -212,11 +212,11 @@ export default function PublicPetCard() {
         return;
       }
 
-      navigate('/portal');
+      navigate('/u/home');
       return;
     }
 
-    navigate('/portal/login');
+    navigate(`/u/login?redirect=${encodeURIComponent(`/client-card/${qrToken}`)}`);
   };
 
   if (loading) {
@@ -238,7 +238,7 @@ export default function PublicPetCard() {
             {error || 'Il QR non corrisponde a un cliente disponibile.'}
           </p>
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/u/login')}
             className="px-4 py-3 rounded-lg text-white font-medium"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >
