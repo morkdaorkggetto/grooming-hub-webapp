@@ -8,7 +8,18 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 24 agosto 2026.*
+*Aggiornato il 27 agosto 2026.*
+
+- **La costruzione è finita.** App clienti completa (login, home, promozioni, scheda pet, wizard richiesta). Gestionale interamente rivestito: Dashboard, scheda cliente, form visita, calendario, rubrica, nuovo cliente, giornata, richieste, login. Unica superficie ancora vecchia: `WeeklyRevenue`, che è un report e merita una composizione di Claude Design — è anche l'ultimo consumatore della vecchia fascia `AppHeader`.
+- **Il cerchio fra le due app è provato**: sul demo, richiesta del cliente → comparsa nel calendario staff → conferma con ora e durata scelte → appuntamento. È il flusso che giustifica il progetto.
+- **Orari e durate sono nel modello giusto**: chiusure in `tenants.settings` (multi-tenant, niente orari nel codice); al cliente una forbice 45 min – 3 ore; la durata effettiva la sceglie chi ha visto il cane. Come il prezzo, come l'orario: **si decide quando si conosce il caso.**
+- **Prova generale della migrazione completa e verificata** (GH-11 → GH-13): ricetta di 35 atti ordinati con impronte, **84,3 secondi** di sole chiamate DB, finestra raccomandata 15 minuti. Prod misurato **immutato** rispetto al dump del 21/8.
+- **Verso la produzione non manca lavoro di costruzione: mancano i cancelli di G6.** Spot-check delle 5 schede, dump fresco, autorizzazione del collegamento di Codex su `Webapp_Project`, **`services` da popolare** (nomi, durate e decisione sul `price_cents` obbligatorio), redirect della radice verso il gestionale, due foto orfane da rimuovere via Storage API.
+- **Code minori aperte**: due componenti morti da rimuovere; i quattro messaggi automatici attendono le parole di Davide; `deleteAppointment` senza consumatori; `CODEX_HANDOFF.md` da ricreare aggiornato.
+
+---
+
+*Stato precedente, conservato per storia — aggiornato il 24 agosto 2026.*
 
 - **Canone operativo BEA** in uso dal 18/8, confermato su tutta la catena GH-01→GH-11: nessuno scostamento silenzioso, ogni interruzione motivata è stata trattata come consegna valida (GH-02, GH-02-bis, GH-05, GH-11).
 - **Fase 1 sostanzialmente chiusa**: Login, Home, Promozioni, Scheda pet (GH-09) e Wizard richiesta appuntamento (GH-08) tutte vive sul demo. App staff risorta (GH-05-bis, Gate 5 chiuso parte applicativa). Gate 4/RLS e migrazione contacts→customer-first chiusi (GH-06, GH-07-bis). Hardening di sicurezza demo eseguito (GH-10): Advisor Security 21→6, Performance 115→113.
@@ -284,6 +295,24 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 27 agosto 2026 — GH-22 e GH-23: gli orari entrano, la veste si verifica
+
+**GH-22 consegnato, e all'opposto di GH-21 con le controprove complete**: quattordici, incluse le tre larghezze. Gli orari sono finiti dove dovevano — `tenants.settings.booking_schedule` con `closed_weekdays` e `closed_time_preferences`, **leggibile e multi-tenant, zero orari nel codice**. Nuova RPC `resolve_appointment_request_with_duration` SECURITY INVOKER, con la precedente conservata senza overload ambiguo. Nel wizard la domenica è visibile ma disabilitata, il lunedì mattina è marcato «Non disponibile», il resto resta selezionabile; nel calendario staff «Chiuso» e «Mattina chiusa» si distinguono dal giorno aperto e vuoto.
+
+**L'invariante «una regola nuova non riscrive il passato» ha tenuto su un caso reale**: la richiesta domenicale già esistente di Luna per il 6 settembre è rimasta visibile e apribile dentro una domenica ora dichiarata chiusa. Nessun rifiuto automatico, nessuno spostamento.
+
+**Durata**: al cliente la forbice «da 45 minuti a 3 ore» — l'intervallo completo di Davide, più onesto della versione che Cowork aveva proposto fermandosi a due ore e dimenticando i cani grandi. Allo staff la scelta della durata effettiva alla conferma, con 60 come sola proposta modificabile: provata a 120, il testo WhatsApp è passato coerentemente da 14:00 a 16:00 e la RPC ha persistito 120. Il rilevamento conflitti usa ora la durata scelta, non più il valore predefinito del servizio.
+
+**GH-23, verifica: dieci superfici × tre larghezze, tutte PASS — e una regressione vera trovata.** Il pulsante di logout su mobile misurava **42×46 px**, sotto il minimo di 44 che ci siamo dati; corretto a 46×46 con un minimo condiviso sul `HeroButton`, più il nome accessibile «Esci» quando l'etichetta visiva è nascosta. **Terza volta che un mandato di sola verifica «che poteva non trovare niente» trova qualcosa** (le altre: l'ombra delle Card in GH-18, i bersagli da 16-38 px sull'app clienti).
+
+**La garanzia di GH-05 è sopravvissuta alla riscrittura**: forzando `pets.sex = 'x'` la RPC atomica ha rifiutato con `23514` lasciando **zero customer orfani**. Era il rischio che più preoccupava dopo il rifacimento di `AddClient`, ed era giusto provarlo forzando il fallimento invece che solo il successo.
+
+**Sesto difetto di Cowork, stessa famiglia dei precedenti** (autodenuncia): il mandato GH-23 parlava di «dodici superfici», elencate da un listato di cartella senza verificare che fossero raggiungibili. Due — `components/ClientCard.jsx` e `components/VisitCard.jsx` — hanno **zero import e nessuna route che le monti**: non sono superfici, sono codice morto. In GH-21 erano state diligentemente rivestite (177→62 e 114→58 righe): lavoro fatto bene su due stanze murate, come `AddVisit` prima di loro. Il filo resta identico — **sbaglio dove descrivo cosa verificare, non cosa ottenere.**
+
+Codex ha rifiutato la scorciatoia di creare una route di prova per far tornare la matrice, e ha proposto un micro-mandato di rimozione nominando il rischio residuo: consumatori esterni al repository non sono osservabili da qui.
+
+**Nota di scoperta ricorrente**: è la terza volta che troviamo codice raggiungibile solo sulla carta — `AddVisit`, e ora due componenti. Vale la pena, prima o poi, una passata sistematica sui consumatori invece di scoprirli uno alla volta.
 
 ### 27 agosto 2026 — GH-21, gli orari, e la durata che non è del servizio
 
