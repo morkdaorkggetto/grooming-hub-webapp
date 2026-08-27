@@ -5,8 +5,8 @@
 **Worktree applicativo:** `/Users/luigimaisto/Desktop/grooming-hub-web/webapp`
 **Branch:** `feat/customer-app`
 **Base Git:** `b1be861d9eacd9029f332fdb1a3e82651b37dee8`
-**Commit applicativo:** da valorizzare nel commit documentale consecutivo di
-chiusura, dopo la creazione del commit che contiene codice e registro.
+**Commit applicativo:** `f09f3b47dd9186a34bf1bda740d7b557d4b513f5`
+(`feat: rebuild staff calendar workflow`).
 **Database usato:** solo demo `grooming-hub-demo`
 (`qttpinkslhenxrsbhhhg`), stato iniziale `ACTIVE_HEALTHY`.
 **Produzione e progetto temporaneo:** non interrogati e non modificati.
