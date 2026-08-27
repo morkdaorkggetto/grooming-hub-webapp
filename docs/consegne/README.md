@@ -67,6 +67,28 @@ innocuo e visibile, invece di un'azione sbagliata riuscita in silenzio.
 **Conseguenza per Cowork**: non produce più blocchi di testo da incollare;
 chiude indicando dove sta il mandato e che serve il push.
 
+### Come si scrivono i mandati — affinamento del 27/8
+
+Due regole nate dal bilancio dei primi diciotto mandati, non da un principio astratto. Il conto misurato: **un errore di Codex** (il checkpoint attraversato in GH-08, causato dall'ambiguità della parola «fermati») contro **cinque difetti di Cowork** — elenco file incompleto in GH-05, prerequisito omesso in GH-13, contraddizione interna in GH-17, `git add -A` in `salva.sh`, nome di variabile sbagliato in GH-18.
+
+**1. Il mandato dichiara le invarianti, non la procedura.**
+
+Il filo dei difetti di Cowork è univoco: sbaglia dove prescrive **il come**, mai dove dichiara **il cosa**. Un mandato deve quindi definire che cosa dev'essere vero alla fine — quali misure, quali controprove, quali stati vietati — e lasciare a Codex la scelta del metodo, che è la parte in cui è più affidabile di chi scrive il mandato.
+
+Corollario pratico: dove il mandato prescrive una procedura specifica, quella riga è il punto più probabile di errore. Se serve davvero, va verificata due volte.
+
+**2. La dimensione del mandato è inversamente proporzionale alle assunzioni non verificate su cui poggia.**
+
+Non «i mandati piccoli sono più sicuri». GH-17 è stato un mandato unico e ampio — quattro tappe, 2.255 righe riscritte — ed è andato liscio, **perché GH-16 aveva già verificato tutto ciò su cui si appoggiava**. GH-19 ha invece bisogno di una fase separata non per difficoltà tecnica, ma perché nessuno ha ancora inventariato cosa quella schermata sa fare.
+
+Quando gli input sono misurati, il mandato può essere grande. Quando poggiano su documenti non ancora confrontati con la realtà, serve prima la fase che li confronta.
+
+**Perché esistono le fasi di confronto.** Da correggere un'interpretazione facile e sbagliata: le Fasi 1 non hanno mai trovato difetti di Codex — hanno trovato difetti **negli input**. L'operatore inesistente in GH-09, le otto decisioni e la pagina murata in GH-16, i quattro campi caduti nella verifica CD-01. Non sono un controllo sull'esecutore: sono un controllo sulle **assunzioni** di chi scrive mandati e di chi compone. Ogni volta che un documento è stato confrontato con la realtà, la realtà era diversa.
+
+**Cosa non si tocca**, perché è ciò che ha retto: la regola che **un'interruzione motivata è una consegna valida**, e il diario che conserva le decisioni con la loro fonte. Senza la prima, GH-11 avrebbe fatto un restore su un database popolato e GH-17 avrebbe obbedito a metà di una contraddizione. Il prodotto vero di questo metodo non è il codice, che si riscrive: è una catena di decisioni tracciabile.
+
+**Il rischio da presidiare**: mandati più ampi tolgono il battito in cui Luigi legge un registro prima di autorizzare il seguito, ed è lì che molti difetti sono stati intercettati. Quel battito va conservato dove gli input non sono verificati — non ovunque per abitudine.
+
 ### Due serie distinte: `GH-` per Codex, `CD-` per Claude Design (24/8)
 
 **Decisione Luigi.** Gli incarichi ai due attori usano prefissi diversi e contatori separati:
