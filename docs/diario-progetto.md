@@ -296,6 +296,45 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 27 agosto 2026 — La porta è aperta (GH-24 → GH-25)
+
+**GH-24 si è fermato davanti alla causa vera, e l'ha dimostrata dal vivo.** `accept_customer_invite` valida il token, crea il profilo, adotta il customer e collega il pet — **ma non inserisce nulla in `tenant_memberships`**. Dal Gate 5 la membership è la sola fonte del ruolo: `AuthProvider` legge quella, `useRequireCustomer` respinge chi non ce l'ha. **Il flusso d'invito era rotto da GH-05-bis**, settimane fa, e nessuno l'aveva visto perché nessuno aveva mai accettato un invito nell'app nuova.
+
+Codex aveva già costruito la pagina e verificata a tre larghezze; quando la controprova sul database ha mostrato zero membership, **ha ripristinato tutto lasciando diff applicativo zero**. Nessun comportamento parziale in giro. È il modo giusto di fermarsi.
+
+**Decisione Luigi (27/8) sul cancello Auth**: registrazioni abilitate, **nessuna conferma via email**. Motivazione sua, da conservare perché è il ragionamento giusto: *«il controllo avviene anche via cellulare visto che le prenotazioni si confermano su WhatsApp»*. La credenziale reale è il token, recapitato a un numero che il salone già conosce e che è obbligatorio in anagrafica. Una conferma via email aggiungerebbe un passaggio, una dipendenza da un servizio di posta inesistente e un punto di rottura, in cambio di nulla — chi si registra senza token non ottiene membership e quindi non vede dati.
+
+**GH-25 CONSEGNATO — l'app clienti ha una porta.** Otto controprove su otto. La RPC riscritta in una sola migration idempotente: blocco `FOR UPDATE` contro accettazioni concorrenti, **quattro stati del token distinti** (inesistente, scaduto, usato da altri, già accettato dallo stesso account — il caso che prima si confondeva con l'errore), guardia che rifiuta sia `profiles.role=operator` sia qualunque membership `owner/staff`, e **inserimento della membership nella stessa transazione**.
+
+`Redeem.jsx` da **71 righe di segnaposto a 309 di pagina vera**, zero stili inline, zero colori letterali. Inviti verso `/u/redeem/:token`. QR: customer autenticato → `/u/home`, visitatore → login con ritorno alla card. **E solo dopo tutto questo la radice è passata a `/login`**, con inviti, QR e rotte legacy riprovati dopo lo spostamento.
+
+Auth user senza membership: **0 prima, 0 dopo, 0 dopo il cleanup** — la conseguenza che avevamo accettato non si è nemmeno verificata, perché invito e membership sono atomici. Suite RLS 26 PASS. Zero residui.
+
+**NUOVO BUCO TROVATO, dichiarato come eccezione**: il pet creato dal gesto «Nuovo cliente» **non riceve un `qr_token`**. Il pulsante QR Card mostra *«QR cliente non disponibile. Applica prima la migration dedicata»*. Significa che al lancio Davide crea un cliente, prova a stampargli la card e riceve un messaggio che parla di migration. La controprova QR è stata fatta su un pet preesistente. **Serve un mandato dati per la generazione automatica del token** — aggiunto ai cancelli di G6.
+
+**Quattro percorsi restano non percorsi**, richiamati nel registro perché non si perdano: conferma email e ritorno al token (ora disattivata per decisione); recupero password del cliente; login completo dopo QR senza sessione; e **la consegna reale del link** — il gestionale lo genera e lo copia, ma qualcuno deve incollarlo a mano in WhatsApp, un cliente alla volta.
+
+### 27 agosto 2026 — L'APP CLIENTI NON HA UNA PORTA
+
+**La scoperta più seria di questi giorni**, emersa da una domanda banale — Luigi non riusciva a entrare in modalità staff — e da una verifica fatta prima di scrivere un mandato che sarebbe stato sbagliato.
+
+**I fatti, misurati:**
+
+- Il link d'invito che lo staff genera è costruito in `database.js:262` come `${origin}/portal/invite/${token}`: punta al **vecchio portale**. Chi lo apre crea l'account lì e atterra in `CustomerPortal.jsx`, le 1.373 righe non rivestite che abbiamo deliberatamente escluso dal restyling.
+- La QR card pubblica (`PublicPetCard.jsx`) manda a `/portal` e `/portal/login`: **stesso vecchio portale**.
+- `/u/redeem/:token`, la pagina che dovrebbe accogliere gli inviti nell'app nuova, è **un segnaposto di 71 righe scritto a maggio con zero chiamate al database**. Il commento in testa lo dichiara: «l'integrazione vera con la RPC `accept_customer_invite` arriva in uno step successivo». Non è mai arrivato.
+- L'unico consumatore reale di `accept_customer_invite` è il vecchio `CustomerInvite.jsx`.
+
+**Conseguenza**: l'app clienti nuova — scheda pet, wizard di richiesta, promozioni, home — **è raggiungibile solo digitando `/u/login` a mano**. Nessun invito, nessun QR, nessun percorso naturale ci porta.
+
+**Corollario che ha evitato un danno**: il redirect della radice verso `/u/login` — quello su cui Luigi è inciampato quattro volte cercando il gestionale, e che avevamo deciso di spostare — **è oggi l'unica porta esistente**. Il mandato che stavo per scrivere avrebbe reso l'app clienti del tutto irraggiungibile. È stato evitato solo perché prima di scriverlo Cowork si è chiesto da dove arrivino i clienti. **Conferma della regola: si misura prima di scrivere il mandato, non dopo.**
+
+**Nota sul nostro metodo, e non è comoda.** Abbiamo verificato ogni schermata dell'app clienti a tre larghezze, misurato ombre, raggi, geometrie, bersagli tattili; abbiamo corretto regressioni invisibili. Ma **il login l'abbiamo sempre fatto con Mario, che l'account ce l'aveva già**. Il percorso di un cliente reale — invito → account → primo accesso — non è mai stato provato, perché nel nuovo non esiste. **Abbiamo ispezionato tutte le stanze e mai il portone.** Le controprove misurano ciò che il mandato nomina: se nessun mandato nomina il primo accesso, nessuna controprova lo copre, per quanto rigorose siano.
+
+**Lavoro che ne deriva, prima del lancio**: implementare `Redeem.jsx` contro `accept_customer_invite`; puntare il link d'invito a `/u/redeem/:token`; puntare la QR card all'app nuova; **e solo dopo** spostare il redirect della radice verso il gestionale. In quest'ordine: invertirlo lascia i clienti senza ingresso.
+
+**Questo è il cancello principale di G6.** Senza, l'app clienti per i clienti non esiste — e il lavoro di una settimana resta visibile solo a chi conosce l'indirizzo.
+
 ### 27 agosto 2026 — GH-22 e GH-23: gli orari entrano, la veste si verifica
 
 **GH-22 consegnato, e all'opposto di GH-21 con le controprove complete**: quattordici, incluse le tre larghezze. Gli orari sono finiti dove dovevano — `tenants.settings.booking_schedule` con `closed_weekdays` e `closed_time_preferences`, **leggibile e multi-tenant, zero orari nel codice**. Nuova RPC `resolve_appointment_request_with_duration` SECURITY INVOKER, con la precedente conservata senza overload ambiguo. Nel wizard la domenica è visibile ma disabilitata, il lunedì mattina è marcato «Non disponibile», il resto resta selezionabile; nel calendario staff «Chiuso» e «Mattina chiusa» si distinguono dal giorno aperto e vuoto.
