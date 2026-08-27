@@ -285,6 +285,32 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 27 agosto 2026 — GH-19 e GH-20: il calendario torna vivo, e il cerchio si chiude
+
+**GH-19, inventario funzionale**: trenta funzioni censite dentro le 1.572 righe, ciascuna con esito dichiarato. Conferma del rischio per cui la fase era stata chiesta — **la composizione CD non copriva tutto**: creazione manuale, controllo conflitti, riprogrammazione, stati finali, promemoria, export. Una vista che nessuno guarda da quattro mesi avrebbe potuto perdere pezzi in silenzio fino a novembre. Scoperto anche un quarto stato non rappresentato (`no_show`) e l'assenza di qualunque legame fra visite e appuntamenti, che vieta la fusione di due righe dello stesso pet nello stesso giorno. Dodici decisioni sollevate, nessuna risolta d'ufficio.
+
+**Divergenza Cowork sulla settima decisione**: Codex proponeva di adottare il testo di rifiuto standard già presente. Verifica: **quel testo non è di Davide, l'abbiamo scritto noi** — «ti chiediamo di selezionare un'altra fascia oraria dall'area cliente», registro da call center, dagli stessi che dicono «bagnetto» 129 volte su 298. CD al §9.4 chiedeva le parole del salone, non le nostre. Decisione: si usa adesso perché nulla si blocchi, ma è marcato provvisorio, e **i quattro messaggi automatici — proposta, promemoria, conferma, rifiuto — attendono le parole di Davide**. È una stringa ciascuno, ed è l'unica volta in cui un cliente riceve un no.
+
+**GH-20 è il primo mandato scritto con la regola nuova** — invarianti e non procedura, mandato unico e ampio perché gli input erano verificati. Ha funzionato.
+
+| | Prima | Dopo |
+|---|---:|---:|
+| `Calendar.jsx` | 1.572 righe | **476** |
+| stili inline | 101 | **0** |
+| colori letterali | — | **0** |
+| foglio stile dedicato | 0 | 597 righe |
+| breakpoint | vari | **uno solo, 640px** |
+
+**Il contratto anti-regressione ha retto: 15 funzioni su 15 PASS**, ciascuna provata dal gesto reale e non dal codice — apertura da `?clientId=`, creazione manuale, conflitto, prossimo slot libero, riprogrammazione, completato, no-show con ripristino del punteggio, annullamento, apri cliente, imminente, guardia demo. Le sei superfici da rimuovere non sono più raggiungibili. Verifica Cowork indipendente: `getDraftAppointmentWhatsAppUrl` sparito, un solo `@media`, zero esadecimali nel CSS, lettura passata a `getCalendarWeekData` sulla sola settimana visibile invece di tutti i pet con tutto lo storico.
+
+**Il cerchio fra le due app è chiuso e provato per la prima volta**: sul demo, login customer → richiesta per Pepe con fascia mattina → comparsa nel calendario staff come capsula tratteggiata e nella coda → conferma con ora assegnata → trasformazione in appuntamento → pulizia. **È il flusso che giustifica l'intero progetto**, e fino a ieri esisteva solo a pezzi.
+
+**Due dettagli di mestiere che vale la pena ricordare.** Per evitare l'apertura accidentale di WhatsApp durante la prova, il telefono della fixture è stato sostituito con un valore non componibile e **subito ripristinato con verifica del ripristino**. E il ramo d'errore è stato provato apposta: telefono mancante → «richiesta confermata, messaggio non preparabile», che dimostra sul campo il principio del §8 — **prima si persiste, poi si comunica**.
+
+**Nota minore**: `deleteAppointment` resta esportata in `database.js` senza alcun consumer. Coerente col mandato, che chiedeva la rimozione dalla UI; è codice morto innocuo, da valutare in una pulizia futura.
+
+**Con questo il capitolo veste è chiuso**: Dashboard, scheda cliente, form visita e calendario. Restano fuori dal restyle il **login staff** — mai stato in perimetro, in attesa di un `CD-02` — e le pagine minori. Verso la produzione non manca più lavoro di costruzione: mancano i cancelli di G6.
+
 ### 27 agosto 2026 — GH-18 chiuso: il dubbio era fondato
 
 **La regressione c'era davvero.** GH-18 nasceva da un sospetto di Cowork — GH-17 aveva modificato sette componenti condivisi e le controprove avevano guardato solo le tre superfici staff, mentre sette pagine customer li importano. Misura: **l'ombra delle `Card` dell'app clienti era cambiata**, e la modifica alla variante staff si era propagata al customer. Ripristinata l'ombra a due livelli pre-GH-17. Il mandato che «poteva non trovare niente» ha trovato esattamente ciò per cui era stato scritto.
