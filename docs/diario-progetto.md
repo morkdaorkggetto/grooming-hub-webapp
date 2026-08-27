@@ -310,7 +310,22 @@ Nota di convergenza: richieste e lavorazioni a posteriori hanno lo **stesso prob
 
 **Precisazione del salone che ribalta il senso di un campo** (Davide e Roby via Luigi, 25/8): quello che il cliente indica — bagno, taglio, toelettatura completa — **non è un servizio che seleziona da un listino, è un'esigenza che segnala**. Le lavorazioni le consigliano o dispongono Davide e Roby **dopo aver valutato di persona** condizioni del pelo, caratteristiche del pet e abitudini. Conseguenze: (a) la parola «Servizio» usata oggi nel wizard clienti (`Book.jsx`, due occorrenze) e nella vista richieste staff (`CustomerRequests.jsx`) ha il **registro sbagliato** — suggerisce un menu da cui si ordina — e va sostituita con il vocabolario dell'indicazione; (b) **ciò che il cliente chiede e ciò che viene fatto sono dati distinti che possono legittimamente differire**: la richiesta porta l'esigenza, la visita porta `treatments`, testo libero scritto dal salone — trattarli come lo stesso campo sarebbe un errore di modello; (c) conferma strutturale del perché non può esistere una griglia a slot, né un preventivo: se la lavorazione si decide guardando il pet, durata e prezzo non sono prevedibili. Conferma anche a posteriori la scelta di GH-16 di tenere `treatments` come testo libero invece di agganciarlo al catalogo.
 
-**BLOCCO DI LANCIO INDIVIDUATO — l'app clienti nascerebbe muta** (25/8, misura Cowork): `appointment_requests.service_id` è **NOT NULL** e referenzia `services`. Sul progetto di prova, che è la fotografia della produzione dopo G6, **`services` ha zero righe** (sul demo ce ne sono due, di prova: per questo lì il wizard funzionava). Al lancio un cliente che apre la prenotazione non avrebbe nulla da indicare e non potrebbe inviare la richiesta. **Serve l'elenco reale delle esigenze, nel linguaggio dei clienti, da farsi dare da Davide** e caricare in `services` prima di G6 — senza prezzi, coerentemente col modello «solo incassi». Nomi confermati come direzione da Luigi: bagno, taglio, toelettatura completa. Aggiunto ai cancelli di G6.
+**BLOCCO DI LANCIO INDIVIDUATO — l'app clienti nascerebbe muta** (25/8, misura Cowork): `appointment_requests.service_id` è **NOT NULL** e referenzia `services`. Sul progetto di prova, che è la fotografia della produzione dopo G6, **`services` ha zero righe** (sul demo ce ne sono due, di prova: per questo lì il wizard funzionava). Al lancio un cliente che apre la prenotazione non avrebbe nulla da indicare e non potrebbe inviare la richiesta.
+
+**Blocco risolto senza chiedere niente a nessuno: il vocabolario era già nel database.** Invece di far inventare un listino, Cowork ha misurato cosa Davide e Roby hanno scritto di loro pugno in 453 visite:
+
+| Come l'hanno scritto | Volte |
+|---|---:|
+| bagno | 169 |
+| bagnetto | 129 |
+| taglio | 122 |
+| bagno e taglio | 9 |
+| toelettatura | 7 |
+| toelettatura completa | 4 |
+
+**Quattro voci coprono il 97% di un anno di lavoro**: bagno, taglio, bagno e taglio, toelettatura completa. **Decisione Luigi con Davide e Roby (25/8): «vince la consuetudine»** — si adottano quelle emerse dall'uso, nessuna aggiunta teorica. Da caricare in `services` prima di G6, senza prezzi. Aggiunto ai cancelli di G6.
+
+**Due scoperte collaterali dalla stessa misura, che valgono più della lista.** (a) **Dicono «bagnetto» 129 volte su 298**: il diminutivo affettuoso per lo stesso identico lavoro. È la loro voce reale, misurata e non supposta — riferimento per la temperatura del copy rivolto ai clienti. Resta una micro-scelta di composizione: se l'etichetta customer debba dire «Bagno» (più frequente) o «Bagnetto» (più loro). Domanda per CD, è materia di voce. (b) **`treatments` non contiene solo lavorazioni**: dentro ci sono «ha saltato l'appuntamento senza avvisare», «non è venuto», «appuntamento rimandato per ciclo», «bagnetto (paga 15 euro perché è la prima volta)». Il salone lo usa anche come diario. Conseguenza per chi compone storico e calendario: una riga che promette «ecco cosa è stato fatto» a volte dirà «non è venuto». Il dato è più sporco di quanto qualunque prototipo lo immaginerebbe, e va composto per come è.
 
 ---
 

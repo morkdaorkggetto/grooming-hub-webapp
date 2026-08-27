@@ -64,6 +64,27 @@ Tre conseguenze compositive:
 
 Il tono che ne discende: il cliente **dice come sta il suo cane**, non compila un ordine. Le condizioni del manto che accompagnano la richiesta sono parte della stessa frase, non un campo accessorio.
 
+### Il vocabolario reale, misurato — e due cose che ti servono
+
+Invece di far inventare un listino al salone, abbiamo contato cosa hanno scritto di loro pugno in 453 visite:
+
+| Come lo scrivono loro | Volte |
+|---|---:|
+| bagno | 169 |
+| **bagnetto** | 129 |
+| taglio | 122 |
+| bagno e taglio | 9 |
+| toelettatura | 7 |
+| toelettatura completa | 4 |
+
+Quattro voci coprono il 97% di un anno. Decisione presa: si adottano quelle, «vince la consuetudine».
+
+**Prima cosa, per te**: dicono **«bagnetto» 129 volte su 298**. Non è un refuso, è il diminutivo affettuoso per lo stesso identico lavoro — la loro voce reale, misurata e non supposta. Ti lasciamo una micro-scelta: se l'etichetta rivolta al cliente debba dire «Bagno», che è più frequente, o «Bagnetto», che è più loro. È materia di voce, quindi tua.
+
+**Seconda cosa, e conta per la composizione**: quel campo **non contiene solo lavorazioni**. Dentro ci sono anche «ha saltato l'appuntamento senza avvisare», «non è venuto», «appuntamento rimandato per ciclo», «bagnetto (paga 15 euro perché è la prima volta)». Il salone lo usa **anche come diario**.
+
+Significa che una riga che promette «ecco cosa è stato fatto» a volte dirà «non è venuto», e una lavorazione registrata potrebbe essere in realtà l'annotazione di un'assenza. **Il dato è più sporco di quanto qualunque prototipo lo immaginerebbe, e va composto per come è** — non per come sarebbe comodo che fosse.
+
 ## La conferma esce dall'applicazione
 
 Al §10.3 avevi visto giusto e va portato fino in fondo: la conferma al cliente avviene **via messaggio**, quindi stato reale e stato a schermo possono divergere — messaggio scritto, richiesta rimasta «in attesa». Il tuo suggerimento era che «Conferma» fosse **un gesto solo** che include l'invio del messaggio, invece di due che si spera vengano fatti entrambi. Componilo così.
