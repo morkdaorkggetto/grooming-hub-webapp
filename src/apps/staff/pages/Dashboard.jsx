@@ -213,7 +213,7 @@ export default function Dashboard() {
   const heroRight = (
     <>
       {user?.email && <span className="gh-hero__account">{user.email}</span>}
-      <HeroButton onClick={handleLogout}>
+      <HeroButton aria-label="Esci" title="Esci" onClick={handleLogout}>
         <Icon name="logout" size={14} />
         <span className="gh-dashboard-logout-label">Esci</span>
       </HeroButton>

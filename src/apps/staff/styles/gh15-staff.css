@@ -2125,6 +2125,10 @@
     height: var(--gh-control-touch-height);
   }
 
+  .gh-hero-button {
+    min-width: var(--gh-control-touch-height);
+  }
+
   .gh-pill {
     min-height: 44px;
     height: 44px;
