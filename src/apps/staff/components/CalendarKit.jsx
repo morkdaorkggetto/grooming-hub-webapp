@@ -64,16 +64,23 @@ export function CalendarDay({ day, today, selected = false, onOpen }) {
   const appointments = day.items.filter((item) => item.kind === 'appointment');
   const visits = day.items.filter((item) => item.kind === 'visit');
   return (
-    <section className={`gh-calendar-day${today ? ' gh-calendar-day--today' : ''}${selected ? ' gh-calendar-day--selected' : ''}`}>
+    <section className={`gh-calendar-day${today ? ' gh-calendar-day--today' : ''}${selected ? ' gh-calendar-day--selected' : ''}${day.closure?.isClosed ? ' gh-calendar-day--closed' : ''}`}>
       <header className="gh-calendar-day__head">
         <h3>{day.label}</h3>
         {today && <span className="gh-calendar-day__today">Oggi</span>}
+        {day.closure?.label && <span className="gh-calendar-day__closure">{day.closure.label}</span>}
         <span className={`gh-calendar-day__count${requests.length ? ' gh-calendar-day__count--pending' : ''}`}>
           {requests.length ? `${requests.length} da confermare` : day.items.length ? `${day.items.length} ${day.items.length === 1 ? 'voce' : 'voci'}` : 'niente'}
         </span>
       </header>
       {!day.items.length ? (
-        <p className="gh-calendar-day__empty">Nessuna richiesta, nessuna lavorazione.</p>
+        <p className="gh-calendar-day__empty">
+          {day.closure?.isClosed
+            ? 'Salone chiuso.'
+            : day.closure?.label
+              ? `${day.closure.label}. Nessuna attività registrata.`
+              : 'Nessuna richiesta, nessuna lavorazione.'}
+        </p>
       ) : (
         <div className="gh-calendar-day__items">
           {[...requests, ...appointments].map((item) => (
@@ -120,13 +127,19 @@ export function CalendarDayStrip({ days, selectedDate, onSelect }) {
         return (
           <button
             type="button"
-            className={`gh-calendar-day-chip${selectedDate === day.date ? ' gh-calendar-day-chip--selected' : ''}`}
+            className={`gh-calendar-day-chip${selectedDate === day.date ? ' gh-calendar-day-chip--selected' : ''}${day.closure?.isClosed ? ' gh-calendar-day-chip--closed' : ''}`}
             aria-pressed={selectedDate === day.date}
+            aria-label={`${day.label}${day.closure?.label ? `, ${day.closure.label}` : ''}`}
             onClick={() => onSelect(day.date)}
             key={day.date}
           >
             <span>{day.shortWeekday}</span>
             <strong>{day.dayNumber}</strong>
+            {day.closure?.label && (
+              <span className="gh-calendar-day-chip__closure" aria-hidden="true">
+                {day.closure.isClosed ? 'Ch.' : 'AM'}
+              </span>
+            )}
             {!!day.items.length && <i className={pending ? 'gh-calendar-day-chip__dot--pending' : ''} />}
           </button>
         );

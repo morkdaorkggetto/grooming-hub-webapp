@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTenant } from '../../../shared/tenant/TenantProvider';
+import { getBookingSchedule, getDateClosure } from '../../../shared/tenant/bookingSchedule';
 import PetAvatar from '../../../shared/ui/PetAvatar';
 import { Button, EmptyState, Fab, Field, Hero, HeroButton, Panel } from '../components/StaffKit';
 import {
@@ -143,6 +145,7 @@ function Modal({ title, children, footer, onClose, narrow = false }) {
 
 export default function Calendar() {
   const navigate = useNavigate();
+  const { tenant } = useTenant();
   const [searchParams] = useSearchParams();
   const openedQueryClientRef = useRef('');
   const [weekStart, setWeekStart] = useState(() => startOfWeek(todayString()));
@@ -161,6 +164,10 @@ export default function Calendar() {
   const [requestForm, setRequestForm] = useState({ date: '', time: '09:00', durationMinutes: DEFAULT_DURATION, message: '' });
   const [detailForm, setDetailForm] = useState({ date: '', time: '', durationMinutes: DEFAULT_DURATION });
   const [workPetId, setWorkPetId] = useState('');
+  const bookingSchedule = useMemo(
+    () => getBookingSchedule(tenant?.settings),
+    [tenant?.settings]
+  );
 
   const loadWeek = useCallback(async () => {
     setLoading(true);
@@ -231,12 +238,13 @@ export default function Calendar() {
     const parsed = new Date(`${date}T12:00:00`);
     return {
       date, label: formatDayLabel(date), shortWeekday: parsed.toLocaleDateString('it-IT', { weekday: 'narrow' }), dayNumber: parsed.getDate(),
+      closure: getDateClosure(date, bookingSchedule),
       items: calendarItems.filter((item) => {
         const itemDate = item.kind === 'request' ? requestDate(item) : item.kind === 'visit' ? item.date : toLocalDateString(new Date(item.scheduled_at));
         return itemDate === date;
       }),
     };
-  }), [calendarItems, weekStart]);
+  }), [bookingSchedule, calendarItems, weekStart]);
 
   const openManual = useCallback(async (clientId = '') => {
     setError('');
@@ -327,7 +335,14 @@ export default function Calendar() {
     if (requestConflict) { setError(`Conflitto con ${formatConflict(requestConflict)}.`); return; }
     setSaving(true); setError(''); setSuccess('');
     try {
-      if (selectedItem.request_kind === 'structured') await resolveAppointmentRequest(selectedItem.id, 'approved', requestCandidate.scheduled_at);
+      if (selectedItem.request_kind === 'structured') {
+        await resolveAppointmentRequest(
+          selectedItem.id,
+          'approved',
+          requestCandidate.scheduled_at,
+          requestCandidate.duration_minutes
+        );
+      }
       else { await updateAppointmentSchedule(selectedItem.id, requestCandidate); await updateAppointmentApproval(selectedItem.id, 'approved'); }
       const whatsappUrl = buildWhatsAppUrl(selectedItem.client?.phone, requestForm.message);
       setModal(null); await loadWeek();
@@ -440,8 +455,9 @@ export default function Calendar() {
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
             <Field label="Data" type="date" value={requestForm.date} onChange={(event) => updateRequestTiming('date', event.target.value)} />
             <Field label="Ora" type="time" value={requestForm.time} onChange={(event) => updateRequestTiming('time', event.target.value)} />
-            <Field label="Durata (min)" type="number" min="15" step="15" value={requestForm.durationMinutes} onChange={(event) => updateRequestTiming('durationMinutes', event.target.value)} />
+            <Field label="Durata prevista (min)" type="number" min="15" step="15" value={requestForm.durationMinutes} onChange={(event) => updateRequestTiming('durationMinutes', event.target.value)} />
           </div>
+          <p className="gh-calendar-form-helper">Il servizio propone il valore iniziale: adattalo al cane che stai valutando.</p>
           <Field label="Messaggio WhatsApp" area value={requestForm.message} onChange={(event) => setRequestForm((current) => ({ ...current, message: event.target.value }))} />
           {requestConflict && <p className="gh-calendar-conflict">Conflitto con {formatConflict(requestConflict)}.</p>}
         </div>

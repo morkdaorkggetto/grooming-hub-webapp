@@ -150,15 +150,17 @@ function ApprovalDialog({ request, busy, onClose, onConfirm }) {
   const defaultTime = request.time_preference === 'afternoon' ? '13:00' : '09:00';
   const [date, setDate] = useState(request.desired_date || '');
   const [time, setTime] = useState(defaultTime);
+  const [durationMinutes, setDurationMinutes] = useState(request.duration_minutes || 60);
   const today = new Date();
   const minDate = `${today.getFullYear()}-${`${today.getMonth() + 1}`.padStart(2, '0')}-${`${today.getDate()}`.padStart(2, '0')}`;
 
   const submit = (event) => {
     event.preventDefault();
-    if (!date || !time) return;
+    const duration = Number(durationMinutes);
+    if (!date || !time || !Number.isInteger(duration) || duration < 15) return;
     const scheduledAt = new Date(`${date}T${time}`);
     if (Number.isNaN(scheduledAt.getTime())) return;
-    onConfirm(scheduledAt.toISOString());
+    onConfirm(scheduledAt.toISOString(), duration);
   };
 
   return (
@@ -170,14 +172,16 @@ function ApprovalDialog({ request, busy, onClose, onConfirm }) {
           {request.client?.name || 'Pet'} · preferenza cliente: {TIME_PREFERENCE_LABELS[request.time_preference] || 'nessuna'}.
         </p>
 
-        <div className="gh-dialog-fields">
+        <div className="gh-dialog-fields gh-dialog-fields--three">
           <Field label="Giorno" type="date" min={minDate} value={date} onChange={(event) => setDate(event.target.value)} required />
           <Field label="Ora" type="time" value={time} onChange={(event) => setTime(event.target.value)} required />
+          <Field label="Durata prevista (min)" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} required />
         </div>
+        <p className="gh-dialog-helper">Il servizio propone il valore iniziale: adattalo al cane che stai valutando.</p>
 
         <div className="gh-dialog-actions">
           <Button staff type="button" variant="outline" onClick={onClose} disabled={busy}>Annulla</Button>
-          <Button staff type="submit" variant="success" disabled={busy || !date || !time}>
+          <Button staff type="submit" variant="success" disabled={busy || !date || !time || !Number.isInteger(Number(durationMinutes)) || Number(durationMinutes) < 15}>
             {busy ? 'Confermo...' : 'Conferma e prepara WhatsApp'}
           </Button>
         </div>
@@ -231,14 +235,14 @@ export default function CustomerRequests() {
     };
   }, [requests]);
 
-  const performApproval = async (request, approvalStatus, scheduledAt = null) => {
+  const performApproval = async (request, approvalStatus, scheduledAt = null, durationMinutes = null) => {
     setError('');
     setSuccess('');
 
     try {
       setUpdatingId(request.id);
       const updatedRequest = request.request_kind === 'structured'
-        ? await resolveAppointmentRequest(request.id, approvalStatus, scheduledAt)
+        ? await resolveAppointmentRequest(request.id, approvalStatus, scheduledAt, durationMinutes)
         : await updateAppointmentApproval(request.id, approvalStatus);
       const whatsappUrl = getAppointmentApprovalWhatsAppUrl(updatedRequest, approvalStatus);
 
@@ -285,7 +289,7 @@ export default function CustomerRequests() {
           request={approvalRequest}
           busy={updatingId === approvalRequest.id}
           onClose={() => setApprovalRequest(null)}
-          onConfirm={(scheduledAt) => performApproval(approvalRequest, 'approved', scheduledAt)}
+          onConfirm={(scheduledAt, durationMinutes) => performApproval(approvalRequest, 'approved', scheduledAt, durationMinutes)}
         />
       ) : null}
       <Hero

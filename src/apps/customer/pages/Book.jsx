@@ -3,6 +3,11 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useUnsavedChanges } from '../../../shared/navigation/UnsavedChangesProvider';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
+import {
+  getBookingSchedule,
+  getDateClosure,
+  isTimePreferenceClosed,
+} from '../../../shared/tenant/bookingSchedule';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
 import Card from '../../../shared/ui/Card';
 import DesiredDateStrip from '../../../shared/ui/DesiredDateStrip';
@@ -59,16 +64,6 @@ const formatDesiredDate = (value) => value
   ? DATE_LABEL.format(new Date(`${value}T12:00:00`))
   : 'Non scelta';
 
-const formatDuration = (minutes) => {
-  if (!minutes) return '';
-  if (minutes < 60) return `circa ${minutes} min`;
-  if (minutes % 60 === 0) {
-    const hours = minutes / 60;
-    return hours === 1 ? 'circa 1 ora' : `circa ${hours} ore`;
-  }
-  return `circa ${Math.floor(minutes / 60)} h ${minutes % 60} min`;
-};
-
 function StepHead({ number, title, hint }) {
   return (
     <div className="gh-book-step-head">
@@ -81,10 +76,11 @@ function StepHead({ number, title, hint }) {
   );
 }
 
-function SelectChip({ selected, onClick, children }) {
+function SelectChip({ selected, disabled = false, onClick, children }) {
   return (
-    <button type="button" className="gh-book-chip" aria-pressed={selected} onClick={onClick}>
+    <button type="button" className="gh-book-chip" aria-pressed={selected} disabled={disabled} onClick={onClick}>
       {children}
+      {disabled ? <small>Non disponibile</small> : null}
     </button>
   );
 }
@@ -114,7 +110,7 @@ function ServiceChoice({ service, selected, icon, onClick }) {
       <span className="gh-book-service-icon" aria-hidden="true"><Icon name={icon} size={18} /></span>
       <span className="gh-book-choice-copy">
         <strong>{service.name}</strong>
-        <small>{formatDuration(service.duration_minutes)}</small>
+        <small>Da 45 minuti a 3 ore*</small>
       </span>
     </button>
   );
@@ -187,7 +183,7 @@ function BookingResult({ submission }) {
 
 export default function Book() {
   const { loading: authLoading } = useRequireCustomer();
-  const { tenantId } = useTenant();
+  const { tenant, tenantId } = useTenant();
   const { data: pets, loading: petsLoading, error: petsError } = usePets();
   const [searchParams] = useSearchParams();
   const [services, setServices] = useState([]);
@@ -204,7 +200,18 @@ export default function Book() {
   const [submitError, setSubmitError] = useState('');
   const [submission, setSubmission] = useState(null);
 
-  const dateOptions = useMemo(createDateOptions, []);
+  const bookingSchedule = useMemo(
+    () => getBookingSchedule(tenant?.settings),
+    [tenant?.settings]
+  );
+  const dateOptions = useMemo(() => createDateOptions().map((item) => {
+    const closure = getDateClosure(item.date, bookingSchedule);
+    return {
+      ...item,
+      disabled: closure.isClosed,
+      unavailableLabel: closure.label,
+    };
+  }), [bookingSchedule]);
   const requestedPetId = searchParams.get('petId') || '';
   const selectedPet = pets.find((pet) => pet.id === petId) || null;
   const selectedService = services.find((service) => service.id === serviceId) || null;
@@ -239,7 +246,16 @@ export default function Book() {
   }, [selectedPet?.birth_date]);
 
   const hasCoatCondition = coatConditions.length > 0 || Boolean(coatNotes.trim());
-  const canSubmit = Boolean(petId && serviceId && desiredDate && hasCoatCondition && (!needsDeclaredAge || declaredAge.trim()));
+  const selectedDateClosure = getDateClosure(desiredDate, bookingSchedule);
+  const canSubmit = Boolean(
+    petId
+    && serviceId
+    && desiredDate
+    && !selectedDateClosure.isClosed
+    && !isTimePreferenceClosed(timePreference, selectedDateClosure)
+    && hasCoatCondition
+    && (!needsDeclaredAge || declaredAge.trim())
+  );
   const isDirty = !submission && Boolean(
     (petId && petId !== requestedPetId)
     || serviceId
@@ -261,6 +277,12 @@ export default function Book() {
     setCoatConditions((current) => current.includes(value)
       ? current.filter((item) => item !== value)
       : [...current, value]);
+  };
+
+  const handleDateChange = (value) => {
+    const closure = getDateClosure(value, bookingSchedule);
+    setDesiredDate(value);
+    setTimePreference((current) => isTimePreferenceClosed(current, closure) ? '' : current);
   };
 
   const handleSubmit = async (event) => {
@@ -342,19 +364,32 @@ export default function Book() {
                     <ServiceChoice key={service.id} service={service} selected={service.id === serviceId} icon={SERVICE_ICONS[index % SERVICE_ICONS.length]} onClick={() => setServiceId(service.id)} />
                   ))}
                 </div>
+                <p className="gh-book-duration-note">
+                  *Dipende dalla taglia, dal tipo e dalle condizioni del pelo. I tempi effettivi si valutano in salone.
+                </p>
               </section>
 
               <section className="gh-book-step">
                 <StepHead number="3" title="Quando ti andrebbe bene?" />
-                <DesiredDateStrip dates={dateOptions} value={desiredDate} onChange={setDesiredDate} />
+                <DesiredDateStrip dates={dateOptions} value={desiredDate} onChange={handleDateChange} />
                 <p className="gh-book-date-hint">È la data che <em>preferiresti</em> — la confermiamo noi insieme all’orario.</p>
                 <div className="gh-book-chip-row" aria-label="Preferenza oraria facoltativa">
                   {TIME_PREFERENCES.map((item) => (
-                    <SelectChip key={item.value} selected={timePreference === item.value} onClick={() => setTimePreference((current) => current === item.value ? '' : item.value)}>
+                    <SelectChip
+                      key={item.value}
+                      selected={timePreference === item.value}
+                      disabled={isTimePreferenceClosed(item.value, selectedDateClosure)}
+                      onClick={() => setTimePreference((current) => current === item.value ? '' : item.value)}
+                    >
                       {item.label}
                     </SelectChip>
                   ))}
                 </div>
+                {selectedDateClosure.label && !selectedDateClosure.isClosed ? (
+                  <p className="gh-book-availability-note" role="status">
+                    {selectedDateClosure.label}. Per quel giorno scegli un’altra preferenza.
+                  </p>
+                ) : null}
                 <p className="gh-book-time-hint">L’orario preciso lo concordiamo noi su WhatsApp.</p>
                 {daysAhead !== null && daysAhead < 7 ? (
                   <WarmNotice title="Sei un po’ a corto di preavviso.">

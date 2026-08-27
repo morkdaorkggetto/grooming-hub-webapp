@@ -102,6 +102,13 @@
 .gh-book-pet-choice .gh-book-choice-copy strong { font-family: var(--font-serif); font-size: 16px; font-weight: 500; }
 .gh-book-choice-copy small { color: var(--color-text-secondary); font-size: 11px; line-height: 1.3; }
 
+.gh-book-duration-note {
+  margin: 10px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
 .gh-book-pet-avatar,
 .gh-book-service-icon {
   width: 42px;
@@ -173,6 +180,27 @@
 }
 
 .gh-book-chip[aria-pressed='true'] { border-color: var(--color-primary); background: var(--color-primary); color: white; }
+.gh-book-chip:disabled {
+  border-style: dashed;
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+.gh-book-chip small {
+  display: block;
+  margin-top: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+.gh-book-availability-note {
+  margin: 9px 0 0;
+  color: var(--color-warning-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
 .gh-book-step [role='status'] { margin-top: 12px; }
 .gh-book-notes-label { margin-top: 18px; }
 
@@ -268,7 +296,7 @@
 
 .gh-book-calendar-note { margin: 18px 0 0; color: var(--color-text-secondary); font-size: 12px; }
 
-@media (max-width: 719px) {
+@media (max-width: 640px) {
   .gh-book-page { padding: 34px 16px 172px; }
   .gh-book-header { margin-bottom: 34px; }
   .gh-book-header h1,
@@ -305,9 +333,6 @@
   .gh-book-result-icon { width: 68px; height: 68px; }
   .gh-book-result-actions { width: 100%; flex-direction: column; }
   .gh-book-result-actions > * { width: 100%; box-sizing: border-box; }
-}
-
-@media (max-width: 359px) {
   .gh-book-page { padding-left: 12px; padding-right: 12px; }
   .gh-book-pet-grid,
   .gh-book-service-grid { gap: 6px; }

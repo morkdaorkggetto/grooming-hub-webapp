@@ -761,16 +761,26 @@ export const getPendingAppointmentRequests = async () => {
   ].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
 };
 
-export const resolveAppointmentRequest = async (requestId, decision, scheduledAt = null) => {
+export const resolveAppointmentRequest = async (
+  requestId,
+  decision,
+  scheduledAt = null,
+  durationMinutes = null
+) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
   if (!['approved', 'rejected'].includes(decision)) throw new Error('Decisione richiesta non valida');
   if (decision === 'approved' && !scheduledAt) throw new Error('Data e ora sono obbligatorie');
+  const duration = Number(durationMinutes);
+  if (decision === 'approved' && (!Number.isInteger(duration) || duration < 15)) {
+    throw new Error('La durata effettiva deve essere di almeno 15 minuti');
+  }
 
-  const { error: rpcError } = await supabase.rpc('resolve_appointment_request', {
+  const { error: rpcError } = await supabase.rpc('resolve_appointment_request_with_duration', {
     p_request_id: requestId,
     p_decision: decision,
     p_scheduled_at: decision === 'approved' ? scheduledAt : null,
+    p_duration_minutes: decision === 'approved' ? duration : null,
   });
   if (rpcError) throw new Error(`Non riesco ad aggiornare la richiesta: ${rpcError.message}`);
 
