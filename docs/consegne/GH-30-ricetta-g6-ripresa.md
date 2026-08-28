@@ -143,7 +143,7 @@ trascritti nell'ordine seguente. Non usare `supabase db push`.
 | 27 | migration | `supabase/migrations/20260424145000_rls_promotions.sql` | `9d4d19a9d1f6ab37788ba9f6cb89197c37cc6b7c31ce4b453b16dbdcf272a333` | GH-13 atto 24 |
 | 28 | migration | `supabase/migrations/20260424145500_rls_customer_invitations.sql` | `a56c31593c57a64a4a531c38c6dd2cba70685dd5a7fb01d205c1898afc84283a` | GH-13 atto 25 |
 | 29 | migration | `supabase/migrations/20260424150000_pet_avatars_bucket.sql` | `92a0b3be380a01830d336c3dabe0308e56b9f772b87abbe51f9803dc9572aef0` | GH-13 atto 26 |
-| 30 | migration | `supabase/prod-migrations/20260824130000_drop_unreachable_records_prod.sql` | `90cb9f416ccb18c6fd67c6956d5931ffb15c7ec28204f24c4e4e883dbe952277` | GH-13 atto 27 |
+| 30 | migration | `supabase/prod-migrations/20260824130000_drop_unreachable_records_prod.sql` | `b9195e1185bb9d6d1125ebceeaa75a347a971512c5ab37e8e3f3a471ffae175c` | GH-13 atto 27; identificativi prod e cardinalita visite corretti da Emendamento 3 GH-31 |
 | 31 | migration | `supabase/prod-migrations/20260824120000_finalize_customers_phone_not_null_prod.sql` | `8cc8c2d38ba6dc0f84cb271d6a1e99adeb9d5aebaaccc3b5dd1bd3643d5a6065` | GH-13 atto 28 |
 | 32 | migration | `supabase/prod-migrations/20260824140000_absorb_contacts_customer_first_prod.sql` | `02ea9a26f4b1db512093d201343e2777e9c74f652f769122796f10ca54036a8c` | GH-13 atto 29 |
 | 33 | migration | `supabase/prod-migrations/20260828073917_gh30_protect_customer_operator_notes_prod.sql` | `3fa8a3f99192b352eac0bbda69dd44c46076ba00d758302aeaa8dc6da89f8cf0` | GH-30 protezione mancante |

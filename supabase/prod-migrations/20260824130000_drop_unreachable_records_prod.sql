@@ -33,7 +33,7 @@ WITH missing_phone_customers AS (
 conflicting_customer AS (
   SELECT c.id
   FROM public.customers c
-  WHERE c.id = '674521d8-b4a9-4543-8377-6a50308073e3'::uuid
+  WHERE c.id = '68462033-9b85-44f5-8ae9-8db7f9a490d1'::uuid
 )
 SELECT id, 'missing_phone'::text AS reason FROM missing_phone_customers
 UNION ALL
@@ -119,24 +119,24 @@ BEGIN
   FROM gh12_unreachable_customers WHERE reason = 'conflict';
   SELECT count(*) INTO v_b_expected_pet
   FROM gh12_unreachable_pets
-  WHERE id = 'c3614527-8945-4db8-bb13-f683b92ad001'::uuid;
+  WHERE id = '2e49f611-1b15-496b-9d8b-6ad0a84990bf'::uuid;
   SELECT count(*) INTO v_b_customer_pets
   FROM gh12_unreachable_pets WHERE reason = 'conflict';
   SELECT count(*) INTO v_b_visits
   FROM public.visits
-  WHERE pet_id = 'c3614527-8945-4db8-bb13-f683b92ad001'::uuid;
+  WHERE pet_id = '2e49f611-1b15-496b-9d8b-6ad0a84990bf'::uuid;
   SELECT count(*) INTO v_b_contact
   FROM gh12_unreachable_contacts
   WHERE id = 'ff68e870-19af-4233-ac6f-dc9ba83f4eeb';
   SELECT count(*) INTO v_b_appointments
   FROM public.appointments
-  WHERE pet_id = 'c3614527-8945-4db8-bb13-f683b92ad001'::uuid;
+  WHERE pet_id = '2e49f611-1b15-496b-9d8b-6ad0a84990bf'::uuid;
   SELECT count(*) INTO v_b_rewards
   FROM public.reward_points
-  WHERE pet_id = 'c3614527-8945-4db8-bb13-f683b92ad001'::uuid;
+  WHERE pet_id = '2e49f611-1b15-496b-9d8b-6ad0a84990bf'::uuid;
   SELECT count(*) INTO v_b_photos
   FROM gh12_unreachable_pets
-  WHERE id = 'c3614527-8945-4db8-bb13-f683b92ad001'::uuid
+  WHERE id = '2e49f611-1b15-496b-9d8b-6ad0a84990bf'::uuid
     AND NULLIF(btrim(photo_url), '') IS NOT NULL;
 
   SELECT count(*) INTO v_target_auth_links
@@ -146,14 +146,14 @@ BEGIN
 
   SELECT count(*) INTO v_protected_in_scope
   FROM gh12_unreachable_customers
-  WHERE id = '70097dcd-e5aa-4ceb-a15e-3fef04d09960'::uuid;
+  WHERE id = '912c5a1c-1c69-4033-a9f2-fc9eb1fb8443'::uuid;
   SELECT count(*) INTO v_protected_pets
   FROM public.pets
-  WHERE customer_id = '70097dcd-e5aa-4ceb-a15e-3fef04d09960'::uuid;
+  WHERE customer_id = '912c5a1c-1c69-4033-a9f2-fc9eb1fb8443'::uuid;
   SELECT count(*) INTO v_protected_visits
   FROM public.visits v
   JOIN public.pets p ON p.id = v.pet_id
-  WHERE p.customer_id = '70097dcd-e5aa-4ceb-a15e-3fef04d09960'::uuid;
+  WHERE p.customer_id = '912c5a1c-1c69-4033-a9f2-fc9eb1fb8443'::uuid;
 
   IF v_protected_in_scope <> 0 THEN
     RAISE EXCEPTION 'GH-12 protected customer entered deletion scope';
@@ -168,7 +168,7 @@ BEGIN
 
   v_is_before :=
     ROW(v_customers, v_pets, v_visits, v_contacts, v_missing_phone)
-      = ROW(268, 290, 462, 295, 7)
+      = ROW(268, 290, 466, 295, 7)
     AND ROW(
       v_a_customers,
       v_a_pets,
@@ -192,7 +192,7 @@ BEGIN
 
   v_is_after :=
     ROW(v_customers, v_pets, v_visits, v_contacts, v_missing_phone)
-      = ROW(260, 282, 452, 287, 0)
+      = ROW(260, 282, 456, 287, 0)
     AND ROW(
       v_a_customers,
       v_a_pets,
@@ -259,17 +259,17 @@ BEGIN
     (SELECT count(*) FROM public.visits),
     (SELECT count(*) FROM public.contacts),
     (SELECT count(*) FROM public.customers WHERE phone IS NULL OR btrim(phone) = '')
-  ) <> ROW(260, 282, 452, 287, 0) THEN
+  ) <> ROW(260, 282, 456, 287, 0) THEN
     RAISE EXCEPTION 'GH-12 post-condition cardinalities failed';
   END IF;
 
   SELECT count(*) INTO v_protected_pets
   FROM public.pets
-  WHERE customer_id = '70097dcd-e5aa-4ceb-a15e-3fef04d09960'::uuid;
+  WHERE customer_id = '912c5a1c-1c69-4033-a9f2-fc9eb1fb8443'::uuid;
   SELECT count(*) INTO v_protected_visits
   FROM public.visits v
   JOIN public.pets p ON p.id = v.pet_id
-  WHERE p.customer_id = '70097dcd-e5aa-4ceb-a15e-3fef04d09960'::uuid;
+  WHERE p.customer_id = '912c5a1c-1c69-4033-a9f2-fc9eb1fb8443'::uuid;
 
   IF v_protected_pets <> 1 OR v_protected_visits <> 4 THEN
     RAISE EXCEPTION 'GH-12 protected customer changed during deletion';

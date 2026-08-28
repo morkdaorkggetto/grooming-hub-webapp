@@ -1,6 +1,6 @@
 # GH-31 - Atto G6
 
-Stato: **terza interruzione all'atto 30; atti 4-29 applicati, atto 30 annullato**
+Stato: **catena 4-45 completata; postflight interrotto sulla cardinalita note 41 contro 32 attese**
 
 ## Perimetro dichiarato
 
@@ -202,9 +202,77 @@ L'atto 30 contiene almeno due misure non allineate allo stato produttivo autoriz
 
 Prima di ripartire occorre identificare sui dati la causa dell'UUID protetto non risolto, aggiornare consapevolmente tutte le cardinalita correlate dell'atto 30, riprovare il file sul banco temporaneo, ricalcolarne l'impronta e autorizzare la ripresa dall'atto 30. Nessuna di queste modifiche e' stata improvvisata in produzione.
 
+## Emendamento 3 e terza ripresa
+
+Cowork ha misurato che gli UUID di customer e pet fissati nell'atto 30 provenivano dallo split sul banco temporaneo, mentre lo split di produzione ha generato identificativi diversi. Luigi ha autorizzato le tre sostituzioni di identificativi e le due correzioni di cardinalita indicate dall'Emendamento 3, senza modificare le ancore legacy `ff68e870-19af-4233-ac6f-dc9ba83f4eeb` e `cb7f316e-65b0-4419-a6df-56367a3d3c0a`.
+
+Prima della modifica e' stato riconfermato in sola lettura che la produzione e' ferma all'atto 29 e che le nuove ancore individuano esattamente: un customer in conflitto, il suo unico pet, un customer protetto con un pet e quattro visite, e il contatto legacy collegato. Le cardinalita restano 268 customer, 290 pet, 466 visite e 295 contatti; profili e membership customer restano zero.
+
+| File corretto | Impronta precedente | Nuova impronta |
+|---|---|---|
+| `supabase/prod-migrations/20260824130000_drop_unreachable_records_prod.sql` | `90cb9f416ccb18c6fd67c6956d5931ffb15c7ec28204f24c4e4e883dbe952277` | `b9195e1185bb9d6d1125ebceeaa75a347a971512c5ab37e8e3f3a471ffae175c` |
+
+La nuova impronta e' stata aggiornata nel §6 di `docs/consegne/GH-30-ricetta-g6-ripresa.md`. Il banco temporaneo non viene usato: e' fuori perimetro, ha gia la catena applicata e un nuovo split produrrebbe ancora UUID diversi, senza validare le ancore di produzione. Il collaudo autorizzato resta la guardia transazionale dell'atto 30 sulle cardinalita misurate prima e dopo.
+
+## Terza ripresa della catena
+
+| Atto | File | Durata | Esito |
+|---:|---|---:|---|
+| 30 | `supabase/prod-migrations/20260824130000_drop_unreachable_records_prod.sql` | 5,274 s | riuscito con guardie Emendamento 3 |
+| 31 | `supabase/prod-migrations/20260824120000_finalize_customers_phone_not_null_prod.sql` | 4,126 s | riuscito |
+| 32 | `supabase/prod-migrations/20260824140000_absorb_contacts_customer_first_prod.sql` | 5,418 s | riuscito |
+| 33 | `supabase/prod-migrations/20260828073917_gh30_protect_customer_operator_notes_prod.sql` | 4,959 s | riuscito |
+| 34 | `supabase/migrations/20260818060158_enforce_pets_customer_update_whitelist.sql` | 4,906 s | riuscito; finestra RLS transitoria chiusa |
+| 35 | `supabase/migrations/20260818063103_fix_pet_avatar_customer_path_qualification.sql` | 4,599 s | riuscito |
+| 36 | `supabase/migrations/20260821031654_add_customer_with_pet.sql` | 4,646 s | riuscito |
+| 37 | `supabase/migrations/20260520051506_add_service_id_to_appointments.sql` | 4,565 s | riuscito |
+| 38 | `supabase/migrations/20260821090000_gh08_appointment_requests.sql` | 7,040 s | riuscito |
+| 39 | `supabase/migrations/20260828120104_gh32_staff_internal_notes.sql` | 5,798 s | riuscito |
+| 40 | `supabase/seeds/gh-30-services-prod.sql` | 5,589 s | riuscito |
+| 41 | `supabase/migrations/20260827091536_gh22_booking_schedule_and_staff_duration.sql` | 5,184 s | riuscito |
+| 42 | `supabase/migrations/20260827170005_gh25_accept_customer_invite_membership.sql` | 5,505 s | riuscito |
+| 43 | `supabase/prod-migrations/20260828043652_gh27_prelaunch_repairs_prod.sql` | 5,249 s | riuscito |
+| 44 | `supabase/migrations/20260828044014_gh27_qr_backfill_privileged_fix.sql` | 5,131 s | riuscito |
+| 45 | `supabase/prod-migrations/20260824150000_security_hardening_prod.sql` | 5,460 s | riuscito e applicato per ultimo |
+
+La catena completa conta 42 atti riusciti (4-45), per 277,102 secondi complessivi di chiamate database. Le migrazioni registrate sono 52: le 10 iniziali piu i 42 atti G6.
+
 ## Verifiche finali
 
-Non eseguite, perche' la catena si e' arrestata all'atto 30. La suite RLS, gli Advisor, la prova note, la conferma appuntamento e il postflight sono pertanto fuori dalla presente esecuzione interrotta.
+### Postflight principale
+
+| Verifica | Atteso | Rilevato | Esito |
+|---|---:|---:|---|
+| `customers` | 260 | 260 | conforme |
+| `pets` | 282 | 282 | conforme |
+| `visits` | 456 | 456 | conforme |
+| `contacts` | 287 | 287 | conforme |
+| customer senza telefono | 0 | 0 | conforme |
+| `customers.phone` nullable | NO | NO | conforme |
+| servizi attivi | 2 | 2 | conforme |
+| pet senza `qr_token` | 0 | 0 | conforme |
+| profili / membership / utenti Auth | 3 / 3 / 3 | 3 / 3 / 3 | conforme |
+| appuntamenti | 5 | 5 | misurato |
+| oggetti Storage | 51 | 51 | invariato |
+
+Il trigger e la funzione della whitelist pet risultano entrambi presenti subito dopo l'atto 34. Le colonne legacy `customers.operator_notes` e `pets.internal_notes` risultano assenti dopo l'atto 39.
+
+### Interruzione sul postflight note
+
+GH-32 richiede esplicitamente 32 righe complessive prima e dopo l'atto 39. Il postflight rileva invece:
+
+| Misura | Rilevato |
+|---|---:|
+| `customer_staff_notes` | 11 |
+| `pet_staff_notes` | 30 |
+| righe complessive | **41** |
+| testi distinti | **41** |
+| testi duplicati | 0 |
+| note customer orfane | 0 |
+| note pet orfane | 0 |
+| colonne legacy residue | 0 |
+
+Le 41 righe non sono una duplicazione testuale e non contengono orfani. Poiche' il registro GH-32 prescrive l'arresto su qualunque conteggio diverso da 32, le controprove successive non sono state avviate: nessuna sonda RLS creata, nessun test vivo di scrittura note/whitelist, nessuna conferma appuntamento e nessuna lettura Advisor. Occorre prima riconciliare la misura 32 con le 41 note migrate, senza cancellazioni o accorpamenti manuali.
 
 `npm run build` non eseguito: non e' stato modificato codice applicativo e il mandato assegna merge, build, push e promozione a Luigi dopo il completamento della catena. Nessun push e nessun deploy eseguiti.
 
@@ -216,8 +284,12 @@ Seconda eccezione: atto 21 rifiutato prima dell'esecuzione per `UPDATE` customer
 
 L'Emendamento 2 ha autorizzato l'atto 21 come scritto; gli atti 21-29 sono stati applicati. Terza eccezione: la guardia dell'atto 30 non riconosce il customer protetto e conserva cardinalita visite precedenti all'aggiornamento del 28/8. L'atto 30 e' stato annullato atomicamente e la catena arrestata.
 
+L'Emendamento 3 ha corretto identificativi e cardinalita dell'atto 30; la catena 30-45 e il postflight principale sono riusciti. Quarta eccezione: 41 righe note staff-only contro le 32 richieste dal registro GH-32. Arresto prima delle sonde e degli Advisor.
+
+Fuori-istruzione procedurale dichiarato: il registro GH-32 prescriveva il controllo 32→32 immediatamente dopo l'atto 39 e prima di proseguire con gli atti 40-45. Il controllo e' stato eseguito soltanto dopo il completamento della catena; pertanto gli atti 40-45 erano gia applicati quando lo scostamento 41 contro 32 e' stato rilevato. Non e' stata eseguita alcuna scrittura correttiva o cancellazione di note.
+
 Nessun file fuori istruzione toccato. Le tre modifiche parallele preesistenti dichiarate sopra restano escluse.
 
 ## Commit
 
-Primo commit locale di interruzione: `04144c4` (`docs: record GH-31 production halt`). Correzione Emendamento 1 e seconda interruzione: `e5fbcd4` (`fix: correct GH-31 legacy operator guard`). La ripresa Emendamento 2 aggiorna soltanto il presente registro. Hash definitivo riportato nella comunicazione di chiusura; nessun push.
+Primo commit locale di interruzione: `04144c4` (`docs: record GH-31 production halt`). Correzione Emendamento 1 e seconda interruzione: `e5fbcd4` (`fix: correct GH-31 legacy operator guard`). Ripresa Emendamento 2: `2480a6d` (`docs: record GH-31 halt at act 30`). La ripresa Emendamento 3 aggiunge il file corretto dell'atto 30, la nuova impronta nella ricetta GH-30 e il presente aggiornamento del registro. Hash definitivo riportato nella comunicazione di chiusura; nessun push.
