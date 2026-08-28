@@ -117,7 +117,7 @@ trascritti nell'ordine seguente. Non usare `supabase db push`.
 | 1 | dump schema | `grooming-prod-dump-20260821.sql` | `27c75ce2d01c42387110651243a479ba7e677cb4a712027c62b4be896597c5c7` | GH-11, 29.965 byte |
 | 2 | dump dati | `grooming-prod-data-20260821.sql` | `c2c7fdb64edabc4d925814896fc0542382a1e6535c06645498a9c612678bd3a6` | GH-11, 1.327.527 byte |
 | 3 | dump Auth | `grooming-prod-auth-20260821.sql` | `7e3ac7d775f2e195cac892df0cf68101b61c737e3716c49407969c0bb7e5f3c6` | GH-11, 117.907 byte |
-| 4 | migration | `supabase/prod-migrations/20260824110000_prepare_legacy_data_prod.sql` | `8e60f6ba5d2d1adc11f4e079d1766527ab08533e5596c1e7203782ef5d5b4ff1` | GH-13 atto 1 |
+| 4 | migration | `supabase/prod-migrations/20260824110000_prepare_legacy_data_prod.sql` | `8f5d8c65eff4e28eaf4f85b69b828b15e4814ec51c0565e6740b10696cbd762f` | GH-13 atto 1; guardia operator corretta da Emendamento 1 GH-31 |
 | 5 | migration | `supabase/prod-migrations/20260824100000_cleanup_test_records_prod.sql` | `d8f883f7770ce71e1d0c0e01cca918c4ee1b0870b2b234d159fd4acac8f0c6d9` | GH-13 atto 2 |
 | 6 | migration | `supabase/prod-migrations/20260424120000_split_clients_with_backfill_prod.sql` | `a184567baaf32fcd372b915fa2519cebd74c921aa18b9865d54796d6533ff3a2` | GH-13 atto 3 |
 | 7 | migration | `supabase/migrations/20260424121000_tenants.sql` | `2052025095429ec806d9e932ff95e40f9b5d37870ca9d9ba58c433e82d21b292` | GH-13 atto 4 |

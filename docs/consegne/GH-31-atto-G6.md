@@ -1,6 +1,6 @@
 # GH-31 - Atto G6
 
-Stato: **interrotto all'atto 4; nessuna modifica persistita sul database**
+Stato: **seconda interruzione all'atto 21; atti 4-20 applicati, atto 21 non eseguito**
 
 ## Perimetro dichiarato
 
@@ -80,18 +80,87 @@ Il controllo successivo all'errore e' stato esclusivamente in lettura e ha confe
 
 La divergenza nasce prima di qualunque cambiamento persistente: il file dell'atto 4 contiene una guardia che congela a 3 il numero di utenti Auth distinti collegati a record `clients`, mentre la produzione corrente ne contiene 4. La scelta fra diagnosi e modifica della ricetta spetta a Luigi; nessuna delle due e' stata avviata in questa sessione.
 
+## Emendamento 1 e ripresa
+
+Cowork ha misurato in produzione la causa della divergenza e Luigi ha autorizzato esplicitamente l'Emendamento 1 del mandato. I quattro proprietari di schede legacy esistono fin dal dump del 21/8: due hanno gia un profilo operator, mentre i record di Roby e dell'utente di prova spiegano i due profili mancanti. L'utente di prova viene rimosso integralmente dall'atto 5 prima della costruzione delle membership.
+
+La guardia non e' stata rimossa: la cardinalita attesa e' stata corretta da 3 a 4, mantenendo invariata la soglia di 7 clienti senza telefono.
+
+| File corretto | Impronta precedente | Nuova impronta |
+|---|---|---|
+| `supabase/prod-migrations/20260824110000_prepare_legacy_data_prod.sql` | `8e60f6ba5d2d1adc11f4e079d1766527ab08533e5596c1e7203782ef5d5b4ff1` | `8f5d8c65eff4e28eaf4f85b69b828b15e4814ec51c0565e6740b10696cbd762f` |
+
+La nuova impronta e' stata ancorata anche nel §6 di `docs/consegne/GH-30-ricetta-g6-ripresa.md`. Nessun altro atto e' stato modificato. La ripresa parte nuovamente dall'atto 4.
+
+## Ripresa della catena
+
+Il preflight e' stato ripetuto prima della nuova scrittura: 296 `clients`, 468 `visits`, 301 `contacts`, 6 utenti Auth, 17 appuntamenti, 4 profili, 51 oggetti Storage, 4 operatori legacy e 10 migrazioni fino a `20260423123000`. Tutti i valori erano conformi allo stato autorizzato dall'Emendamento 1. Le impronte della catena aggiornata risultavano 42/42 conformi.
+
+| Atto | File | Durata | Esito |
+|---:|---|---:|---|
+| 4 | `supabase/prod-migrations/20260824110000_prepare_legacy_data_prod.sql` | 6,611 s | riuscito |
+| 5 | `supabase/prod-migrations/20260824100000_cleanup_test_records_prod.sql` | 8,191 s | riuscito |
+| 6 | `supabase/prod-migrations/20260424120000_split_clients_with_backfill_prod.sql` | 8,814 s | riuscito |
+| 7 | `supabase/migrations/20260424121000_tenants.sql` | 25,512 s | riuscito |
+| 8 | `supabase/migrations/20260424122000_tenant_memberships.sql` | 5,781 s | riuscito |
+| 9 | `supabase/migrations/20260424123000_profiles_auto_create_and_deprecate_role.sql` | 8,072 s | riuscito |
+| 10 | `supabase/migrations/20260424124000_helpers_has_tenant_access.sql` | 6,321 s | riuscito |
+| 11 | `supabase/migrations/20260424125000_services.sql` | 5,738 s | riuscito |
+| 12 | `supabase/migrations/20260424126000_promotions.sql` | 5,632 s | riuscito |
+| 13 | `supabase/migrations/20260424130000_tenant_id_nullable_and_backfill.sql` | 6,013 s | riuscito |
+| 14 | `supabase/migrations/20260424131000_tenant_id_indexes.sql` | 6,681 s | riuscito |
+| 15 | `supabase/migrations/20260424132000_backfill_customers_stub.sql` | 8,715 s | riuscito |
+| 16 | `supabase/migrations/20260424133000_tenant_id_enforce_not_null.sql` | 5,663 s | riuscito |
+| 17 | `supabase/migrations/20260424140000_rls_tenants.sql` | 5,738 s | riuscito |
+| 18 | `supabase/migrations/20260424140500_rls_tenant_memberships.sql` | 7,383 s | riuscito |
+| 19 | `supabase/migrations/20260424141000_rls_profiles.sql` | 6,768 s | riuscito |
+| 20 | `supabase/migrations/20260424141500_rls_customers.sql` | 8,472 s | riuscito |
+| 21 | `supabase/migrations/20260424142000_rls_pets.sql` | 7,059 s | **rifiutato prima dell'esecuzione** |
+
+### Motivo della seconda interruzione
+
+L'atto 21 definisce `pets_customer_update` come `UPDATE` completo sulla riga del pet e dichiara esplicitamente che la whitelist dei campi modificabili e' affidata alla sola UI. L'operazione e' stata rifiutata perche' consentirebbe temporaneamente al customer di modificare anche campi sensibili quali `tenant_id`, `customer_id` e note interne. Nessun SQL dell'atto 21 e' stato eseguito e la migrazione non e' stata registrata.
+
+La procedura GH-31 impone l'arresto al primo errore o rifiuto: gli atti 22-45 non sono stati avviati e non e' stato tentato alcun aggiramento.
+
+### Stato database dopo l'arresto
+
+| Misura | Stato dopo atto 20 |
+|---|---:|
+| Tabella `clients` | assente, come previsto dopo lo split |
+| `customers` | 268 |
+| `pets` | 290 |
+| `visits` | 466 |
+| `contacts` | 295 |
+| `profiles` | 3 |
+| `tenants` | 1 |
+| `tenant_memberships` | 3 |
+| utenti Auth | 3 |
+| `appointments` | 5 |
+| oggetti Storage | 51 |
+| migrazioni registrate | 27 |
+| ultima migrazione | `g6_20_rls_customers` |
+
+La produzione si trova quindi all'ultimo atto riuscito. Poiche' `clients` e' gia stata rimossa, la finestra prevista dal mandato in cui il frontend precedente non funziona e' aperta. Nessun ripristino e' stato avviato: la decisione spetta a Luigi.
+
+### Soluzione proposta a Cowork, non eseguita
+
+Rendere sicuro l'atto 21 fin dalla sua prima applicazione, portando nel file la stessa whitelist server-side prevista dall'atto 34 (`owner_notes`, `coat_preferences`, `photo_url`) invece di creare una policy volutamente ampia e restringerla tredici atti dopo. L'atto 34 dovra' quindi essere reso idempotente rispetto alla protezione gia presente o trasformato in verifica della guardia. La nuova coppia di file va riprovata sul progetto temporaneo, reimprontata e autorizzata da un nuovo emendamento prima di ripartire dall'atto 21.
+
 ## Verifiche finali
 
-Non eseguite, perche' la catena non ha superato il primo atto. La suite RLS, gli Advisor, la prova note, la conferma appuntamento e il postflight sono pertanto fuori dalla presente esecuzione interrotta.
+Non eseguite, perche' la catena si e' arrestata all'atto 21. La suite RLS, gli Advisor, la prova note, la conferma appuntamento e il postflight sono pertanto fuori dalla presente esecuzione interrotta.
 
 `npm run build` non eseguito: non e' stato modificato codice applicativo e il mandato assegna merge, build, push e promozione a Luigi dopo il completamento della catena. Nessun push e nessun deploy eseguiti.
 
 ## Eccezioni e fuori istruzione
 
-Unica eccezione rilevata: guardia dell'atto 4 non conforme allo stato vivo di produzione (4 operatori legacy rilevati contro 3 attesi). L'eccezione e' stata trattata applicando letteralmente la procedura di arresto del mandato.
+Prima eccezione: guardia dell'atto 4 corretta dall'Emendamento 1 dopo la misura documentata dei 4 operatori legacy.
+
+Seconda eccezione: atto 21 rifiutato prima dell'esecuzione per `UPDATE` customer troppo ampio sui pet. L'eccezione e' stata trattata applicando letteralmente la procedura di arresto del mandato.
 
 Nessun file fuori istruzione toccato. Le tre modifiche parallele preesistenti dichiarate sopra restano escluse.
 
 ## Commit
 
-Commit locale `docs: record GH-31 production halt`; hash definitivo riportato nella comunicazione di chiusura. Include esclusivamente questo file; nessun push.
+Primo commit locale di interruzione: `04144c4` (`docs: record GH-31 production halt`). La ripresa aggiunge il file corretto dell'atto 4, la nuova impronta nella ricetta GH-30 e il presente aggiornamento del registro. Hash definitivo riportato nella comunicazione di chiusura; nessun push.

@@ -4,8 +4,9 @@
 -- 1. Completa il profilo operator degli utenti che possiedono record legacy.
 -- 2. Compila un telefono mancante solo quando lo stesso nominativo ha una
 --    singola fonte telefonica normalizzata tra clients e contacts.
--- 3. Congela le cardinalita misurate sul dump del 21/8: 3 operator e 7
---    clienti ancora senza una fonte telefonica reale.
+-- 3. Congela le cardinalita misurate sul dump del 21/8: 4 operator e 7
+--    clienti ancora senza una fonte telefonica reale. La misura iniziale di
+--    3 operator era stata rilevata dopo la pulizia dei record di prova.
 
 BEGIN;
 
@@ -88,9 +89,9 @@ BEGIN
   FROM public.clients
   WHERE phone IS NULL OR btrim(phone) = '';
 
-  IF v_operators <> 3 THEN
+  IF v_operators <> 4 THEN
     RAISE EXCEPTION
-      'Preparazione bloccata: attesi 3 operator legacy, trovati %.',
+      'Preparazione bloccata: attesi 4 operator legacy, trovati %.',
       v_operators;
   END IF;
 
