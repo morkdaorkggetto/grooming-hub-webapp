@@ -296,6 +296,31 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 28 agosto 2026 — GH-26: la vita di un cliente nuovo, e la data che scivola
+
+**Ricognizione senza riparazioni**: dodici passaggi dal gesto reale, dalla creazione del cliente fino alla visita che compare nello storico. **Diff applicativo zero**, pulizia verificata con conteggi identici prima e dopo. Otto difetti trovati e ordinati per quanto farebbero male il 1° settembre.
+
+**LO SLITTAMENTO DELLA DATA — reale, e circoscritto** (misura manuale di Luigi, 28/8). Codex l'aveva riportato come *osservato* con browser automatizzato, raccomandando una riprova umana prima di attribuirlo al prodotto. **Cowork aveva previsto che a mano avrebbe funzionato: previsione sbagliata.**
+
+Misure manuali su Safari, con `VITE_DEMO_MODE` temporaneamente a `false` e redeploy:
+
+| Superficie | Digitato | Salvato | Esito |
+|---|---|---|---|
+| Dialogo di conferma richiesta | sabato 5 | **domenica 6** | difetto reale |
+| Form registrazione visita | data scelta | data scelta | **corretto** |
+
+**La localizzazione è la parte preziosa.** Il form visita scrive `visits.date`, una data pura senza orario, e funziona. Il dialogo di conferma deve **comporre data e ora in un `timestamptz`** (`appointments.scheduled_at`), e lì il giorno scivola in avanti. Quindi non è un problema sistemico di fusi orari: è un punto solo. E l'osservazione di Codex sul form visita era davvero un artefatto della sua automazione, come lui stesso aveva sospettato.
+
+**Aggravante**: lo slittamento ha portato l'appuntamento **di domenica**, giorno in cui il salone è chiuso — senza che nulla lo segnalasse. Le chiusure introdotte in GH-22 valgono per il wizard cliente, non per la conferma staff.
+
+**Gli altri sette difetti**: il **QR non nasce con il pet** (il pulsante risponde parlando di migration); **la richiesta pendente sparisce dalla home del cliente**, che legge «Non hai appuntamenti in programma» e viene invitato a riprenotare — quindi manda doppioni credendo di aver fallito; **registrare la lavorazione non chiude l'appuntamento**, due gesti separati senza richiamo; **l'invito si incolla a mano**, e il rischio non è il tempo ma associare il link alla persona sbagliata, perché i token si somigliano; **«WhatsApp di conferma pronto» senza che si apra nulla** né si possa rileggere il testo, quindi l'operatore crede di aver avvisato; **i punti non sono visibili al cliente** mentre lo staff vede zero; **l'anagrafica nasce incompleta** senza che nulla inviti a completarla.
+
+Più un difetto grafico notato da Luigi: nella card della richiesta la seconda riga (Manto, Età) non si allinea alle tre colonne superiori.
+
+**Nota su Vercel, che correggo perché l'avevo letta male**: il *branch tracking* del progetto `-aish` dice `main`, e da lì avevo concluso che il dominio stabile servisse il codice di maggio. Sbagliato: il deployment **attualmente promosso** su quel dominio è di `feat/customer-app`, promosso a mano il 21/8. Il tracking dice cosa si costruisce da solo, non cosa è pubblicato. Conseguenza da ricordare per G6: al merge `feat` → `main`, **due siti** cambieranno faccia con lo stesso gesto.
+
+**Metodo, di nuovo**: `VITE_DEMO_MODE=true` blocca ogni scrittura del gestionale sull'anteprima — è la protezione che permette di mostrare l'app senza che venga toccata. Va spenta e riaccesa per qualunque prova che scriva, e il banner rosso è la spia che dice se la finestra è aperta o chiusa.
+
 ### 27 agosto 2026 — La porta è aperta (GH-24 → GH-25)
 
 **GH-24 si è fermato davanti alla causa vera, e l'ha dimostrata dal vivo.** `accept_customer_invite` valida il token, crea il profilo, adotta il customer e collega il pet — **ma non inserisce nulla in `tenant_memberships`**. Dal Gate 5 la membership è la sola fonte del ruolo: `AuthProvider` legge quella, `useRequireCustomer` respinge chi non ce l'ha. **Il flusso d'invito era rotto da GH-05-bis**, settimane fa, e nessuno l'aveva visto perché nessuno aveva mai accettato un invito nell'app nuova.
