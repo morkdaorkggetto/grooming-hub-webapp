@@ -434,7 +434,7 @@ export default function ClientDetail() {
           </div>
         </Panel>
 
-        {fidelity.mode !== 'points' && promo.count > 0 && (
+        {promo.count > 0 && (
           <Panel className="gh-promo-panel" eyebrow="Promozione visite" title={promo.message}>
             <p className="gh-body">
               {promo.discount > 0
@@ -459,35 +459,35 @@ export default function ClientDetail() {
               <div className="gh-stat-num">{fidelity.rewardPointsTotal}</div>
             </div>
             <p className="gh-meta">
-              {fidelity.mode === 'points'
-                ? 'Il livello fidelity è calcolato sui punti premio.'
+              {fidelity.hasRewardPoints
+                ? 'Il livello considera il risultato migliore tra visite e punti premio.'
                 : 'Nessun punto ancora assegnato: la card usa ancora il fallback sulle visite.'}
             </p>
           </div>
 
           <div className="gh-tier-list">
             {fidelity.tiers.map((tier) => {
-              const current = fidelity.mode === 'points'
-                ? Math.min(fidelity.rewardPointsTotal, tier.pointsRequired)
-                : tier.visitsInWindow;
-              const total = fidelity.mode === 'points' ? tier.pointsRequired : tier.visitsRequired;
+              const visitsProgress = Math.min(tier.visitsInWindow / tier.visitsRequired, 1);
+              const pointsProgress = Math.min(fidelity.rewardPointsTotal / tier.pointsRequired, 1);
+              const bestProgress = Math.max(visitsProgress, pointsProgress) * 100;
+              const achievedWith = [
+                tier.achievedByVisits ? 'visite' : '',
+                tier.achievedByPoints ? 'punti' : '',
+              ].filter(Boolean).join(' e ');
               return (
                 <div className="gh-tier-row" key={tier.key}>
                   <FidelityBadge tier={tier.key} compact />
                   <div className="gh-tier-row__progress">
-                    <progress max={total} value={Math.min(current, total)} />
+                    <progress max={100} value={bestProgress} />
                     <span className="gh-meta gh-num">
-                      {fidelity.mode === 'points'
-                        ? `${current} / ${total} punti`
-                        : `${current} / ${total} visite in ${tier.monthsWindow} mesi`}
+                      {tier.visitsInWindow} / {tier.visitsRequired} visite in {tier.monthsWindow} mesi
+                      {' · '}{fidelity.rewardPointsTotal} / {tier.pointsRequired} punti
                     </span>
                   </div>
                   <span className="gh-meta gh-num">
                     {tier.achieved
-                      ? 'Raggiunto'
-                      : fidelity.mode === 'points'
-                        ? `${tier.remainingPoints} mancanti`
-                        : `${tier.remainingVisits} mancanti`}
+                      ? `Raggiunto con ${achievedWith}`
+                      : `${tier.remainingVisits} visite oppure ${tier.remainingPoints} punti`}
                   </span>
                 </div>
               );

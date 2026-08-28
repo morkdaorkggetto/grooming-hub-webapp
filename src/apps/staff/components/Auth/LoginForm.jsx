@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../../../shared/supabase/client';
 import { DEMO_MODE } from '../../lib/demoMode';
-import { ensureOperatorProfile } from '../../lib/database';
+import { ensureOperatorProfile, getUserProfile } from '../../lib/database';
 import { Button, ErrorState, Field, Panel } from '../StaffKit';
 
 /**
@@ -170,8 +170,14 @@ export default function LoginForm({ currentUser = null, currentRole = null, onSu
       const {
         data: { user: signedInUser },
       } = await supabase.auth.getUser();
+      let destination = redirectTo;
       if (signedInUser) {
-        await ensureOperatorProfile(signedInUser);
+        const profile = await getUserProfile(signedInUser.id);
+        if (profile?.role === 'customer') {
+          destination = '/u/home';
+        } else {
+          await ensureOperatorProfile(signedInUser);
+        }
       }
 
       setSuccessMessage('Login riuscito! Caricamento...');
@@ -180,7 +186,7 @@ export default function LoginForm({ currentUser = null, currentRole = null, onSu
 
       // Chiama callback dopo login
       if (onSuccess) onSuccess();
-      navigate(redirectTo, { replace: true });
+      navigate(destination, { replace: true });
     } catch (error) {
       await supabase.auth.signOut();
       setError(`Errore login: ${error.message}`);

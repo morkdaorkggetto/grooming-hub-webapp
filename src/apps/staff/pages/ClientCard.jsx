@@ -210,7 +210,7 @@ export default function ClientCard() {
                 <div className="gh-card-metric">
                   <p className="gh-eyebrow--staff">Premio</p>
                   <FidelityBadge tier={fidelityTierKey} label={getFidelityLabel(fidelityTierKey)} />
-                  <p className="gh-body gh-num">{fidelity.mode === 'points' ? `${fidelity.rewardPointsTotal} punti` : `${client.visitsCount} visite`}</p>
+                  <p className="gh-body gh-num">{fidelity.rewardPointsTotal} punti · {client.visitsCount} visite</p>
                 </div>
 
                 <div className="gh-card-metric">

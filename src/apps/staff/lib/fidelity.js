@@ -56,18 +56,20 @@ const countVisitsInWindow = (visits = [], monthsWindow) => {
 export const getFidelityTierSnapshot = (client) => {
   const visits = Array.isArray(client?.visits) ? client.visits : [];
   const rewardPointsTotal = Number(client?.rewardPointsTotal || 0);
-  const useRewardPoints = rewardPointsTotal > 0;
+  const hasRewardPoints = rewardPointsTotal > 0;
 
   const tiers = FIDELITY_TIERS.map((tier) => {
     const visitsInWindow = countVisitsInWindow(visits, tier.monthsWindow);
-    const achieved = useRewardPoints
-      ? rewardPointsTotal >= tier.pointsRequired
-      : visitsInWindow >= tier.visitsRequired;
+    const achievedByVisits = visitsInWindow >= tier.visitsRequired;
+    const achievedByPoints = rewardPointsTotal >= tier.pointsRequired;
+    const achieved = achievedByVisits || achievedByPoints;
 
     return {
       ...tier,
       visitsInWindow,
       rewardPointsTotal,
+      achievedByVisits,
+      achievedByPoints,
       achieved,
       remainingVisits: Math.max(0, tier.visitsRequired - visitsInWindow),
       remainingPoints: Math.max(0, tier.pointsRequired - rewardPointsTotal),
@@ -84,12 +86,19 @@ export const getFidelityTierSnapshot = (client) => {
   const currentTier =
     [...tiers].reverse().find((tier) => tier.achieved) || null;
   const nextTier = tiers.find((tier) => !tier.achieved) || null;
+  const visitTier = [...tiers].reverse().find((tier) => tier.achievedByVisits) || null;
+  const pointsTier = [...tiers].reverse().find((tier) => tier.achievedByPoints) || null;
+  const tierRank = (tier) => tiers.findIndex((candidate) => candidate.key === tier?.key);
+  const mode = tierRank(pointsTier) > tierRank(visitTier) ? 'points' : 'visits';
 
   return {
     currentTier,
     nextTier,
+    visitTier,
+    pointsTier,
     tiers,
-    mode: useRewardPoints ? 'points' : 'visits',
+    mode,
+    hasRewardPoints,
     rewardPointsTotal,
   };
 };

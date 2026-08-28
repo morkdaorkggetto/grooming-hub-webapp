@@ -43,7 +43,7 @@ function ProtectedRoute({
     if (!role) {
       return <Navigate to={loginPath} replace />;
     }
-    return <Navigate to={role === 'customer' ? '/portal' : '/dashboard'} replace />;
+    return <Navigate to={role === 'customer' ? '/u/home' : '/dashboard'} replace />;
   }
 
   return children;
@@ -61,7 +61,7 @@ export default function App() {
     currentProfile?.role === 'operator'
       ? '/dashboard'
       : currentProfile?.role === 'customer'
-        ? '/portal'
+        ? '/u/home'
         : '/portal/login';
 
   /**
