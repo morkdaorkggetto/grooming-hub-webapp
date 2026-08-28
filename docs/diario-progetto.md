@@ -15,15 +15,18 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 **Cancelli, in ordine di dipendenza:**
 
-| # | Cosa | Di chi |
+| # | Cosa | Stato |
 |---|---|---|
-| 1 | Decisione su `services.price_cents` (obbligatorio, ma i prezzi non esistono come listino) | **Luigi — in attesa** |
-| 2 | Ricetta G6 aggiornata: varianti prod-safe delle migration di GH-22, GH-25, GH-27, seed `services`, esclusione dichiarata di `20260511070742` | Cowork + Codex |
-| 3 | Mandato G6 riscritto sulla ricetta nuova (`GH-14` è fermo al 24/8) | Cowork |
-| 4 | Password nota su `frogletinpond@` **prima** della migrazione; decisione sull'account di Roby, oggi senza ruolo | Luigi |
-| 5 | Spot-check delle 5 schede contro la vecchia app | Luigi |
-| 6 | Dump fresco, autorizzazione di Codex su `Webapp_Project`, impostazioni Auth in produzione | Luigi |
-| 7 | Post-G6: due foto orfane via Storage API, toggle leaked-password, smontaggio del temporaneo, revoca accesso Codex | Luigi |
+| ~~1~~ | ~~Decisione su `services.price_cents`~~ | **chiuso 28/8** — due servizi, Bagno 20 €/45 min e Taglio 30 €/90 min, misurati contro un anno di incassi |
+| ~~2~~ | ~~Ricetta G6 aggiornata~~ | **chiuso 28/8** — `GH-30 §6`, 54 atti con impronte |
+| ~~3~~ | ~~Mandato G6 riscritto~~ | **chiuso 28/8** — `GH-31`, sostituisce GH-14 |
+| ~~4~~ | ~~Lettura delle note interne~~ | **chiuso 28/8** — `GH-32`, tabelle staff-only e colonne rimosse |
+| 5 | Spot-check delle 5 schede contro la vecchia app | **Luigi — aperto** |
+| 6 | Decisione sull'account di Roby, oggi senza ruolo nel profilo | **Luigi — aperto** |
+| 7 | Impostazioni Auth in produzione: registrazioni abilitate, conferma email disattivata | **Luigi — aperto** |
+| 8 | Password nota su `frogletinpond@`, da provare prima sul demo con sessione aperta | **Luigi — aperto** |
+| 9 | Il giorno stesso: dump fresco, autorizzazione di Codex su `Webapp_Project` | Luigi |
+| 10 | Post-G6: due foto orfane, toggle leaked-password, smontaggio del temporaneo, revoca accesso Codex | Luigi |
 
 **Domande aperte al salone, nessuna bloccante**: cosa dà un livello fedeltà; le parole di Davide per i quattro messaggi; se mettere una promozione al lancio o lasciare la sezione vuota.
 
@@ -316,6 +319,34 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 28 agosto 2026 — Un accesso solo: decisione, non rinuncia
+
+**Decisione di Luigi (28/8): Davide e Roby continuano a condividere un unico accesso.** L'argomento non è tecnico ed è il migliore possibile — conosce i suoi clienti: *«si confonderebbero rimproverando una modifica all'altro»*. Un sistema che consente di dire «questo l'hai cambiato tu» fra due persone che lavorano fianco a fianco non aggiunge trasparenza, aggiunge occasioni di discussione.
+
+**Conseguenza accettata e da non riaprire**: l'app **non potrà mai attribuire nulla a nessuno** — chi ha segnato quel no-show, chi ha messo in blacklist, chi ha registrato quella lavorazione. È anche la ragione profonda per cui il campo operatore sulle visite non è mai esistito, escluso tre volte in tre giri diversi. Da oggi è una scelta e non un'eredità.
+
+**Conseguenza pratica che cambia il peso di un altro cancello**: quella non è la password di Davide, **è la chiave del salone. L'unica.** Oggi non la conosce nessuno, e il sistema regge solo perché una sessione si rinnova da sola dal 31 maggio.
+
+**L'account di Roby resta dov'è, dormiente e non rimosso.** Ha un cliente intestato che dopo la migrazione diventa un pet legato al suo identificativo: cancellarlo romperebbe quel legame. Se un giorno provasse a entrare con il proprio accesso non funzionerebbe, perché senza ruolo nel profilo la catena non gli crea una membership — **e adesso sappiamo perché, invece di cercare un guasto.**
+
+### 28 agosto 2026 — GH-30 e GH-32: la ricetta è pronta e le note sono al riparo
+
+**GH-30 ha prodotto la ricetta vera**: **54 atti ordinati** con impronta e provenienza, dai tre dump fino ai gesti finali di Luigi. Trascrivibile senza dedurre nulla, che era il vincolo.
+
+Tre cose che Codex ha capito meglio di chi ha scritto il mandato. **L'hardening è stato spostato in fondo**: GH-25 e GH-27 *sostituiscono* funzioni, quindi l'irrigidimento deve operare sulle definizioni finali — nella prova generale non era emerso perché quelle migration non esistevano. **Nessuna copia inutile**: GH-22, GH-25 e la correzione QR sono già neutre e vanno in produzione così come sono; solo GH-27 ha una variante, e per la parola «demo» in un'intestazione. **Le quattro inversioni d'ordine** rispetto all'alfabeto sono dichiarate una per una con il motivo.
+
+Falso allarme risolto: Codex non trovava i tre dump del 21/8 perché la sua ricerca si ferma alla cartella del progetto e i dump stanno sulla Scrivania. Verificati presenti, dimensioni corrispondenti. **È disciplina di perimetro, non un guasto.**
+
+**GH-32 — le note interne fuori dalla portata del cliente.** Decisione di Luigi: *«il cliente non può e non deve vederle»*. La soluzione adottata è più pulita di quella ipotizzata nel mandato: due tabelle del salone, `customer_staff_notes` e `pet_staff_notes`, con RLS solo-staff e **il legame al tenant derivato dalla riga padre invece che duplicato**, così non possono divergere. Le due colonne esposte **rimosse**, non svuotate, dopo backfill con verifica esatta del contenuto. Per lo staff non cambia niente: l'adattatore conserva gli stessi nomi in memoria, quindi schermate, etichette e gesto di salvataggio restano identici.
+
+**Il nodo con GH-30 sciolto senza toccare nulla**: GH-30 resta l'atto 33 e viene eseguito mentre `operator_notes` esiste ancora; GH-32 entra come atto 39, dopo le RPC che ancora nominano le colonne legacy. Il problema si risolve **nell'ordine**, non nel codice. Ricetta rinumerata a 54 conservando le inversioni motivate.
+
+**Controprove fatte come le farebbe il cliente, non ragionando** — la lezione dell'errore del 27/8: sessione reale di `mario.rossi`, **zero righe leggibili** dalle due tabelle, **due scritture rifiutate**, le colonne legacy che rispondono `42703` perché non esistono più. Lato staff, gesto reale di modifica nota con marker scritto, riletto identico e rimosso. **Suite RLS da 26 a 30 PASS.**
+
+Il **32 → 32** sulla produzione è correttamente rinviato: Codex non ha accesso al prod e non l'ha forzato. La ricetta ora richiede quel conteggio come preflight e postflight dell'atto 39, con l'ordine di **fermarsi** se diverge — «la migration è transazionale e non va forzata o corretta manualmente durante G6».
+
+**Quinto cancello chiuso.**
 
 ### 28 agosto 2026 — GH-29 si ferma su un buco di sicurezza, e ne emerge un secondo
 
