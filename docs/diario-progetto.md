@@ -317,6 +317,29 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 28 agosto 2026 — GH-29 si ferma su un buco di sicurezza, e ne emerge un secondo
+
+**L'interruzione era prevista dal mandato e ha funzionato.** GH-29 ordinava di fermarsi se la copertura delle protezioni senza `20260511070742` non fosse risultata equivalente. Non lo è.
+
+| Protezione legacy | Nella catena G6 | Esito |
+|---|---|---|
+| `pets.internal_notes` | `trg_pets_customer_update_whitelist` ripristina l'intera riga da `OLD`, riapre solo tre campi | coperta, **meglio** |
+| `customers.operator_notes` | `enforce_customer_directory_fields_staff_only` ripristina **solo** `acquisition_source` e `relationship_status`; il trigger scatta **solo** su quelle due colonne | **scoperta** |
+
+Con `customers_self_update` che consente al cliente di aggiornare la propria riga, e le policy che non sanno limitare le colonne, **un cliente potrebbe scrivere nelle note che il salone tiene su di lui**. Sul demo la protezione c'è (la migration legacy è applicata lì); nella catena di produzione mancherebbe: **regressione introdotta da noi**, non difetto ereditato.
+
+**Ottavo difetto di Cowork, e il primo di sicurezza** (autodenuncia): il 27/8, verificando sul progetto temporaneo, avevo trovato due trigger con nomi plausibili e avevo scritto «copertura pari o migliore, nessuna azione». **Avevo confrontato i nomi, non il contenuto.** È esattamente la verifica superficiale che i mandati vietano a Codex. Il filo resta lo stesso — sbaglio nel descrivere *come* verificare — ma stavolta il costo sarebbe stato una falla in produzione.
+
+**Verifica Cowork riga per riga**, non accettazione sulla fiducia: la funzione prod ripristina davvero solo due campi, e il trigger è `BEFORE UPDATE OF acquisition_source, relationship_status` — quindi **un aggiornamento della sola `operator_notes` non lo attiva nemmeno**. Doppio buco, non uno.
+
+**SECONDO PROBLEMA, emerso leggendo e più grande del primo: non esiste alcuna protezione in lettura.** La migration legacy protegge solo la scrittura, con un trigger; nessuna revoca a livello di colonna esiste da nessuna parte. `customers_self_select` restituisce al cliente **l'intera propria riga**, `operator_notes` compreso, e lo stesso vale per `pets.internal_notes` attraverso la scheda del proprio cane. L'app non le mostra — ma **l'app non è il confine**: il confine sono le regole del database.
+
+Sono note che un toelettatore scrive per sé. **Non è una regressione**: esiste già oggi, su demo e produzione, ed è teorica finché nessun cliente reale usa l'app. **Diventa concreta al primo invito.**
+
+E non si chiude con una revoca di colonna: per il database staff e clienti sono **lo stesso ruolo**, quindi bloccare la colonna la bloccherebbe anche a Davide. Le strade sono due — una vista che al cliente non esponga quel campo, oppure spostare le note dello staff in una tabella separata con regole solo-staff. La seconda è più pulita e definitiva. **Decisione di Luigi, da prendere prima di invitare i clienti.**
+
+**GH-30 emesso**: autorizza la riparazione minima proposta da Codex — estendere la funzione esistente perché ripristini anche `operator_notes` e far scattare il trigger anche su quella colonna, senza reintrodurre la migration legacy, la cui metà pet è ridondante e le cui funzioni `SECURITY DEFINER` contraddirebbero il preflight dell'hardening — e riprende il resto della ricetta.
+
 ### 28 agosto 2026 — GH-28, e la validazione della regola sulle invarianti
 
 Entrambe le code chiuse. Il redirect porta i clienti a `/u/home`; la fedeltà calcola `achievedByVisits || achievedByPoints`, quindi **i punti possono solo alzare**. Prova deterministica **12/12**, incluso il caso che ci preoccupava — 30 visite più 10 punti resta Argento, nessun declassamento — e i due valori reali del prod simulati **senza leggere la produzione**, disciplina di perimetro corretta.
