@@ -1,6 +1,6 @@
 # GH-31 - Atto G6
 
-Stato: **seconda interruzione all'atto 21; atti 4-20 applicati, atto 21 non eseguito**
+Stato: **terza interruzione all'atto 30; atti 4-29 applicati, atto 30 annullato**
 
 ## Perimetro dichiarato
 
@@ -147,9 +147,64 @@ La produzione si trova quindi all'ultimo atto riuscito. Poiche' `clients` e' gia
 
 Rendere sicuro l'atto 21 fin dalla sua prima applicazione, portando nel file la stessa whitelist server-side prevista dall'atto 34 (`owner_notes`, `coat_preferences`, `photo_url`) invece di creare una policy volutamente ampia e restringerla tredici atti dopo. L'atto 34 dovra' quindi essere reso idempotente rispetto alla protezione gia presente o trasformato in verifica della guardia. La nuova coppia di file va riprovata sul progetto temporaneo, reimprontata e autorizzata da un nuovo emendamento prima di ripartire dall'atto 21.
 
+## Emendamento 2 e seconda ripresa
+
+Cowork ha verificato che lo stato permissivo dell'atto 21 e' transitorio e, all'atto 20, non e' raggiungibile da alcun cliente: la produzione contiene 3 utenti Auth ma zero profili `customer` e zero membership `customer`. Luigi ha autorizzato esplicitamente l'applicazione dell'atto 21 esattamente come scritto e la prosecuzione nell'ordine dichiarato, senza accorpare l'atto 34.
+
+Prima della nuova scrittura e' stato riconfermato lo stato dell'arresto: 268 customer, 290 pet, 466 visite, 295 contatti, 3 utenti Auth, zero profili customer, zero membership customer, tabella `clients` assente e ultima migrazione `g6_20_rls_customers`.
+
+La proposta precedente resta nel registro come evidenza del rilievo e non viene eseguita. Se la catena si arresta prima dell'atto 34, il registro deve dichiarare esplicitamente lo stato transitorio; nessun invito customer puo essere emesso prima della sua chiusura. Dopo l'atto 34 verra aggiunta una controprova viva con customer usa-e-getta per verificare che le colonne fuori whitelist non siano modificabili.
+
+## Seconda ripresa della catena
+
+| Atto | File | Durata | Esito |
+|---:|---|---:|---|
+| 21 | `supabase/migrations/20260424142000_rls_pets.sql` | 6,718 s | riuscito come scritto, su autorizzazione esplicita Emendamento 2 |
+| 22 | `supabase/migrations/20260424142500_rls_visits.sql` | 8,540 s | riuscito |
+| 23 | `supabase/migrations/20260424143000_rls_appointments.sql` | 5,404 s | riuscito |
+| 24 | `supabase/migrations/20260424143500_rls_contacts.sql` | 5,675 s | riuscito |
+| 25 | `supabase/migrations/20260424144000_rls_reward_points.sql` | 5,250 s | riuscito |
+| 26 | `supabase/migrations/20260424144500_rls_services.sql` | 8,455 s | riuscito |
+| 27 | `supabase/migrations/20260424145000_rls_promotions.sql` | 4,603 s | riuscito |
+| 28 | `supabase/migrations/20260424145500_rls_customer_invitations.sql` | 5,008 s | riuscito |
+| 29 | `supabase/migrations/20260424150000_pet_avatars_bucket.sql` | 7,895 s | riuscito |
+| 30 | `supabase/prod-migrations/20260824130000_drop_unreachable_records_prod.sql` | 6,806 s | **fallito e annullato**: `GH-12 protected customer guard failed: pets 0, visits 0` |
+
+Gli atti 31-45 non sono stati eseguiti.
+
+### Stato database dopo l'atto 29
+
+| Misura | Stato rilevato |
+|---|---:|
+| `customers` | 268 |
+| `pets` | 290 |
+| `visits` | 466 |
+| `contacts` | 295 |
+| `profiles` | 3 |
+| profili customer | 0 |
+| `tenant_memberships` | 3 |
+| membership customer | 0 |
+| utenti Auth | 3 |
+| `appointments` | 5 |
+| oggetti Storage | 51 |
+| policy `pets_customer_update` | presente |
+| migrazioni registrate | 36 |
+| ultima migrazione | `g6_29_pet_avatars_bucket` |
+
+La policy customer transitoria introdotta dall'atto 21 e' quindi presente e l'atto 34 non e' ancora stato raggiunto. L'esposizione resta non raggiungibile nello stato misurato perche' non esistono profili o membership customer, ma nessun invito deve essere emesso finche' la whitelist non sara applicata e verificata.
+
+### Indicazione per il prossimo emendamento
+
+L'atto 30 contiene almeno due misure non allineate allo stato produttivo autorizzato:
+
+- la guardia cerca il customer protetto `70097dcd-e5aa-4ceb-a15e-3fef04d09960` e rileva 0 pet/0 visite invece di 1/4;
+- le condizioni globali congelano ancora 462→452 visite, mentre dopo i quattro ingressi reali del 25 agosto lo stato misurato e il postflight autorizzato sono 466→456.
+
+Prima di ripartire occorre identificare sui dati la causa dell'UUID protetto non risolto, aggiornare consapevolmente tutte le cardinalita correlate dell'atto 30, riprovare il file sul banco temporaneo, ricalcolarne l'impronta e autorizzare la ripresa dall'atto 30. Nessuna di queste modifiche e' stata improvvisata in produzione.
+
 ## Verifiche finali
 
-Non eseguite, perche' la catena si e' arrestata all'atto 21. La suite RLS, gli Advisor, la prova note, la conferma appuntamento e il postflight sono pertanto fuori dalla presente esecuzione interrotta.
+Non eseguite, perche' la catena si e' arrestata all'atto 30. La suite RLS, gli Advisor, la prova note, la conferma appuntamento e il postflight sono pertanto fuori dalla presente esecuzione interrotta.
 
 `npm run build` non eseguito: non e' stato modificato codice applicativo e il mandato assegna merge, build, push e promozione a Luigi dopo il completamento della catena. Nessun push e nessun deploy eseguiti.
 
@@ -159,8 +214,10 @@ Prima eccezione: guardia dell'atto 4 corretta dall'Emendamento 1 dopo la misura 
 
 Seconda eccezione: atto 21 rifiutato prima dell'esecuzione per `UPDATE` customer troppo ampio sui pet. L'eccezione e' stata trattata applicando letteralmente la procedura di arresto del mandato.
 
+L'Emendamento 2 ha autorizzato l'atto 21 come scritto; gli atti 21-29 sono stati applicati. Terza eccezione: la guardia dell'atto 30 non riconosce il customer protetto e conserva cardinalita visite precedenti all'aggiornamento del 28/8. L'atto 30 e' stato annullato atomicamente e la catena arrestata.
+
 Nessun file fuori istruzione toccato. Le tre modifiche parallele preesistenti dichiarate sopra restano escluse.
 
 ## Commit
 
-Primo commit locale di interruzione: `04144c4` (`docs: record GH-31 production halt`). La ripresa aggiunge il file corretto dell'atto 4, la nuova impronta nella ricetta GH-30 e il presente aggiornamento del registro. Hash definitivo riportato nella comunicazione di chiusura; nessun push.
+Primo commit locale di interruzione: `04144c4` (`docs: record GH-31 production halt`). Correzione Emendamento 1 e seconda interruzione: `e5fbcd4` (`fix: correct GH-31 legacy operator guard`). La ripresa Emendamento 2 aggiorna soltanto il presente registro. Hash definitivo riportato nella comunicazione di chiusura; nessun push.
