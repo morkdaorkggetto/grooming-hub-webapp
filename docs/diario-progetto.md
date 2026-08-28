@@ -8,7 +8,28 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 27 agosto 2026.*
+*Aggiornato il 28 agosto 2026.*
+
+- **Costruzione e riparazioni finite.** App clienti completa e con una porta d'ingresso funzionante; gestionale interamente rivestito; calendario ricostruito; orari, chiusure e durate nel modello giusto; i dodici difetti trovati percorrendo la vita di un cliente nuovo sono chiusi, più le due code. Unica superficie ancora vecchia: `WeeklyRevenue`, che è un report e merita una composizione di Claude Design.
+- **Verso la produzione non manca lavoro: mancano i cancelli di G6.**
+
+**Cancelli, in ordine di dipendenza:**
+
+| # | Cosa | Di chi |
+|---|---|---|
+| 1 | Decisione su `services.price_cents` (obbligatorio, ma i prezzi non esistono come listino) | **Luigi — in attesa** |
+| 2 | Ricetta G6 aggiornata: varianti prod-safe delle migration di GH-22, GH-25, GH-27, seed `services`, esclusione dichiarata di `20260511070742` | Cowork + Codex |
+| 3 | Mandato G6 riscritto sulla ricetta nuova (`GH-14` è fermo al 24/8) | Cowork |
+| 4 | Password nota su `frogletinpond@` **prima** della migrazione; decisione sull'account di Roby, oggi senza ruolo | Luigi |
+| 5 | Spot-check delle 5 schede contro la vecchia app | Luigi |
+| 6 | Dump fresco, autorizzazione di Codex su `Webapp_Project`, impostazioni Auth in produzione | Luigi |
+| 7 | Post-G6: due foto orfane via Storage API, toggle leaked-password, smontaggio del temporaneo, revoca accesso Codex | Luigi |
+
+**Domande aperte al salone, nessuna bloccante**: cosa dà un livello fedeltà; le parole di Davide per i quattro messaggi; se mettere una promozione al lancio o lasciare la sezione vuota.
+
+---
+
+*Stato precedente, conservato per storia — aggiornato il 27 agosto 2026.*
 
 - **La costruzione è finita.** App clienti completa (login, home, promozioni, scheda pet, wizard richiesta). Gestionale interamente rivestito: Dashboard, scheda cliente, form visita, calendario, rubrica, nuovo cliente, giornata, richieste, login. Unica superficie ancora vecchia: `WeeklyRevenue`, che è un report e merita una composizione di Claude Design — è anche l'ultimo consumatore della vecchia fascia `AppHeader`.
 - **Il cerchio fra le due app è provato**: sul demo, richiesta del cliente → comparsa nel calendario staff → conferma con ora e durata scelte → appuntamento. È il flusso che giustifica il progetto.
@@ -295,6 +316,14 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 28 agosto 2026 — GH-28, e la validazione della regola sulle invarianti
+
+Entrambe le code chiuse. Il redirect porta i clienti a `/u/home`; la fedeltà calcola `achievedByVisits || achievedByPoints`, quindi **i punti possono solo alzare**. Prova deterministica **12/12**, incluso il caso che ci preoccupava — 30 visite più 10 punti resta Argento, nessun declassamento — e i due valori reali del prod simulati **senza leggere la produzione**, disciplina di perimetro corretta.
+
+**La scoperta è più interessante della riparazione, e valida una decisione di metodo.** Il mandato nominava due punti in `StaffApp.jsx`. Provando davvero, Codex ha trovato **un terzo blocco in `LoginForm.jsx`**: il form staff chiamava `ensureOperatorProfile` e **disconnetteva il cliente subito dopo il login**. Correggere solo i due redirect non sarebbe bastato — il cliente veniva buttato fuori prima di arrivarci.
+
+È esattamente ciò che la regola del 27/8 doveva produrre. Il mandato non diceva «cambia queste due righe»: diceva **«un cliente autenticato che raggiunge una rotta del gestionale arriva all'app nuova»**. Un'invariante si insegue finché non è vera, e porta a scoprire i posti che chi scrive non conosceva. Un elenco di file, invece, si esaurisce quando finisce l'elenco — ed è la forma in cui i miei mandati hanno sbagliato sette volte.
 
 ### 28 agosto 2026 — GH-27: dodici riparazioni, e la data smette di scivolare
 
