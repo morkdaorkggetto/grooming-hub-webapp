@@ -69,12 +69,11 @@ const formatAppointmentRange = ({ scheduledAt, date, time, durationMinutes = 60 
 const DEFAULT_PUBLIC_GROOMING_HUB_PHONE = '393332979797';
 const PUBLIC_GROOMING_HUB_PHONE =
   import.meta.env.VITE_PUBLIC_GROOMING_WHATSAPP || DEFAULT_PUBLIC_GROOMING_HUB_PHONE;
-const PUBLIC_GROOMING_HUB_NAME = import.meta.env.VITE_PUBLIC_GROOMING_HUB_NAME || 'Grooming Hub';
 
 export const getClientWhatsAppUrl = (client) => {
   const ownerName = client?.owner || 'cliente';
   const petName = client?.name || 'il tuo cane';
-  const message = `Buongiorno ${ownerName}, ti contatto da Grooming Hub per ${petName}.`;
+  const message = `Ciao ${ownerName}, ti scriviamo per ${petName}.`;
   return buildWhatsAppUrl(client?.phone, message);
 };
 
@@ -92,8 +91,8 @@ export const getAppointmentWhatsAppUrl = (appointment) => {
     : '';
 
   const message = when
-    ? `Buongiorno ${ownerName}, ti ricordo l'appuntamento per ${clientName} previsto il ${when}.`
-    : `Buongiorno ${ownerName}, ti contatto da Grooming Hub per ${clientName}.`;
+    ? `Ciao ${ownerName}, ti aspettiamo ${when} con ${clientName}.`
+    : `Ciao ${ownerName}, ti scriviamo per ${clientName}.`;
 
   return buildWhatsAppUrl(appointment?.client?.phone, message);
 };
@@ -113,11 +112,11 @@ export const getCustomerAppointmentRequestWhatsAppUrl = ({
   const requestedWindow = timeWindowLabel || when;
   const desiredDateText = formatDesiredDate(desiredDate);
   const dateText = desiredDateText ? ` Data desiderata: ${desiredDateText}.` : '';
-  const serviceText = serviceName ? ` Servizio richiesto: ${serviceName}.` : '';
+  const serviceText = serviceName ? ` Indicazione: ${serviceName}.` : '';
   const noteText = notes ? ` Note: ${notes}.` : '';
   const message = requestedWindow
-    ? `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}.${dateText} Preferenza oraria: ${requestedWindow}.${serviceText}${noteText}`
-    : `Ciao, ho appena inviato dall'area cliente una richiesta già registrata in Grooming Hub per ${clientName}.${dateText}${serviceText}${noteText}`;
+    ? `Ciao, abbiamo appena inviato una richiesta per ${clientName}.${dateText} Preferenza oraria: ${requestedWindow}.${serviceText}${noteText}`
+    : `Ciao, abbiamo appena inviato una richiesta per ${clientName}.${dateText}${serviceText}${noteText}`;
 
   return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };
@@ -132,11 +131,11 @@ export const getAppointmentApprovalWhatsAppMessage = (appointment, approvalStatu
 
   return approvalStatus === 'approved'
       ? when
-        ? `Buongiorno ${ownerName}, la richiesta registrata in Grooming Hub per ${clientName} è confermata nella fascia ${when}.`
-        : `Buongiorno ${ownerName}, la richiesta registrata in Grooming Hub per ${clientName} è confermata.`
+        ? `Ciao ${ownerName}, per ${clientName} ci siamo: ${when}. A presto!`
+        : `Ciao ${ownerName}, per ${clientName} ci siamo. A presto!`
       : when
-        ? `Buongiorno ${ownerName}, la fascia richiesta in Grooming Hub per ${clientName} (${when}) non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`
-        : `Buongiorno ${ownerName}, la fascia richiesta in Grooming Hub per ${clientName} non è disponibile. Ti chiediamo di selezionare un'altra fascia oraria dall'area cliente o di scriverci qui.`;
+        ? `Ciao ${ownerName}, purtroppo ${when} siamo pieni. Per ${clientName} troviamo volentieri un'altra fascia: scrivici qui e la blocchiamo.`
+        : `Ciao ${ownerName}, per ${clientName} in quella fascia siamo pieni. Scrivici qui e troviamo insieme un'alternativa.`;
 };
 
 export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) =>
@@ -145,17 +144,44 @@ export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) =
     getAppointmentApprovalWhatsAppMessage(appointment, approvalStatus)
   );
 
+export const getAppointmentAlternativesWhatsAppMessage = (appointment, alternatives = []) => {
+  const clientName = appointment?.client?.name || 'il tuo cane';
+  const ownerName = appointment?.client?.owner || 'cliente';
+  const labels = alternatives.map(({ date, time_preference: preference }) => {
+    const day = formatDesiredDate(date);
+    const windowLabel = preference === 'morning' ? 'mattina' : 'pomeriggio';
+    return `${day} ${windowLabel}`;
+  });
+  const alternativesText = labels.length === 2
+    ? `${labels[0]} oppure ${labels[1]}`
+    : `${labels.slice(0, -1).join(', ')} oppure ${labels.at(-1)}`;
+  const requestedWhen = formatDesiredDate(appointment?.desired_date) || 'quando ci hai chiesto';
+  return `Ciao ${ownerName}, purtroppo ${requestedWhen} siamo pieni. Per ${clientName} avremmo ${alternativesText}: dimmi tu e blocchiamo.`;
+};
+
+export const getAppointmentAlternativesWhatsAppUrl = (appointment, alternatives) =>
+  buildWhatsAppUrl(
+    appointment?.client?.phone,
+    getAppointmentAlternativesWhatsAppMessage(appointment, alternatives)
+  );
+
+export const getCustomerInviteWhatsAppMessage = ({ recipient, petName, inviteUrl } = {}) =>
+  `Ciao ${recipient || 'cliente'}, qui trovi l'accesso alla scheda di ${petName || 'il tuo cane'}: ${inviteUrl}`;
+
+export const getCustomerInviteWhatsAppUrl = (invite) =>
+  buildWhatsAppUrl(invite?.phone, getCustomerInviteWhatsAppMessage(invite));
+
 export const getCustomerDirectoryWhatsAppUrl = (customer) => {
   const ownerName = customer?.owner_name || 'cliente';
   const petName = customer?.pet_name || customer?.pending_pet_name || 'il tuo cane';
-  const message = `Buongiorno ${ownerName}, ti contatto da Grooming Hub per ${petName}.`;
+  const message = `Ciao ${ownerName}, ti scriviamo per ${petName}.`;
   return buildWhatsAppUrl(customer?.phone, message);
 };
 
 export const getPublicGroomingHubWhatsAppUrl = ({ petName } = {}) => {
   const message = petName
-    ? `Ciao, sto scrivendo dalla card di ${petName}. Vorrei contattare ${PUBLIC_GROOMING_HUB_NAME}.`
-    : `Ciao, vorrei contattare ${PUBLIC_GROOMING_HUB_NAME}.`;
+    ? `Ciao, ti scriviamo per ${petName}.`
+    : 'Ciao, vorremmo chiedervi un’informazione.';
 
   return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };
@@ -165,8 +191,8 @@ export const getBoutiqueOrderWhatsAppUrl = ({ petName, items = [] } = {}) => {
     .map((item) => `${item.quantity}x ${item.name}`)
     .join(', ');
   const message = itemText
-    ? `Ciao, sto scrivendo dall'area cliente di ${petName || 'il mio cane'}. Vorrei mettere da parte questi prodotti: ${itemText}.`
-    : `Ciao, sto scrivendo dall'area cliente di ${petName || 'il mio cane'}. Vorrei informazioni sulla boutique.`;
+    ? `Ciao, per ${petName || 'il nostro cane'} vorremmo mettere da parte questi prodotti: ${itemText}.`
+    : `Ciao, per ${petName || 'il nostro cane'} vorremmo informazioni sulla boutique.`;
 
   return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
 };

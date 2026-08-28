@@ -158,6 +158,7 @@ export default function Calendar() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [whatsappDraft, setWhatsappDraft] = useState(null);
   const [modal, setModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [manualForm, setManualForm] = useState(() => ({ ...DEFAULT_FORM, date: todayString() }));
@@ -339,15 +340,16 @@ export default function Calendar() {
         await resolveAppointmentRequest(
           selectedItem.id,
           'approved',
-          requestCandidate.scheduled_at,
+          requestForm.date,
+          requestForm.time,
           requestCandidate.duration_minutes
         );
       }
       else { await updateAppointmentSchedule(selectedItem.id, requestCandidate); await updateAppointmentApproval(selectedItem.id, 'approved'); }
       const whatsappUrl = buildWhatsAppUrl(selectedItem.client?.phone, requestForm.message);
       setModal(null); await loadWeek();
-      if (whatsappUrl) { window.open(whatsappUrl, '_blank', 'noopener,noreferrer'); setSuccess('Richiesta confermata. Il messaggio WhatsApp è pronto.'); }
-      else setError('Richiesta confermata, ma il messaggio non è preparabile: manca il telefono del cliente.');
+      setWhatsappDraft({ url: whatsappUrl, message: requestForm.message, recipient: selectedItem.client?.owner || 'cliente' });
+      setSuccess('Richiesta confermata e appuntamento creato. Ora puoi avvisare il cliente.');
     } catch (saveError) { setError(saveError.message || 'Non riesco a confermare la richiesta'); }
     finally { setSaving(false); }
   };
@@ -355,12 +357,13 @@ export default function Calendar() {
     if (!selectedItem) return;
     setSaving(true); setError(''); setSuccess('');
     try {
-      if (selectedItem.request_kind === 'structured') await resolveAppointmentRequest(selectedItem.id, 'rejected');
+      if (selectedItem.request_kind === 'structured') await resolveAppointmentRequest(selectedItem.id, 'rejected', null, null, null);
       else await updateAppointmentApproval(selectedItem.id, 'rejected');
-      const rejectionUrl = buildWhatsAppUrl(selectedItem.client?.phone, getAppointmentApprovalWhatsAppMessage(selectedItem, 'rejected'));
+      const rejectionMessage = getAppointmentApprovalWhatsAppMessage(selectedItem, 'rejected');
+      const rejectionUrl = buildWhatsAppUrl(selectedItem.client?.phone, rejectionMessage);
       setModal(null); await loadWeek();
-      if (rejectionUrl) { window.open(rejectionUrl, '_blank', 'noopener,noreferrer'); setSuccess('Richiesta rifiutata. Il messaggio per scegliere un’altra fascia è pronto.'); }
-      else setError('Richiesta rifiutata, ma il messaggio non è preparabile: manca il telefono del cliente.');
+      setWhatsappDraft({ url: rejectionUrl, message: rejectionMessage, recipient: selectedItem.client?.owner || 'cliente' });
+      setSuccess('Richiesta rifiutata. Ora puoi avvisare il cliente.');
     } catch (saveError) { setError(saveError.message || 'Non riesco a rifiutare la richiesta'); }
     finally { setSaving(false); }
   };
@@ -408,6 +411,16 @@ export default function Calendar() {
         {DEMO_MODE && <div className="gh-calendar-notice">{DEMO_WRITE_BLOCK_MESSAGE}</div>}
         {error && <div className="gh-calendar-notice gh-calendar-notice--error" role="alert">{error}</div>}
         {success && <div className="gh-calendar-notice gh-calendar-notice--success" role="status">{success}</div>}
+        {whatsappDraft ? (
+          <Panel eyebrow="Comunicazione separata" title={`Messaggio per ${whatsappDraft.recipient}`}>
+            <p className="gh-body gh-pre-wrap">{whatsappDraft.message}</p>
+            <p className="gh-meta">Il salvataggio è concluso; il messaggio non risulta inviato finché non lo mandi da WhatsApp.</p>
+            <div className="gh-inline-actions">
+              {whatsappDraft.url ? <a className="gh-btn gh-btn--whatsapp" href={whatsappDraft.url} target="_blank" rel="noreferrer">Apri WhatsApp</a> : null}
+              <Button staff variant="outline" onClick={() => navigator.clipboard?.writeText(whatsappDraft.message)}>Copia messaggio</Button>
+            </div>
+          </Panel>
+        ) : null}
         <div className="gh-calendar-layout">
           <Panel className="gh-calendar-main" flush>
             <CalendarNavigation rangeLabel={formatWeekLabel(weekStart, weekEnd)}
@@ -458,7 +471,15 @@ export default function Calendar() {
             <Field label="Durata prevista (min)" type="number" min="15" step="15" value={requestForm.durationMinutes} onChange={(event) => updateRequestTiming('durationMinutes', event.target.value)} />
           </div>
           <p className="gh-calendar-form-helper">Il servizio propone il valore iniziale: adattalo al cane che stai valutando.</p>
+          {getDateClosure(requestForm.date, bookingSchedule).label ? (
+            <p className="gh-calendar-notice gh-calendar-notice--error" role="status">
+              Attenzione: {getDateClosure(requestForm.date, bookingSchedule).isClosed ? 'il salone risulta chiuso in questo giorno' : getDateClosure(requestForm.date, bookingSchedule).label.toLowerCase()}. Puoi confermare comunque se è un’eccezione voluta.
+            </p>
+          ) : null}
           <Field label="Messaggio WhatsApp" area value={requestForm.message} onChange={(event) => setRequestForm((current) => ({ ...current, message: event.target.value }))} />
+          {selectedItem.request_kind === 'structured' ? (
+            <Button staff variant="secondary" onClick={() => navigate('/requests')}>Proponi alternative dalla coda richieste</Button>
+          ) : null}
           {requestConflict && <p className="gh-calendar-conflict">Conflitto con {formatConflict(requestConflict)}.</p>}
         </div>
       </Modal>}
@@ -477,10 +498,14 @@ export default function Calendar() {
             <Button staff variant="outline" icon="calendar" onClick={() => window.open(getGoogleCalendarUrl(selectedItem), '_blank', 'noopener,noreferrer')}>Google</Button>
             <Button staff variant="outline" icon="calendar" onClick={() => downloadIcs(selectedItem)}>Apple</Button>
             <Button staff variant="outline" icon="user" onClick={() => navigate(`/client/${selectedItem.pet_id}`)}>Apri cliente</Button>
+            {selectedItem.status === 'scheduled' ? (
+              <Button staff variant="success" icon="pencil" onClick={() => navigate(`/client/${selectedItem.pet_id}/add-visit?appointmentId=${selectedItem.id}`)}>
+                Registra lavorazione
+              </Button>
+            ) : null}
             <Button staff variant="outline" icon="plus" onClick={() => { setModal(null); openManual(selectedItem.pet_id); }}>Nuovo per lo stesso cliente</Button>
           </div>
           <div className="gh-calendar-detail-actions">
-            <Button staff variant="success" disabled={selectedItem.status === 'completed'} onClick={() => changeStatus('completed')}>Completato</Button>
             <Button staff variant="outline" disabled={selectedItem.status === 'no_show'} onClick={() => changeStatus('no_show')}>No-show</Button>
             <Button staff variant="danger" disabled={selectedItem.status === 'cancelled'} onClick={() => changeStatus('cancelled')}>Annulla</Button>
             {selectedItem.status !== 'scheduled' && <Button staff variant="ghost" onClick={() => changeStatus('scheduled')}>Ripristina programmato</Button>}

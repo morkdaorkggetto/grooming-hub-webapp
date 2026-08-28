@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {
   Hero,
@@ -8,12 +8,14 @@ import {
   PetAvatar,
   SkeletonRow,
 } from '../components/StaffKit';
-import { addVisit, getClientById } from '../lib/database';
+import { addVisit, completeAppointmentWithVisit, getClientById } from '../lib/database';
 import { getFidelityTierSnapshot } from '../lib/fidelity';
 
 export default function AddVisit() {
   const { clientId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const appointmentId = searchParams.get('appointmentId') || '';
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -54,13 +56,17 @@ export default function AddVisit() {
 
     setSubmitting(true);
     try {
-      await addVisit(clientId, {
+      const visitInput = {
         date: formData.date,
         treatments: formData.treatments || null,
         issues: formData.issues || null,
         cost,
+      };
+      if (appointmentId) await completeAppointmentWithVisit(appointmentId, visitInput);
+      else await addVisit(clientId, visitInput);
+      navigate(`/client/${clientId}`, {
+        state: appointmentId ? { visitCompletedWithAppointment: true } : null,
       });
-      navigate(`/client/${clientId}`);
     } catch (err) {
       setError(err.message || 'Errore nell’aggiunta della visita');
     } finally {
@@ -116,6 +122,12 @@ export default function AddVisit() {
           </Panel>
         )}
 
+        {appointmentId ? (
+          <div className="gh-success-state" role="status">
+            Questa lavorazione nasce dall’appuntamento: salvandola, visita e appuntamento verranno chiusi insieme.
+          </div>
+        ) : null}
+
         <Panel eyebrow="Storico cliente" title="Registra visita">
           <VisitForm
             value={formData}
@@ -124,7 +136,7 @@ export default function AddVisit() {
             onCancel={handleCancel}
             error={error}
             submitting={submitting}
-            submitLabel="Salva Visita"
+            submitLabel={appointmentId ? 'Salva e chiudi appuntamento' : 'Salva visita'}
           />
         </Panel>
       </main>

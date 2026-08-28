@@ -21,6 +21,7 @@ import {
   getPublicGroomingHubWhatsAppUrl,
 } from '../../staff/lib/whatsapp';
 import { usePets } from '../hooks/usePets';
+import { useAppointmentRequests } from '../hooks/useAppointmentRequests';
 import { getBookingServices, submitAppointmentRequest } from '../lib/booking';
 import { getBookingFullPeriod } from '../lib/bookingDates';
 import './Book.css';
@@ -37,7 +38,7 @@ const COAT_CONDITIONS = [
   { value: 'some_knots', label: 'Qualche nodo' },
   { value: 'very_matted', label: 'Molto annodato' },
   { value: 'heavy_shedding', label: 'Perde tanto pelo' },
-  { value: 'sensitive_skin', label: 'Cute sensibile' },
+  { value: 'regular_grooming', label: 'Lo porto regolarmente' },
   { value: 'clean_long', label: 'Pulito, solo lungo' },
 ];
 
@@ -85,9 +86,9 @@ function SelectChip({ selected, disabled = false, onClick, children }) {
   );
 }
 
-function PetChoice({ pet, selected, onClick }) {
+function PetChoice({ pet, selected, disabled, onClick }) {
   return (
-    <button type="button" className="gh-book-choice gh-book-pet-choice" aria-pressed={selected} onClick={onClick}>
+    <button type="button" className="gh-book-choice gh-book-pet-choice" aria-pressed={selected} disabled={disabled} onClick={onClick}>
       {pet.photo_url ? (
         <img src={pet.photo_url} alt="" className="gh-book-pet-avatar" />
       ) : (
@@ -97,7 +98,7 @@ function PetChoice({ pet, selected, onClick }) {
       )}
       <span className="gh-book-choice-copy">
         <strong>{pet.name}</strong>
-        <small>{pet.breed || 'Razza non indicata'}</small>
+        <small>{disabled ? 'Richiesta già in attesa' : pet.breed || 'Razza non indicata'}</small>
       </span>
       {selected ? <Icon name="check" size={18} /> : null}
     </button>
@@ -110,7 +111,6 @@ function ServiceChoice({ service, selected, icon, onClick }) {
       <span className="gh-book-service-icon" aria-hidden="true"><Icon name={icon} size={18} /></span>
       <span className="gh-book-choice-copy">
         <strong>{service.name}</strong>
-        <small>Da 45 minuti a 3 ore*</small>
       </span>
     </button>
   );
@@ -163,7 +163,7 @@ function BookingResult({ submission }) {
         </p>
         <Card padding={22} radius="lg" elevated={false} style={{ width: '100%', borderRadius: 20 }}>
           <SummaryRow label="Pet" value={submission.pet.name} />
-          <SummaryRow label="Servizio" value={submission.service.name} />
+          <SummaryRow label="Indicazione" value={submission.service.name} />
           <SummaryRow label="Data desiderata" value={formatDesiredDate(submission.desiredDate)} />
           <SummaryRow label="Preferenza" value={submission.timePreference?.label || 'Nessuna preferenza'} />
         </Card>
@@ -185,6 +185,7 @@ export default function Book() {
   const { loading: authLoading } = useRequireCustomer();
   const { tenant, tenantId } = useTenant();
   const { data: pets, loading: petsLoading, error: petsError } = usePets();
+  const { data: requests, loading: requestsLoading } = useAppointmentRequests();
   const [searchParams] = useSearchParams();
   const [services, setServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(true);
@@ -214,6 +215,11 @@ export default function Book() {
   }), [bookingSchedule]);
   const requestedPetId = searchParams.get('petId') || '';
   const selectedPet = pets.find((pet) => pet.id === petId) || null;
+  const pendingPetIds = useMemo(
+    () => new Set(requests.filter((request) => request.status === 'pending').map((request) => request.pet_id)),
+    [requests]
+  );
+  const selectedPetHasPendingRequest = pendingPetIds.has(petId);
   const selectedService = services.find((service) => service.id === serviceId) || null;
   const selectedTimePreference = TIME_PREFERENCES.find((item) => item.value === timePreference) || null;
   const selectedCoatLabels = COAT_CONDITIONS.filter((item) => coatConditions.includes(item.value)).map((item) => item.label);
@@ -250,6 +256,7 @@ export default function Book() {
   const canSubmit = Boolean(
     petId
     && serviceId
+    && !selectedPetHasPendingRequest
     && desiredDate
     && !selectedDateClosure.isClosed
     && !isTimePreferenceClosed(timePreference, selectedDateClosure)
@@ -306,13 +313,17 @@ export default function Book() {
         coatNotes: coatNotes.trim(),
       });
     } catch (error) {
-      setSubmitError(error.message || 'Invio non riuscito');
+      setSubmitError(
+        error.code === '23505' || /gia una richiesta|già una richiesta/i.test(error.message || '')
+          ? 'Per questo pet c’è già una richiesta in attesa.'
+          : error.message || 'Invio non riuscito'
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (authLoading || petsLoading || servicesLoading) return <LoadingBook />;
+  if (authLoading || petsLoading || servicesLoading || requestsLoading) return <LoadingBook />;
   if (submission) return <BookingResult submission={submission} />;
 
   const whatsappFallback = getPublicGroomingHubWhatsAppUrl({ petName: selectedPet?.name });
@@ -346,8 +357,13 @@ export default function Book() {
               <section className="gh-book-step">
                 <StepHead number="1" title="Per chi?" />
                 <div className="gh-book-pet-grid">
-                  {pets.map((pet) => <PetChoice key={pet.id} pet={pet} selected={pet.id === petId} onClick={() => setPetId(pet.id)} />)}
+                  {pets.map((pet) => <PetChoice key={pet.id} pet={pet} selected={pet.id === petId} disabled={pendingPetIds.has(pet.id)} onClick={() => setPetId(pet.id)} />)}
                 </div>
+                {selectedPetHasPendingRequest ? (
+                  <WarmNotice title="Richiesta già inviata">
+                    La trovi nella home. Aspetta la risposta del salone prima di inviarne un’altra per lo stesso pet.
+                  </WarmNotice>
+                ) : null}
                 {needsDeclaredAge ? (
                   <div className="gh-book-age-block">
                     <label htmlFor="declared-pet-age">Quanti anni ha {selectedPet.name}?</label>
@@ -364,9 +380,7 @@ export default function Book() {
                     <ServiceChoice key={service.id} service={service} selected={service.id === serviceId} icon={SERVICE_ICONS[index % SERVICE_ICONS.length]} onClick={() => setServiceId(service.id)} />
                   ))}
                 </div>
-                <p className="gh-book-duration-note">
-                  *Dipende dalla taglia, dal tipo e dalle condizioni del pelo. I tempi effettivi si valutano in salone.
-                </p>
+                <p className="gh-book-duration-note">Il cane resta con noi qualche ora. Ti scriviamo appena è pronto.</p>
               </section>
 
               <section className="gh-book-step">
@@ -428,7 +442,7 @@ export default function Book() {
               <Card padding={24} radius="lg" style={{ borderRadius: 20 }}>
                 <Eyebrow style={{ marginBottom: 16 }}>La tua richiesta</Eyebrow>
                 <SummaryRow label="Pet" value={selectedPet?.name} />
-                <SummaryRow label="Servizio" value={selectedService?.name} />
+                <SummaryRow label="Indicazione" value={selectedService?.name} />
                 <SummaryRow label="Data desiderata" value={desiredDate ? formatDesiredDate(desiredDate) : ''} />
                 <SummaryRow label="Manto" value={selectedCoatLabels.join(', ') || coatNotes.trim()} />
                 <p className="gh-book-summary-message">Ti rispondiamo noi su WhatsApp con giorno e ora — di solito in pochi minuti.</p>

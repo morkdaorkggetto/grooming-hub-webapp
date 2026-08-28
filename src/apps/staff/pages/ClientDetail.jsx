@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ImageCropModal from '../components/ImageCropModal';
 import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {
@@ -38,7 +38,7 @@ import {
   getClientCardUrl,
   getClientQrImageUrl,
 } from '../lib/qrCode';
-import { getClientWhatsAppUrl } from '../lib/whatsapp';
+import { getClientWhatsAppUrl, getCustomerInviteWhatsAppUrl } from '../lib/whatsapp';
 
 const REWARD_REASON_LABELS = {
   visit: 'Visita',
@@ -63,6 +63,7 @@ const formatVisitDate = (dateString) => {
 export default function ClientDetail() {
   const { clientId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -77,6 +78,13 @@ export default function ClientDetail() {
   const [editForm, setEditForm] = useState({
     name: '',
     breed: '',
+    species: '',
+    birth_date: '',
+    sex: '',
+    microchip: '',
+    weight_kg: '',
+    color: '',
+    neutered: '',
     owner: '',
     phone: '',
     notes: '',
@@ -109,6 +117,13 @@ export default function ClientDetail() {
       setEditForm({
         name: data.name,
         breed: data.breed || '',
+        species: data.species || '',
+        birth_date: data.birth_date || '',
+        sex: data.sex || '',
+        microchip: data.microchip || '',
+        weight_kg: data.weight_kg || '',
+        color: data.color || '',
+        neutered: data.neutered == null ? '' : String(data.neutered),
         owner: data.owner,
         phone: data.phone || '',
         notes: data.notes || '',
@@ -197,6 +212,13 @@ export default function ClientDetail() {
     setEditForm({
       name: client.name,
       breed: client.breed || '',
+      species: client.species || '',
+      birth_date: client.birth_date || '',
+      sex: client.sex || '',
+      microchip: client.microchip || '',
+      weight_kg: client.weight_kg || '',
+      color: client.color || '',
+      neutered: client.neutered == null ? '' : String(client.neutered),
       owner: client.owner,
       phone: client.phone || '',
       notes: client.notes || '',
@@ -258,7 +280,7 @@ export default function ClientDetail() {
 
   const handleOpenClientCard = () => {
     if (!client?.qr_token) {
-      setError('QR cliente non disponibile. Applica prima la migration dedicata.');
+      setError('Il QR non è ancora disponibile. Ricarica la scheda e riprova.');
       return;
     }
     navigate(getClientCardPath(client.qr_token));
@@ -268,7 +290,6 @@ export default function ClientDetail() {
     try {
       const invite = await createCustomerPortalInvite(clientId, customerInviteEmail.trim());
       setCustomerInvite(invite);
-      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(invite.inviteUrl);
     } catch (err) {
       setError(err.message || 'Errore creazione invito cliente');
     }
@@ -276,7 +297,7 @@ export default function ClientDetail() {
 
   const handlePrintClientCard = () => {
     if (!client?.qr_token) {
-      setError('QR cliente non disponibile. Applica prima la migration dedicata.');
+      setError('Il QR non è ancora disponibile. Ricarica la scheda e riprova.');
       return;
     }
     window.open(getClientCardUrl(client.qr_token, { print: true }), '_blank', 'noopener,noreferrer');
@@ -348,6 +369,18 @@ export default function ClientDetail() {
       />
 
       <main className="gh-page-shell gh-detail-stack">
+        {location.state?.justCreated ? (
+          <div className="gh-success-state" role="status">
+            Cliente creato. Puoi completare ora la scheda oppure tornare alla dashboard.
+            <div className="gh-inline-actions">
+              <Button staff variant="primary" onClick={handleOpenEditModal}>Completa la scheda</Button>
+              <Button staff variant="outline" onClick={() => navigate('/dashboard')}>Più tardi</Button>
+            </div>
+          </div>
+        ) : null}
+        {location.state?.visitCompletedWithAppointment ? (
+          <div className="gh-success-state" role="status">Visita registrata e appuntamento chiuso insieme.</div>
+        ) : null}
         {error && (
           <ErrorState
             title="Operazione non completata"
@@ -493,20 +526,20 @@ export default function ClientDetail() {
           </Panel>
         )}
 
-        <Panel className="gh-detail-half" eyebrow="Card identificativa QR" title={`Codice ${getClientCardCode(client.qr_token)}`}>
+        <Panel className="gh-detail-half" eyebrow="Card identificativa QR" title={client.qr_token ? `Codice ${getClientCardCode(client.qr_token)}` : 'QR in preparazione'}>
           <div className="gh-qr-layout">
             <div className="gh-qr-copy">
               <p className="gh-body">
                 Il QR apre la card cliente pubblica. Se sei in area operatore, puoi continuare dalla scheda completa.
               </p>
-              <div className="gh-inline-actions">
+              {client.qr_token ? <div className="gh-inline-actions">
                 <Button staff variant="secondary" icon="arrow" onClick={handleOpenClientCard}>
                   Apri area operatore
                 </Button>
                 <Button staff variant="outline" icon="qr" onClick={handlePrintClientCard}>
                   Stampa card
                 </Button>
-              </div>
+              </div> : <p className="gh-meta">Ricarica la scheda tra un momento.</p>}
             </div>
             {client.qr_token && (
               <div className="gh-qr-image">
@@ -539,8 +572,13 @@ export default function ClientDetail() {
             {customerInvite && (
               <div className="gh-invite-result">
                 <span className="gh-eyebrow--staff">Link invito</span>
+                <p className="gh-body"><strong>Destinatario:</strong> {customerInvite.recipient} · {customerInvite.phone}</p>
                 <p className="gh-invite-result__url">{customerInvite.inviteUrl}</p>
-                <p className="gh-meta">Link copiato negli appunti. Scade tra 30 giorni.</p>
+                <p className="gh-meta">Scade tra 30 giorni.</p>
+                <div className="gh-inline-actions">
+                  <a className="gh-btn gh-btn--whatsapp" href={getCustomerInviteWhatsAppUrl(customerInvite)} target="_blank" rel="noreferrer">Apri WhatsApp</a>
+                  <Button staff variant="outline" onClick={() => navigator.clipboard?.writeText(customerInvite.inviteUrl)}>Copia link</Button>
+                </div>
               </div>
             )}
           </div>
@@ -643,7 +681,18 @@ export default function ClientDetail() {
                   <ErrorState body={`${error}. Le modifiche inserite restano disponibili.`} />
                 )}
                 <Field label="Nome *" value={editForm.name} onChange={(event) => setEditForm({ ...editForm, name: event.target.value })} required />
+                <Field label="Specie" value={editForm.species} onChange={(event) => setEditForm({ ...editForm, species: event.target.value })} placeholder="Es. cane" />
                 <Field label="Razza" value={editForm.breed} onChange={(event) => setEditForm({ ...editForm, breed: event.target.value })} />
+                <Field label="Data di nascita" type="date" value={editForm.birth_date} onChange={(event) => setEditForm({ ...editForm, birth_date: event.target.value })} />
+                <Field label="Sesso" as="select" value={editForm.sex} onChange={(event) => setEditForm({ ...editForm, sex: event.target.value })}>
+                  <option value="">Non indicato</option><option value="m">Maschio</option><option value="f">Femmina</option>
+                </Field>
+                <Field label="Microchip" value={editForm.microchip} onChange={(event) => setEditForm({ ...editForm, microchip: event.target.value })} />
+                <Field label="Peso (kg)" type="number" min="0" step="0.1" value={editForm.weight_kg} onChange={(event) => setEditForm({ ...editForm, weight_kg: event.target.value })} />
+                <Field label="Colore" value={editForm.color} onChange={(event) => setEditForm({ ...editForm, color: event.target.value })} />
+                <Field label="Sterilizzato" as="select" value={editForm.neutered} onChange={(event) => setEditForm({ ...editForm, neutered: event.target.value })}>
+                  <option value="">Non indicato</option><option value="true">Sì</option><option value="false">No</option>
+                </Field>
                 <Field label="Proprietario *" value={editForm.owner} onChange={(event) => setEditForm({ ...editForm, owner: event.target.value })} required />
                 <Field label="Telefono" type="tel" value={editForm.phone} onChange={(event) => setEditForm({ ...editForm, phone: event.target.value })} />
                 <Field label="Note" area rows="3" value={editForm.notes} onChange={(event) => setEditForm({ ...editForm, notes: event.target.value })} />

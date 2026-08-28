@@ -14,9 +14,9 @@ const APPOINTMENT_SOURCES = ['operator', 'customer'];
 const STAFF_ROLES = ['owner', 'staff'];
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
-const PET_SELECT = `*, customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, operator_notes, acquisition_source, relationship_status, created_at, updated_at), visits(id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
+const PET_SELECT = `*, customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, operator_notes, acquisition_source, relationship_status, created_at, updated_at), visits(id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
-const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
+const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, staff_responded_at, proposed_alternatives, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_PET_SELECT = `id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone)`;
 
@@ -259,7 +259,13 @@ export const createCustomerPortalInvite = async (petId, customerEmail = '') => {
       expires_at: expiresAt.toISOString(),
     }).select('id, token, pet_id, customer_email, expires_at, created_at').single();
     if (error) throw error;
-    return { ...data, inviteUrl: `${getPublicAppOrigin()}/u/redeem/${token}` };
+    return {
+      ...data,
+      inviteUrl: `${getPublicAppOrigin()}/u/redeem/${token}`,
+      recipient: pet.owner,
+      phone: pet.phone,
+      petName: pet.name,
+    };
   } catch (error) {
     throw new Error(`Non riesco a creare l'invito cliente: ${error.message}`);
   }
@@ -561,7 +567,17 @@ export const updateClient = async (petId, input) => {
     photoUrl = null;
   }
   const { error } = await supabase.from('pets').update({
-    name: input.name.trim(), breed: input.breed?.trim() || null,
+    name: input.name.trim(),
+    species: input.species?.trim() || null,
+    breed: input.breed?.trim() || null,
+    birth_date: input.birth_date || null,
+    sex: input.sex || null,
+    microchip: input.microchip?.trim() || null,
+    weight_kg: input.weight_kg ? Number(input.weight_kg) : null,
+    color: input.color?.trim() || null,
+    neutered: input.neutered === '' || input.neutered == null
+      ? null
+      : input.neutered === true || input.neutered === 'true',
     internal_notes: input.notes?.trim() || null, photo_url: photoUrl,
   }).eq('id', petId).eq('tenant_id', tenantId);
   if (error) throw new Error(`Non riesco a modificare il pet: ${error.message}`);
@@ -588,6 +604,24 @@ export const addVisit = async (petId, input) => {
   }).select('id').single();
   if (error) throw new Error(`Non riesco ad aggiungere la visita: ${error.message}`);
   return data.id;
+};
+
+export const completeAppointmentWithVisit = async (appointmentId, input) => {
+  assertDemoWriteAllowed();
+  await requireStaff();
+  if (!appointmentId) throw new Error('Appuntamento non disponibile');
+  if (!input.date || !input.cost || Number(input.cost) <= 0) {
+    throw new Error('Data e costo positivo sono obbligatori');
+  }
+  const { data, error } = await supabase.rpc('complete_appointment_with_visit', {
+    p_appointment_id: appointmentId,
+    p_date: input.date,
+    p_treatments: input.treatments || null,
+    p_issues: input.issues || null,
+    p_cost: Number(input.cost),
+  });
+  if (error) throw new Error(`Non riesco a chiudere lavorazione e appuntamento: ${error.message}`);
+  return data?.id || data;
 };
 
 export const deleteVisit = async (visitId, petId) => {
@@ -764,22 +798,24 @@ export const getPendingAppointmentRequests = async () => {
 export const resolveAppointmentRequest = async (
   requestId,
   decision,
-  scheduledAt = null,
+  scheduledDate = null,
+  scheduledTime = null,
   durationMinutes = null
 ) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
   if (!['approved', 'rejected'].includes(decision)) throw new Error('Decisione richiesta non valida');
-  if (decision === 'approved' && !scheduledAt) throw new Error('Data e ora sono obbligatorie');
+  if (decision === 'approved' && (!scheduledDate || !scheduledTime)) throw new Error('Data e ora sono obbligatorie');
   const duration = Number(durationMinutes);
   if (decision === 'approved' && (!Number.isInteger(duration) || duration < 15)) {
     throw new Error('La durata effettiva deve essere di almeno 15 minuti');
   }
 
-  const { error: rpcError } = await supabase.rpc('resolve_appointment_request_with_duration', {
+  const { error: rpcError } = await supabase.rpc('resolve_appointment_request_local', {
     p_request_id: requestId,
     p_decision: decision,
-    p_scheduled_at: decision === 'approved' ? scheduledAt : null,
+    p_scheduled_date: decision === 'approved' ? scheduledDate : null,
+    p_scheduled_time: decision === 'approved' ? scheduledTime : null,
     p_duration_minutes: decision === 'approved' ? duration : null,
   });
   if (rpcError) throw new Error(`Non riesco ad aggiornare la richiesta: ${rpcError.message}`);
@@ -790,6 +826,26 @@ export const resolveAppointmentRequest = async (
     .eq('tenant_id', tenantId)
     .single();
   if (error) throw new Error(`Richiesta aggiornata ma non rileggibile: ${error.message}`);
+  return mapAppointmentRequest(data);
+};
+
+export const proposeAppointmentRequestAlternatives = async (requestId, alternatives) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  if (![2, 3].includes(alternatives?.length)) {
+    throw new Error('Scegli due o tre alternative');
+  }
+  const { error: rpcError } = await supabase.rpc('propose_appointment_request_alternatives', {
+    p_request_id: requestId,
+    p_alternatives: alternatives,
+  });
+  if (rpcError) throw new Error(`Non riesco a registrare le alternative: ${rpcError.message}`);
+  const { data, error } = await supabase.from('appointment_requests')
+    .select(APPOINTMENT_REQUEST_SELECT)
+    .eq('id', requestId)
+    .eq('tenant_id', tenantId)
+    .single();
+  if (error) throw new Error(`Alternative registrate ma non rileggibili: ${error.message}`);
   return mapAppointmentRequest(data);
 };
 

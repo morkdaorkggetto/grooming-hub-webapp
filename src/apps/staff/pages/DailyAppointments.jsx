@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import {
   getAppointments,
   updateAppointmentApproval,
-  updateAppointmentStatus,
 } from '../lib/database';
 import {
-  getAppointmentApprovalWhatsAppUrl,
+  buildWhatsAppUrl,
+  getAppointmentApprovalWhatsAppMessage,
   getAppointmentWhatsAppUrl,
 } from '../lib/whatsapp';
 import {
@@ -77,6 +77,7 @@ export default function DailyAppointments() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [updatingId, setUpdatingId] = useState('');
+  const [whatsappDraft, setWhatsappDraft] = useState(null);
 
   const loadAppointments = async () => {
     setLoading(true);
@@ -134,22 +135,6 @@ export default function DailyAppointments() {
     [appointments, grouped]
   );
 
-  const handleMarkCompleted = async (appointmentId) => {
-    setSuccess('');
-    setError('');
-
-    try {
-      setUpdatingId(appointmentId);
-      await updateAppointmentStatus(appointmentId, 'completed');
-      setSuccess('Appuntamento segnato come completato.');
-      await loadAppointments();
-    } catch (err) {
-      setError(err.message || 'Errore aggiornamento appuntamento');
-    } finally {
-      setUpdatingId('');
-    }
-  };
-
   const handleApproval = async (appointment, approvalStatus) => {
     setSuccess('');
     setError('');
@@ -157,18 +142,14 @@ export default function DailyAppointments() {
     try {
       setUpdatingId(appointment.id);
       const updatedAppointment = await updateAppointmentApproval(appointment.id, approvalStatus);
-      const whatsappUrl = getAppointmentApprovalWhatsAppUrl(updatedAppointment, approvalStatus);
-
-      if (whatsappUrl) {
-        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      } else {
-        setError('Richiesta aggiornata, ma numero cliente non disponibile per WhatsApp.');
-      }
+      const message = getAppointmentApprovalWhatsAppMessage(updatedAppointment, approvalStatus);
+      const whatsappUrl = buildWhatsAppUrl(updatedAppointment.client?.phone, message);
+      setWhatsappDraft({ message, url: whatsappUrl, recipient: updatedAppointment.client?.owner || 'cliente' });
 
       setSuccess(
         approvalStatus === 'approved'
-          ? 'Richiesta appuntamento approvata. WhatsApp di conferma pronto.'
-          : 'Richiesta appuntamento rifiutata. WhatsApp per nuova fascia pronto.'
+          ? 'Richiesta appuntamento approvata. Ora puoi avvisare il cliente.'
+          : 'Richiesta appuntamento rifiutata. Ora puoi avvisare il cliente.'
       );
       await loadAppointments();
     } catch (err) {
@@ -228,8 +209,8 @@ export default function DailyAppointments() {
                 </Button>
               </>
             ) : (
-              <Button staff variant="success" onClick={() => handleMarkCompleted(appointment.id)} disabled={updatingId === appointment.id || !canMarkCompleted}>
-                {updatingId === appointment.id ? 'Aggiorno...' : 'Completato'}
+              <Button staff variant="success" onClick={() => navigate(`/client/${appointment.pet_id}/add-visit?appointmentId=${appointment.id}`)} disabled={!canMarkCompleted}>
+                Registra lavorazione
               </Button>
             )}
           </div>
@@ -249,6 +230,16 @@ export default function DailyAppointments() {
       <main className="gh-page-shell gh-daily-stack">
         {error && <ErrorState title="L'elenco non è stato modificato" body={error} />}
         {success && <div className="gh-success-state" role="status">{success}</div>}
+        {whatsappDraft ? (
+          <Panel eyebrow="Comunicazione separata" title={`Messaggio per ${whatsappDraft.recipient}`}>
+            <p className="gh-body gh-pre-wrap">{whatsappDraft.message}</p>
+            <p className="gh-meta">Il dato è salvato; il messaggio non risulta inviato finché non lo mandi da WhatsApp.</p>
+            <div className="gh-inline-actions">
+              {whatsappDraft.url ? <a className="gh-btn gh-btn--whatsapp" href={whatsappDraft.url} target="_blank" rel="noreferrer">Apri WhatsApp</a> : null}
+              <Button staff variant="outline" onClick={() => navigator.clipboard?.writeText(whatsappDraft.message)}>Copia messaggio</Button>
+            </div>
+          </Panel>
+        ) : null}
 
         <Panel>
           <div className="gh-date-toolbar">

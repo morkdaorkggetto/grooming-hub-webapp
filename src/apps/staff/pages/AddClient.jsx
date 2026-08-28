@@ -147,7 +147,9 @@ export default function AddClient() {
         window.alert(`Customer e pet creati. La foto non è stata caricata: ${created.photoUploadError}`);
       }
 
-      navigate('/dashboard');
+      navigate(`/client/${created.pet_id}`, {
+        state: { justCreated: true },
+      });
     } catch (err) {
       setError(err.message || 'Errore nell\'aggiunta del cliente');
     } finally {

@@ -1,11 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTenant } from '../../../shared/tenant/TenantProvider';
+import { getBookingSchedule, getDateClosure, isTimePreferenceClosed } from '../../../shared/tenant/bookingSchedule';
 import {
   getPendingAppointmentRequests,
+  proposeAppointmentRequestAlternatives,
   resolveAppointmentRequest,
   updateAppointmentApproval,
 } from '../lib/database';
-import { getAppointmentApprovalWhatsAppUrl } from '../lib/whatsapp';
+import {
+  buildWhatsAppUrl,
+  getAppointmentAlternativesWhatsAppMessage,
+  getAppointmentApprovalWhatsAppMessage,
+} from '../lib/whatsapp';
 import {
   Button,
   EmptyState,
@@ -55,7 +62,7 @@ const COAT_CONDITION_LABELS = {
   some_knots: 'Qualche nodo',
   very_matted: 'Molto annodato',
   heavy_shedding: 'Perde tanto pelo',
-  sensitive_skin: 'Cute sensibile',
+  regular_grooming: 'Lo porto regolarmente',
   clean_long: 'Pulito, solo lungo',
 };
 
@@ -69,7 +76,7 @@ const getRequestWindow = (notes = '') => {
   return match?.[1]?.trim() || '';
 };
 
-function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
+function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenClient }) {
   const isStructured = request.request_kind === 'structured';
   const service = request.service?.name || getRequestService(request.notes);
   const windowLabel = isStructured
@@ -85,9 +92,14 @@ function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
       <div className="gh-request-row">
         <div className="gh-request-copy">
           <div className="gh-request-tags">
-            <StateTag tone="warning">In attesa</StateTag>
+            <StateTag tone={request.staff_responded_at ? 'success' : 'warning'}>
+              {request.staff_responded_at ? 'Risposto' : 'Da leggere'}
+            </StateTag>
+            {request.client?.is_blacklisted ? <StateTag tone="danger">Blacklist</StateTag> : null}
             <span className="gh-meta gh-num">
-              Arrivata il {formatCreatedAt(request.created_at)}
+              {request.staff_responded_at
+                ? `Risposto il ${formatCreatedAt(request.staff_responded_at)}`
+                : `Arrivata il ${formatCreatedAt(request.created_at)}`}
             </span>
           </div>
 
@@ -102,14 +114,23 @@ function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
               label={isStructured ? 'Data desiderata' : 'Quando'}
               value={isStructured ? formatDesiredDate(request.desired_date) : formatDateTime(request.scheduled_at)}
             />
-            <InfoTile label="Servizio" value={service} />
+            <InfoTile label="Indicazione" value={service} />
             <InfoTile label="Fascia" value={windowLabel || `${request.duration_minutes || 60} minuti`} />
           </div>
 
           {isStructured ? (
-            <div className="gh-request-info-grid">
+            <div className="gh-request-info-grid gh-request-info-grid--three">
               <InfoTile label="Manto" value={coatLabels || 'Indicazione libera'} />
               <InfoTile label="Età dichiarata" value={request.declared_pet_age || 'Già presente in anagrafica'} />
+            </div>
+          ) : null}
+
+          {request.proposed_alternatives?.length ? (
+            <div className="gh-request-notes">
+              <p className="gh-eyebrow--staff">Alternative proposte</p>
+              <p className="gh-body">
+                {request.proposed_alternatives.map((item) => `${formatDesiredDate(item.date)} · ${TIME_PREFERENCE_LABELS[item.time_preference]}`).join(' · ')}
+              </p>
             </div>
           ) : null}
 
@@ -125,10 +146,15 @@ function RequestCard({ request, updatingId, onApproval, onOpenClient }) {
 
         <div className="gh-request-actions">
           <Button staff wide variant="success" onClick={() => onApproval(request, 'approved')} disabled={isUpdating}>
-            {isUpdating ? 'Aggiorno...' : 'Approva e WhatsApp'}
+            {isUpdating ? 'Aggiorno...' : 'Conferma'}
           </Button>
+          {isStructured ? (
+            <Button staff wide variant="secondary" onClick={() => onAlternatives(request)} disabled={isUpdating}>
+              Proponi alternative
+            </Button>
+          ) : null}
           <Button staff wide variant="danger" onClick={() => onApproval(request, 'rejected')} disabled={isUpdating}>
-            {isUpdating ? 'Aggiorno...' : 'Rifiuta e WhatsApp'}
+            {isUpdating ? 'Aggiorno...' : 'Rifiuta'}
           </Button>
           <Button staff wide variant="outline" onClick={() => onOpenClient(request.pet_id)}>Apri scheda cane</Button>
         </div>
@@ -146,7 +172,7 @@ function InfoTile({ label, value }) {
   );
 }
 
-function ApprovalDialog({ request, busy, onClose, onConfirm }) {
+function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
   const defaultTime = request.time_preference === 'afternoon' ? '13:00' : '09:00';
   const [date, setDate] = useState(request.desired_date || '');
   const [time, setTime] = useState(defaultTime);
@@ -158,10 +184,9 @@ function ApprovalDialog({ request, busy, onClose, onConfirm }) {
     event.preventDefault();
     const duration = Number(durationMinutes);
     if (!date || !time || !Number.isInteger(duration) || duration < 15) return;
-    const scheduledAt = new Date(`${date}T${time}`);
-    if (Number.isNaN(scheduledAt.getTime())) return;
-    onConfirm(scheduledAt.toISOString(), duration);
+    onConfirm(date, time, duration);
   };
+  const closure = getDateClosure(date, schedule);
 
   return (
     <div className="gh-dialog-backdrop">
@@ -178,6 +203,11 @@ function ApprovalDialog({ request, busy, onClose, onConfirm }) {
           <Field label="Durata prevista (min)" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} required />
         </div>
         <p className="gh-dialog-helper">Il servizio propone il valore iniziale: adattalo al cane che stai valutando.</p>
+        {closure.label ? (
+          <p className="gh-calendar-notice gh-calendar-notice--error" role="status">
+            Attenzione: {closure.isClosed ? 'il salone risulta chiuso in questo giorno' : closure.label.toLowerCase()}. Puoi confermare comunque se è un’eccezione voluta.
+          </p>
+        ) : null}
 
         <div className="gh-dialog-actions">
           <Button staff type="button" variant="outline" onClick={onClose} disabled={busy}>Annulla</Button>
@@ -190,14 +220,91 @@ function ApprovalDialog({ request, busy, onClose, onConfirm }) {
   );
 }
 
+function AlternativesDialog({ request, busy, schedule, onClose, onConfirm }) {
+  const [rows, setRows] = useState([
+    { date: '', time_preference: 'morning' },
+    { date: '', time_preference: 'afternoon' },
+  ]);
+  const [localError, setLocalError] = useState('');
+  const minDate = new Date().toISOString().slice(0, 10);
+  const updateRow = (index, field, value) => setRows((current) => current.map((row, rowIndex) => (
+    rowIndex === index ? { ...row, [field]: value } : row
+  )));
+  const addThird = () => setRows((current) => [...current, { date: '', time_preference: 'morning' }]);
+  const submit = (event) => {
+    event.preventDefault();
+    const invalid = rows.find((row) => {
+      const closure = getDateClosure(row.date, schedule);
+      return !row.date || closure.isClosed || isTimePreferenceClosed(row.time_preference, closure);
+    });
+    if (invalid) {
+      setLocalError('Ogni alternativa deve avere una data e una fascia in cui il salone è aperto.');
+      return;
+    }
+    const keys = new Set(rows.map((row) => `${row.date}:${row.time_preference}`));
+    if (keys.size !== rows.length) {
+      setLocalError('Le alternative devono essere diverse tra loro.');
+      return;
+    }
+    onConfirm(rows);
+  };
+  return (
+    <div className="gh-dialog-backdrop">
+      <form onSubmit={submit} className="gh-dialog" role="dialog" aria-modal="true" aria-labelledby="gh-alternatives-title">
+        <p className="gh-eyebrow--staff">Risposta al cliente</p>
+        <h2 className="gh-panel-title" id="gh-alternatives-title">Proponi due o tre alternative</h2>
+        <p className="gh-body">La richiesta resta in attesa finché il cliente non sceglie su WhatsApp.</p>
+        <div className="gh-calendar-form-stack">
+          {rows.map((row, index) => {
+            const closure = getDateClosure(row.date, schedule);
+            return (
+              <div className="gh-dialog-fields" key={index}>
+                <Field label={`Data ${index + 1}`} type="date" min={minDate} value={row.date} onChange={(event) => updateRow(index, 'date', event.target.value)} required />
+                <Field label="Fascia" as="select" value={row.time_preference} onChange={(event) => updateRow(index, 'time_preference', event.target.value)}>
+                  <option value="morning" disabled={isTimePreferenceClosed('morning', closure)}>Mattina</option>
+                  <option value="afternoon" disabled={isTimePreferenceClosed('afternoon', closure)}>Pomeriggio</option>
+                </Field>
+              </div>
+            );
+          })}
+        </div>
+        {rows.length === 2 ? <Button staff type="button" variant="outline" onClick={addThird}>Aggiungi terza alternativa</Button> : null}
+        {localError ? <p className="gh-calendar-notice gh-calendar-notice--error">{localError}</p> : null}
+        <div className="gh-dialog-actions">
+          <Button staff type="button" variant="outline" onClick={onClose} disabled={busy}>Annulla</Button>
+          <Button staff type="submit" variant="secondary" disabled={busy}>{busy ? 'Registro...' : 'Registra e prepara WhatsApp'}</Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function WhatsAppHandoff({ draft, onCopy }) {
+  if (!draft) return null;
+  return (
+    <Panel eyebrow="Comunicazione separata" title={`Messaggio per ${draft.recipient}`}>
+      <p className="gh-body gh-pre-wrap">{draft.message}</p>
+      <p className="gh-meta">Il dato è stato salvato. Il messaggio non risulta inviato finché non lo mandi da WhatsApp.</p>
+      <div className="gh-inline-actions">
+        {draft.url ? <a className="gh-btn gh-btn--whatsapp" href={draft.url} target="_blank" rel="noreferrer">Apri WhatsApp</a> : null}
+        <Button staff variant="outline" onClick={onCopy}>Copia messaggio</Button>
+      </div>
+    </Panel>
+  );
+}
+
 export default function CustomerRequests() {
   const navigate = useNavigate();
+  const { tenant } = useTenant();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [updatingId, setUpdatingId] = useState('');
   const [approvalRequest, setApprovalRequest] = useState(null);
+  const [alternativesRequest, setAlternativesRequest] = useState(null);
+  const [whatsappDraft, setWhatsappDraft] = useState(null);
+  const bookingSchedule = useMemo(() => getBookingSchedule(tenant?.settings), [tenant?.settings]);
 
   const loadRequests = async () => {
     setLoading(true);
@@ -235,27 +342,23 @@ export default function CustomerRequests() {
     };
   }, [requests]);
 
-  const performApproval = async (request, approvalStatus, scheduledAt = null, durationMinutes = null) => {
+  const performApproval = async (request, approvalStatus, scheduledDate = null, scheduledTime = null, durationMinutes = null) => {
     setError('');
     setSuccess('');
 
     try {
       setUpdatingId(request.id);
       const updatedRequest = request.request_kind === 'structured'
-        ? await resolveAppointmentRequest(request.id, approvalStatus, scheduledAt, durationMinutes)
+        ? await resolveAppointmentRequest(request.id, approvalStatus, scheduledDate, scheduledTime, durationMinutes)
         : await updateAppointmentApproval(request.id, approvalStatus);
-      const whatsappUrl = getAppointmentApprovalWhatsAppUrl(updatedRequest, approvalStatus);
-
-      if (whatsappUrl) {
-        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      } else {
-        setError('Richiesta aggiornata, ma manca il numero cliente per WhatsApp.');
-      }
+      const message = getAppointmentApprovalWhatsAppMessage(updatedRequest, approvalStatus);
+      const whatsappUrl = buildWhatsAppUrl(updatedRequest.client?.phone, message);
+      setWhatsappDraft({ message, url: whatsappUrl, recipient: updatedRequest.client?.owner || 'cliente' });
 
       setSuccess(
         approvalStatus === 'approved'
-          ? 'Richiesta approvata. WhatsApp di conferma pronto.'
-          : 'Richiesta rifiutata. WhatsApp per nuova fascia pronto.'
+          ? 'Richiesta approvata e appuntamento creato. Ora puoi avvisare il cliente.'
+          : 'Richiesta rifiutata. Ora puoi avvisare il cliente.'
       );
       setApprovalRequest(null);
       await loadRequests();
@@ -264,6 +367,24 @@ export default function CustomerRequests() {
     } finally {
       setUpdatingId('');
     }
+  };
+
+  const performAlternatives = async (request, alternatives) => {
+    setError(''); setSuccess(''); setUpdatingId(request.id);
+    try {
+      const updatedRequest = await proposeAppointmentRequestAlternatives(request.id, alternatives);
+      const message = getAppointmentAlternativesWhatsAppMessage(updatedRequest, alternatives);
+      setWhatsappDraft({
+        message,
+        url: buildWhatsAppUrl(updatedRequest.client?.phone, message),
+        recipient: updatedRequest.client?.owner || 'cliente',
+      });
+      setSuccess('Alternative registrate. La richiesta resta in attesa della risposta del cliente.');
+      setAlternativesRequest(null);
+      await loadRequests();
+    } catch (err) {
+      setError(err.message || 'Non riesco a registrare le alternative.');
+    } finally { setUpdatingId(''); }
   };
 
   const handleApproval = (request, approvalStatus) => {
@@ -288,8 +409,18 @@ export default function CustomerRequests() {
         <ApprovalDialog
           request={approvalRequest}
           busy={updatingId === approvalRequest.id}
+          schedule={bookingSchedule}
           onClose={() => setApprovalRequest(null)}
-          onConfirm={(scheduledAt, durationMinutes) => performApproval(approvalRequest, 'approved', scheduledAt, durationMinutes)}
+          onConfirm={(date, time, durationMinutes) => performApproval(approvalRequest, 'approved', date, time, durationMinutes)}
+        />
+      ) : null}
+      {alternativesRequest ? (
+        <AlternativesDialog
+          request={alternativesRequest}
+          busy={updatingId === alternativesRequest.id}
+          schedule={bookingSchedule}
+          onClose={() => setAlternativesRequest(null)}
+          onConfirm={(alternatives) => performAlternatives(alternativesRequest, alternatives)}
         />
       ) : null}
       <Hero
@@ -301,6 +432,10 @@ export default function CustomerRequests() {
       <main className="gh-page-shell gh-requests-stack">
         {error ? <ErrorState title="Le richieste restano da gestire" body={error} /> : null}
         {success ? <div className="gh-success-state" role="status">{success}</div> : null}
+        <WhatsAppHandoff draft={whatsappDraft} onCopy={async () => {
+          await navigator.clipboard?.writeText(whatsappDraft.message);
+          setSuccess('Messaggio copiato.');
+        }} />
 
         <StatStrip items={[
           { label: 'Da gestire', value: stats.total },
@@ -333,6 +468,7 @@ export default function CustomerRequests() {
                 request={request}
                 updatingId={updatingId}
                 onApproval={handleApproval}
+                onAlternatives={setAlternativesRequest}
                 onOpenClient={handleOpenClient}
               />
             ))}
