@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>CD-01 · Il calendario · composizione</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #root { width: 100vw; height: 100vh; overflow: hidden; }
+  em { font-style: italic; }
+  a { color: var(--color-link); }
+  a:hover { color: var(--color-primary-hover); }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><rect x="72" y="44" width="96" height="72" rx="12" fill="#fbf6f3"/><rect x="84" y="58" width="30" height="8" rx="4" fill="#2b2525"/><rect x="120" y="59" width="36" height="6" rx="3" fill="#cfc1c4"/><rect x="84" y="76" width="30" height="8" rx="4" fill="none" stroke="#b8863f" stroke-width="1.6" stroke-dasharray="3 2"/><rect x="120" y="77" width="30" height="6" rx="3" fill="#cfc1c4"/><rect x="90" y="97" width="14" height="3" rx="1.5" fill="#cfc1c4"/><rect x="120" y="95" width="24" height="6" rx="3" fill="#cfc1c4"/></svg>
+</template>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+<script type="text/babel" src="cd01-cal-kit.jsx"></script>
+<script type="text/babel" src="cd01-cal-viste.jsx"></script>
+<script type="text/babel" src="cd01-cal-note.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const Center = ({ children }) => (
+    <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>
+  );
+  const App = () => (
+    <DesignCanvas>
+      <DCSection
+        id="cd01-grammatica"
+        title="CD-01 · La grammatica dei tre oggetti"
+        subtitle="Da leggere prima delle schermate: la cella dell’ora è tutto il vocabolario. Cifre serif = ora decisa · capsula tratteggiata = ora da decidere · barretta muta = ora mai esistita. E la ragione per cui la griglia a slot non torna."
+      >
+        <DCArtboard id="obj" label="I tre oggetti · forma e perché" width={1280} height={620}>
+          <CalObjectsBoard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd01-vuota"
+        title="CD-01 · La settimana vuota — il primo stato che vedranno"
+        subtitle="Composta per prima, come chiede il brief. Non si scusa e non riempie: insegna che il calendario ha due direzioni. I sette giorni restano visibili sotto — una settimana deserta deve somigliare a una settimana, non a un errore."
+      >
+        <DCArtboard id="w-empty" label="Desktop 1280 · settimana vuota" width={1280} height={880}>
+          <CalWeekEmpty/>
+        </DCArtboard>
+        <DCArtboard id="m-empty" label="Mobile 390 · giorno vuoto" width={480} height={900}>
+          <Center><CalMobileEmpty/></Center>
+        </DCArtboard>
+        <DCArtboard id="w-load" label="Desktop 1280 · caricamento" width={1280} height={620}>
+          <CalWeekLoad/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd01-registrate"
+        title="CD-01 · La settimana di sole lavorazioni registrate — la giornata tipo"
+        subtitle="Nessun appuntamento, nessuna richiesta: solo il resoconto di chi è passato, senza un’ora. È lo stato che nelle prime settimane sarà la maggioranza, ed è la prova che la vista non ha bisogno di una griglia oraria per stare in piedi."
+      >
+        <DCArtboard id="w-reg" label="Desktop 1280 · solo registrato a posteriori" width={1280} height={900}>
+          <CalWeekReg/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd01-piena"
+        title="CD-01 · La settimana con tutti e tre gli oggetti"
+        subtitle="Ordine di lettura dentro il giorno: da decidere → deciso → già accaduto. La coda delle richieste sta nella spalla perché è l’unica cosa che chiede un’azione. Le righe registrate portano il testo del salone verbatim, virgolette incluse: dentro c’è anche il diario."
+      >
+        <DCArtboard id="w-full" label="Desktop 1280 · settimana piena" width={1280} height={1200}>
+          <CalWeekFull/>
+        </DCArtboard>
+        <DCArtboard id="m-day" label="Mobile 390 · un giorno alla volta" width={480} height={900}>
+          <Center><CalMobileDay/></Center>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd01-conferma"
+        title="CD-01 · La conferma — un gesto solo, che contiene l’invio"
+        subtitle="Qui l’ora si decide, perché dipende dalle condizioni del pet e prima non era determinabile. L’affidabilità del cliente compare proprio qui: è il momento in cui serve. «Conferma e invia» è un bottone, non due — così non restano richieste confermate a voce e ferme sullo schermo."
+      >
+        <DCArtboard id="c-d" label="Desktop 1280 · conferma sulla settimana" width={1280} height={1000}>
+          <CalConfirmDesktop/>
+        </DCArtboard>
+        <DCArtboard id="c-m" label="Mobile 390 · conferma a schermo pieno" width={480} height={900}>
+          <Center><CalConfirmMobile/></Center>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd01-parole"
+        title="CD-01 · Le parole"
+        subtitle="«Servizio» suggerisce un menu da cui si ordina, e il salone ha chiarito che non è così. Una parola sola, usata ovunque — più la micro-scelta su «bagno» e «bagnetto», che è materia di voce."
+      >
+        <DCArtboard id="words" label="Vocabolario · decisioni prese" width={1280} height={560}>
+          <CalWordsBoard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd01-note"
+        title="CD-01 · Quadro d’insieme, campi ⚠, domande aperte"
+        subtitle="La risposta alla domanda su incassi, promozioni e status del cliente; i campi che non sono certa esistano; e le cinque domande che dichiaro invece di risolvere da sola."
+      >
+        <DCArtboard id="notes" label="Risposte, ⚠ e domande" width={1280} height={770}>
+          <CalNotesBoard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={44} y={44} width={340}>
+        <strong>CD-01 · Il calendario — composizione</strong><br/><br/>
+        Vocabolario ereditato da <em>design_handoff_staff_app</em>: token, scala, altezze, geometria, rottura a 640px. <strong>Nessun colore nuovo</strong> oltre i tre già dichiarati in GH-15.<br/><br/>
+        La decisione portante: <strong>via la griglia a slot.</strong> Senza durata e senza prezzo una griglia mostra blocchi tutti uguali — un dato inventato — e spreca l’altezza in ore vuote. I giorni diventano sezioni in colonna: costano l’altezza di ciò che contengono, zero se sono vuote.<br/><br/>
+        Le due forme per i due oggetti senza ora precisa <em>non</em> sono la stessa: la fascia tratteggiata promette una collocazione, la barretta muta non promette niente. Su una lavorazione registrata la fascia sarebbe falsa — lo stesso errore dell’operatore accanto alla visita.<br/><br/>
+        Composto nell’ordine del brief: settimana vuota, giornata di solo-registrato, poi la piena.<br/><br/>
+        <strong>11 campi marcati ⚠.</strong> L’unico che dò per certo è <em>visits.date</em> senza ora, perché è misurato. Le promozioni non le ho composte: non ho trovato il dato.
+      </DCPostIt>
+    </DesignCanvas>
+  );
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

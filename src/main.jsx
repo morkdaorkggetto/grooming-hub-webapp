@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import './shared/tokens/tokens.css';
+import './apps/staff/styles/gh15-staff.css';
 
 /**
  * main.jsx — Entry point React + Vite

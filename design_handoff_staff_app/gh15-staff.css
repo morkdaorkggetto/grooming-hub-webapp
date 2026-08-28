@@ -1,0 +1,159 @@
+/* ───────────────────────────────────────────────────────────
+   GH-15 · gestionale staff — variante editoriale approvata
+   Da incollare in src/ e importare dopo index.css.
+   Nessun letterale di colore: tutto passa dalle var di index.css.
+   ─────────────────────────────────────────────────────────── */
+
+:root {
+  --gh-bd: rgba(207, 193, 196, .6);
+  --gh-bd-soft: rgba(207, 193, 196, .35);
+  --gh-bridge: #f7f1ea;          /* ponte verso l'app customer */
+  --gh-r-field: 12px;
+  --gh-r-btn: 14px;
+  --gh-r-strip: 16px;
+  --gh-r-panel: 20px;
+  --gh-row: 44px;                /* al banco */
+  --gh-row-touch: 60px;          /* sul telefono */
+  --gh-ctl: 38px;
+  --gh-ctl-touch: 46px;
+}
+
+/* ── superficie ─────────────────────────────────────────── */
+.gh-page { background: var(--color-surface-main); color: var(--color-text-primary); font-family: var(--font-sans); }
+.gh-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+/* ── tipografia: serif sui nomi propri e sulle cifre che si guardano ── */
+.gh-h1 { font-family: var(--font-serif); font-weight: 400; letter-spacing: -.02em; font-size: 32px; line-height: 1.08; margin: 4px 0 0; }
+.gh-panel-title { font-family: var(--font-serif); font-weight: 500; letter-spacing: -.02em; font-size: 16px; }
+.gh-tile-title { font-family: var(--font-serif); font-weight: 500; letter-spacing: -.02em; font-size: 18px; }
+.gh-pet-name { font-family: var(--font-serif); font-weight: 400; letter-spacing: -.02em; font-size: 32px; }
+.gh-pet-name--row { font-family: var(--font-serif); font-weight: 500; letter-spacing: -.02em; font-size: 16px; }
+.gh-stat-num { font-family: var(--font-serif); font-weight: 400; letter-spacing: -.02em; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.gh-price { font-family: var(--font-serif); font-weight: 500; letter-spacing: -.02em; font-size: 16px; font-variant-numeric: tabular-nums; }
+
+/* sans: tutto ciò che si scandisce */
+.gh-eyebrow { font-size: 9.5px; text-transform: uppercase; letter-spacing: .19em; font-weight: 700; color: var(--color-text-secondary); }
+.gh-eyebrow--accent { color: var(--color-primary); }
+.gh-body { font-size: 13px; line-height: 1.45; text-wrap: pretty; }
+.gh-meta { font-size: 11.5px; color: var(--color-text-secondary); }
+
+@media (max-width: 640px) {
+  .gh-h1 { font-size: 25px; }
+  .gh-pet-name { font-size: 26px; }
+}
+
+/* ── hero: superficie calda, niente banda teal piena ────── */
+.gh-hero { background: var(--color-surface-main); border-bottom: 1px solid var(--gh-bd); padding: 20px 28px 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.gh-hero__sub { font-size: 12.5px; color: var(--color-text-secondary); margin-top: 4px; }
+@media (max-width: 640px) { .gh-hero { padding: 14px 18px 16px; } }
+
+/* ── pannello ───────────────────────────────────────────── */
+.gh-panel { background: #fff; border: 1px solid var(--gh-bd); border-radius: var(--gh-r-panel); overflow: hidden; }
+.gh-panel__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--gh-bd-soft); }
+.gh-panel__body { padding: 13px; }
+.gh-panel--bridge { background: var(--gh-bridge); }
+
+/* ── bottoni: una sola primaria per gruppo ──────────────── */
+.gh-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: var(--gh-ctl); padding: 0 13px; border-radius: var(--gh-r-btn); font: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; white-space: nowrap; border: 1px solid transparent; transition: background-color .15s, border-color .15s; }
+.gh-btn--wide { width: 100%; }
+.gh-btn--primary { background: var(--color-primary); color: #fbf6f3; border-color: var(--color-primary); }
+.gh-btn--primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.gh-btn--secondary { background: var(--color-secondary); color: #fbf6f3; border-color: var(--color-secondary); }
+.gh-btn--secondary:hover { background: var(--color-secondary-hover); border-color: var(--color-secondary-hover); }
+.gh-btn--outline { background: #fff; color: var(--color-text-primary); border-color: var(--gh-bd); }
+.gh-btn--outline:hover { background: var(--color-surface-soft); }
+.gh-btn--ghost { background: transparent; color: var(--color-text-secondary); }
+.gh-btn--ghost:hover { background: var(--color-surface-soft); }
+.gh-btn--success { background: var(--color-success-bg); color: var(--color-success-text); border-color: rgba(79, 139, 103, .35); }
+.gh-btn--danger { background: transparent; color: var(--color-danger-text); border-color: rgba(184, 94, 105, .5); }
+.gh-btn--danger:hover { background: var(--color-danger-bg); }
+/* verde WhatsApp: unica eccezione ammessa, è colore di marca esterno */
+.gh-btn--whatsapp { background: var(--color-success-text); color: #fff; border-color: var(--color-success-text); }
+
+/* ── campi ──────────────────────────────────────────────── */
+.gh-field { height: var(--gh-ctl); border: 1px solid var(--gh-bd); border-radius: var(--gh-r-field); background: #fff; padding: 0 12px; font: inherit; font-size: 13px; color: var(--color-text-primary); width: 100%; }
+.gh-field::placeholder { color: var(--color-placeholder); }
+.gh-field--area { height: 66px; padding: 10px 12px; resize: none; }
+.gh-search { display: flex; align-items: center; gap: 9px; height: 40px; border: 1px solid var(--gh-bd); background: #fff; border-radius: var(--gh-r-field); padding: 0 12px; }
+
+/* ── pill filtro ────────────────────────────────────────── */
+.gh-pill { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--gh-bd); background: #fff; color: var(--color-text-primary); font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; white-space: nowrap; }
+.gh-pill[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: #fbf6f3; }
+.gh-pill__n { font-size: 11px; opacity: .7; font-variant-numeric: tabular-nums; }
+
+/* ── striscia numeri (stato generale) ───────────────────── */
+.gh-strip { display: grid; border: 1px solid var(--gh-bd); border-radius: var(--gh-r-strip); overflow: hidden; background: #fff; }
+.gh-strip__cell { padding: 10px 13px 11px; }
+.gh-strip__cell + .gh-strip__cell { border-left: 1px solid var(--gh-bd-soft); }
+.gh-strip__cell--danger { background: var(--color-danger-bg); }
+.gh-strip__cell--danger .gh-stat-num, .gh-strip__cell--danger .gh-eyebrow { color: var(--color-danger-text); }
+
+/* ── tessera area operativa: la tessera è il bersaglio ──── */
+.gh-tile { position: relative; overflow: hidden; background: #fff; border: 1px solid var(--gh-bd); border-radius: var(--gh-r-panel); padding: 16px; display: flex; flex-direction: column; gap: 9px; cursor: pointer; text-align: left; }
+.gh-tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gh-accent, var(--color-primary)); }
+.gh-tile:hover { background: var(--color-surface-soft); }
+.gh-tile__foot { margin-top: auto; padding-top: 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* ── righe di lista: densità sopra, bersaglio sotto ─────── */
+.gh-row { display: flex; align-items: center; gap: 12px; min-height: var(--gh-row); padding: 0 13px; background: #fff; cursor: pointer; }
+.gh-row + .gh-row { border-top: 1px solid var(--gh-bd-soft); }
+.gh-row:hover { background: var(--color-surface-soft); }
+.gh-row--grid { display: grid; grid-template-columns: 1.5fr 1.4fr .9fr 84px 74px 20px; }
+.gh-row__head { display: grid; grid-template-columns: 1.5fr 1.4fr .9fr 84px 74px 20px; gap: 12px; padding: 7px 13px; background: var(--color-surface-soft); border-bottom: 1px solid var(--gh-bd-soft); }
+@media (max-width: 640px) {
+  .gh-row, .gh-row--grid { display: flex; min-height: var(--gh-row-touch); padding: 9px 13px; }
+  .gh-row__head { display: none; }
+  .gh-btn, .gh-field, .gh-search { height: var(--gh-ctl-touch); }
+  .gh-pill { height: 40px; }
+}
+
+/* ── stati ──────────────────────────────────────────────── */
+.gh-tag { font-size: 10px; font-weight: 700; border-radius: 5px; padding: 3px 7px; white-space: nowrap; }
+.gh-tag--attivo { color: var(--color-success-text); background: var(--color-success-bg); }
+.gh-tag--rischio { color: var(--color-warning-text); background: var(--color-warning-bg); }
+.gh-tag--blacklist { color: var(--color-danger-text); background: var(--color-danger-bg); }
+
+.gh-dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
+.gh-dot--bronzo { background: var(--tier-bronze); }
+.gh-dot--argento { background: var(--tier-silver); }
+.gh-dot--oro { background: var(--tier-gold); }
+.gh-dot--base { background: var(--gh-bd); }
+
+/* avviso mai bloccante (visita al passato, preavviso corto…) */
+.gh-notice { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--color-warning-text); background: var(--color-warning-bg); border: 1px solid var(--color-warning-border); border-radius: 9px; padding: 7px 10px; }
+
+/* scala affidabilità −3…+3 */
+.gh-score { display: flex; gap: 3px; }
+.gh-score__tick { width: 16px; height: 6px; border-radius: 2px; background: var(--color-success-bg); }
+.gh-score__tick--neg { background: var(--color-danger-bg); }
+.gh-score__tick--zero { background: var(--color-primary); }
+
+/* barra progresso tier */
+.gh-bar { flex: 1; height: 5px; border-radius: 999px; background: var(--color-surface-soft); overflow: hidden; }
+.gh-bar__fill { height: 100%; background: var(--gh-accent, var(--color-primary)); }
+
+/* ── FAB: mai sopra un'azione primaria ──────────────────── */
+.gh-fab { position: fixed; right: 15px; bottom: 15px; width: 56px; height: 56px; border-radius: 999px; background: var(--color-primary); border: none; color: #fbf6f3; box-shadow: 0 8px 20px rgba(111, 151, 146, .45); cursor: pointer; display: grid; place-items: center; }
+
+/* ── modale registra visita ─────────────────────────────── */
+.gh-modal__scrim { position: fixed; inset: 0; background: rgba(43, 37, 37, .34); display: grid; place-items: center; padding: 24px; z-index: 50; }
+.gh-modal { width: 620px; max-width: 100%; background: var(--color-surface-main); border: 1px solid var(--gh-bd); border-radius: var(--gh-r-strip); box-shadow: 0 24px 60px rgba(43, 37, 37, .28); overflow: hidden; }
+.gh-modal__head, .gh-modal__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; }
+.gh-modal__head { border-bottom: 1px solid var(--gh-bd-soft); }
+.gh-modal__foot { border-top: 1px solid var(--gh-bd-soft); background: var(--color-surface-soft); }
+.gh-daychip { flex: 1; min-width: 0; height: 48px; border-radius: var(--gh-r-field); border: 1px solid var(--gh-bd); background: #fff; color: var(--color-text-primary); font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.gh-daychip[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: #fbf6f3; }
+.gh-oppick { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 13px 0 9px; border-radius: var(--gh-r-field); border: 1px solid var(--gh-bd); background: #fff; font: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; }
+.gh-oppick[aria-pressed="true"] { border-color: var(--color-secondary); background: rgba(103, 56, 63, .08); color: var(--color-secondary); }
+.gh-svcchip { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--gh-bd); background: #fff; color: var(--color-text-primary); font: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; white-space: nowrap; }
+.gh-svcchip[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: #fbf6f3; }
+@media (max-width: 640px) {
+  .gh-daychip { height: 54px; }
+  .gh-oppick { height: var(--gh-ctl-touch); }
+  .gh-svcchip { height: 44px; }
+  .gh-modal { width: 100%; border-radius: 0; border: none; }
+}
+
+/* ── link ───────────────────────────────────────────────── */
+a { color: var(--color-link); }
+a:hover { color: var(--color-primary-hover); }

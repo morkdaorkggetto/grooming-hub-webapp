@@ -1,0 +1,8 @@
+-- Retrospective stub — migration originale già applicata al DB 2026-03-05.
+-- Tutto lo schema pre-Gate-2 è consolidato in
+-- `20260423123000_customer_appointment_requests.sql`, che è l'unica migration
+-- retrospettiva con DDL reale. Questo file esiste solo per allineare la tabella
+-- `supabase_migrations.schema_migrations` (matching per timestamp) così che il
+-- CLI consideri il repo coerente con il DB demo.
+--
+-- Non rimuovere: serve a `supabase db pull/push/reset` per funzionare.

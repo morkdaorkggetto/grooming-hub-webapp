@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>GH-03 · Wizard prenotazione · Composizione</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #root { width: 100vw; height: 100vh; overflow: hidden; }
+  em { font-style: italic; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh03-book.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const App = () => (
+    <DesignCanvas>
+      <DCSection
+        id="gh03-book"
+        title="GH-03 · Richiesta di appuntamento /u/book"
+        subtitle="Semantica: richiesta con data desiderata, non booking. L'app non blocca mai. Esito = conversazione WhatsApp. Servizi placeholder (lista reale da iniettare)."
+      >
+        <DCArtboard id="d-base" label="Desktop · richiesta (Luna, caso base)" width={1280} height={1120}>
+          <GhBookDesktop/>
+        </DCArtboard>
+        <DCArtboard id="d-short" label="Desktop · preavviso corto + età mancante (Miele)" width={1280} height={1240}>
+          <GhBookDesktop petIdx={1} shortNotice height={1240}/>
+        </DCArtboard>
+        <DCArtboard id="d-peak" label="Desktop · periodo di piena" width={1280} height={1200}>
+          <GhBookDesktop peak height={1200}/>
+        </DCArtboard>
+        <DCArtboard id="d-done" label="Desktop · esito «in attesa di conferma»" width={1280} height={860}>
+          <GhBookDoneDesktop/>
+        </DCArtboard>
+        <DCArtboard id="m-form-fold" label="Mobile · richiesta 1/2 — pet + servizio (età mancante)" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}><GhBookMobile view="fold"/></div>
+        </DCArtboard>
+        <DCArtboard id="m-form-scrolled" label="Mobile · richiesta 2/2 — data + manto + CTA (preavviso corto)" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}><GhBookMobile view="scrolled"/></div>
+        </DCArtboard>
+        <DCArtboard id="m-done" label="Mobile · esito" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}><GhBookDoneMobile/></div>
+        </DCArtboard>
+        <DCArtboard id="states" label="Stati & avvisi — vocabolario" width={1280} height={720}>
+          <GhBookStates/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={44} y={44} width={320}>
+        <strong>GH-03 · Richiesta 1 — bozza di composizione</strong><br/><br/>
+        Scelte da validare a vista:<br/>
+        · Single-page a sezioni numerate (1–4), niente stepper: meno "pratica", più conversazione<br/>
+        · Strip di date <em>desiderate</em> — nessuna casella libera/occupata, micro-copy che chiarisce la semantica<br/>
+        · Avvisi warm (token warning), mai bloccanti<br/>
+        · Esito: badge pending + "Ci pensiamo noi da qui" + CTA WhatsApp verde<br/>
+        · Manto: chips + campo libero facoltativo<br/>
+        · Età solo se mancante (Miele), inline nello step 1<br/><br/>
+        OK a vista → distillo in <em>GH-03-R1-handoff.md</em>
+      </DCPostIt>
+    </DesignCanvas>
+  );
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

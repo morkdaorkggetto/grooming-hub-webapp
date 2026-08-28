@@ -40,6 +40,7 @@
     --color-placeholder: #a58f95;
     --color-link: #5e8580;
     --color-success-text: #4f8b67;
+    --color-whatsapp: var(--color-success-text);
     --color-success-bg: #e3f0e7;
     --color-danger-text: #b85e69;
     --color-danger-bg: #f8e6e9;
@@ -48,6 +49,9 @@
     --color-warning-text: #7f5d60;
     --color-demo-banner-bg: #2b2525;
     --color-demo-banner-text: #fbf6f3;
+    --gh-bridge: #f7f1ea;
+    --gh-border-60: rgba(207, 193, 196, 0.6);
+    --gh-border-35: rgba(207, 193, 196, 0.35);
   }
 
   body {

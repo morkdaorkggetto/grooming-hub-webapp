@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>GH-15 · Gestionale staff · veste editoriale (approvata)</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #root { width: 100vw; height: 100vh; overflow: hidden; }
+  em { font-style: italic; }
+  a { color: var(--color-link); }
+  a:hover { color: var(--color-primary-hover); }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><rect x="72" y="48" width="96" height="64" rx="12" fill="#fbf6f3"/><rect x="84" y="62" width="48" height="7" rx="3.5" fill="#6f9792"/><rect x="84" y="77" width="72" height="5" rx="2.5" fill="#cfc1c4"/><rect x="84" y="88" width="60" height="5" rx="2.5" fill="#cfc1c4"/><rect x="84" y="99" width="34" height="5" rx="2.5" fill="#67383f"/></svg>
+</template>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-dashboard.jsx"></script>
+<script type="text/babel" src="gh15-ed-scheda.jsx"></script>
+<script type="text/babel" src="gh15-ed-visita.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const Stage = ({ children }) => (
+    <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>
+  );
+  const App = () => (
+    <DesignCanvas>
+      <DCSection
+        id="s1-dashboard"
+        title="1 · Dashboard clienti — /dashboard"
+        subtitle="File di composizione: gh15-ed-dashboard.jsx · kit: gh15-ed-kit.jsx. Ordine sezioni invariato: ricerca e filtri, stato generale, aree operative, archivio."
+      >
+        <DCArtboard id="dash-d" label="Desktop 1280 · pronta" width={1280} height={1180}>
+          <DashDesktop/>
+        </DCArtboard>
+        <DCArtboard id="dash-d-load" label="Desktop 1280 · caricamento archivio" width={1280} height={1180}>
+          <DashDesktop state="loading"/>
+        </DCArtboard>
+        <DCArtboard id="dash-d-empty" label="Desktop 1280 · archivio vuoto" width={1280} height={1020}>
+          <DashDesktop state="empty"/>
+        </DCArtboard>
+        <DCArtboard id="dash-m" label="Mobile 390 · stessa narrativa condensata" width={480} height={900}>
+          <Stage><DashMobile/></Stage>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="s2-scheda"
+        title="2 · Scheda cliente — /client/:id"
+        subtitle="File di composizione: gh15-ed-scheda.jsx. Le sette sezioni restano tutte; su desktop si dispongono in due colonne, su telefono si distribuiscono su tre schermate nello stesso ordine di lettura."
+      >
+        <DCArtboard id="cli-d" label="Desktop 1280 · scheda completa" width={1280} height={850}>
+          <ClientDesktop/>
+        </DCArtboard>
+        <DCArtboard id="cli-m1" label="Mobile 390 · 1/2 identità + storico" width={480} height={900}>
+          <Stage><ClientMobile view="top"/></Stage>
+        </DCArtboard>
+        <DCArtboard id="cli-m2" label="Mobile 390 · 2/3 fidelity + affidabilità" width={480} height={900}>
+          <Stage><ClientMobile view="mid"/></Stage>
+        </DCArtboard>
+        <DCArtboard id="cli-m3" label="Mobile 390 · 3/3 QR + ponte customer" width={480} height={900}>
+          <Stage><ClientMobile view="bridge"/></Stage>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="s3-visita"
+        title="3 · Registra visita — /client/:id/add-visit"
+        subtitle="File di composizione: gh15-ed-visita.jsx. Si apre dalla scheda cliente. «Ieri» e «Altra data» di primo livello: è così che il calendario si riempie a ritroso."
+      >
+        <DCArtboard id="vis-d" label="Desktop 1280 · modale 620px" width={1280} height={1000}>
+          <VisitDesktop/>
+        </DCArtboard>
+        <DCArtboard id="vis-d-err" label="Desktop 1280 · errore di salvataggio" width={1280} height={1000}>
+          <VisitDesktop error/>
+        </DCArtboard>
+        <DCArtboard id="vis-m" label="Mobile 390 · schermo pieno" width={480} height={900}>
+          <Stage><VisitMobile/></Stage>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="s4-stati"
+        title="4 · Stati — vocabolario unico"
+        subtitle="Sette stati: confermato, in attesa, no-show, attivo, a rischio, blacklist, più caricamento / vuoto / errore."
+      >
+        <DCArtboard id="stati" label="Stati e loro trattamento" width={1280} height={560}>
+          <StatesBoard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="s5-spec"
+        title="5 · Specifiche misurabili"
+        subtitle="Densità in numeri, ritmo verticale, tipografia, token (nessun colore inventato: tre nuovi dichiarati), campi da verificare in schema."
+      >
+        <DCArtboard id="spec" label="Densità · geometria · tipografia · colori · campi incerti" width={1280} height={910}>
+          <SpecBoard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={44} y={44} width={340}>
+        <strong>GH-15 · veste editoriale — unica approvata</strong><br/><br/>
+        La variante grigia con banda teal piena è <em>scartata</em>: non implementarla.<br/><br/>
+        <strong>File di composizione</strong>, uno per schermata, apribili e confrontabili riga per riga:<br/>
+        · <em>gh15-ed-kit.jsx</em> — primitive e valori normativi<br/>
+        · <em>gh15-ed-dashboard.jsx</em><br/>
+        · <em>gh15-ed-scheda.jsx</em><br/>
+        · <em>gh15-ed-visita.jsx</em><br/>
+        · <em>gh15-ed-riferimenti.jsx</em> — stati e specifiche<br/>
+        · <em>gh15-staff.css</em> — le stesse regole già in CSS<br/><br/>
+        Ogni campo che potrebbe non esistere in schema è marcato <strong>⚠</strong> nei file e elencato nella tavola 5.<br/><br/>
+        Regola: <strong>stesse ossa</strong>. Nessuna sezione aggiunta, rimossa o riordinata.
+      </DCPostIt>
+    </DesignCanvas>
+  );
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

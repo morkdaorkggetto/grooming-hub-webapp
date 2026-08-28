@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>Grooming Hub · Dashboard utente · Variante B</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #root { width: 100vw; height: 100vh; overflow: hidden; }
+  code { font-family: ui-monospace, monospace; background: var(--color-surface-soft); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#6f9792"/>
+    <g fill="#FBF6F3" transform="translate(50 52)">
+      <circle cx="-14" cy="-6" r="5"/>
+      <circle cx="-6" cy="-14" r="5"/>
+      <circle cx="6" cy="-14" r="5"/>
+      <circle cx="14" cy="-6" r="5"/>
+      <path d="M-12 8c0-7 5-12 12-12s12 5 12 12c0 6-5 10-12 10s-12-4-12-10z"/>
+    </g>
+  </svg>
+</template>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="frames/ios-frame.jsx"></script>
+<script type="text/babel" src="dashboard-b.jsx"></script>
+<script type="text/babel" src="pet-page.jsx"></script>
+<script type="text/babel" src="booking.jsx"></script>
+<script type="text/babel" src="shop.jsx"></script>
+<script type="text/babel" src="auth.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const App = () => (
+    <DesignCanvas>
+      <DCSection
+        id="dashboard-b"
+        title="Dashboard · Variante B (Editorial caldo)"
+        subtitle="Stesse schermate, due formati. Copy tu informale, stati richiesta→conferma, niente pagamenti online."
+      >
+        <DCArtboard id="desktop" label="Desktop · 1280" width={1280} height={860}>
+          <DashboardDesktop/>
+        </DCArtboard>
+        <DCArtboard id="mobile-fold" label="Mobile · Above the fold" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <DashboardMobile view="fold"/>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="mobile-scrolled" label="Mobile · Scrolled" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <DashboardMobile view="scrolled"/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="pet-v1"
+        title="Scheda pet · V1 Editoriale"
+        subtitle="Hero sobrio, avatar grande a sx, serif, tutto in un'unica scrollata. Continuità col linguaggio della dashboard."
+      >
+        <DCArtboard id="v1-desktop" label="Desktop · 1280" width={1280} height={860}>
+          <PetPageV1Desktop/>
+        </DCArtboard>
+        <DCArtboard id="v1-mobile" label="Mobile · iPhone" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <PetPageV1Mobile/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="pet-v2"
+        title="Scheda pet · V2 Tabbed"
+        subtitle="Stat-strip nell'hero, tab Panoramica/Visite/Fedeltà. Meno scroll, più struttura utility — per chi userà la scheda spesso."
+      >
+        <DCArtboard id="v2-desktop" label="Desktop · 1280 (tab attivo: Panoramica)" width={1280} height={860}>
+          <PetPageV2Desktop/>
+        </DCArtboard>
+        <DCArtboard id="v2-mobile" label="Mobile · iPhone" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <PetPageV2Mobile/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="booking"
+        title="Prenotazione · /u/book"
+        subtitle="Single page, no stepper. Entry contestuale (da pet / generica / da servizio). Calendario-mese + fasce orarie. Submit = richiesta, risposta entro 24h."
+      >
+        <DCArtboard id="book-desktop-generic" label="Desktop · entry generica" width={1280} height={860}>
+          <BookingPageDesktop entry="generic"/>
+        </DCArtboard>
+        <DCArtboard id="book-desktop-frompet" label="Desktop · da pet (Luna)" width={1280} height={860}>
+          <BookingPageDesktop entry="from-pet"/>
+        </DCArtboard>
+        <DCArtboard id="book-desktop-fromservice" label="Desktop · da servizio" width={1280} height={860}>
+          <BookingPageDesktop entry="from-service"/>
+        </DCArtboard>
+        <DCArtboard id="book-desktop-confirm" label="Desktop · conferma" width={1280} height={860}>
+          <BookingConfirmDesktop/>
+        </DCArtboard>
+        <DCArtboard id="book-mobile" label="Mobile · da pet" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <BookingPageMobile/>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="book-mobile-confirm" label="Mobile · conferma" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <BookingConfirmMobile/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="boutique"
+        title="Boutique · /u/shop"
+        subtitle="Click & collect. Ordini online, ritiri in negozio alla prossima visita. Personalizzazione 'per Luna', stock visibile, stesso pattern richiesta→conferma."
+      >
+        <DCArtboard id="shop-grid-desktop" label="Griglia prodotti · desktop" width={1280} height={860}>
+          <ShopGridDesktop/>
+        </DCArtboard>
+        <DCArtboard id="shop-detail-desktop" label="Dettaglio prodotto · desktop" width={1280} height={860}>
+          <ProductDetailDesktop/>
+        </DCArtboard>
+        <DCArtboard id="shop-cart-desktop" label="Carrello · desktop" width={1280} height={860}>
+          <ShopCartDesktop/>
+        </DCArtboard>
+        <DCArtboard id="shop-grid-mobile" label="Griglia · mobile" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <ShopGridMobile/>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="shop-detail-mobile" label="Dettaglio · mobile" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <ProductDetailMobile/>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="shop-cart-mobile" label="Carrello · mobile" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <ShopCartMobile/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="auth"
+        title="Autenticazione · /login /register /forgot"
+        subtitle="Form centrato, minimal. Email+password, Google, Apple. Registrazione chiede subito anche nome del pet — telefono opzionale."
+      >
+        <DCArtboard id="auth-login-desktop" label="Login · desktop" width={1280} height={860}>
+          <LoginDesktop/>
+        </DCArtboard>
+        <DCArtboard id="auth-register-desktop" label="Registrazione · desktop" width={1280} height={860}>
+          <RegisterDesktop/>
+        </DCArtboard>
+        <DCArtboard id="auth-forgot-desktop" label="Password dimenticata · desktop" width={1280} height={860}>
+          <ForgotDesktop/>
+        </DCArtboard>
+        <DCArtboard id="auth-login-mobile" label="Login · mobile" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <LoginMobile/>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="auth-register-mobile" label="Registrazione · mobile" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <RegisterMobile/>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="auth-forgot-mobile" label="Password dimenticata · mobile" width={480} height={900}>
+          <div style={{ width: '100%', height: '100%',
+            display: 'grid', placeItems: 'center', background: '#f0eee9' }}>
+            <ForgotMobile/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={44} y={44} width={320}>
+        <strong>Partiamo dalla B · Dashboard</strong><br/><br/>
+
+        <strong>Decisioni cristallizzate:</strong><br/>
+        · Prenotazione → stati <em>pending</em> (giallo) / <em>confirmed</em> (verde)<br/>
+        · Nessun pagamento, CTA "Prenota" non "Paga"<br/>
+        · Vendita webapp nascosta (solo <code>profile.type=business</code>)<br/>
+        · Fedeltà: serif, Bronzo/Argento/Oro, tono celebrativo ma asciutto<br/>
+        · Foto pet: upload previsto in <code>/u/pet/:id</code><br/><br/>
+
+        <strong>Prossimi step possibili:</strong><br/>
+        a) Scheda pet <code>/u/pet/:id</code><br/>
+        b) Flow prenotazione <code>/u/book</code><br/>
+        c) Technical plan (SQL, RLS, route)
+      </DCPostIt>
+    </DesignCanvas>
+  );
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
