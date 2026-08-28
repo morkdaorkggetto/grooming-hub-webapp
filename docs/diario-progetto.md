@@ -8,7 +8,35 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 28 agosto 2026.*
+*Aggiornato il 28 agosto 2026, sera — dopo G6.*
+
+> # La produzione è multi-tenant.
+>
+> **G6 è stato eseguito e verificato la sera del 28 agosto 2026.** Il gestionale che Davide e Roby usano ogni giorno gira sul nuovo schema, con i dati veri: **260 clienti, 282 cani, 456 visite, 287 contatti**. L'app clienti ha una porta d'ingresso. La vecchia tabella `clients` non esiste più.
+
+**Come è andata.** Quattro arresti, nessun danno, nessun ripristino. La catena si è fermata agli atti 4, 21 e 30 e una quarta volta sul postflight delle note; ogni volta il database è rimasto esattamente allo stato precedente. **Tre arresti su quattro avevano la stessa causa: un numero misurato da Cowork in un mondo e congelato come traguardo di un altro.** Il quarto era un giudizio di merito di Codex su una policy transitoria, risolto misurando che non esisteva un solo account in grado di sfruttarla.
+
+**Verifiche superate**: postflight conforme su tutte le cardinalità; suite API/RLS **14 PASS, 0 FAIL**; whitelist pet provata dal vivo; appuntamento riletto **3 settembre ore 09:15 Europe/Rome, 75 minuti** — la data non scivola più; sonde smontate, zero residui; Advisor Security 6 e Performance 112, coerenti con GH-10.
+
+**Atto 49 — verifica dal vivo, superata su cinque schede**: Carnevale (due schede legacy fuse, due cani, tre visite), «vigilessa» (tre cani), «mamma parrucchiera» (due cani, foto), il cliente con sei visite e due foto, più la conferma che i quattro bagni del 25 agosto sono migrati con i loro 75 €.
+
+**Restano da fare, in ordine di importanza:**
+
+| # | Cosa | Chi |
+|---|---|---|
+| 1 | **Revocare a Codex l'accesso a `Webapp_Project`** — era per l'atto, non permanente | Luigi |
+| 2 | Rimuovere le due foto orfane via Storage API (percorsi nel §4 di `GH-12`) | Luigi |
+| 3 | Attivare «Leaked password protection» sul prod | Luigi |
+| 4 | Smontare `grooming-prova-generale` | Luigi |
+| 5 | Ripulire ~100 file duplicati con suffisso « 2» comparsi nel worktree, di cui 82 dentro `docs/` — **alla prossima `salva.sh` verrebbero raccolti come documenti veri** | Luigi |
+
+**Code aperte, nessuna bloccante**: `WeeklyRevenue` è l'ultima superficie con la veste vecchia (attende `CD-02`); i contatti con lo stesso numero sotto lo stesso cliente si possono unire; i «cognomi-numero» ereditati dal quaderno si possono ripulire; un dubbio sulla ricerca staff da riprodurre prima di chiamarlo difetto; le quattro frasi WhatsApp attendono le parole di Davide; cosa dà un livello fedeltà; se mettere una promozione al lancio.
+
+**Fatto nuovo da sapere**: il salone ha **tre accessi staff** — Davide, Roby e Luigi. L'atto 4 promuove a operatore chiunque possieda schede legacy, e tutti e tre ne possedevano. In pratica ne funziona uno solo, perché la password è nota solo per l'account di Davide.
+
+---
+
+*Stato precedente, conservato per storia — aggiornato il 28 agosto 2026, mattina.*
 
 - **Costruzione e riparazioni finite.** App clienti completa e con una porta d'ingresso funzionante; gestionale interamente rivestito; calendario ricostruito; orari, chiusure e durate nel modello giusto; i dodici difetti trovati percorrendo la vita di un cliente nuovo sono chiusi, più le due code. Unica superficie ancora vecchia: `WeeklyRevenue`, che è un report e merita una composizione di Claude Design.
 - **Verso la produzione non manca lavoro: mancano i cancelli di G6.**
@@ -322,6 +350,36 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 28 agosto 2026, sera — G6: quattro arresti, nessun danno, la produzione è passata
+
+Iniziato alle 19:58 con i dump, finito con l'app viva e verificata. **Quattro arresti della catena, nessuna scrittura persa, nessun ripristino necessario.**
+
+**Atto 4 — la guardia contava male.** Attendeva 3 operatori legacy, ne ha trovati 4. Misurato: i proprietari di schede legacy sono quattro — Davide 289, Luigi 5, Roby 1, l'account di prova `sofaj` 1 — e lo erano già il 21 agosto. Il 3 era stato congelato il 24 contando in un mondo dove la pulizia era già avvenuta. Corretto in 4 con l'Emendamento 1, dopo aver verificato che il quarto (`sofaj`) viene cancellato per intero dall'atto 5, prima che lo split crei qualunque membership.
+
+**Ricaduta**: il cancello 3 affermava che Roby, senza ruolo, non avrebbe ricevuto una membership. Falso — possiede una scheda, quindi l'atto 4 lo promuove. Il salone ha tre accessi staff, non uno.
+
+**Atto 21 — Codex ha rifiutato di eseguire.** Non una guardia: un suo giudizio. `pets_customer_update` è una policy per riga, e RLS non sa limitare le colonne: da sola concede a un cliente di scrivere qualunque campo dei propri pet. Rilievo corretto. Ma è uno stato intermedio che l'atto 34 chiude dentro la stessa catena, e la misura ha mostrato **zero profili cliente e zero membership cliente**: nessun account al mondo poteva sfruttarlo. Applicato come scritto, senza accorpare i due atti — riscrivere due migration provate con l'app già giù sarebbe stata la strada peggiore.
+
+**Atto 30 — il difetto più serio.** La guardia cercava il cliente protetto per identificativo e lo trovava con 0 pet e 0 visite. Causa: **gli identificativi di `customers` e `pets` li genera lo split**, cioè un atto della catena stessa. Quelli scritti nel file venivano dallo split del banco di prova e in produzione non esistono; l'unico che reggeva era il contatto, perché `contacts` conserva gli identificativi legacy. **L'atto 30 non poteva funzionare in produzione in nessun caso.**
+
+Ritrovati per nome — i nomi sopravvivono allo split: il conflitto «3275394345» con il suo pet «pincher» e una visita; il protetto «Amico di Ernesto 3337261321» con il cane Gianni e le sue **quattro visite**, vivo e integro come dichiarato il 24 agosto. Tutto il resto del perimetro coincideva con GH-12 riga per riga. Corretti tre identificativi e due cardinalità con l'Emendamento 3.
+
+Verificato inoltre che **nessun altro atto della catena fissa identificativi generati dalla catena**: l'atto 30 era l'unico.
+
+> **Regola nuova**: un atto non può fissare identificativi che un atto precedente della stessa catena genera a caso. Se deve puntare a una riga nata dalla migrazione, la punta per criterio — un nome, un legame, una tabella legacy — mai per identificativo osservato altrove.
+
+**Postflight — le note erano 41, non 32.** Terzo errore di misura di Cowork: il 32 era stato contato su `clients.notes` **prima** della catena, e la catena cancella 14 schede legacy prima di arrivare a GH-32. Soprattutto, quel numero non contava affatto il lato customer, che si popola dall'assorbimento dei contatti. Misurato: 11 note customer, 30 note pet, **38 clienti distinti**, solo 2 con note da entrambi i lati — nessuna duplicazione. La garanzia contro le perdite non è il conteggio ma la migration stessa, che interrompe la transazione su mancata corrispondenza e invece ha committato.
+
+> **La lezione della serata.** Tre arresti su quattro hanno la stessa causa: **un numero misurato in un mondo e congelato come traguardo di un altro.** Gli operatori contati dopo la pulizia, le visite contate prima del 25 agosto, le note contate prima delle cancellazioni. Un traguardo non è un numero: è un numero **più il momento in cui vale**. Se il momento non è scritto accanto al numero, il numero è una trappola.
+>
+> Le guardie hanno retto tutte e quattro le volte. Il difetto non era nella catena: era nelle misure di Cowork.
+
+**I gesti di Luigi.** `salva.sh` ha fatto il suo mestiere: ha mostrato la modifica fuori perimetro e ha chiesto, invece di inghiottirla. La `checkout` su `main` si è bloccata proprio per quel file — la riscrittura dello script, mai committata: in archivio c'era ancora la versione con `git add -A`. Committata e poi merge, build verde, push. **Vercel ha promosso da solo**, perché il progetto pubblica da `main`: la finestra di indisponibilità si è chiusa senza un gesto in più.
+
+Nel mezzo Codex ha completato il merge di sua iniziativa — gesto che il mandato assegna a Luigi — ma si è fermato prima del push e ha chiesto. Il conflitto (`src/lib/database.js` rimosso dal refactor) era risolto correttamente. Comparsi anche **~100 file duplicati con suffisso « 2»**, non tracciati, di cui 82 dentro `docs/`: innocui stasera, ma alla prossima `salva.sh` verrebbero raccolti come documenti veri.
+
+**Atto 49, verifica dal vivo, superata.** Carnevale con i suoi due cani e tre visite — la fusione tiene, e si vede la cucitura: due contatti con lo stesso numero, uno per scheda legacy. «vigilessa» con tre cani, a provare che i cani non si sono mescolati fra proprietari. «mamma parrucchiera» con le foto. Il cliente con sei visite. E il report incassi — ancora con la veste vecchia, come sapevamo — che mostra **martedì 25 agosto, 4 visite, 75,00 €**: i quattro bagni che stamattina non sapevamo esistessero, migrati con i loro importi.
 
 ### 28 agosto 2026, sera — Il preflight, e due dump che non si aprono allo stesso modo
 
