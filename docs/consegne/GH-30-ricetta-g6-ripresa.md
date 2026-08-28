@@ -162,7 +162,7 @@ trascritti nell'ordine seguente. Non usare `supabase db push`.
 | 46 | gesto Luigi | merge locale `feat/customer-app` -> `main` | n/a | GH-14; solo dopo catena e controprove DB riuscite |
 | 47 | gesto Luigi | `npm run build` sul `main` risultante | n/a | cancello obbligatorio prima del push |
 | 48 | gesto Luigi | push e promozione Vercel Production di `grooming-hub-webapp` | n/a | GH-14 |
-| 49 | gesto Luigi | verifica live: login staff, dashboard, una scheda pet, rubrica | n/a | GH-14 |
+| 49 | gesto Luigi | verifica live: login staff, dashboard, rubrica, e **cinque schede di clienti riconoscibili** — nomi che Luigi sa a memoria, con i loro cani e le loro visite. Assorbe lo spot-check che GH-31 collocava prima della migrazione: il confronto dei dati è già stato fatto da Cowork il 25/8 e coincide, incluso il caso Carnevale (due schede legacy fuse in un cliente con due cani e tutte e tre le visite). Qui resta l'occhio, e si fa sulla cosa vera invece che sul banco di prova | n/a | GH-14, modificato 28/8 con Luigi |
 | 50 | gesto Luigi | rimuovere via Storage API `cb7f316e-65b0-4419-a6df-56367a3d3c0a/301a4643-3ed8-49fc-920e-ba4ca806a927-1775057002870.jpg` | n/a | GH-12 sezione 4 |
 | 51 | gesto Luigi | rimuovere via Storage API `cb7f316e-65b0-4419-a6df-56367a3d3c0a/04bc45e9-d5f5-47d5-be43-26115fb970ab-1773492470924.jpg` | n/a | GH-12 sezione 4 |
 | 52 | gesto Luigi | revocare a Codex l'accesso all'organizzazione Supabase di produzione | n/a | GH-14 |

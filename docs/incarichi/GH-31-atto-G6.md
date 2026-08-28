@@ -21,7 +21,9 @@ Nessun atto inizia se manca anche uno solo. Sono in ordine: i primi si fanno con
 
 ### Da fare prima, con calma
 
-**1. Spot-check delle cinque schede.** Confronto fra le schede migrate del registro `GH-13 §7` e la vecchia app in produzione. È l'unica verifica che né Cowork né Codex possono fare, perché nessuno dei due vede il prod dall'occhio di chi lo usa. *(Il confronto dei dati è già stato fatto da Cowork e coincide, incluso il caso difficile di Carnevale con due schede fuse in un cliente con due cani. Resta l'occhio.)*
+**1. ~~Spot-check delle cinque schede~~ — spostato dopo il rilascio.** *(Decisione Luigi, 28/8.)* Il confronto dei dati è già stato fatto da Cowork il 25/8 e coincide, incluso il caso difficile di Carnevale — due schede legacy fuse in un cliente con due cani, tutte e tre le visite conservate. Restava l'occhio, e farlo prima avrebbe richiesto di riallestire l'anteprima locale puntata al progetto di prova: allestimento vero per guardare come il **banco di prova** disegna delle schede.
+
+È stato quindi assorbito nell'**atto 49** della ricetta, la verifica dal vivo dopo il rilascio, dove diventa più utile: **cinque clienti che Luigi riconosce**, sulla produzione reale invece che sulla copia. Se qualcosa non torna si vede lì, e le vie di ripristino restano tutte disponibili.
 
 **2. Password nota su `frogletinpond@gmail.com`.** L'account con i 289 clienti lavora da tre mesi su una sessione che si rinnova da sola, e nessuno ricorda la password. Impostarne una nota **non interrompe la sessione**: continuano a lavorare come sempre, e in più esiste una credenziale se qualcosa si rompe. **Va fatto prima della migrazione, non dopo.**
 

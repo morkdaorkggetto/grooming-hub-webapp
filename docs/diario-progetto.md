@@ -21,12 +21,14 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 | ~~2~~ | ~~Ricetta G6 aggiornata~~ | **chiuso 28/8** — `GH-30 §6`, 54 atti con impronte |
 | ~~3~~ | ~~Mandato G6 riscritto~~ | **chiuso 28/8** — `GH-31`, sostituisce GH-14 |
 | ~~4~~ | ~~Lettura delle note interne~~ | **chiuso 28/8** — `GH-32`, tabelle staff-only e colonne rimosse |
-| 5 | Spot-check delle 5 schede contro la vecchia app | **Luigi — aperto** |
-| 6 | Decisione sull'account di Roby, oggi senza ruolo nel profilo | **Luigi — aperto** |
-| 7 | Impostazioni Auth in produzione: registrazioni abilitate, conferma email disattivata | **Luigi — aperto** |
-| 8 | Password nota su `frogletinpond@`, da provare prima sul demo con sessione aperta | **Luigi — aperto** |
-| 9 | Il giorno stesso: dump fresco, autorizzazione di Codex su `Webapp_Project` | Luigi |
+| ~~5~~ | ~~Spot-check delle 5 schede~~ | **chiuso 28/8** — spostato all'atto 49, sulla produzione vera dopo il rilascio |
+| ~~6~~ | ~~Account di Roby~~ | **chiuso 28/8** — accesso condiviso per scelta; il suo resta dormiente e non rimosso |
+| ~~7~~ | ~~Impostazioni Auth in produzione~~ | **chiuso 28/8** — registrazioni aperte, conferma email spenta, verificate |
+| ~~8~~ | ~~La chiave del salone~~ | **chiuso 28/8** — provata prima sul demo, poi impostata su `frogletinpond@` |
+| 9 | **Il giorno stesso**: dump fresco, autorizzazione di Codex su `Webapp_Project`, poi `GH-31` | Luigi |
 | 10 | Post-G6: due foto orfane, toggle leaked-password, smontaggio del temporaneo, revoca accesso Codex | Luigi |
+
+**Tutti i cancelli preparatori sono chiusi.** Restano i due gesti del giorno e l'esecuzione.
 
 **Domande aperte al salone, nessuna bloccante**: cosa dà un livello fedeltà; le parole di Davide per i quattro messaggi; se mettere una promozione al lancio o lasciare la sezione vuota.
 
@@ -319,6 +321,24 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 28 agosto 2026 — Tutti i cancelli preparatori chiusi
+
+**Auth in produzione** (cancello 7): registrazioni abilitate, conferma email disattivata sul progetto `grooming`, verificate dopo il salvataggio. Senza, nessun cliente invitato avrebbe potuto crearsi l'accesso. Conseguenza accettata, la stessa già discussa per il demo: chiunque abbia l'indirizzo dell'app può creare un account, ma **senza invito non ottiene alcuna membership e non vede nulla**. Da rivedere fra qualche settimana contando quanti account senza membership si formano.
+
+**Spot-check spostato** (cancello 5): il confronto dei dati era già fatto e coincideva; restava l'occhio, e farlo prima avrebbe richiesto di riallestire l'anteprima locale sul progetto di prova — allestimento vero per guardare come il **banco di prova** disegna delle schede. Assorbito nell'**atto 49**, la verifica dal vivo dopo il rilascio: cinque clienti che Luigi riconosce, sulla produzione reale. Proposta di Cowork, che Luigi stava per fare a sua volta.
+
+**LA CHIAVE DEL SALONE — cancello chiuso** (28/8, ore 15:24).
+
+Prima è stata fatta **la prova sul demo**, per rispondere con una misura invece che con l'aspettativa di Cowork: cambio password via SQL con una sessione staff aperta in un'altra scheda, e **la sessione è sopravvissuta** — l'app ha continuato a rispondere, restituendo un errore di *schema* e non di accesso. Poi la stessa operazione su `frogletinpond@gmail.com` in produzione: verifica preliminare a **1 riga**, `UPDATE` con clausola esplicita, rilettura che mostra **solo quella riga** con l'orario corrente e le altre cinque con date vecchie. Query chiuse senza salvarle.
+
+**Correzione di Cowork sul peso della cosa**: avevo impostato la prova come se fosse lei a reggere il cancello. Non è così. **La rete di sicurezza non è che la sessione sopravviva: è che qualcuno conosca la password.** Se anche il cambio avesse interrotto la sessione, il salone sarebbe rientrato con la credenziale nuova. Il problema non era il rischio di essere buttati fuori — era che **se fossero stati buttati fuori nessuno avrebbe saputo come farli rientrare.** Da oggi non è più vero.
+
+**Limite da ricordare, emerso dalla prova**: cambiare la password **non chiude le sessioni già aperte**. Comodo oggi; ma se un giorno un accesso fosse compromesso, cambiare la password non basterebbe a mettere fuori chi è già dentro — servirebbe revocare esplicitamente le sessioni.
+
+**Osservazione dal vivo che vale come prova generale**: sul demo l'app ha mostrato *«column customers_1.operator_notes does not exist»*. È GH-32 visto da fuori — la migration ha rimosso la colonna dal database mentre il deployment pubblicato contiene ancora il codice che la chiede. **Codice e schema disallineati, in miniatura e senza danni**: esattamente la finestra documentata per G6, e la ragione per cui merge e promozione devono seguire la catena senza pause.
+
+**Restano solo i gesti del giorno**: dump fresco e autorizzazione di Codex su `Webapp_Project`.
 
 ### 28 agosto 2026 — Un accesso solo: decisione, non rinuncia
 
