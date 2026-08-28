@@ -14,7 +14,7 @@ const APPOINTMENT_SOURCES = ['operator', 'customer'];
 const STAFF_ROLES = ['owner', 'staff'];
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
-const PET_SELECT = `*, customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, operator_notes, acquisition_source, relationship_status, created_at, updated_at), visits(id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
+const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, staff_responded_at, proposed_alternatives, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
@@ -60,22 +60,47 @@ const normalizePhoneIt = (value) => {
 
 const mapPet = (row) => {
   if (!row) return null;
-  const customer = relation(row.customer);
+  const rawCustomer = relation(row.customer);
+  const customerStaffNotes = relation(rawCustomer?.staff_notes)?.notes || null;
+  const customer = rawCustomer
+    ? { ...rawCustomer, operator_notes: customerStaffNotes }
+    : null;
+  const internalNotes = relation(row.staff_notes)?.notes || null;
   const visits = [...(row.visits || [])].sort((a, b) =>
     String(b.date || '').localeCompare(String(a.date || ''))
   );
   return {
     ...row,
     customer,
+    internal_notes: internalNotes,
     owner: customerName(customer),
     phone: customer?.phone || '',
     email: customer?.email || '',
     photo: row.photo_url || null,
-    notes: row.internal_notes || '',
+    notes: internalNotes || '',
     visits,
     last_visit_at: visits[0]?.date || null,
   };
 };
+
+const setStaffNote = async (table, idColumn, id, value) => {
+  const notes = String(value || '').trim();
+  if (!notes) {
+    const { error } = await supabase.from(table).delete().eq(idColumn, id);
+    if (error) throw error;
+    return;
+  }
+  const { error } = await supabase
+    .from(table)
+    .upsert({ [idColumn]: id, notes }, { onConflict: idColumn });
+  if (error) throw error;
+};
+
+const setCustomerStaffNote = (customerId, value) =>
+  setStaffNote('customer_staff_notes', 'customer_id', customerId, value);
+
+const setPetStaffNote = (petId, value) =>
+  setStaffNote('pet_staff_notes', 'pet_id', petId, value);
 
 const mapAppointment = (row) => {
   const pet = mapPet(relation(row?.pet));
@@ -364,11 +389,11 @@ export const getCustomerDirectory = async () => {
       last_name,
       email,
       phone,
-      operator_notes,
       acquisition_source,
       relationship_status,
       created_at,
       updated_at,
+      staff_notes:customer_staff_notes(notes),
       pets(id, name, breed, photo_url, created_at)
     `)
     .eq('tenant_id', tenantId)
@@ -376,16 +401,18 @@ export const getCustomerDirectory = async () => {
   if (error) throw new Error(`Non riesco a caricare il direttorio clienti: ${error.message}`);
 
   return (data || []).map((customer) => {
+    const operatorNotes = relation(customer.staff_notes)?.notes || null;
     const pets = [...(customer.pets || [])].sort((a, b) =>
       String(a.name || '').localeCompare(String(b.name || ''), 'it')
     );
     const pendingPetPattern = /(?:^|\n)\[Lead\] Pet dichiarato: ([^\n]+)/;
-    const pendingPetName = customer.operator_notes?.match(pendingPetPattern)?.[1]?.trim() || '';
-    const visibleNotes = String(customer.operator_notes || '')
+    const pendingPetName = operatorNotes?.match(pendingPetPattern)?.[1]?.trim() || '';
+    const visibleNotes = String(operatorNotes || '')
       .replace(pendingPetPattern, '')
       .trim();
     return {
       ...customer,
+      operator_notes: operatorNotes,
       owner_name: customerName(customer),
       notes: visibleNotes,
       source: customer.acquisition_source || 'manual',
@@ -496,7 +523,7 @@ export const addPetToCustomer = async (customerId, petData) => {
   if (!petData?.name?.trim()) throw new Error('Il nome del pet e obbligatorio');
   const { data: customer, error: customerError } = await supabase
     .from('customers')
-    .select('id, tenant_id, operator_notes')
+    .select('id, tenant_id, relationship_status, staff_notes:customer_staff_notes(notes)')
     .eq('id', customerId)
     .eq('tenant_id', tenantId)
     .single();
@@ -510,26 +537,36 @@ export const addPetToCustomer = async (customerId, petData) => {
     neutered: typeof petData.neutered === 'boolean' ? petData.neutered : null,
     color: petData.color?.trim() || null, coat_preferences: petData.coat_preferences || null,
     owner_notes: petData.owner_notes?.trim() || null,
-    internal_notes: petData.internal_notes?.trim() || null,
     photo_url: petData.photo_url || null,
   }).select('id').single();
   if (error) throw new Error(`Non riesco ad aggiungere il pet: ${error.message}`);
 
-  const notesWithoutPendingPet = String(customer.operator_notes || '')
+  const originalOperatorNotes = relation(customer.staff_notes)?.notes || null;
+  const notesWithoutPendingPet = String(originalOperatorNotes || '')
     .replace(/(?:^|\n)\[Lead\] Pet dichiarato: [^\n]+/, '')
     .trim();
   const transferredPetNotes = String(petData.internal_notes || '').trim();
   const operatorNotes = notesWithoutPendingPet === transferredPetNotes
     ? null
     : notesWithoutPendingPet || null;
-  const { error: statusError } = await supabase
-    .from('customers')
-    .update({ relationship_status: 'active', operator_notes: operatorNotes })
-    .eq('id', customer.id)
-    .eq('tenant_id', tenantId);
-  if (statusError) {
+  try {
+    await setPetStaffNote(data.id, petData.internal_notes);
+    const { error: statusError } = await supabase
+      .from('customers')
+      .update({ relationship_status: 'active' })
+      .eq('id', customer.id)
+      .eq('tenant_id', tenantId);
+    if (statusError) throw statusError;
+    await setCustomerStaffNote(customer.id, operatorNotes);
+  } catch (writeError) {
     await supabase.from('pets').delete().eq('id', data.id).eq('tenant_id', tenantId);
-    throw new Error(`Pet non confermato: ${statusError.message}`);
+    await supabase
+      .from('customers')
+      .update({ relationship_status: customer.relationship_status })
+      .eq('id', customer.id)
+      .eq('tenant_id', tenantId);
+    await setCustomerStaffNote(customer.id, originalOperatorNotes).catch(() => {});
+    throw new Error(`Pet non confermato: ${writeError.message}`);
   }
 
   return { pet_id: data.id, ...(await applyPhoto(user.id, data.id, petData.photoFile)) };
@@ -566,6 +603,11 @@ export const updateClient = async (petId, input) => {
     if (photoUrl) await deletePhoto(photoUrl);
     photoUrl = null;
   }
+  try {
+    await setPetStaffNote(petId, input.notes);
+  } catch (noteError) {
+    throw new Error(`Non riesco a salvare le note interne: ${noteError.message}`);
+  }
   const { error } = await supabase.from('pets').update({
     name: input.name.trim(),
     species: input.species?.trim() || null,
@@ -578,9 +620,12 @@ export const updateClient = async (petId, input) => {
     neutered: input.neutered === '' || input.neutered == null
       ? null
       : input.neutered === true || input.neutered === 'true',
-    internal_notes: input.notes?.trim() || null, photo_url: photoUrl,
+    photo_url: photoUrl,
   }).eq('id', petId).eq('tenant_id', tenantId);
-  if (error) throw new Error(`Non riesco a modificare il pet: ${error.message}`);
+  if (error) {
+    await setPetStaffNote(petId, pet.notes).catch(() => {});
+    throw new Error(`Non riesco a modificare il pet: ${error.message}`);
+  }
 };
 
 export const deleteClient = async (petId) => {

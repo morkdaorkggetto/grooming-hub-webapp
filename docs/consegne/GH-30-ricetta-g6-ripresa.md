@@ -152,21 +152,22 @@ trascritti nell'ordine seguente. Non usare `supabase db push`.
 | 36 | migration | `supabase/migrations/20260821031654_add_customer_with_pet.sql` | `442ba9bc8c7274958109ccedfe18a6c62d1ce21fc9c2d9f0ec2ef50fd59b6db9` | GH-13 atto 32 |
 | 37 | migration | `supabase/migrations/20260520051506_add_service_id_to_appointments.sql` | `2e335febc3e8171d1bb12b2d25b8aa643300441f6e1353ccdfc22c9d5fa3f820` | GH-13 atto 33, prerequisito del seguente |
 | 38 | migration | `supabase/migrations/20260821090000_gh08_appointment_requests.sql` | `c3ca45fa6cbf42fa0f8c92cc3af8a624decf0d902d35e8050d4bdcb2512e6f86` | GH-13 atto 34 |
-| 39 | seed | `supabase/seeds/gh-30-services-prod.sql` | `cd416268a93dcf471b272bf326583a47fb5277027396488d6dc996d25e05ffa5` | GH-30, decisione Davide/Luigi 28/8 |
-| 40 | migration | `supabase/migrations/20260827091536_gh22_booking_schedule_and_staff_duration.sql` | `5691601a5322b60f5e4a63328c660e54ac56797a253ab8b1e53de71f0fce2bcb` | GH-22, neutra |
-| 41 | migration | `supabase/migrations/20260827170005_gh25_accept_customer_invite_membership.sql` | `b26bf374e75905887b27b27fbdc568f6dfd5980b3ee50b3f43ded7af85609f8e` | GH-25, neutra |
-| 42 | migration | `supabase/prod-migrations/20260828043652_gh27_prelaunch_repairs_prod.sql` | `90d5b1c563e892d32f65d8961802bda471028c34349f07acf6bc8bd3f438654f` | GH-27, variante prod-safe GH-30 |
-| 43 | migration | `supabase/migrations/20260828044014_gh27_qr_backfill_privileged_fix.sql` | `4d32cc32f535d27ccf373f8b0d88a86962f1fe06aaf8ecaaa808a07a1e203a70` | GH-27 follow-up, neutra |
-| 44 | migration | `supabase/prod-migrations/20260824150000_security_hardening_prod.sql` | `c9537584c2b768294cc58a4533fc43a2e522b517486ad1e3e5e81fb43bcb2c79` | GH-13 atto 35, spostato in fondo |
-| 45 | gesto Luigi | merge locale `feat/customer-app` -> `main` | n/a | GH-14; solo dopo catena e controprove DB riuscite |
-| 46 | gesto Luigi | `npm run build` sul `main` risultante | n/a | cancello obbligatorio prima del push |
-| 47 | gesto Luigi | push e promozione Vercel Production di `grooming-hub-webapp` | n/a | GH-14 |
-| 48 | gesto Luigi | verifica live: login staff, dashboard, una scheda pet, rubrica | n/a | GH-14 |
-| 49 | gesto Luigi | rimuovere via Storage API `cb7f316e-65b0-4419-a6df-56367a3d3c0a/301a4643-3ed8-49fc-920e-ba4ca806a927-1775057002870.jpg` | n/a | GH-12 sezione 4 |
-| 50 | gesto Luigi | rimuovere via Storage API `cb7f316e-65b0-4419-a6df-56367a3d3c0a/04bc45e9-d5f5-47d5-be43-26115fb970ab-1773492470924.jpg` | n/a | GH-12 sezione 4 |
-| 51 | gesto Luigi | revocare a Codex l'accesso all'organizzazione Supabase di produzione | n/a | GH-14 |
-| 52 | gesto Luigi | attivare Leaked password protection sul progetto prod | n/a | GH-14, dopo la migrazione |
-| 53 | gesto Luigi | smontare il progetto temporaneo solo dopo G6 riuscito e verificato | n/a | GH-14 |
+| 39 | migration | `supabase/migrations/20260828120104_gh32_staff_internal_notes.sql` | `50b6de8cb6df7b2a19cd506694bb1df9af4ad1a21c1f4db32c6e50d923045940` | GH-32, note staff-only e contract colonne legacy |
+| 40 | seed | `supabase/seeds/gh-30-services-prod.sql` | `cd416268a93dcf471b272bf326583a47fb5277027396488d6dc996d25e05ffa5` | GH-30, decisione Davide/Luigi 28/8 |
+| 41 | migration | `supabase/migrations/20260827091536_gh22_booking_schedule_and_staff_duration.sql` | `5691601a5322b60f5e4a63328c660e54ac56797a253ab8b1e53de71f0fce2bcb` | GH-22, neutra |
+| 42 | migration | `supabase/migrations/20260827170005_gh25_accept_customer_invite_membership.sql` | `b26bf374e75905887b27b27fbdc568f6dfd5980b3ee50b3f43ded7af85609f8e` | GH-25, neutra |
+| 43 | migration | `supabase/prod-migrations/20260828043652_gh27_prelaunch_repairs_prod.sql` | `90d5b1c563e892d32f65d8961802bda471028c34349f07acf6bc8bd3f438654f` | GH-27, variante prod-safe GH-30 |
+| 44 | migration | `supabase/migrations/20260828044014_gh27_qr_backfill_privileged_fix.sql` | `4d32cc32f535d27ccf373f8b0d88a86962f1fe06aaf8ecaaa808a07a1e203a70` | GH-27 follow-up, neutra |
+| 45 | migration | `supabase/prod-migrations/20260824150000_security_hardening_prod.sql` | `c9537584c2b768294cc58a4533fc43a2e522b517486ad1e3e5e81fb43bcb2c79` | GH-13 atto 35, spostato in fondo |
+| 46 | gesto Luigi | merge locale `feat/customer-app` -> `main` | n/a | GH-14; solo dopo catena e controprove DB riuscite |
+| 47 | gesto Luigi | `npm run build` sul `main` risultante | n/a | cancello obbligatorio prima del push |
+| 48 | gesto Luigi | push e promozione Vercel Production di `grooming-hub-webapp` | n/a | GH-14 |
+| 49 | gesto Luigi | verifica live: login staff, dashboard, una scheda pet, rubrica | n/a | GH-14 |
+| 50 | gesto Luigi | rimuovere via Storage API `cb7f316e-65b0-4419-a6df-56367a3d3c0a/301a4643-3ed8-49fc-920e-ba4ca806a927-1775057002870.jpg` | n/a | GH-12 sezione 4 |
+| 51 | gesto Luigi | rimuovere via Storage API `cb7f316e-65b0-4419-a6df-56367a3d3c0a/04bc45e9-d5f5-47d5-be43-26115fb970ab-1773492470924.jpg` | n/a | GH-12 sezione 4 |
+| 52 | gesto Luigi | revocare a Codex l'accesso all'organizzazione Supabase di produzione | n/a | GH-14 |
+| 53 | gesto Luigi | attivare Leaked password protection sul progetto prod | n/a | GH-14, dopo la migrazione |
+| 54 | gesto Luigi | smontare il progetto temporaneo solo dopo G6 riuscito e verificato | n/a | GH-14 |
 
 ### Perche l'ordine non e alfabetico
 
@@ -178,7 +179,9 @@ trascritti nell'ordine seguente. Non usare `supabase db push`.
   rendere `customers.phone` obbligatorio.
 - L'atto 37, nonostante il timestamp di maggio, deve stare immediatamente prima
   dell'atto 38: `service_id` e prerequisito di `appointment_requests`.
-- L'atto 44 ha timestamp 24/8 ma resta dopo gli atti 27-28/8: GH-25 e GH-27
+- L'atto 39 segue GH-30 e le RPC degli atti 32 e 36: prima conserva e usa le
+  colonne legacy; poi sposta le note, sostituisce le RPC e rimuove le colonne.
+- L'atto 45 ha timestamp 24/8 ma resta dopo gli atti 27-28/8: GH-25 e GH-27
   sostituiscono funzioni; l'hardening deve operare sulle definizioni finali.
 
 ## 7. Controprove e impronte
@@ -186,14 +189,14 @@ trascritti nell'ordine seguente. Non usare `supabase db push`.
 | Controprova | Esito misurato |
 |---|---|
 | 35 file della ricetta GH-13 ancora esistenti e con hash invariato | 35/35 |
-| 6 nuovi file SQL/seed presenti e con hash dichiarato | 6/6 |
+| 7 nuovi file SQL/seed presenti e con hash dichiarato | 7/7 |
 | SQL operativo variante GH-27 uguale all'originale, intestazioni escluse | identico |
-| identificativi/riferimenti/cardinalita ambiente nei 6 file selezionati | 0 |
+| identificativi/riferimenti/cardinalita ambiente nei 7 file selezionati | 0 |
 | asserzioni statiche su trigger, revoche, seed e variante | 19/19 |
-| verifica automatica ricetta, dipendenze ed esclusione | 41/41 hash; sequenza 1-53 continua |
-| `npm run build` | riuscita, Vite 147 moduli, 1,10 s |
-| ordine della ricetta uguale all'ordine alfabetico | no; quattro inversioni motivate sopra |
-| applicazioni a database | 0 |
+| verifica automatica ricetta, dipendenze ed esclusione | 42/42 hash; sequenza 1-54 continua |
+| `npm run build` | riuscita, Vite 147 moduli, 1,34 s |
+| ordine della ricetta uguale all'ordine alfabetico | no; cinque inversioni motivate sopra |
+| applicazioni a database | GH-32 solo sul demo; produzione 0 |
 
 Eccezione: i tre dump del 21/8 non sono presenti sotto la root del progetto ne
 sono reperibili dall'indice locale del Mac. Le dimensioni e le impronte in
@@ -202,18 +205,14 @@ misura GH-30. Prima di G6 Luigi deve recuperarli come secondo paracadute oppure
 registrare esplicitamente che il dump fresco e il backup Supabase Pro li
 sostituiscono. Non vanno ricreati, committati o dedotti dagli hash.
 
-## 8. Rischio fuori perimetro da non perdere
+## 8. Rischio GH-30 chiuso da GH-32
 
-La correzione chiude la scrittura, non la lettura. Le policy self-select
-restituiscono al customer l'intera propria riga customer e le righe dei propri
-pet; quindi la Data API puo includere `customers.operator_notes` e
-`pets.internal_notes`, anche se l'interfaccia non li mostra.
-
-Come ordinato, GH-30 non modifica questo comportamento. Prima di invitare
-clienti reali serve una decisione separata: preferenza tecnica per una tabella
-staff-only delle note interne, con RLS dedicata; in alternativa una superficie
-di lettura customer che non esponga le colonne, verificando attentamente il
-modello di sicurezza delle view.
+GH-32 adotta la soluzione separata prevista da questo registro: note in
+`customer_staff_notes` e `pet_staff_notes`, entrambe con RLS staff-only, e
+rimozione delle colonne `customers.operator_notes` e `pets.internal_notes`.
+La sessione customer reale sul demo ha misurato zero righe leggibili, due
+scritture negate e le due colonne legacy assenti. In G6 il preflight e il
+postflight dell'atto 39 devono registrare il conteggio produzione **32 -> 32**.
 
 ## 9. File della consegna
 
@@ -223,6 +222,7 @@ modello di sicurezza delle view.
 | `docs/consegne/GH-30-ricetta-g6-ripresa.md` | registro e ricetta completa | calcolata sullo stato finale |
 | `supabase/prod-migrations/20260828043652_gh27_prelaunch_repairs_prod.sql` | variante prod-safe creata | `90d5b1c563e892d32f65d8961802bda471028c34349f07acf6bc8bd3f438654f` |
 | `supabase/prod-migrations/20260828073917_gh30_protect_customer_operator_notes_prod.sql` | migration prod-safe creata | `3fa8a3f99192b352eac0bbda69dd44c46076ba00d758302aeaa8dc6da89f8cf0` |
+| `supabase/migrations/20260828120104_gh32_staff_internal_notes.sql` | migration GH-32 aggiunta alla ricetta | `50b6de8cb6df7b2a19cd506694bb1df9af4ad1a21c1f4db32c6e50d923045940` |
 | `supabase/seeds/gh-30-services-prod.sql` | seed idempotente creato | `cd416268a93dcf471b272bf326583a47fb5277027396488d6dc996d25e05ffa5` |
 
 ## 10. Eccezioni e fuori istruzione
@@ -234,5 +234,5 @@ modello di sicurezza delle view.
   oltre 500 kB; sono avvisi preesistenti, non errori GH-30.
 - `docs/diario-progetto.md` e `scripts/salva.sh` restano modifiche parallele
   fuori da stage e commit.
-- La perdita di riservatezza in lettura delle note interne e richiamata, non
-  risolta, come richiesto dal mandato.
+- La perdita di riservatezza richiamata da GH-30 e chiusa da GH-32 sul demo e
+  inserita come atto 39 nella ricetta G6; produzione non e stata toccata.

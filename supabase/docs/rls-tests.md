@@ -1,6 +1,6 @@
-# Suite RLS demo GH-06
+# Suite RLS demo GH-06 / GH-32
 
-Ultima esecuzione misurata: **21 agosto 2026**.
+Ultima esecuzione misurata: **28 agosto 2026**.
 
 Questa suite verifica le policy RLS e Storage sul solo progetto Supabase demo
 `grooming-hub-demo` (`qttpinkslhenxrsbhhhg`). Lo script interrompe l'esecuzione
@@ -40,24 +40,28 @@ in caso di errore. Un esito FAIL produce exit code diverso da zero.
 | Login Luca | Sessione API disponibile | UUID fixture Luca atteso | PASS |
 | Lettura staff baseline | 7 pet nel tenant demo | 7 pet | PASS |
 | Portale customer, nucleo proprio | 1 customer e 2 pet di Mario | 1 customer, 2 pet | PASS |
+| Staff legge e scrive note riservate | Due marker leggibili dallo staff | 2 marker scritti e riletti | PASS |
+| Customer legge note riservate | 0 note pet, 0 note customer | 0, 0 | PASS |
+| Portale incorpora note riservate | Due pet, relazioni note vuote | 2 pet, 0 relazioni note | PASS |
+| Customer scrive note riservate | Due rifiuti RLS | 2 rifiuti `42501`/RLS | PASS |
+| Colonne note legacy | `operator_notes` e `internal_notes` assenti | 2 errori `42703` | PASS |
 | Mario verso Luca | 0 customer, 0 pet, 0 visite | 0, 0, 0 | PASS |
 | Luca verso Mario | 0 customer, 0 pet, 0 visite | 0, 0, 0 | PASS |
 | Customer verso sonda | 0 membership, 0 profili staff | 0, 0 | PASS |
-| Campi direttorio customer altrui | 0 righe con status, source o note operatore | 0 righe | PASS |
+| Campi direttorio customer altrui | 0 righe con status o source | 0 righe | PASS |
 | Scrittura campi direttorio propri | `relationship_status` e `acquisition_source` invariati | Invariati (`active`, `manual`) | PASS |
 | RPC staff da customer | SQLSTATE `42501`, nessuna scrittura | `42501`, 0 customer | PASS |
 | Whitelist `microchip` | Valore invariato | Invariato (`null`) | PASS |
 | Whitelist `name` | Valore invariato | Invariato (`Luna`) | PASS |
-| Whitelist `internal_notes` | Valore invariato | Invariato (`null`) | PASS |
 | Whitelist `owner_notes` | Modifica consentita | Marker scritto e ripristinato | PASS |
 | Storage su pet proprio | Upload e delete consentiti | Upload 200, delete riuscita | PASS |
 | Storage su pet altrui | HTTP 403 | HTTP 403 | PASS |
 | Storage su tenant estraneo | HTTP 403 | HTTP 403 | PASS |
-| Aggiornamento staff-only | `internal_notes` modificabile dallo staff | Marker scritto e ripristinato | PASS |
+| Aggiornamento staff-only | Nota pet modificabile dallo staff | Marker scritto e ripristinato | PASS |
 | Staff fuori tenant | 0 righe da secondo tenant reale | Secondo tenant non disponibile | SKIP |
 | Pulizia fixture | 0 residui marker | 0 pet, 0 visite, 0 customer | PASS |
 
-Totale misurato: **20 PASS, 0 FAIL, 1 SKIP**.
+Totale misurato: **30 PASS, 0 FAIL, 1 SKIP**.
 
 Lo SKIP cross-tenant e esplicito e previsto dal mandato: il progetto demo ha un
 solo tenant. Il test potra diventare una controprova reale quando sara

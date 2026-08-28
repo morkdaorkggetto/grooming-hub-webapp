@@ -43,7 +43,8 @@ let marioPet = null;
 let fixturePet = null;
 let fixtureVisit = null;
 let originalOwnerNotes = null;
-let originalInternalNotes = null;
+let originalPetStaffNotes = null;
+let originalCustomerStaffNotes = null;
 const storagePaths = new Set();
 const appointmentRequestIds = new Set();
 const appointmentIds = new Set();
@@ -88,11 +89,23 @@ function assertNoError(error, label) {
   if (error) throw new Error(`${label}: ${error.code || error.statusCode || ''} ${error.message}`.trim());
 }
 
+function relation(value) {
+  return Array.isArray(value) ? value[0] || null : value || null;
+}
+
 function forbiddenStorageError(error) {
   return Boolean(
     error &&
       (String(error.statusCode) === '403' ||
         /row-level security|unauthorized|not authorized|403/i.test(error.message || ''))
+  );
+}
+
+function forbiddenRlsError(error) {
+  return Boolean(
+    error &&
+      (error.code === '42501' ||
+        /row-level security|permission denied|not authorized|42501/i.test(error.message || ''))
   );
 }
 
@@ -130,6 +143,13 @@ async function removeStoragePath(client, objectPath) {
 }
 
 async function cleanupStaleFixtures() {
+  const [petNoteCleanup, customerNoteCleanup] = await Promise.all([
+    staff.client.from('pet_staff_notes').delete().ilike('notes', `${MARKER}%`),
+    staff.client.from('customer_staff_notes').delete().ilike('notes', `${MARKER}%`),
+  ]);
+  assertNoError(petNoteCleanup.error, 'Pulizia note pet pregresse');
+  assertNoError(customerNoteCleanup.error, 'Pulizia note customer pregresse');
+
   const { data: staleRequests, error: staleRequestReadError } = await staff.client
     .from('appointment_requests')
     .select('id, appointment_id')
@@ -204,7 +224,7 @@ async function loadContext() {
 
   const { data: customers, error: customerError } = await staff.client
     .from('customers')
-    .select('id, user_id, tenant_id')
+    .select('id, user_id, tenant_id, staff_notes:customer_staff_notes(notes)')
     .eq('tenant_id', tenantId)
     .in('user_id', [mario.user.id, luca.user.id]);
   assertNoError(customerError, 'Customer fixture');
@@ -215,7 +235,7 @@ async function loadContext() {
 
   const { data: marioPets, error: marioPetError } = await staff.client
     .from('pets')
-    .select('id, name, microchip, internal_notes, owner_notes')
+    .select('id, name, microchip, owner_notes, staff_notes:pet_staff_notes(notes)')
     .eq('tenant_id', tenantId)
     .eq('customer_id', marioCustomer.id)
     .order('name');
@@ -223,7 +243,8 @@ async function loadContext() {
   assert(marioPets.length === 2, `Pet Mario attesi 2, misurati ${marioPets.length}`);
   marioPet = marioPets.find((item) => item.name === 'Luna') || marioPets[0];
   originalOwnerNotes = marioPet.owner_notes;
-  originalInternalNotes = marioPet.internal_notes;
+  originalPetStaffNotes = relation(marioPet.staff_notes)?.notes || null;
+  originalCustomerStaffNotes = relation(marioCustomer.staff_notes)?.notes || null;
 }
 
 async function createLucaFixture() {
@@ -236,12 +257,17 @@ async function createLucaFixture() {
       name: `${MARKER} Pet Luca`,
       species: 'dog',
       breed: 'Test RLS',
-      internal_notes: `${MARKER} fixture isolamento`,
     })
     .select('id, tenant_id, customer_id, name')
     .single();
   assertNoError(petError, 'Creazione pet Luca');
   fixturePet = pet;
+
+  const { error: noteError } = await staff.client.from('pet_staff_notes').insert({
+    pet_id: fixturePet.id,
+    notes: `${MARKER} fixture isolamento`,
+  });
+  assertNoError(noteError, 'Creazione note staff pet Luca');
 
   const { data: visit, error: visitError } = await staff.client
     .from('visits')
@@ -289,11 +315,19 @@ async function cleanupCurrentRun() {
   }
 
   if (staff?.client && marioPet?.id) {
-    const { error } = await staff.client
-      .from('pets')
-      .update({ internal_notes: originalInternalNotes })
-      .eq('id', marioPet.id);
-    if (error) cleanupErrors.push(`internal_notes: ${error.message}`);
+    const noteQuery = originalPetStaffNotes
+      ? staff.client.from('pet_staff_notes').upsert({ pet_id: marioPet.id, notes: originalPetStaffNotes })
+      : staff.client.from('pet_staff_notes').delete().eq('pet_id', marioPet.id);
+    const { error } = await noteQuery;
+    if (error) cleanupErrors.push(`pet_staff_notes: ${error.message}`);
+  }
+
+  if (staff?.client && marioCustomer?.id) {
+    const noteQuery = originalCustomerStaffNotes
+      ? staff.client.from('customer_staff_notes').upsert({ customer_id: marioCustomer.id, notes: originalCustomerStaffNotes })
+      : staff.client.from('customer_staff_notes').delete().eq('customer_id', marioCustomer.id);
+    const { error } = await noteQuery;
+    if (error) cleanupErrors.push(`customer_staff_notes: ${error.message}`);
   }
 
   if (staff?.client) {
@@ -342,15 +376,24 @@ async function cleanupCurrentRun() {
   }
 
   if (!staff?.client || !tenantId) return;
-  const [{ data: pets }, { data: visits }, { data: customers }, { data: requests }] = await Promise.all([
+  const [
+    { data: pets },
+    { data: visits },
+    { data: customers },
+    { data: requests },
+    { data: petNotes },
+    { data: customerNotes },
+  ] = await Promise.all([
     staff.client.from('pets').select('id').ilike('name', `${MARKER}%`),
     staff.client.from('visits').select('id').ilike('treatments', `${MARKER}%`),
     staff.client.from('customers').select('id').eq('phone', FIXTURE_PHONE),
     staff.client.from('appointment_requests').select('id').ilike('coat_condition_notes', `${APPOINTMENT_REQUEST_MARKER}%`),
+    staff.client.from('pet_staff_notes').select('pet_id').ilike('notes', `${MARKER}%`),
+    staff.client.from('customer_staff_notes').select('customer_id').ilike('notes', `${MARKER}%`),
   ]);
-  const measured = `${pets?.length || 0} pet, ${visits?.length || 0} visite, ${customers?.length || 0} customer, ${requests?.length || 0} richieste`;
+  const measured = `${pets?.length || 0} pet, ${visits?.length || 0} visite, ${customers?.length || 0} customer, ${requests?.length || 0} richieste, ${petNotes?.length || 0} note pet, ${customerNotes?.length || 0} note customer`;
   addResult(
-    pets?.length === 0 && visits?.length === 0 && customers?.length === 0 && requests?.length === 0 ? 'PASS' : 'FAIL',
+    pets?.length === 0 && visits?.length === 0 && customers?.length === 0 && requests?.length === 0 && petNotes?.length === 0 && customerNotes?.length === 0 ? 'PASS' : 'FAIL',
     'Pulizia fixture',
     '0 residui marker',
     measured
@@ -407,6 +450,83 @@ async function main() {
       return '1 customer, 2 pet';
     }
   );
+
+  await runTest('Staff legge e scrive note riservate', 'marker presenti in entrambe le tabelle', async () => {
+    const [petWrite, customerWrite] = await Promise.all([
+      staff.client
+        .from('pet_staff_notes')
+        .upsert({ pet_id: marioPet.id, notes: `${MARKER} STAFF PET` })
+        .select('notes')
+        .single(),
+      staff.client
+        .from('customer_staff_notes')
+        .upsert({ customer_id: marioCustomer.id, notes: `${MARKER} STAFF CUSTOMER` })
+        .select('notes')
+        .single(),
+    ]);
+    assertNoError(petWrite.error, 'Scrittura note pet staff');
+    assertNoError(customerWrite.error, 'Scrittura note customer staff');
+    assert(petWrite.data.notes === `${MARKER} STAFF PET`, 'Nota pet staff non riletta');
+    assert(customerWrite.data.notes === `${MARKER} STAFF CUSTOMER`, 'Nota customer staff non riletta');
+    return '2 marker scritti e riletti';
+  });
+
+  await runTest('Customer non legge note riservate', '0 note pet e 0 note customer', async () => {
+    const [petResult, customerResult] = await Promise.all([
+      mario.client.from('pet_staff_notes').select('pet_id, notes').eq('pet_id', marioPet.id),
+      mario.client
+        .from('customer_staff_notes')
+        .select('customer_id, notes')
+        .eq('customer_id', marioCustomer.id),
+    ]);
+    assertNoError(petResult.error, 'Lettura note pet da customer');
+    assertNoError(customerResult.error, 'Lettura note customer da customer');
+    assert(petResult.data.length === 0, `Mario vede ${petResult.data.length} note pet`);
+    assert(customerResult.data.length === 0, `Mario vede ${customerResult.data.length} note customer`);
+    return '0 note pet, 0 note customer';
+  });
+
+  await runTest('Portale customer non incorpora note riservate', '2 pet con relazioni note vuote', async () => {
+    const { data, error } = await mario.client
+      .from('pets')
+      .select(`
+        id,
+        staff_notes:pet_staff_notes(notes),
+        customer:customers(id, staff_notes:customer_staff_notes(notes))
+      `)
+      .eq('customer_id', marioCustomer.id);
+    assertNoError(error, 'Query portale con relazioni note');
+    assert(data.length === 2, `Pet portale attesi 2, misurati ${data.length}`);
+    for (const pet of data) {
+      assert(!relation(pet.staff_notes), `Nota pet incorporata per ${pet.id}`);
+      assert(!relation(relation(pet.customer)?.staff_notes), `Nota customer incorporata per ${pet.id}`);
+    }
+    return '2 pet, 0 relazioni note';
+  });
+
+  await runTest('Customer non scrive note riservate', 'due rifiuti RLS', async () => {
+    const [petResult, customerResult] = await Promise.all([
+      mario.client
+        .from('pet_staff_notes')
+        .upsert({ pet_id: marioPet.id, notes: `${MARKER} CUSTOMER PET` }),
+      mario.client
+        .from('customer_staff_notes')
+        .upsert({ customer_id: marioCustomer.id, notes: `${MARKER} CUSTOMER CUSTOMER` }),
+    ]);
+    assert(forbiddenRlsError(petResult.error), `Scrittura note pet non rifiutata: ${petResult.error?.message || 'successo'}`);
+    assert(forbiddenRlsError(customerResult.error), `Scrittura note customer non rifiutata: ${customerResult.error?.message || 'successo'}`);
+    return '2 rifiuti 42501/RLS';
+  });
+
+  await runTest('Colonne note legacy rimosse', 'operator_notes e internal_notes assenti', async () => {
+    const [customerResult, petResult] = await Promise.all([
+      mario.client.from('customers').select('id, operator_notes').eq('id', marioCustomer.id),
+      mario.client.from('pets').select('id, internal_notes').eq('id', marioPet.id),
+    ]);
+    assert(customerResult.error?.code === '42703', `customers.operator_notes ancora interrogabile: ${customerResult.error?.code || 'successo'}`);
+    assert(petResult.error?.code === '42703', `pets.internal_notes ancora interrogabile: ${petResult.error?.code || 'successo'}`);
+    return '2 errori 42703';
+  });
 
   await createLucaFixture();
 
@@ -475,11 +595,11 @@ async function main() {
 
   await runTest(
     'Customer non legge campi direttorio altrui',
-    '0 customer altrui con status, source o note operatore',
+    '0 customer altrui con status o source',
     async () => {
       const { data, error } = await mario.client
         .from('customers')
-        .select('id, relationship_status, acquisition_source, operator_notes')
+        .select('id, relationship_status, acquisition_source')
         .neq('id', marioCustomer.id);
       assertNoError(error, 'Campi direttorio altrui da Mario');
       assert(data.length === 0, `Mario vede ${data.length} customer altrui`);
@@ -657,7 +777,6 @@ async function main() {
   for (const [column, attemptedValue] of [
     ['microchip', `${MARKER} MICROCHIP`],
     ['name', `${MARKER} NAME`],
-    ['internal_notes', `${MARKER} INTERNAL`],
   ]) {
     await runTest(
       `Whitelist customer protegge ${column}`,
@@ -731,15 +850,15 @@ async function main() {
     return `HTTP ${error.statusCode || 403}`;
   });
 
-  await runTest('Staff aggiorna campo staff-only', 'internal_notes modificato', async () => {
+  await runTest('Staff aggiorna campo staff-only', 'nota pet modificata', async () => {
     const { data, error } = await staff.client
-      .from('pets')
-      .update({ internal_notes: `${MARKER} STAFF UPDATE` })
-      .eq('id', marioPet.id)
-      .select('internal_notes')
+      .from('pet_staff_notes')
+      .update({ notes: `${MARKER} STAFF UPDATE` })
+      .eq('pet_id', marioPet.id)
+      .select('notes')
       .single();
-    assertNoError(error, 'UPDATE staff internal_notes');
-    assert(data.internal_notes === `${MARKER} STAFF UPDATE`, 'UPDATE staff ripristinato inaspettatamente');
+    assertNoError(error, 'UPDATE staff pet_staff_notes');
+    assert(data.notes === `${MARKER} STAFF UPDATE`, 'UPDATE staff ripristinato inaspettatamente');
     return 'marker scritto';
   });
 
