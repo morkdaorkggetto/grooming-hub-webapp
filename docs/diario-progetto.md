@@ -296,6 +296,50 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 28 agosto 2026 — GH-27: dodici riparazioni, e la data smette di scivolare
+
+**Tutti e dodici i punti chiusi**, due migration, quindici file applicativi. Le cose che vale la pena ricordare.
+
+**La data era un problema di fuso, ed è stata risolta introducendo il fuso del salone**: `tenants.settings.booking_schedule.timezone`, con `Europe/Rome` come valore iniziale e ripiego. Multi-tenant per costruzione — un salone altrove avrà il suo. La controprova è quella giusta: la stessa conferma riletta dal database in sessioni **UTC, New York, Tokyo e Honolulu**, con le ore di confine `00:15` e `23:45`. Giorno e ora del salone restano identici. I tre appuntamenti nati dalle prove manuali di Luigi sono stati rimossi.
+
+**Due difetti sono stati chiusi nel database invece che nell'interfaccia**, ed è la scelta giusta: una seconda richiesta pendente sullo stesso pet viene **respinta dal vincolo** (`23505`), e una data alternativa che cade in una chiusura viene **respinta dalla RPC** (`22023`). Non è una schermata che avvisa: è il sistema che non lo permette.
+
+**Scoperta durante il lavoro, dichiarata in una migration separata apposta**: il trigger whitelist introdotto in GH-02-bis — quello che protegge le colonne dei pet dalle scritture del customer — **bloccava anche il backfill privilegiato dei QR**, che non ha una sessione utente. La correzione conserva la protezione per ogni customer autenticato e apre solo la manutenzione senza sessione. È il tipo di interferenza fra due difese scritte a mesi di distanza che si vede solo eseguendo.
+
+**Sulla chip «Lo porto regolarmente»**: misurata a **164,6 px** di larghezza e 44 di altezza, senza andare a capo a 320 px. La stima geometrica fatta a mano prima del mandato diceva «circa 165 px»: buon segno che si possa calcolare invece di provare, quando serve decidere in fretta.
+
+**Il difetto di automazione è stato confermato e non assecondato**: il riempimento automatico del controllo nativo `date` mostra il valore nel DOM ma React conserva quello iniziale. Codex **non ha piegato il prodotto** per far tornare la propria prova — ha riallineato il dato e ha usato le prove multi-fuso della RPC come controprova vera. Conferma retroattiva che l'osservazione di GH-26 sul form visita era artefatto, mentre quella sulla conferma era difetto reale.
+
+**Restano due riparazioni che Cowork aveva individuato e non ha portato nel mandato** (settimo difetto della stessa famiglia — nominato a voce, non scritto):
+
+1. **`StaffApp.jsx` manda i clienti al portale vecchio.** Due punti nel codice spediscono chiunque non sia operatore a `/portal`. Da quando la radice porta a `/login`, è il percorso normale per un cliente che digita l'indirizzo — e ci finisce anche Codex durante le verifiche locali.
+2. **I punti fedeltà possono declassare invece di elevare.** Misurato: `useRewardPoints = punti > 0`, e da quel momento le visite **smettono del tutto di contare**. Un cliente con 30 visite è Argento; regalargli 10 punti lo fa precipitare a Base, perché 10 è sotto la soglia di Bronzo. **La leva nata per elevare declassa.** In produzione non è ancora successo per fortuna: i due soli usi sono 500 e 150 punti, cioè cifre scelte per *raggiungere* una soglia — segno che il meccanismo viene già usato come leva di livello e non come salvadanaio. La riparazione è concettualmente una riga: il livello è **il migliore dei due**, e i punti possono solo alzare.
+
+**Decisione Luigi (28/8)**: la premialità resta, i benefici dei livelli si definiscono con Davide. Nota di prodotto: nessuna parte del sistema dice oggi **cosa dà un livello** — le soglie esistono, i premi no. E il portale vecchio la scala la mostra già al cliente («Mancano 9 visite per Bronzo»), quindi la domanda è già posta a chi apre quella pagina.
+
+### 28 agosto 2026 — Gli accessi del salone: un rischio che esiste già oggi
+
+Domanda di Luigi guardando avanti a G6 — come si ridefiniscono le password di Davide, Roby e sua. La misura sul prod ha trovato una fragilità che **non dipende dalla migrazione** e che esiste adesso.
+
+| Account | Ultimo accesso | Ruolo profilo | Clienti |
+|---|---|---|---:|
+| `frogletinpond@` (Davide) | **31 maggio** | operator | **289** |
+| `ggetto@` (Luigi) | 24 agosto | operator | 5 |
+| `zavaroby@` (Roby) | 5 marzo | **nessuno** | 1 |
+| tre account di prova | — | — | rimossi dalla pulizia G6 |
+
+**L'ultimo accesso di Davide è del 31 maggio, ma le visite arrivano al 13 agosto.** Non è una contraddizione: quel campo cambia solo a un accesso nuovo, non al rinnovo del token. **La sessione è viva da tre mesi e si rinnova da sola** — è il «si loggano in automatico» riferito da Luigi. E **nessuno ricorda la password che la tiene in piedi**: basta un logout, una cronologia svuotata, un dispositivo nuovo o un token scaduto perché il salone resti fuori dai propri 289 clienti.
+
+**Verificato che G6 non peggiora la cosa**: l'indirizzo di produzione non cambia (stesso progetto Vercel, stesso database), quindi sessione e password salvate nel browser restano valide perché legate alla stessa origine; e la catena di migrazione non tocca gli hash. In teoria il 1° settembre trovano tutto com'era.
+
+**Decisione (Luigi, 28/8)**: password nota impostata su `frogletinpond@` **prima** di G6. Impostarla via SQL **non interrompe la sessione in corso** — continuano a lavorare come sempre e in più esiste una credenziale conosciuta come rete. Costo zero, rischio azzerato. È l'account che conta, perché lì stanno i 289 clienti, anche se è **Roby a operare** mentre Davide usa soltanto.
+
+**Secondo dato**: l'account di Roby ha `profiles.role` vuoto. La catena G6 semina le membership da quel campo, quindi **dopo la migrazione quel account non funzionerebbe** — entrerebbe senza essere riconosciuto come staff. Oggi è irrilevante perché condividono l'accesso di Davide, ma se un giorno vorranno accessi separati va sistemato prima.
+
+**Sulla configurazione definitiva, dopo il lancio**: il recupero password esiste (`resetPasswordForEmail` → `/reset-password`) ma **dipende da un servizio di posta che non è configurato** — quello interno di Supabase è dichiaratamente per prove. E **manca un cambio password dall'interno dell'app** per chi è già autenticato: è la cosa che li renderebbe autonomi nel caso normale, «voglio cambiarla», lasciando alla posta solo il caso «l'ho dimenticata». Entrambe rinviate a dopo G6 per scelta, perché toccare gli accessi durante una migrazione è il momento peggiore.
+
+**Scelta di prodotto nominata e lasciata aperta**: se Davide e Roby continuano a condividere un accesso, l'app **non potrà mai attribuire nulla a nessuno** — chi ha segnato quel no-show, chi ha messo in blacklist, chi ha registrato quella lavorazione. È anche la ragione profonda per cui `visits` non ha un campo operatore, escluso tre volte in tre giri. Va bene, purché sia una scelta e non un'eredità.
+
 ### 28 agosto 2026 — GH-26: la vita di un cliente nuovo, e la data che scivola
 
 **Ricognizione senza riparazioni**: dodici passaggi dal gesto reale, dalla creazione del cliente fino alla visita che compare nello storico. **Diff applicativo zero**, pulizia verificata con conteggi identici prima e dopo. Otto difetti trovati e ordinati per quanto farebbero male il 1° settembre.
