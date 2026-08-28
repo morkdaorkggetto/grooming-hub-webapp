@@ -1,6 +1,6 @@
 # GH-31 - Atto G6
 
-Stato: **catena 4-45 completata; postflight interrotto sulla cardinalita note 41 contro 32 attese**
+Stato: **fase database GH-31 completata e verificata; pronta per i gesti di rilascio di Luigi**
 
 ## Perimetro dichiarato
 
@@ -272,7 +272,43 @@ GH-32 richiede esplicitamente 32 righe complessive prima e dopo l'atto 39. Il po
 | note pet orfane | 0 |
 | colonne legacy residue | 0 |
 
-Le 41 righe non sono una duplicazione testuale e non contengono orfani. Poiche' il registro GH-32 prescrive l'arresto su qualunque conteggio diverso da 32, le controprove successive non sono state avviate: nessuna sonda RLS creata, nessun test vivo di scrittura note/whitelist, nessuna conferma appuntamento e nessuna lettura Advisor. Occorre prima riconciliare la misura 32 con le 41 note migrate, senza cancellazioni o accorpamenti manuali.
+Le 41 righe non sono una duplicazione testuale e non contengono orfani. Il controllo ha prodotto un arresto prima delle sonde, poi superato dall'Emendamento 4: il 32 era stato misurato da Cowork sulle note legacy prima delle cancellazioni e prima della creazione delle note customer; il traguardo corretto dopo la catena e' 41. Nessuna nota e' stata cancellata o accorpata.
+
+### Emendamento 4 e sonde RLS vive
+
+Sono state create tre sonde usa-e-getta marcate `[PROD GH-31]`: una staff e due customer distinti nello stesso tenant. Nessun account reale e' stato modificato. Il primo giro ha prodotto 12 PASS e 2 errori di costruzione della sonda: MIME `text/plain` non ammesso dal bucket e codice mantello inventato non ammesso dal vincolo. Corretto esclusivamente il runner temporaneo con `image/png` e nota mantello senza codice, il giro completo ha prodotto **14 PASS, 0 FAIL**.
+
+| Controprova | Esito misurato |
+|---|---|
+| Login API staff + due customer | 3 sessioni riuscite |
+| Lettura staff | 2/2 pet sonda visibili |
+| Isolamento customer A/B | A vede solo il proprio pet; B vede 0 customer e 0 pet di A |
+| Lettura note staff-only da customer | 0 righe customer, 0 righe pet |
+| Scrittura note staff-only da customer | 2 rifiuti RLS/permessi |
+| Colonne note legacy | 2 errori `42703` |
+| Protezione direttorio customer | `relationship_status` e `acquisition_source` invariati; campo ordinario aggiornabile |
+| Whitelist pet viva | nome, microchip, `customer_id` e `owner_user_id` invariati; `owner_notes` aggiornato |
+| RPC staff da customer | rifiuto `42501`, zero righe create |
+| Note riservate da staff | 2 note aggiornate e rilette |
+| Invisibilita staff al customer | 0 membership, 0 profili |
+| Storage | upload sul proprio pet riuscito; pet altrui rifiutato |
+| Richiesta e conferma appuntamento | richiesta customer e risoluzione staff riuscite |
+| Rilettura appuntamento | **2030-09-03 09:15 Europe/Rome**, durata 75 minuti |
+
+La prova viva richiesta su `operator_notes` e' stata adattata al contratto finale GH-32: la colonna legacy e' assente (`42703`), la nuova tabella `customer_staff_notes` restituisce zero righe al customer e ne rifiuta la scrittura, mentre lo staff legge e aggiorna la nota. La prova whitelist ha verificato i valori dal database dopo un singolo update misto consentito/vietato.
+
+### Teardown sonde
+
+Il teardown e' stato eseguito nella stessa sessione di lavoro. Residui finali: 0 utenti Auth, 0 identita, 0 profili, 0 membership, 0 customer, 0 pet, 0 richieste, 0 appuntamenti, 0 oggetti Storage e 0 righe RPC vietate riferibili alle sonde. Le note reali sono tornate a 41. Le cardinalita finali sono tornate a 260 customer, 282 pet, 456 visite, 287 contatti, 5 appuntamenti, 0 richieste, 3 account operativi e 51 oggetti Storage.
+
+### Advisor finali
+
+| Advisor | Totale | Dettaglio | Destino |
+|---|---:|---|---|
+| Security | 6 WARN | 1 QR pubblico `get_public_pet_card`; 4 funzioni `SECURITY DEFINER` autenticate intenzionali; Leaked Password Protection disattivata | coincide con GH-10; toggle password resta gesto successivo di Luigi |
+| Performance | 112 | 15 `auth_rls_initplan`; 16 `unused_index`; 80 `multiple_permissive_policies`; 1 strategia connessioni Auth | stesse famiglie GH-10, un indice inutilizzato in meno del riferimento demo; nessun nuovo rilievo |
+
+I warning Security intenzionali sono: QR pubblico per token opaco, `accept_customer_invite` per il flusso invito e i due helper necessari alle RLS, piu la raggiungibilita autenticata della stessa RPC QR. I rilievi Performance richiedono mandati separati perche' riscrivere policy o rimuovere indici cambia il contratto o richiede statistiche produttive; non sono stati modificati durante G6.
 
 `npm run build` non eseguito: non e' stato modificato codice applicativo e il mandato assegna merge, build, push e promozione a Luigi dopo il completamento della catena. Nessun push e nessun deploy eseguiti.
 
@@ -284,7 +320,9 @@ Seconda eccezione: atto 21 rifiutato prima dell'esecuzione per `UPDATE` customer
 
 L'Emendamento 2 ha autorizzato l'atto 21 come scritto; gli atti 21-29 sono stati applicati. Terza eccezione: la guardia dell'atto 30 non riconosce il customer protetto e conserva cardinalita visite precedenti all'aggiornamento del 28/8. L'atto 30 e' stato annullato atomicamente e la catena arrestata.
 
-L'Emendamento 3 ha corretto identificativi e cardinalita dell'atto 30; la catena 30-45 e il postflight principale sono riusciti. Quarta eccezione: 41 righe note staff-only contro le 32 richieste dal registro GH-32. Arresto prima delle sonde e degli Advisor.
+L'Emendamento 3 ha corretto identificativi e cardinalita dell'atto 30; la catena 30-45 e il postflight principale sono riusciti. Quarta eccezione: 41 righe note staff-only contro le 32 richieste dal registro GH-32. L'Emendamento 4 ha dimostrato che 41 e' il traguardo corretto e ha autorizzato la chiusura delle controprove.
+
+Il primo giro sonde ha avuto due errori di input del runner temporaneo, non del prodotto: MIME Storage non ammesso e codice mantello non valido. Gli input sono stati corretti senza modificare schema o dati reali; il secondo giro completo ha chiuso 14/14 prove.
 
 Fuori-istruzione procedurale dichiarato: il registro GH-32 prescriveva il controllo 32→32 immediatamente dopo l'atto 39 e prima di proseguire con gli atti 40-45. Il controllo e' stato eseguito soltanto dopo il completamento della catena; pertanto gli atti 40-45 erano gia applicati quando lo scostamento 41 contro 32 e' stato rilevato. Non e' stata eseguita alcuna scrittura correttiva o cancellazione di note.
 
@@ -292,4 +330,4 @@ Nessun file fuori istruzione toccato. Le tre modifiche parallele preesistenti di
 
 ## Commit
 
-Primo commit locale di interruzione: `04144c4` (`docs: record GH-31 production halt`). Correzione Emendamento 1 e seconda interruzione: `e5fbcd4` (`fix: correct GH-31 legacy operator guard`). Ripresa Emendamento 2: `2480a6d` (`docs: record GH-31 halt at act 30`). La ripresa Emendamento 3 aggiunge il file corretto dell'atto 30, la nuova impronta nella ricetta GH-30 e il presente aggiornamento del registro. Hash definitivo riportato nella comunicazione di chiusura; nessun push.
+Primo commit locale di interruzione: `04144c4` (`docs: record GH-31 production halt`). Correzione Emendamento 1 e seconda interruzione: `e5fbcd4` (`fix: correct GH-31 legacy operator guard`). Ripresa Emendamento 2: `2480a6d` (`docs: record GH-31 halt at act 30`). Ripresa Emendamento 3: `4ca4511` (`fix: align GH-31 production cleanup anchors`). L'Emendamento 4 aggiorna soltanto il presente registro. Hash definitivo riportato nella comunicazione di chiusura; nessun push.
