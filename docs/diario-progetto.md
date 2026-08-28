@@ -25,10 +25,11 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 | ~~6~~ | ~~Account di Roby~~ | **chiuso 28/8** — accesso condiviso per scelta; il suo resta dormiente e non rimosso |
 | ~~7~~ | ~~Impostazioni Auth in produzione~~ | **chiuso 28/8** — registrazioni aperte, conferma email spenta, verificate |
 | ~~8~~ | ~~La chiave del salone~~ | **chiuso 28/8** — provata prima sul demo, poi impostata su `frogletinpond@` |
-| 9 | **Il giorno stesso**: dump fresco, autorizzazione di Codex su `Webapp_Project`, poi `GH-31` | Luigi |
+| ~~9a~~ | ~~Dump fresco~~ | **chiuso 28/8 ore 20:13** — tre file, verificati riga per riga contro il preflight |
+| 9b | Autorizzazione di Codex su `Webapp_Project`, poi `GH-31` per nome | Luigi, **in corso stasera** |
 | 10 | Post-G6: due foto orfane, toggle leaked-password, smontaggio del temporaneo, revoca accesso Codex | Luigi |
 
-**Tutti i cancelli preparatori sono chiusi.** Restano i due gesti del giorno e l'esecuzione.
+**Tutti i cancelli preparatori sono chiusi. L'atto G6 è in esecuzione la sera del 28 agosto.**
 
 **Domande aperte al salone, nessuna bloccante**: cosa dà un livello fedeltà; le parole di Davide per i quattro messaggi; se mettere una promozione al lancio o lasciare la sezione vuota.
 
@@ -321,6 +322,24 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 28 agosto 2026, sera — Il preflight, e due dump che non si aprono allo stesso modo
+
+**Il salone ha lavorato il 25 agosto.** Rimisurata la produzione prima di partire: **468 visite, non 464**. Quattro bagni reali su Nathan, Athena, Hermes e Milo — 20, 20, 20 e 15 € — inseriti dall'account di Davide. Non erano dati di prova: le ferie erano meno ferme di come le avevamo assunte. `GH-31` corretto di conseguenza, preflight 468 e post-catena 456. Luigi ha avvisato Davide e Roby di non toccare l'app durante l'atto.
+
+**Lezione, piccola ma vera**: una misura presa quattro giorni prima non è una misura, è un ricordo. Il preflight va rifatto la sera stessa.
+
+**Tre dump freschi**, ore 19:58-20:13: schema 29.965 byte, dati 1.284.135, autenticazione 111.877.
+
+Lo schema è **identico al byte** a quello del 21 agosto — la struttura non è cambiata in una settimana, come doveva essere.
+
+Il dump dati era però **43.392 byte più piccolo** di quello del 21, pur avendo quattro visite in più. Cowork ha sollevato la cosa invece di attribuirla all'arrotondamento, e ha verificato il file contando le righe che dichiara: `clients` 296, `visits` 468, `contacts` 301, `appointments` 17, `profiles` 4, `auth.users` 6, `storage.objects` 51. **Tutte e sei le misure del preflight coincidono.** Il paracadute è fedele.
+
+**Ma il conteggio non è riuscito sul file del 21 agosto: zero righe.** Non conteneva istruzioni `COPY`. Indagato: **quindici istruzioni `INSERT` multi-riga, una per tabella non vuota**, ciascuna con migliaia di tuple su una riga sola. Le quindici tabelle sono esattamente quelle che stasera hanno righe, meno `one_time_tokens` che il 21 era vuota.
+
+**I due paracadute non si aprono allo stesso modo**, ed è anche il motivo per cui il vecchio è più grande pur contenendo meno dati: ogni tupla si porta dietro la sintassi. Annotato in `GH-31` sotto le vie di ripristino. **Chi dovesse usare quello vecchio deve saperlo prima, non mentre cade.**
+
+**Cancello 4 verificato dal vivo sulla produzione**, non assunto: `azgehoseiojodltcttfb`, organizzazione `Webapp_Project`, ramo `main` marcato PRODUCTION. Registrazioni abilitate, conferma email disattivata, collegamento manuale e accessi anonimi spenti, provider Email abilitato.
 
 ### 28 agosto 2026 — Tutti i cancelli preparatori chiusi
 
