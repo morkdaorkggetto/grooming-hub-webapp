@@ -164,6 +164,7 @@ export default function Calendar() {
   const { tenant } = useTenant();
   const [searchParams] = useSearchParams();
   const openedQueryClientRef = useRef('');
+  const latestWeekLoadRef = useRef(0);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(todayString()));
   const weekEnd = addDays(weekStart, 6);
   const [selectedDay, setSelectedDay] = useState(todayString());
@@ -191,17 +192,25 @@ export default function Calendar() {
   );
 
   const loadWeek = useCallback(async () => {
+    const requestId = latestWeekLoadRef.current + 1;
+    latestWeekLoadRef.current = requestId;
     setLoading(true);
     setError('');
     try {
-      setData(await getCalendarWeekData({ from: weekStart, to: weekEnd }));
+      const nextData = await getCalendarWeekData({ from: weekStart, to: weekEnd });
+      if (requestId !== latestWeekLoadRef.current) return;
+      setData(nextData);
     } catch (loadError) {
+      if (requestId !== latestWeekLoadRef.current) return;
       setError(loadError.message || 'Non riesco a caricare il calendario');
     } finally {
-      setLoading(false);
+      if (requestId === latestWeekLoadRef.current) setLoading(false);
     }
   }, [weekEnd, weekStart]);
-  useEffect(() => { loadWeek(); }, [loadWeek]);
+  useEffect(() => {
+    loadWeek();
+    return () => { latestWeekLoadRef.current += 1; };
+  }, [loadWeek]);
   useEffect(() => {
     if (selectedDay < weekStart || selectedDay > weekEnd) setSelectedDay(weekStart);
   }, [selectedDay, weekEnd, weekStart]);
