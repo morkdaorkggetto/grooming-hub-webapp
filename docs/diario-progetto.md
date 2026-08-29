@@ -39,7 +39,9 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 - i «cognomi-numero» ereditati dal quaderno si possono ripulire;
 - un dubbio sulla ricerca staff — «mamma parrucchiera 340» non trova, «parrucchiera 340» sì — da riprodurre prima di chiamarlo difetto: il codice letto sembra reggere entrambe;
 - le quattro frasi WhatsApp attendono le parole di Davide; cosa dà un livello fedeltà; se mettere una promozione al lancio;
-- domanda per il salone, sollevata da Claude Design: **le righe che raccontano un'assenza contano come «cani passati»?** Oggi sì.
+- domanda per il salone, sollevata da Claude Design: **le righe che raccontano un'assenza contano come «cani passati»?** Oggi sì;
+- **il controllo `lint` non è mai esistito.** Misurato il 29/8: in `package.json` c'è la riga `eslint src --ext js,jsx`, ma ESLint **non è fra le dipendenze**, **non ha configurazione** e **non è installato**. Non si è rotto: era una riga arrivata da un modello di progetto e mai completata. Da decidere: installarlo davvero e sistemare quello che troverà al primo giro, oppure cancellare la riga. **Lasciarlo com'è è la scelta peggiore delle due**: ogni registro di consegna porta in fondo la stessa falsa mancanza da venti mandati, e un controllo che fallisce sempre insegna a saltare la sezione delle eccezioni — che è la sezione dove il 28/8 è comparso il buco di sicurezza sulle note interne;
+- **la coda delle lavorazioni non chiuse.** Un elenco degli appuntamenti passati da almeno un giorno e ancora «programmati»: una coda di lavoro, non un giudizio sul cliente. Nata discutendo `GH-41` e messa da parte deliberatamente, perché il problema che il salone ha posto era un altro.
 
 **Fatto nuovo da sapere**: il salone ha **tre accessi staff** — Davide, Roby e Luigi. L'atto 4 promuove a operatore chiunque possieda schede legacy, e tutti e tre ne possedevano. In pratica ne funziona uno solo, perché la password è nota solo per l'account di Davide.
 
