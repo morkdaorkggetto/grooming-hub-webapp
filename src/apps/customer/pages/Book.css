@@ -252,6 +252,16 @@
   line-height: 1.55;
 }
 
+.gh-book-duplicate-action {
+  display: block;
+  width: fit-content;
+  margin-top: 8px;
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .gh-book-empty-title { margin: 0 0 8px; font-family: var(--font-serif); font-size: 25px; font-weight: 500; }
 .gh-book-empty-copy { margin: 0 0 18px; color: var(--color-text-secondary); }
 .gh-book-whatsapp-button { padding: 0 18px; background: var(--color-whatsapp); color: white; }

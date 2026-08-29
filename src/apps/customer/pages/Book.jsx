@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import {
+  findOpenPetBooking,
+  formatOpenPetBookingWhen,
+  getCustomerPetBookingMessage,
+  isOpenPetBookingRequest,
+} from '../../../shared/appointments/openPetBookings';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useUnsavedChanges } from '../../../shared/navigation/UnsavedChangesProvider';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
@@ -19,11 +25,13 @@ import Skeleton from '../../../shared/ui/Skeleton';
 import StatusBadge from '../../../shared/ui/StatusBadge';
 import WarmNotice from '../../../shared/ui/WarmNotice';
 import {
+  buildWhatsAppUrl,
   getCustomerAppointmentRequestWhatsAppUrl,
   getPublicGroomingHubWhatsAppUrl,
 } from '../../staff/lib/whatsapp';
 import { usePets } from '../hooks/usePets';
 import { useAppointmentRequests } from '../hooks/useAppointmentRequests';
+import { useOpenPetAppointments } from '../hooks/useOpenPetAppointments';
 import { getBookingServices, submitAppointmentRequest } from '../lib/booking';
 import { getBookingFullPeriod } from '../lib/bookingDates';
 import './Book.css';
@@ -82,9 +90,9 @@ function SelectChip({ selected, disabled = false, onClick, children }) {
   );
 }
 
-function PetChoice({ pet, selected, disabled, onClick }) {
+function PetChoice({ pet, selected, onClick }) {
   return (
-    <button type="button" className="gh-book-choice gh-book-pet-choice" aria-pressed={selected} disabled={disabled} onClick={onClick}>
+    <button type="button" className="gh-book-choice gh-book-pet-choice" aria-pressed={selected} onClick={onClick}>
       {pet.photo_url ? (
         <img src={pet.photo_url} alt="" className="gh-book-pet-avatar" />
       ) : (
@@ -94,7 +102,7 @@ function PetChoice({ pet, selected, disabled, onClick }) {
       )}
       <span className="gh-book-choice-copy">
         <strong>{pet.name}</strong>
-        <small>{disabled ? 'Richiesta già in attesa' : pet.breed || 'Razza non indicata'}</small>
+        <small>{pet.breed || 'Razza non indicata'}</small>
       </span>
       {selected ? <Icon name="check" size={18} /> : null}
     </button>
@@ -185,6 +193,11 @@ export default function Book() {
   const { tenant, tenantId } = useTenant();
   const { data: pets, loading: petsLoading, error: petsError } = usePets();
   const { data: requests, loading: requestsLoading } = useAppointmentRequests();
+  const {
+    data: openAppointments,
+    loading: openAppointmentsLoading,
+    error: openAppointmentsError,
+  } = useOpenPetAppointments();
   const [searchParams] = useSearchParams();
   const [services, setServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(true);
@@ -214,11 +227,10 @@ export default function Book() {
   }), [bookingSchedule]);
   const requestedPetId = searchParams.get('petId') || '';
   const selectedPet = pets.find((pet) => pet.id === petId) || null;
-  const pendingPetIds = useMemo(
-    () => new Set(requests.filter((request) => request.status === 'pending').map((request) => request.pet_id)),
-    [requests]
+  const selectedOpenBooking = useMemo(
+    () => findOpenPetBooking([...openAppointments, ...requests], petId),
+    [openAppointments, petId, requests]
   );
-  const selectedPetHasPendingRequest = pendingPetIds.has(petId);
   const selectedService = services.find((service) => service.id === serviceId) || null;
   const selectedTimePreference = BOOKING_TIME_PREFERENCES.find((item) => item.value === timePreference) || null;
   const selectedCoatLabels = COAT_CONDITIONS.filter((item) => coatConditions.includes(item.value)).map((item) => item.label);
@@ -255,7 +267,6 @@ export default function Book() {
   const canSubmit = Boolean(
     petId
     && serviceId
-    && !selectedPetHasPendingRequest
     && desiredDate
     && !selectedDateClosure.isClosed
     && !isTimePreferenceClosed(timePreference, selectedDateClosure)
@@ -322,7 +333,7 @@ export default function Book() {
     }
   };
 
-  if (authLoading || petsLoading || servicesLoading || requestsLoading) return <LoadingBook />;
+  if (authLoading || petsLoading || servicesLoading || requestsLoading || openAppointmentsLoading) return <LoadingBook />;
   const salonPhone = getTenantWhatsAppPhone(tenant);
 
   if (submission) return <BookingResult submission={submission} salonPhone={salonPhone} />;
@@ -331,6 +342,15 @@ export default function Book() {
     salonPhone,
     petName: selectedPet?.name,
   });
+  const existingBookingWhen = selectedOpenBooking
+    ? formatOpenPetBookingWhen(selectedOpenBooking, { includeMonth: true })
+    : '';
+  const moveWhatsAppUrl = selectedOpenBooking ? buildWhatsAppUrl(
+    salonPhone,
+    isOpenPetBookingRequest(selectedOpenBooking)
+      ? `Ciao, vorrei modificare la richiesta per ${selectedPet?.name || 'il mio cane'} prevista per ${existingBookingWhen}.`
+      : `Ciao, vorrei spostare l’appuntamento di ${selectedPet?.name || 'il mio cane'} previsto per ${existingBookingWhen}.`
+  ) : '';
 
   return (
     <main className="gh-book-page">
@@ -345,7 +365,7 @@ export default function Book() {
           </p>
         </header>
 
-        {petsError ? <div className="gh-book-error" role="alert">Non riusciamo a caricare i tuoi pet. Riprova tra un momento.</div> : null}
+        {petsError || openAppointmentsError ? <div className="gh-book-error" role="alert">Non riusciamo a verificare tutti gli appuntamenti. Riprova tra un momento.</div> : null}
 
         {servicesError || services.length === 0 ? (
           <Card padding={28} radius="lg" style={{ maxWidth: 620, borderRadius: 20 }}>
@@ -363,11 +383,18 @@ export default function Book() {
               <section className="gh-book-step">
                 <StepHead number="1" title="Per chi?" />
                 <div className="gh-book-pet-grid">
-                  {pets.map((pet) => <PetChoice key={pet.id} pet={pet} selected={pet.id === petId} disabled={pendingPetIds.has(pet.id)} onClick={() => setPetId(pet.id)} />)}
+                  {pets.map((pet) => <PetChoice key={pet.id} pet={pet} selected={pet.id === petId} onClick={() => setPetId(pet.id)} />)}
                 </div>
-                {selectedPetHasPendingRequest ? (
-                  <WarmNotice title="Richiesta già inviata">
-                    La trovi nella home. Aspetta la risposta del salone prima di inviarne un’altra per lo stesso pet.
+                {selectedOpenBooking ? (
+                  <WarmNotice icon="bell" title={getCustomerPetBookingMessage(selectedOpenBooking, selectedPet?.name)}>
+                    <span>Se non ti va bene, spostalo — così non ne restano due aperti.</span>
+                    {moveWhatsAppUrl ? (
+                      <a className="gh-book-duplicate-action" href={moveWhatsAppUrl} target="_blank" rel="noreferrer">
+                        Chiedi di spostarlo su WhatsApp
+                      </a>
+                    ) : (
+                      <Link className="gh-book-duplicate-action" to="/u/home">Vedi l’appuntamento</Link>
+                    )}
                   </WarmNotice>
                 ) : null}
                 {needsDeclaredAge ? (

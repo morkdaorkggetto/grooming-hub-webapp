@@ -473,6 +473,10 @@
   font-weight: 650;
 }
 
+.gh-calendar-pet-duplicate {
+  box-shadow: inset 3px 0 0 var(--color-warning-border);
+}
+
 .gh-calendar-detail-actions {
   display: flex;
   flex-wrap: wrap;

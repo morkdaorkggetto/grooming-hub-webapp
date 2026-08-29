@@ -770,8 +770,17 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
   const { tenantId } = await requireStaff();
   const fromIso = new Date(`${from}T00:00:00`).toISOString();
   const toIso = new Date(`${to}T23:59:59.999`).toISOString();
+  const nowIso = new Date().toISOString();
 
-  const [appointmentsResult, structuredResult, legacyResult, visitsResult] = await Promise.all([
+  const [
+    appointmentsResult,
+    structuredResult,
+    legacyResult,
+    visitsResult,
+    openAppointmentsResult,
+    openStructuredResult,
+    openLegacyResult,
+  ] = await Promise.all([
     supabase
       .from('appointments')
       .select(APPOINTMENT_SELECT)
@@ -805,6 +814,27 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
       .gte('date', from)
       .lte('date', to)
       .order('date'),
+    supabase
+      .from('appointments')
+      .select(APPOINTMENT_SELECT)
+      .eq('tenant_id', tenantId)
+      .gt('scheduled_at', nowIso)
+      .neq('status', 'cancelled')
+      .or('approval_status.is.null,approval_status.eq.approved')
+      .order('scheduled_at'),
+    supabase
+      .from('appointment_requests')
+      .select(APPOINTMENT_REQUEST_SELECT)
+      .eq('tenant_id', tenantId)
+      .eq('status', 'pending')
+      .order('desired_date'),
+    supabase
+      .from('appointments')
+      .select(APPOINTMENT_SELECT)
+      .eq('tenant_id', tenantId)
+      .eq('approval_status', 'pending')
+      .eq('appointment_source', 'customer')
+      .order('scheduled_at'),
   ]);
 
   if (appointmentsResult.error) {
@@ -819,6 +849,9 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
   if (visitsResult.error) {
     throw new Error(`Non riesco a caricare le lavorazioni: ${visitsResult.error.message}`);
   }
+  if (openAppointmentsResult.error || openStructuredResult.error || openLegacyResult.error) {
+    throw new Error('Non riesco a verificare gli appuntamenti già aperti per i pet');
+  }
 
   return {
     appointments: (appointmentsResult.data || []).map(mapAppointment),
@@ -827,6 +860,11 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
       ...(legacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
     ].sort((left, right) => String(right.created_at || '').localeCompare(String(left.created_at || ''))),
     visits: (visitsResult.data || []).map(mapCalendarVisit),
+    openBookings: [
+      ...(openAppointmentsResult.data || []).map(mapAppointment),
+      ...(openStructuredResult.data || []).map(mapAppointmentRequest),
+      ...(openLegacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
+    ],
   };
 };
 

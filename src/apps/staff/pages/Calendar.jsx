@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  findOpenPetBooking,
+  getStaffPetBookingMessage,
+} from '../../../shared/appointments/openPetBookings';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import {
   getBookingSchedule,
@@ -15,6 +19,7 @@ import {
   isAppointmentCapacityAvailable,
 } from '../../../shared/tenant/workstationCapacity';
 import PetAvatar from '../../../shared/ui/PetAvatar';
+import WarmNotice from '../../../shared/ui/WarmNotice';
 import { Button, EmptyState, Fab, Field, Hero, HeroButton, Panel } from '../components/StaffKit';
 import {
   CalendarDay,
@@ -145,6 +150,15 @@ function AppointmentLoadNote({ notice }) {
   );
 }
 
+function PetDuplicateNotice({ booking, petName }) {
+  if (!booking) return null;
+  return (
+    <WarmNotice staff icon="bell" className="gh-calendar-pet-duplicate">
+      {getStaffPetBookingMessage(booking, petName)}
+    </WarmNotice>
+  );
+}
+
 export default function Calendar() {
   const navigate = useNavigate();
   const { tenant } = useTenant();
@@ -153,7 +167,7 @@ export default function Calendar() {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(todayString()));
   const weekEnd = addDays(weekStart, 6);
   const [selectedDay, setSelectedDay] = useState(todayString());
-  const [data, setData] = useState({ appointments: [], requests: [], visits: [] });
+  const [data, setData] = useState({ appointments: [], requests: [], visits: [], openBookings: [] });
   const [petOptions, setPetOptions] = useState([]);
   const [petsLoaded, setPetsLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -319,6 +333,21 @@ export default function Calendar() {
   const detailLoadNotice = detailCandidate && !detailConflict
     ? getLoadNotice(detailCandidate, selectedItem?.id)
     : null;
+  const manualPet = petOptions.find((pet) => pet.id === manualForm.clientId) || null;
+  const manualDuplicateBooking = !manualConflict
+    ? findOpenPetBooking(data.openBookings, manualForm.clientId)
+    : null;
+  const requestDuplicateBooking = !requestConflict && selectedItem
+    ? findOpenPetBooking(data.openBookings, selectedItem.pet_id, {
+      excludeAppointmentId: selectedItem.request_kind === 'legacy' ? selectedItem.id : null,
+      excludeRequestId: selectedItem.request_kind === 'structured' ? selectedItem.id : null,
+    })
+    : null;
+  const detailDuplicateBooking = !detailConflict && selectedItem
+    ? findOpenPetBooking(data.openBookings, selectedItem.pet_id, {
+      excludeAppointmentId: selectedItem.id,
+    })
+    : null;
 
   const updateRequestTiming = (field, value) => {
     setRequestForm((current) => {
@@ -473,6 +502,7 @@ export default function Calendar() {
           <Field label="Note" area value={manualForm.notes} onChange={(event) => setManualForm((current) => ({ ...current, notes: event.target.value }))} />
           {manualConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <AppointmentLoadNote notice={manualLoadNotice} />
+          <PetDuplicateNotice booking={manualDuplicateBooking} petName={manualPet?.name} />
         </form>
       </Modal>}
 
@@ -502,6 +532,7 @@ export default function Calendar() {
           ) : null}
           {requestConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <AppointmentLoadNote notice={requestLoadNotice} />
+          <PetDuplicateNotice booking={requestDuplicateBooking} petName={selectedItem.petName} />
         </div>
       </Modal>}
 
@@ -515,6 +546,7 @@ export default function Calendar() {
           </div>
           {detailConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <AppointmentLoadNote notice={detailLoadNotice} />
+          <PetDuplicateNotice booking={detailDuplicateBooking} petName={selectedItem.petName} />
           <div className="gh-calendar-detail-actions">
             <Button staff variant="whatsapp" icon="whatsapp" onClick={openReminder}>Promemoria</Button>
             <Button staff variant="outline" icon="calendar" onClick={() => window.open(getGoogleCalendarUrl(selectedItem), '_blank', 'noopener,noreferrer')}>Google</Button>
