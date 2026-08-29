@@ -35,6 +35,13 @@
   --shadow-sm: 0 1px 2px rgba(43, 37, 37, 0.04);
   --shadow-md: 0 4px 16px rgba(43, 37, 37, 0.06);
   --shadow-lg: 0 12px 32px rgba(43, 37, 37, 0.1);
+
+  --color-primary-alpha-06: rgba(111, 151, 146, 0.06);
+  --color-primary-alpha-08: rgba(111, 151, 146, 0.08);
+  --color-primary-alpha-16: rgba(111, 151, 146, 0.16);
+  --color-primary-alpha-22: rgba(111, 151, 146, 0.22);
+  --color-primary-alpha-35: rgba(111, 151, 146, 0.35);
+  --color-border-alpha-12: rgba(207, 193, 196, 0.12);
 }
 
 .gh-eyebrow {

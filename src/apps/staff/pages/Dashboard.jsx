@@ -159,9 +159,9 @@ export default function Dashboard() {
       onClick: () => navigate('/appointments/today'),
     },
     {
-      eyebrow: 'Controllo business',
-      title: 'Report incassi',
-      description: 'KPI settimanali, grafico e dettaglio delle visite',
+      eyebrow: 'Come è andata',
+      title: 'Come è andata',
+      description: 'Cani passati e incassato, settimana per settimana',
       metric: 'Ultimi 7 giorni',
       icon: 'sparkle',
       accent: 'var(--color-success-text)',

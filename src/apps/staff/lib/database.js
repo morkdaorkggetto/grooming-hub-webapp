@@ -1019,13 +1019,12 @@ export const getPublicPetCardByToken = async (qrToken) => {
   return data;
 };
 
-export const getWeeklyRevenueReport = async ({ from, to }) => {
-  if (!from || !to) throw new Error('Intervallo date non valido');
+export const getRevenueReportData = async () => {
   const { tenantId } = await requireStaff();
   const { data, error } = await supabase.from('visits').select(`
     id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent,
-    pet:pets(id, name, breed, customer:customers(id, first_name, last_name, phone))
-  `).eq('tenant_id', tenantId).gte('date', from).lte('date', to).order('date');
+    pet:pets(id, name, breed, photo_url, customer:customers(id, first_name, last_name, phone))
+  `).eq('tenant_id', tenantId).order('date');
   if (error) throw new Error(`Non riesco a caricare il report incassi: ${error.message}`);
   return (data || []).map((visit) => {
     const pet = mapPet(relation(visit.pet));
