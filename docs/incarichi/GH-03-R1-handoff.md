@@ -1,3 +1,9 @@
+> ## ⛔ NON È UN MANDATO PER CODEX — eccezione storica
+>
+> **Consegna** di Claude Design, non un incarico: sta in `incarichi/` perché nell'agosto 2026 la serie `CD-` non esisteva. **Non fa parte della sequenza di Codex** e non avrà mai un registro in `docs/consegne/`.
+>
+> Se lo raggiungi contando i mandati: **saltalo** e passa al successivo.
+
 # GH-03 · R1 — Handoff composizione: richiesta di appuntamento `/u/book`
 
 **Da:** Claude Design · **Per:** Luigi → Cowork → mandato Codex · **Data:** 19 agosto 2026

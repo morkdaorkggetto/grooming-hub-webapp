@@ -1,3 +1,9 @@
+> ## ⛔ NON È UN MANDATO PER CODEX — eccezione storica
+>
+> Brief per **Claude Design**, scritto il 18 agosto quando la serie `CD-` non esisteva ancora e i suoi incarichi vivevano dentro la numerazione `GH-`. Non si rinomina — è citato da troppi registri — ma **non fa parte della sequenza di Codex** e non avrà mai un registro in `docs/consegne/`.
+>
+> Se lo raggiungi contando i mandati: **saltalo** e passa al successivo.
+
 # Incarico GH-03 — Brief per Claude Design: wizard prenotazione + calibrazione Scheda pet
 
 **Per:** Claude Design (CD) · **Da:** Luigi (via Cowork) · **Data:** 18 agosto 2026

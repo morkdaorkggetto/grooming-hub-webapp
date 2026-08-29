@@ -136,6 +136,42 @@ Ogni mandato che tocca una **superficie visibile** si chiude con una lista corta
 
 Misurato il 29/8: tre difetti reali — un allineamento, un ritorno mancante, un separatore delle migliaia assente in produzione — trovati tutti **aprendo l'app e guardandola**. Nessuno dei tre rompe qualcosa, quindi nessuna suite li avrebbe visti. Fino a quel giorno quel gesto non aveva un posto nel metodo: capitava.
 
+### Regola permanente (29/8) — `supabase db push` non si usa mai sulla produzione
+
+**Il registro delle migration della produzione non coincide con i nomi dei file nel repository, e non coinciderà mai.** Verificato il 29/8:
+
+- la catena di G6 è memorizzata in produzione come `g6_04` … `g6_45`, applicata atto per atto la notte del 28 agosto, mentre nel repository quegli stessi atti hanno nomi diversi;
+- le due migration del 29/8 applicate da Cowork portano i nomi giusti ma **versioni diverse** da quelle dei file locali (`20260829093832` contro `091550`, `102147` contro `100319`), perché la versione la assegna il servizio al momento dell'applicazione.
+
+**Conseguenza**: un `supabase db push` contro la produzione considererebbe l'intera catena come non applicata e **proverebbe a rieseguirla** — comprese le cancellazioni di G6, fra cui l'eliminazione della tabella `clients`. Non è un fastidio di allineamento: è una perdita di dati.
+
+**Regola**: sulla produzione le migration si applicano **una alla volta e nominativamente**, mai in blocco, mai per sincronizzazione automatica. Il divieto era già in `GH-31` per una ragione diversa — l'ordine lessicale sbagliato — e da oggi ne regge anche questa.
+
+**Conseguenza sul demo**: lì il disallineamento va invece **corretto**, rinominando il file locale perché coincida con la versione registrata. Il demo si ricostruisce, la produzione no.
+
+### Correzione del 29/8 (decisione Luigi) — «il mandato successivo», non «l'ultimo elaborato»
+
+**La formula cambia.** Dal 29 agosto l'ordine generico a Codex è:
+
+> Esegui **il mandato successivo**.
+
+**Definizione**: il `GH-NN` **più basso** presente in `docs/incarichi/` che non abbia un registro corrispondente in `docs/consegne/` e non porti un blocco `⛔` in testa.
+
+**Perché.** *«Ultimo elaborato»* significava il numero **più alto** senza registro, e chiedeva a chi lo leggeva di calcolare qualcosa. Il 29 agosto è stato frainteso due volte in poche ore, in due modi diversi:
+
+- Codex ha cercato il numero più alto **in assoluto**, l'ha trovato chiuso e ha concluso che non ci fosse altro da fare — invece del più alto **privo di registro**;
+- con due mandati aperti contemporaneamente, `GH-39` e `GH-40`, l'ordine generico ha preso il 40 e **lasciato indietro il 39 in silenzio**. Prima ancora era quasi successo con il 37.
+
+I numeri sono progressivi: **«il successivo» è l'unica lettura che non ha bisogno di essere spiegata.** Chiede di contare, non di calcolare. E rende sicuro lasciare più mandati aperti: vengono eseguiti in ordine invece di scavalcarsi.
+
+**Cosa la sequenza salta**, e deve dichiararlo:
+
+- i mandati con `⛔ NON ESEGUIBILE SU ORDINE GENERICO` — produzione, o cancelli non soddisfatti;
+- i mandati **assorbiti** da uno successivo, che portano lo stesso blocco (esempio: `GH-36`, assorbito in `GH-38`);
+- le **eccezioni storiche** della serie `CD-` finite dentro la numerazione `GH-` prima che le due serie esistessero — `GH-03-brief-claude-design.md` e `GH-03-R1-handoff.md` — che dal 29/8 portano in testa `⛔ NON È UN MANDATO PER CODEX` e non avranno mai un registro.
+
+**Conseguenza operativa**: un mandato che resta senza registro e senza blocco **ferma la sequenza**, e questo è il comportamento voluto. Un mandato dimenticato deve diventare visibile, non essere scavalcato.
+
 ### Eccezione: mandati depositati ma non attivati (24/8)
 
 Un mandato può essere **scritto in anticipo** e restare in attesa di condizioni
