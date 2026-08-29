@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useUnsavedChanges } from '../../../shared/navigation/UnsavedChangesProvider';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
+import { getTenantWhatsAppPhone } from '../../../shared/tenant/contact';
 import {
   getBookingSchedule,
   getDateClosure,
@@ -141,8 +142,9 @@ function LoadingBook() {
   );
 }
 
-function BookingResult({ submission }) {
+function BookingResult({ submission, salonPhone }) {
   const whatsappUrl = getCustomerAppointmentRequestWhatsAppUrl({
+    salonPhone,
     petName: submission.pet.name,
     desiredDate: submission.desiredDate,
     serviceName: submission.service.name,
@@ -168,9 +170,11 @@ function BookingResult({ submission }) {
           <SummaryRow label="Preferenza" value={submission.timePreference?.label || 'Nessuna preferenza'} />
         </Card>
         <div className="gh-book-result-actions">
-          <a className="gh-book-whatsapp-button" href={whatsappUrl} target="_blank" rel="noreferrer">
-            <Icon name="whatsapp" size={18} /> Scrivici su WhatsApp
-          </a>
+          {whatsappUrl ? (
+            <a className="gh-book-whatsapp-button" href={whatsappUrl} target="_blank" rel="noreferrer">
+              <Icon name="whatsapp" size={18} /> Scrivici su WhatsApp
+            </a>
+          ) : null}
           <Link className="gh-book-ghost-link" to="/u/home">Torna alla home</Link>
         </div>
         <p className="gh-book-calendar-note">
@@ -324,9 +328,14 @@ export default function Book() {
   };
 
   if (authLoading || petsLoading || servicesLoading || requestsLoading) return <LoadingBook />;
-  if (submission) return <BookingResult submission={submission} />;
+  const salonPhone = getTenantWhatsAppPhone(tenant);
 
-  const whatsappFallback = getPublicGroomingHubWhatsAppUrl({ petName: selectedPet?.name });
+  if (submission) return <BookingResult submission={submission} salonPhone={salonPhone} />;
+
+  const whatsappFallback = getPublicGroomingHubWhatsAppUrl({
+    salonPhone,
+    petName: selectedPet?.name,
+  });
 
   return (
     <main className="gh-book-page">
@@ -347,9 +356,11 @@ export default function Book() {
           <Card padding={28} radius="lg" style={{ maxWidth: 620, borderRadius: 20 }}>
             <h2 className="gh-book-empty-title">Qui non carica, ma noi ci siamo.</h2>
             <p className="gh-book-empty-copy">Scrivici su WhatsApp e prenotiamo a voce, come sempre.</p>
-            <a className="gh-book-whatsapp-button" href={whatsappFallback} target="_blank" rel="noreferrer">
-              <Icon name="whatsapp" size={18} /> Scrivici su WhatsApp
-            </a>
+            {whatsappFallback ? (
+              <a className="gh-book-whatsapp-button" href={whatsappFallback} target="_blank" rel="noreferrer">
+                <Icon name="whatsapp" size={18} /> Scrivici su WhatsApp
+              </a>
+            ) : null}
           </Card>
         ) : (
           <form className="gh-book-layout" onSubmit={handleSubmit}>

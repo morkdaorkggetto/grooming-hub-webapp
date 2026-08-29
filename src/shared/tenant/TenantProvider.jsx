@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabase/client';
 import { useAuth } from '../auth/AuthProvider';
+import { PILOT_TENANT_SLUG } from './config';
 
 /**
  * TenantProvider — risolve il tenant corrente.
@@ -15,8 +16,6 @@ import { useAuth } from '../auth/AuthProvider';
  *
  * Espone: { tenant, tenantId, loading }.
  */
-
-const PILOT_TENANT_SLUG = 'grooming-hub';
 
 const TenantContext = createContext(null);
 

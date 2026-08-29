@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getClientCardByToken } from '../lib/database';
+import ClientQrImage from '../components/ClientQrImage';
 import {
   getClientCardCode,
   getClientQrImageUrl,
@@ -95,7 +96,8 @@ export default function ClientCard() {
     setError('');
 
     try {
-      const qrImage = await loadImage(getClientQrImageUrl(client.qr_token, 900));
+      const qrDataUrl = await getClientQrImageUrl(client.qr_token, 900);
+      const qrImage = await loadImage(qrDataUrl);
 
       const canvas = document.createElement('canvas');
       const width = 1180;
@@ -235,8 +237,9 @@ export default function ClientCard() {
             </div>
 
             <aside className="gh-print-card__qr">
-              <img
-                src={getClientQrImageUrl(client.qr_token, 280)}
+              <ClientQrImage
+                qrToken={client.qr_token}
+                size={280}
                 alt={`QR ${client.name}`}
                 className="gh-print-card__qr-image"
               />

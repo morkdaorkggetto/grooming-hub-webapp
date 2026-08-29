@@ -1,4 +1,5 @@
 import { supabase, getCurrentUser } from '../../../shared/supabase/client';
+import { PILOT_TENANT_SLUG } from '../../../shared/tenant/config';
 import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from './demoMode';
 import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 
@@ -1017,6 +1018,14 @@ export const getPublicPetCardByToken = async (qrToken) => {
   if (error) throw new Error(`Non riesco a caricare la card pubblica: ${error.message}`);
   if (!data) throw new Error('Card cliente non disponibile');
   return data;
+};
+
+export const getPublicSalonIdentity = async () => {
+  const { data, error } = await supabase.rpc('get_public_salon_identity', {
+    p_tenant_slug: PILOT_TENANT_SLUG,
+  });
+  if (error) throw new Error(`Non riesco a caricare il contatto del salone: ${error.message}`);
+  return data || null;
 };
 
 export const getRevenueReportData = async ({ from = null, to = null } = {}) => {

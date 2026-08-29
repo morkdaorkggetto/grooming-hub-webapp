@@ -1,4 +1,5 @@
-const QR_BASE_URL = 'https://api.qrserver.com/v1/create-qr-code/';
+import createQrCode from 'qrcode-generator';
+
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
 const getOrigin = () => {
@@ -41,9 +42,40 @@ export const getClientCardUrl = (qrToken, options = {}) => {
   return `${origin}${getClientCardPath(qrToken, options)}`;
 };
 
-export const getClientQrImageUrl = (qrToken, size = 240) => {
+export const getClientQrImageUrl = async (qrToken, size = 240) => {
   const targetUrl = getPublicPetUrl(qrToken);
-  return `${QR_BASE_URL}?size=${size}x${size}&data=${encodeURIComponent(targetUrl)}`;
+  const qr = createQrCode(0, 'M');
+  qr.addData(targetUrl);
+  qr.make();
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Canvas non disponibile per generare il QR.');
+
+  const outputSize = Math.max(1, Math.round(Number(size) || 240));
+  const margin = 4;
+  const moduleCount = qr.getModuleCount();
+  const gridSize = moduleCount + margin * 2;
+  const scale = outputSize / gridSize;
+
+  canvas.width = outputSize;
+  canvas.height = outputSize;
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, outputSize, outputSize);
+  context.fillStyle = '#2b2525';
+
+  for (let row = 0; row < moduleCount; row += 1) {
+    for (let column = 0; column < moduleCount; column += 1) {
+      if (!qr.isDark(row, column)) continue;
+      const left = Math.round((column + margin) * scale);
+      const top = Math.round((row + margin) * scale);
+      const right = Math.round((column + margin + 1) * scale);
+      const bottom = Math.round((row + margin + 1) * scale);
+      context.fillRect(left, top, right - left, bottom - top);
+    }
+  }
+
+  return canvas.toDataURL('image/png');
 };
 
 export const getClientCardCode = (qrToken) => {

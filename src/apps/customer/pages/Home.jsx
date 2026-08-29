@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useAuth } from '../../../shared/auth/AuthProvider';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
+import { getTenantWhatsAppPhone } from '../../../shared/tenant/contact';
 import { usePets } from '../hooks/usePets';
 import { useNextAppointment } from '../hooks/useNextAppointment';
 import { usePromotions } from '../hooks/usePromotions';
@@ -15,6 +16,7 @@ import Eyebrow from '../../../shared/ui/Eyebrow';
 import Icon from '../../../shared/ui/Icon';
 import Skeleton from '../../../shared/ui/Skeleton';
 import StatusBadge from '../../../shared/ui/StatusBadge';
+import { buildWhatsAppUrl } from '../../staff/lib/whatsapp';
 
 /**
  * /u/home — Dashboard customer reale.
@@ -34,11 +36,6 @@ import StatusBadge from '../../../shared/ui/StatusBadge';
  *   - Card row: Pet card / Next appt card / Mini-promo (top 3, silenzioso se 0)
  *   - Empty states (decisione 9 Gate 2 sui pet)
  */
-
-const SALON_WHATSAPP = '+393331112233';
-const SALON_WHATSAPP_URL = `https://wa.me/${SALON_WHATSAPP.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-  'Ciao! Vorrei aggiungere il mio pet alla scheda del salone.'
-)}`;
 
 const DAY_FMT = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 const TIME_FMT = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' });
@@ -138,6 +135,10 @@ export default function Home() {
   const rejectedRequest = requests.find((request) => request.status === 'rejected') || null;
   const pendingPetIds = new Set(requests.filter((request) => request.status === 'pending').map((request) => request.pet_id));
   const bookingPet = pets?.find((pet) => !pendingPetIds.has(pet.id)) || null;
+  const salonWhatsAppUrl = buildWhatsAppUrl(
+    getTenantWhatsAppPhone(tenant),
+    'Ciao! Vorrei aggiungere il mio pet alla scheda del salone.'
+  );
   const requestPetName = pendingRequest?.pet?.name || 'il tuo pet';
 
   // Loading state generale
@@ -285,12 +286,14 @@ export default function Home() {
                 Non hai ancora un pet registrato. Per aggiungerlo, contatta il
                 salone direttamente.
               </p>
-              <a href={SALON_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                <span style={primaryBtnStyle}>
-                  <Icon name="whatsapp" size={16} />
-                  Scrivici su WhatsApp
-                </span>
-              </a>
+              {salonWhatsAppUrl ? (
+                <a href={salonWhatsAppUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <span style={primaryBtnStyle}>
+                    <Icon name="whatsapp" size={16} />
+                    Scrivici su WhatsApp
+                  </span>
+                </a>
+              ) : null}
             </Card>
           )}
 

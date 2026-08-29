@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>CD-04 · La card pubblica del cane · composizione</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #root { width: 100vw; height: 100vh; overflow: hidden; }
+  em { font-style: italic; }
+  a { color: var(--color-link); }
+  a:hover { color: var(--color-primary-hover); }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><rect x="86" y="34" width="68" height="92" rx="10" fill="#fbf6f3"/><circle cx="120" cy="66" r="17" fill="none" stroke="#6f9792" stroke-width="2"/><circle cx="120" cy="66" r="11" fill="rgba(111,151,146,.18)"/><rect x="102" y="90" width="36" height="6" rx="3" fill="#2b2525"/><rect x="98" y="106" width="44" height="12" rx="6" fill="#6f9792"/></svg>
+</template>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+<script type="text/babel" src="cd01-cal-note.jsx"></script>
+<script type="text/babel" src="cd04-card-kit.jsx"></script>
+<script type="text/babel" src="cd04-card-viste.jsx"></script>
+<script type="text/babel" src="cd04-card-note.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const Center = ({ children }) => (
+    <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>
+  );
+  const App = () => (
+    <DesignCanvas>
+      <DCSection
+        id="cd04-norma"
+        title="CD-04 · Il caso normale: telefono, nessuna foto, nessun livello"
+        subtitle="240 cani su 282 non hanno foto e nessun cliente può vedere altro che Livello Base. Non è una card con la foto e un caso limite senza: è una card senza foto, con una minoranza fortunata che ce l’ha. Composta a 390 e allargata — l’inverso della regola del gestionale."
+      >
+        <DCArtboard id="norma" label="390 · la norma — 3 visite, ritratto generico" width={480} height={900}>
+          <Center><CardNorma/></Center>
+        </DCArtboard>
+        <DCArtboard id="prima" label="390 · zero visite — il cartoncino gira prima" width={480} height={900}>
+          <Center><CardPrima/></Center>
+        </DCArtboard>
+        <DCArtboard id="foto" label="390 · la minoranza fortunata — foto e un livello vero" width={480} height={900}>
+          <Center><CardFoto/></Center>
+        </DCArtboard>
+        <DCArtboard id="accesso" label="390 · chi ha già l’accesso — cambia solo il secondo gesto" width={480} height={900}>
+          <Center><CardAccesso/></Center>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd04-confronto"
+        title="CD-04 · Prima e dopo"
+        subtitle="A sinistra la pagina in circolazione: undici colori scritti a mano, e la metà inferiore che dice tre volte «sei lontano» a uno sconosciuto. A destra la stessa pagina quando la metà inferiore diventa una riga vera."
+      >
+        <DCArtboard id="old" label="390 · oggi, in circolazione" width={480} height={900}>
+          <Center><CardPrimaVeste/></Center>
+        </DCArtboard>
+        <DCArtboard id="new" label="390 · la proposta" width={480} height={900}>
+          <Center><CardNorma/></Center>
+        </DCArtboard>
+        <DCArtboard id="larga" label="Schermo largo · la card si centra, non si divide" width={1000} height={800}>
+          <CardLarga/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd04-domande"
+        title="CD-04 · Le quattro domande"
+        subtitle="Tre secondi, a chi serve, il telefono come caso normale, il secondo stato."
+      >
+        <DCArtboard id="dom" label="Risposte alle quattro domande" width={1280} height={720}>
+          <CD4_Domande/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd04-fedelta"
+        title="CD-04 · La progressione fedeltà"
+        subtitle="Non chiedete di aggiustare la barra, ma di dire se quel blocco debba essere il protagonista. Risposta: no — e cosa dovrebbero valere le soglie per essere una promessa e non una distanza."
+      >
+        <DCArtboard id="fed" label="Il blocco fedeltà · e la proposta 3 / 6 / 10" width={1280} height={720}>
+          <CD4_Fedelta/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd04-colori"
+        title="CD-04 · Gli undici colori e il verde del pulsante"
+        subtitle="Zero token nuovi: i tre metalli erano già dichiarati dal giro GH-15."
+      >
+        <DCArtboard id="col" label="Gli undici colori · la decisione sul verde" width={1280} height={640}>
+          <CD4_Colori/>
+        </DCArtboard>
+        <DCArtboard id="campi" label="Campi ⚠ · domande aperte" width={1280} height={680}>
+          <CD4_Campi/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={44} y={44} width={340}>
+        <strong>CD-04 · La card pubblica</strong><br/><br/>
+        Prima pagina di questo progetto che <strong>non parla a chi ci lavora</strong>. Vocabolario app clienti, voce del salone: «noi», mai «voi».<br/><br/>
+        Le decisioni:<br/>
+        · <strong>Prima il nome del salone.</strong> Chi ha inquadrato un cartoncino non sa dove è finito. Il nome del cane non è l’informazione, è <em>la prova</em> che il riconoscimento è vero.<br/>
+        · <strong>Le tre barre diventano una riga.</strong> «È venuto 3 volte da noi.» Vera, già mantenuta, un ventesimo dello spazio. A zero visite: «La prima volta è la prossima.»<br/>
+        · <strong>I livelli restano, ma non al centro</strong> — un segno in metallo accanto al nome, per l’unica persona su 282 che ce l’ha.<br/>
+        · <strong>Un solo pulsante pieno</strong>, WhatsApp. Tutto ciò che non porta a quel gesto è arredamento.<br/>
+        · <strong>Niente verde di WhatsApp</strong>: questa è l’unica superficie del salone che il cliente vede per mesi. Dove porta lo dice il glifo.<br/>
+        · <strong>Target a 54px, non 44</strong>: qui non c’è un banco, c’è una mano sola e un cane che tira.<br/><br/>
+        <strong>Zero token nuovi</strong> — i tre metalli erano già dichiarati.<br/><br/>
+        Per il salone: <strong>3 / 6 / 10</strong>. Una soglia è una promessa solo se qualcuno l’ha già superata.
+      </DCPostIt>
+    </DesignCanvas>
+  );
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

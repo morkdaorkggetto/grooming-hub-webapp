@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createCustomerAppointmentRequest, getCustomerPortalData } from '../lib/database';
 import { logout } from '../../../shared/supabase/client';
+import { useTenant } from '../../../shared/tenant/TenantProvider';
+import { getTenantWhatsAppPhone } from '../../../shared/tenant/contact';
 import {
   getBoutiqueOrderWhatsAppUrl,
   getCustomerAppointmentRequestWhatsAppUrl,
@@ -332,12 +334,12 @@ function PetAvatar({ client, size = 'large' }) {
   );
 }
 
-function HomeView({ client, onNavigate }) {
+function HomeView({ client, onNavigate, salonPhone }) {
   const fidelity = useMemo(() => getFidelityTierSnapshot(client), [client]);
   const tierKey = fidelity.currentTier?.key || 'base';
   const pendingRequests = getPendingRequests(client);
   const recentAppointments = getSortedAppointments(client).slice(0, 3);
-  const whatsappUrl = getPublicGroomingHubWhatsAppUrl({ petName: client.name });
+  const whatsappUrl = getPublicGroomingHubWhatsAppUrl({ salonPhone, petName: client.name });
 
   return (
     <div className="space-y-6">
@@ -419,15 +421,17 @@ function HomeView({ client, onNavigate }) {
             >
               Nuova richiesta
             </button>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="w-full rounded-xl px-5 py-3 font-bold text-center text-white"
-              style={{ backgroundColor: '#16a34a' }}
-            >
-              WhatsApp
-            </a>
+            {whatsappUrl ? (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full rounded-xl px-5 py-3 font-bold text-center text-white"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+              >
+                WhatsApp
+              </a>
+            ) : null}
           </div>
         </div>
       </section>
@@ -565,6 +569,7 @@ function StatTile({ label, value }) {
 
 function BookingView({
   client,
+  salonPhone,
   onRequestAppointment,
   requestNotice,
   isRequestSubmitting = false,
@@ -605,6 +610,7 @@ function BookingView({
 
     if (ok) {
       const whatsappUrl = getCustomerAppointmentRequestWhatsAppUrl({
+        salonPhone,
         petName: client.name,
         date,
         time: selectedSlot.time,
@@ -881,11 +887,11 @@ function AppointmentListItem({ appointment, compact = false }) {
   );
 }
 
-function BoutiqueView({ client, cartItems, onAddToCart, onRemoveFromCart, onCheckout }) {
+function BoutiqueView({ client, salonPhone, cartItems, onAddToCart, onRemoveFromCart, onCheckout }) {
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const fidelity = getFidelityTierSnapshot(client);
   const hasPerk = fidelity.currentTier?.key === 'gold' || fidelity.currentTier?.key === 'silver';
-  const checkoutUrl = getBoutiqueOrderWhatsAppUrl({ petName: client.name, items: cartItems });
+  const checkoutUrl = getBoutiqueOrderWhatsAppUrl({ salonPhone, petName: client.name, items: cartItems });
 
   return (
     <div className="grid lg:grid-cols-[1fr_340px] gap-5">
@@ -999,16 +1005,18 @@ function BoutiqueView({ client, cartItems, onAddToCart, onRemoveFromCart, onChec
               ) : null}
             </div>
 
-            <a
-              href={checkoutUrl}
-              target="_blank"
-              rel="noreferrer"
-              onClick={onCheckout}
-              className="block w-full rounded-xl px-4 py-3 text-center font-bold text-white"
-              style={{ backgroundColor: '#16a34a' }}
-            >
-              Richiedi su WhatsApp
-            </a>
+            {checkoutUrl ? (
+              <a
+                href={checkoutUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={onCheckout}
+                className="block w-full rounded-xl px-4 py-3 text-center font-bold text-white"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+              >
+                Richiedi su WhatsApp
+              </a>
+            ) : null}
           </div>
         )}
       </aside>
@@ -1016,7 +1024,7 @@ function BoutiqueView({ client, cartItems, onAddToCart, onRemoveFromCart, onChec
   );
 }
 
-function ProfileView({ client, demoPreview }) {
+function ProfileView({ client, demoPreview, salonPhone }) {
   const fidelity = useMemo(() => getFidelityTierSnapshot(client), [client]);
   const tierKey = fidelity.currentTier?.key || 'base';
 
@@ -1062,15 +1070,17 @@ function ProfileView({ client, demoPreview }) {
             Azioni rapide
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
-            <a
-              href={getPublicGroomingHubWhatsAppUrl({ petName: client.name })}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-xl px-4 py-3 text-center font-bold text-white"
-              style={{ backgroundColor: '#16a34a' }}
-            >
-              Scrivi allo staff
-            </a>
+            {salonPhone ? (
+              <a
+                href={getPublicGroomingHubWhatsAppUrl({ salonPhone, petName: client.name })}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-xl px-4 py-3 text-center font-bold text-white"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+              >
+                Scrivi allo staff
+              </a>
+            ) : null}
             <button
               type="button"
               className="rounded-xl px-4 py-3 text-center font-bold border"
@@ -1104,6 +1114,8 @@ function ProfileRow({ label, value }) {
 
 export default function CustomerPortal({ demoPreview = false }) {
   const navigate = useNavigate();
+  const { tenant } = useTenant();
+  const salonPhone = getTenantWhatsAppPhone(tenant);
   const [clients, setClients] = useState([]);
   const [activeSection, setActiveSection] = useState('home');
   const [activeClientId, setActiveClientId] = useState('');
@@ -1311,7 +1323,7 @@ export default function CustomerPortal({ demoPreview = false }) {
         ) : (
           <>
             {activeSection === 'home' ? (
-              <HomeView client={activeClient} onNavigate={setActiveSection} />
+              <HomeView client={activeClient} onNavigate={setActiveSection} salonPhone={salonPhone} />
             ) : null}
             {activeSection === 'pet' ? (
               <PetDetailView client={activeClient} onNavigate={setActiveSection} />
@@ -1319,6 +1331,7 @@ export default function CustomerPortal({ demoPreview = false }) {
             {activeSection === 'booking' ? (
               <BookingView
                 client={activeClient}
+                salonPhone={salonPhone}
                 onRequestAppointment={handleRequestAppointment}
                 requestNotice={requestNoticeByClient[activeClient.id]}
                 isRequestSubmitting={submittingClientId === activeClient.id}
@@ -1327,6 +1340,7 @@ export default function CustomerPortal({ demoPreview = false }) {
             {activeSection === 'shop' ? (
               <BoutiqueView
                 client={activeClient}
+                salonPhone={salonPhone}
                 cartItems={cartItems}
                 onAddToCart={handleAddToCart}
                 onRemoveFromCart={handleRemoveFromCart}
@@ -1337,7 +1351,7 @@ export default function CustomerPortal({ demoPreview = false }) {
               <HistoryView client={activeClient} />
             ) : null}
             {activeSection === 'profile' ? (
-              <ProfileView client={activeClient} demoPreview={demoPreview} />
+              <ProfileView client={activeClient} demoPreview={demoPreview} salonPhone={salonPhone} />
             ) : null}
           </>
         )}

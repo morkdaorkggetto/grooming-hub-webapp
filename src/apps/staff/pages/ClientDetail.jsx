@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ImageCropModal from '../components/ImageCropModal';
+import ClientQrImage from '../components/ClientQrImage';
 import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {
   Button,
@@ -36,7 +37,6 @@ import {
   getClientCardCode,
   getClientCardPath,
   getClientCardUrl,
-  getClientQrImageUrl,
 } from '../lib/qrCode';
 import { getClientWhatsAppUrl, getCustomerInviteWhatsAppUrl } from '../lib/whatsapp';
 
@@ -543,7 +543,7 @@ export default function ClientDetail() {
             </div>
             {client.qr_token && (
               <div className="gh-qr-image">
-                <img src={getClientQrImageUrl(client.qr_token, 180)} alt={`QR ${client.name}`} />
+                <ClientQrImage qrToken={client.qr_token} size={180} alt={`QR ${client.name}`} />
               </div>
             )}
           </div>

@@ -66,10 +66,6 @@ const formatAppointmentRange = ({ scheduledAt, date, time, durationMinutes = 60 
   return `${formatDateTime(start)}-${endTime}`;
 };
 
-const DEFAULT_PUBLIC_GROOMING_HUB_PHONE = '393332979797';
-const PUBLIC_GROOMING_HUB_PHONE =
-  import.meta.env.VITE_PUBLIC_GROOMING_WHATSAPP || DEFAULT_PUBLIC_GROOMING_HUB_PHONE;
-
 export const getClientWhatsAppUrl = (client) => {
   const ownerName = client?.owner || 'cliente';
   const petName = client?.name || 'il tuo cane';
@@ -98,6 +94,7 @@ export const getAppointmentWhatsAppUrl = (appointment) => {
 };
 
 export const getCustomerAppointmentRequestWhatsAppUrl = ({
+  salonPhone,
   petName,
   desiredDate,
   date,
@@ -118,7 +115,7 @@ export const getCustomerAppointmentRequestWhatsAppUrl = ({
     ? `Ciao, abbiamo appena inviato una richiesta per ${clientName}.${dateText} Preferenza oraria: ${requestedWindow}.${serviceText}${noteText}`
     : `Ciao, abbiamo appena inviato una richiesta per ${clientName}.${dateText}${serviceText}${noteText}`;
 
-  return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
+  return buildWhatsAppUrl(salonPhone, message);
 };
 
 export const getAppointmentApprovalWhatsAppMessage = (appointment, approvalStatus) => {
@@ -178,15 +175,15 @@ export const getCustomerDirectoryWhatsAppUrl = (customer) => {
   return buildWhatsAppUrl(customer?.phone, message);
 };
 
-export const getPublicGroomingHubWhatsAppUrl = ({ petName } = {}) => {
+export const getPublicGroomingHubWhatsAppUrl = ({ salonPhone, petName } = {}) => {
   const message = petName
     ? `Ciao, ti scriviamo per ${petName}.`
     : 'Ciao, vorremmo chiedervi un’informazione.';
 
-  return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
+  return buildWhatsAppUrl(salonPhone, message);
 };
 
-export const getBoutiqueOrderWhatsAppUrl = ({ petName, items = [] } = {}) => {
+export const getBoutiqueOrderWhatsAppUrl = ({ salonPhone, petName, items = [] } = {}) => {
   const itemText = items
     .map((item) => `${item.quantity}x ${item.name}`)
     .join(', ');
@@ -194,5 +191,5 @@ export const getBoutiqueOrderWhatsAppUrl = ({ petName, items = [] } = {}) => {
     ? `Ciao, per ${petName || 'il nostro cane'} vorremmo mettere da parte questi prodotti: ${itemText}.`
     : `Ciao, per ${petName || 'il nostro cane'} vorremmo informazioni sulla boutique.`;
 
-  return buildWhatsAppUrl(PUBLIC_GROOMING_HUB_PHONE, message);
+  return buildWhatsAppUrl(salonPhone, message);
 };
