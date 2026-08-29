@@ -106,6 +106,36 @@ Le misure di supporto prodotte da Cowork non sono incarichi e conservano il nome
 
 *Nato dalla domanda di Luigi del 24/8: «GH-15 è di CD?». Se la domanda si pone, il nome non sta facendo il suo lavoro.*
 
+### Affinamento del 29/8 — tre regole nate dall'atto G6
+
+Il bilancio della migrazione di produzione: **quattro arresti, nessun danno, nessun ripristino**. Ma **tre arresti su quattro** sono stati causati da errori di misura di Cowork, non da difetti della catena. Le tre regole seguenti nascono da lì.
+
+**3. Un traguardo si scrive come criterio, e come numero solo quando non se ne può fare a meno.**
+
+Il canone chiede a Codex di dichiarare invarianti invece di procedure. I mandati di Cowork facevano l'opposto: gli consegnavano **costanti congelate sullo stato del mondo** — 3 operatori, 462 visite, tre identificativi — cioè descrivevano lo stato invece del criterio. Ogni volta che il mondo era cambiato fra la misura e l'esecuzione, la catena si è fermata.
+
+La riprova sta dentro un file solo. Nell'atto 30 il **perimetro A** era selezionato per criterio misurabile e ha retto senza un graffio; il **perimetro B** era ancorato a identificativi osservati altrove e ha rotto la catena — su identificativi che **la catena stessa genera**, quindi irriproducibili per costruzione. Il mandato GH-12 lo diceva già: *«selezionare per criterio misurabile, non per lista di id incollata dove è possibile»*. La parte che ha ceduto è la parte che disobbediva alla propria regola.
+
+Quindi: *«gli operatori legacy devono essere tanti quanti i proprietari di schede legacy»* invece di *«devono essere 3»*.
+
+**Quando il numero è inevitabile, porta con sé il proprio mondo**: quando è stato misurato e in quale stato. Un traguardo non è un numero — è un numero **più il momento in cui vale**. Senza quel momento accanto, è una trappola che scatta più tardi.
+
+**Corollario, valido per sempre**: nessun atto può fissare identificativi che un atto precedente della stessa catena genera. Se deve puntare a una riga nata dalla migrazione, la punta per criterio — un nome, un legame, una tabella che conserva i propri identificativi.
+
+**4. Forma breve per il lavoro senza rischio sui dati.**
+
+Non tutto merita la cerimonia della produzione. Per interventi su superfici in **sola lettura**, veste, parole e allineamenti — dove non esiste una scrittura, una migrazione o un dato in gioco — il mandato è una **lista numerata di voci, ciascuna con la causa già misurata**: dove sta, perché accade, cosa dev'essere vero dopo. Niente preamboli, nessuna regola d'ingresso ripetuta oltre la root e il perimetro.
+
+`GH-34` ci è arrivato da sé, per necessità. La ragione della regola è che senza una corsia leggera ogni cosa tende a diventare una pratica: la cerimonia **cresce in silenzio e somiglia alla documentazione utile**, e nessuno la pota perché potare sembra abbassare la guardia.
+
+Distinzione da tenere presente quando si valuta cosa scrivere: i documenti che **traducono** fra attori che parlano lingue diverse, e quelli che **provano** con misure, valgono sempre il loro costo. Quelli che si limitano a ripetere il contesto no.
+
+**5. Lo sguardo di Luigi è un passo dichiarato, non una fortuna.**
+
+Ogni mandato che tocca una **superficie visibile** si chiude con una lista corta di schermate da aprire, scritta da Cowork ed eseguita da Luigi, con la domanda giusta: non «funziona?» ma **«cosa non ti torna?»**.
+
+Misurato il 29/8: tre difetti reali — un allineamento, un ritorno mancante, un separatore delle migliaia assente in produzione — trovati tutti **aprendo l'app e guardandola**. Nessuno dei tre rompe qualcosa, quindi nessuna suite li avrebbe visti. Fino a quel giorno quel gesto non aveva un posto nel metodo: capitava.
+
 ### Eccezione: mandati depositati ma non attivati (24/8)
 
 Un mandato può essere **scritto in anticipo** e restare in attesa di condizioni
