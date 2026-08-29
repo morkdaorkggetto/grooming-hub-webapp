@@ -8,33 +8,41 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 28 agosto 2026, sera — dopo G6.*
+*Aggiornato il 29 agosto 2026, sera.*
 
-> # La produzione è multi-tenant.
+> # La produzione è multi-tenant, e il salone la sta usando.
 >
-> **G6 è stato eseguito e verificato la sera del 28 agosto 2026.** Il gestionale che Davide e Roby usano ogni giorno gira sul nuovo schema, con i dati veri: **260 clienti, 282 cani, 456 visite, 287 contatti**. L'app clienti ha una porta d'ingresso. La vecchia tabella `clients` non esiste più.
+> **G6 è stato eseguito la sera del 28 agosto.** Il gestionale gira sul nuovo schema con i dati veri, la vecchia tabella `clients` non esiste più, e l'app clienti ha una porta d'ingresso.
+>
+> **Il 29 agosto il salone ci ha lavorato dentro tutto il giorno.** Al mattino: 260 clienti, 282 cani, 456 visite, 5 appuntamenti. A fine giornata: **266 clienti, 288 cani, 458 visite, 14 appuntamenti** — e nove di quei quattordici sono nati oggi.
 
-**Come è andata.** Quattro arresti, nessun danno, nessun ripristino. La catena si è fermata agli atti 4, 21 e 30 e una quarta volta sul postflight delle note; ogni volta il database è rimasto esattamente allo stato precedente. **Tre arresti su quattro avevano la stessa causa: un numero misurato da Cowork in un mondo e congelato come traguardo di un altro.** Il quarto era un giudizio di merito di Codex su una policy transitoria, risolto misurando che non esisteva un solo account in grado di sfruttarla.
+**Il fatto della giornata non è un mandato: è che il calendario è tornato vivo.** Aveva 17 record in tutta la sua storia, tutti fra l'11 marzo e il 23 aprile, e zero da allora. Oggi Davide ci ha passato la giornata di lavoro. E da lì è arrivata la richiesta delle postazioni: non una domanda teorica, ma uno che stava usando lo strumento e ha sbattuto contro un muro.
 
-**Verifiche superate**: postflight conforme su tutte le cardinalità; suite API/RLS **14 PASS, 0 FAIL**; whitelist pet provata dal vivo; appuntamento riletto **3 settembre ore 09:15 Europe/Rome, 75 minuti** — la data non scivola più; sonde smontate, zero residui; Advisor Security 6 e Performance 112, coerenti con GH-10.
+> **Un dato mancante non è una preferenza espressa.** Per mesi abbiamo letto «17 appuntamenti e poi più nulla» come «il calendario non serve». Serviva: non era usabile.
 
-**Atto 49 — verifica dal vivo, superata su cinque schede**: Carnevale (due schede legacy fuse, due cani, tre visite), «vigilessa» (tre cani), «mamma parrucchiera» (due cani, foto), il cliente con sei visite e due foto, più la conferma che i quattro bagni del 25 agosto sono migrati con i loro 75 €.
+**Fatto il 29 agosto**: sette mandati chiusi — `GH-34` rifiniture, `CD-03`+`GH-35` modo mese, `CD-04`+`GH-38` card pubblica e identità, `GH-37` postazioni, `GH-39` avviso di carico, `GH-40` soglie fedeltà, `GH-41` avviso di doppione, `GH-42` risposte in ritardo del calendario. **Tre atti sulla produzione**, applicati da Cowork su autorizzazione esplicita di Luigi, sempre **prima** del frontend e mai dopo.
+
+**Quattro difetti trovati guardando, non leggendo**: l'insegna della card pubblica diceva «FROGLETINPOND» invece del nome del salone; un numero di telefono finto in produzione; il QR disegnato da un servizio esterno; il separatore delle migliaia assente. Nessuno rompeva niente — per questo nessuna suite li avrebbe visti.
 
 **Restano da fare, in ordine di importanza:**
 
 | # | Cosa | Chi |
 |---|---|---|
-| 1 | **Revocare a Codex l'accesso a `Webapp_Project`** — era per l'atto, non permanente | Luigi |
-| 2 | Rimuovere le due foto orfane via Storage API (percorsi nel §4 di `GH-12`) | Luigi |
-| 3 | Attivare «Leaked password protection» sul prod | Luigi |
-| 4 | Smontare `grooming-prova-generale` | Luigi |
-| 5 | Ripulire ~100 file duplicati con suffisso « 2» comparsi nel worktree, di cui 82 dentro `docs/` — **alla prossima `salva.sh` verrebbero raccolti come documenti veri** | Luigi |
+| 1 | Rimuovere le due foto orfane via Storage API (percorsi nel §4 di `GH-12`) | Luigi |
+| 2 | Attivare «Leaked password protection» sul prod | Luigi |
+| 3 | Smontare `grooming-prova-generale` | Luigi |
+| 4 | **Capienza a 3** quando apre la terza postazione — una riga di impostazioni, nessun rilascio | Cowork su richiesta |
+| 5 | **Schermata impostazioni del salone** — rinviata a dopo il 1° settembre per decisione di Luigi: prima una settimana d'uso, poi si sa cosa serve davvero | dopo il test |
 
-**La veste è completa.** `CD-02` e `GH-33` hanno chiuso il report incassi la notte fra il 28 e il 29 agosto: era l'ultima superficie vecchia, e con lei è sparita la fascia `AppHeader`. La mattina del 29, `GH-34` ha chiuso tre rifiniture e `CD-03`/`GH-35` hanno aggiunto il **modo mese** sulla stessa pagina, senza rotte nuove.
+*(Accesso di Codex alla produzione: revocato il 29/8 riportandolo sull'organizzazione del demo. Duplicati « 2» nel worktree: rimossi.)*
+
+**La veste è completa**, gestionale e card pubblica comprese. `CD-02`/`GH-33` hanno chiuso il report incassi, `CD-03`/`GH-35` gli hanno aggiunto il modo mese, `CD-04`/`GH-38` hanno vestito la card pubblica — l'unica superficie che un cliente vede per mesi, e l'ultima a non parlare la lingua del prodotto.
+
+**Quattro cose vivono ora in `tenants.settings`** e nessuna richiede una build per cambiare: giorni di chiusura, numero WhatsApp, capienza delle postazioni, soglie fedeltà. È il motivo per cui la schermata di impostazioni è diventata necessaria.
 
 **Code aperte, nessuna bloccante:**
 
-- **«Operatività giornaliera» guarda la tabella sbagliata per il passato.** Interroga gli appuntamenti, che sono **5 in tutto** e tutti fra l'11 marzo e il 23 aprile; da allora il salone registra il lavoro come visita — **253 visite dopo l'ultimo appuntamento**. Risultato: il 3 agosto la pagina dice «nessun appuntamento» mentre sono passati sei cani. Per le date passate deve mostrare le visite registrate. Sarà un `GH-` a sé.
+- **«Operatività giornaliera» guarda la tabella sbagliata per il passato.** Interroga gli appuntamenti, che erano **5** e tutti fra l'11 marzo e il 23 aprile; da allora il salone registra il lavoro come visita — **253 visite dopo l'ultimo appuntamento**. Il 3 agosto la pagina dice «nessun appuntamento» mentre sono passati sei cani. Per le date passate deve mostrare le visite registrate. Sarà un `GH-` a sé.
 - i contatti con lo stesso numero sotto lo stesso cliente si possono unire (si vede su Carnevale, la fusione lascia due righe identiche);
 - i «cognomi-numero» ereditati dal quaderno si possono ripulire;
 - un dubbio sulla ricerca staff — «mamma parrucchiera 340» non trova, «parrucchiera 340» sì — da riprodurre prima di chiamarlo difetto: il codice letto sembra reggere entrambe;
