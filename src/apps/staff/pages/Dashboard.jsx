@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, logout } from '../../../shared/supabase/client';
+import { useTenant } from '../../../shared/tenant/TenantProvider';
 import Icon from '../../../shared/ui/Icon';
 import {
   AreaTile,
@@ -45,6 +46,7 @@ const formatLastVisit = (dateString) => {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { tenant } = useTenant();
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +76,7 @@ export default function Dashboard() {
         case 'reliable':
           return (client.no_show_score ?? 0) >= 1;
         case 'fidelity':
-          return (client.visits?.length || 0) >= 12;
+          return Boolean(getFidelityTierSnapshot(client, tenant?.settings).currentTier);
         case 'blacklist':
           return Boolean(client.is_blacklisted);
         default:
@@ -83,7 +85,7 @@ export default function Dashboard() {
     });
 
     setFilteredClients(filtered);
-  }, [searchTerm, activeFilter, clients]);
+  }, [searchTerm, activeFilter, clients, tenant?.settings]);
 
   const loadClients = async () => {
     setLoading(true);
@@ -118,7 +120,9 @@ export default function Dashboard() {
   const totalVisits = clients.reduce((sum, client) => sum + (client.visits?.length || 0), 0);
   const blacklistedCount = clients.filter((client) => client.is_blacklisted).length;
   const reliableClients = clients.filter((client) => (client.no_show_score ?? 0) >= 1).length;
-  const fidelityClients = clients.filter((client) => (client.visits?.length || 0) >= 12).length;
+  const fidelityClients = clients.filter((client) =>
+    Boolean(getFidelityTierSnapshot(client, tenant?.settings).currentTier)
+  ).length;
 
   const statItems = [
     {
@@ -197,7 +201,7 @@ export default function Dashboard() {
   const clientRows = useMemo(
     () =>
       filteredClients.map((client) => {
-        const fidelity = getFidelityTierSnapshot(client);
+        const fidelity = getFidelityTierSnapshot(client, tenant?.settings);
         const score = client.no_show_score ?? 0;
         return {
           client,
@@ -207,7 +211,7 @@ export default function Dashboard() {
           lastVisit: formatLastVisit(client.last_visit_at),
         };
       }),
-    [filteredClients]
+    [filteredClients, tenant?.settings]
   );
 
   const heroRight = (

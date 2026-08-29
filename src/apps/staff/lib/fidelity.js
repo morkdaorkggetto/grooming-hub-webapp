@@ -1,10 +1,7 @@
-const FIDELITY_TIERS = [
+const FIDELITY_TIER_META = [
   {
     key: 'bronze',
     label: 'Bronzo',
-    visitsRequired: 12,
-    monthsWindow: 12,
-    pointsRequired: 100,
     activeBackground: '#f6e3cf',
     activeBorder: '#cd7f32',
     activeText: '#7c4a21',
@@ -12,9 +9,6 @@ const FIDELITY_TIERS = [
   {
     key: 'silver',
     label: 'Argento',
-    visitsRequired: 24,
-    monthsWindow: 24,
-    pointsRequired: 250,
     activeBackground: '#eef2f7',
     activeBorder: '#94a3b8',
     activeText: '#334155',
@@ -22,9 +16,6 @@ const FIDELITY_TIERS = [
   {
     key: 'gold',
     label: 'Oro',
-    visitsRequired: 36,
-    monthsWindow: 36,
-    pointsRequired: 500,
     activeBackground: '#fff3bf',
     activeBorder: '#d4a017',
     activeText: '#7a5c00',
@@ -53,12 +44,33 @@ const countVisitsInWindow = (visits = [], monthsWindow) => {
   }).length;
 };
 
-export const getFidelityTierSnapshot = (client) => {
+const toPositiveInteger = (value) => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
+export const getFidelityTiers = (settings) => {
+  const configured = settings?.fidelity_tiers;
+  if (!configured || typeof configured !== 'object' || Array.isArray(configured)) return [];
+
+  const tiers = FIDELITY_TIER_META.map((meta) => {
+    const threshold = configured[meta.key];
+    const visitsRequired = toPositiveInteger(threshold?.visits_required);
+    const monthsWindow = toPositiveInteger(threshold?.months_window);
+    const pointsRequired = toPositiveInteger(threshold?.points_required);
+    if (!visitsRequired || !monthsWindow || !pointsRequired) return null;
+    return { ...meta, visitsRequired, monthsWindow, pointsRequired };
+  });
+
+  return tiers.every(Boolean) ? tiers : [];
+};
+
+export const getFidelityTierSnapshot = (client, settings = client?.fidelitySettings) => {
   const visits = Array.isArray(client?.visits) ? client.visits : [];
   const rewardPointsTotal = Number(client?.rewardPointsTotal || 0);
   const hasRewardPoints = rewardPointsTotal > 0;
 
-  const tiers = FIDELITY_TIERS.map((tier) => {
+  const tiers = getFidelityTiers(settings).map((tier) => {
     const visitsInWindow = countVisitsInWindow(visits, tier.monthsWindow);
     const achievedByVisits = visitsInWindow >= tier.visitsRequired;
     const achievedByPoints = rewardPointsTotal >= tier.pointsRequired;

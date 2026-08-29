@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useTenant } from '../../../shared/tenant/TenantProvider';
 import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {
   Hero,
@@ -14,6 +15,7 @@ import { getFidelityTierSnapshot } from '../lib/fidelity';
 export default function AddVisit() {
   const { clientId } = useParams();
   const navigate = useNavigate();
+  const { tenant } = useTenant();
   const [searchParams] = useSearchParams();
   const appointmentId = searchParams.get('appointmentId') || '';
   const [client, setClient] = useState(null);
@@ -89,7 +91,7 @@ export default function AddVisit() {
     );
   }
 
-  const fidelity = client ? getFidelityTierSnapshot(client) : null;
+  const fidelity = client ? getFidelityTierSnapshot(client, tenant?.settings) : null;
 
   return (
     <div className="gh-page">

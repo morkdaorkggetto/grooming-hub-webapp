@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useTenant } from '../../../shared/tenant/TenantProvider';
 import ImageCropModal from '../components/ImageCropModal';
 import ClientQrImage from '../components/ClientQrImage';
 import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
@@ -64,6 +65,7 @@ export default function ClientDetail() {
   const { clientId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { tenant } = useTenant();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -355,7 +357,7 @@ export default function ClientDetail() {
   }
 
   const promo = getClientPromos(client);
-  const fidelity = getFidelityTierSnapshot(client);
+  const fidelity = getFidelityTierSnapshot(client, tenant?.settings);
   const currentTier = fidelity.currentTier?.key || 'base';
   const visitsTotal = client.visits?.length || 0;
   const visitsValue = client.visits?.reduce((sum, visit) => sum + Number(visit.cost || 0), 0) || 0;

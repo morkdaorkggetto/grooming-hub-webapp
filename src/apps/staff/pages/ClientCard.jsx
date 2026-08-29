@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { getClientCardByToken } from '../lib/database';
 import ClientQrImage from '../components/ClientQrImage';
 import {
@@ -53,6 +54,7 @@ const loadImage = (src) =>
 
 export default function ClientCard() {
   const navigate = useNavigate();
+  const { tenant } = useTenant();
   const { qrToken } = useParams();
   const [searchParams] = useSearchParams();
   const [client, setClient] = useState(null);
@@ -168,7 +170,7 @@ export default function ClientCard() {
     );
   }
 
-  const fidelity = getFidelityTierSnapshot(client);
+  const fidelity = getFidelityTierSnapshot(client, tenant?.settings);
   const fidelityTierKey = fidelity.currentTier?.key || 'base';
 
   return (

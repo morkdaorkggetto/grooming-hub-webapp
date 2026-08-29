@@ -1148,10 +1148,10 @@ export default function CustomerPortal({ demoPreview = false }) {
     loadPortal();
   }, []);
 
-  const activeClient = useMemo(
-    () => clients.find((client) => client.id === activeClientId) || clients[0] || null,
-    [clients, activeClientId]
-  );
+  const activeClient = useMemo(() => {
+    const client = clients.find((item) => item.id === activeClientId) || clients[0] || null;
+    return client ? { ...client, fidelitySettings: tenant?.settings } : null;
+  }, [clients, activeClientId, tenant?.settings]);
 
   const handleLogout = async () => {
     await logout();

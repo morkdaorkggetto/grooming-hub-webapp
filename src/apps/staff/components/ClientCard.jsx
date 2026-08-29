@@ -11,13 +11,13 @@ import { FidelityBadge, PetAvatar, StateTag } from './StaffKit';
  * Props:
  * - client: oggetto cliente con { id, name, breed, owner, photo, visits }
  */
-export default function ClientCard({ client }) {
+export default function ClientCard({ client, fidelitySettings }) {
   const visitsCount = client.visits?.length || 0;
   const visitsText =
     visitsCount === 1 ? `${visitsCount} visita` : `${visitsCount} visite`;
   const noShowScore = client.no_show_score ?? 0;
   const hasPhoto = Boolean(client.photo);
-  const fidelity = getFidelityTierSnapshot(client);
+  const fidelity = getFidelityTierSnapshot(client, fidelitySettings);
   const currentTierKey = fidelity.currentTier?.key || 'none';
   const stateClass = client.is_blacklisted ? 'danger' : noShowScore >= 1 ? 'success' : 'primary';
 
