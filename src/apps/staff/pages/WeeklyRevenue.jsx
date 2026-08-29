@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Eyebrow from '../../../shared/ui/Eyebrow';
 import Icon from '../../../shared/ui/Icon';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
@@ -189,7 +189,11 @@ const VisitLine = ({ visit, index }) => {
   const discountPercent = Number(visit.discount_percent) || 0;
   const pet = visit.pet || visit.client;
   return (
-    <div className={`gh-report-visit${zeroAmount ? ' gh-report-visit--zero' : ''}`}>
+    <Link
+      className={`gh-report-visit${zeroAmount ? ' gh-report-visit--zero' : ''}`}
+      to={`/client/${visit.pet_id || pet?.id}`}
+      aria-label={`Apri la scheda di ${pet?.name || 'questo cane'}`}
+    >
       <PetAvatar name={pet?.name || 'Pet'} photo={pet?.photo} size={30} />
       <div className="gh-report-visit__copy">
         <div className="gh-report-visit__identity">
@@ -212,7 +216,7 @@ const VisitLine = ({ visit, index }) => {
         {discountPercent > 0 && <span>Sconto {discountPercent}%</span>}
       </div>
       {index > 0 && <span className="sr-only">Visita {index + 1}</span>}
-    </div>
+    </Link>
   );
 };
 

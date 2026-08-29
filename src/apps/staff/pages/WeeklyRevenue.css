@@ -229,6 +229,19 @@
   align-items: center;
   gap: 13px;
   padding: 6px 16px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.gh-report-visit:hover {
+  background: var(--color-primary-alpha-06);
+}
+
+.gh-report-visit:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .gh-report-visit + .gh-report-visit {
@@ -237,6 +250,10 @@
 
 .gh-report-visit--zero {
   background: var(--color-border-alpha-12);
+}
+
+.gh-report-visit--zero:hover {
+  background: var(--color-primary-alpha-08);
 }
 
 .gh-report-visit__copy {

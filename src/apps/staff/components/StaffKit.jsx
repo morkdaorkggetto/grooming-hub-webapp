@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Button from '../../../shared/ui/Button';
 import Eyebrow from '../../../shared/ui/Eyebrow';
 import FidelityBadge from '../../../shared/ui/FidelityBadge';
@@ -9,10 +10,21 @@ import Skeleton from '../../../shared/ui/Skeleton';
 const joinClasses = (...classes) => classes.filter(Boolean).join(' ');
 
 export function Hero({ title, subtitle, right, className = '' }) {
+  const { pathname } = useLocation();
+  const brand = <Eyebrow staff accent>Grooming Hub</Eyebrow>;
+
   return (
     <header className={joinClasses('gh-hero', className)}>
       <div className="gh-hero__copy">
-        <Eyebrow staff accent>Grooming Hub</Eyebrow>
+        {pathname === '/dashboard' ? brand : (
+          <Link
+            className="gh-hero__brand-link"
+            to="/dashboard"
+            aria-label="Torna alla Dashboard"
+          >
+            {brand}
+          </Link>
+        )}
         <h1 className="gh-h1">{title}</h1>
         {subtitle && <p className="gh-hero__subtitle">{subtitle}</p>}
       </div>
