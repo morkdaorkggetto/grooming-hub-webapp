@@ -360,6 +360,50 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 29 agosto 2026, mezzogiorno — Il calendario è tornato vivo, e il salone lo ha detto senza dirlo
+
+**Nove appuntamenti creati oggi.** Il calendario aveva **17 record in tutta la sua storia**, tutti fra l'11 marzo e il 23 aprile, e **zero da allora** — era la ragione per cui CD-01 aveva potuto ripensarlo invece di rivestirlo: «nessuno ci ha costruito abitudini sopra».
+
+Oggi, il giorno dopo la migrazione e con la veste nuova, Davide ci ha passato la giornata di lavoro: nove appuntamenti fra le 9:30 e le 19:30, creati da operatore, alcuni già segnati come completati.
+
+**E spiega da dove veniva la segnalazione delle postazioni.** Al mattino Luigi aveva riportato: *«il salone ha tre postazioni, quindi la guardia che mi impedisce di collocare più di un pet nella stessa fascia ne deve tenere conto»*. Non era una richiesta teorica: era **uno che stava usando lo strumento e ha sbattuto contro il muro**. Il muro era la capienza uno, implicita nel fatto che bastava *un* conflitto per bloccare.
+
+> **La lezione, e vale oltre il calendario.** Per mesi abbiamo dedotto dall'assenza di dati che quella funzione non servisse. Serviva: non era usabile. **Un dato mancante non è una preferenza espressa** — è una domanda a cui non è ancora stato possibile rispondere.
+
+**`GH-37` — le postazioni.** Capienza in `tenants.settings`, non nel codice: cambierà da 2 a 3 per questo stesso salone entro settimane, e il prossimo salone avrà un altro numero. La regola giusta è il **picco di contemporaneità**, non il conteggio delle sovrapposizioni: se quattro lavorazioni toccano l'orario scelto ma non sono mai più di due insieme, con tre postazioni ci si sta. Risolta con un algoritmo a spazzata e un lock per tenant, **nel database**, perché il browser non è il confine: due dispositivi possono chiedere lo stesso posto e uno solo deve riuscire. Più una guardia che impedisce di **abbassare** la capienza sotto le lavorazioni già pianificate.
+
+**Secondo atto sulla produzione della giornata**, applicato da Cowork su autorizzazione di Luigi. Controllo preventivo: picco di contemporaneità **1** sui 14 appuntamenti esistenti, nessuna violazione. Dopo: capienza 2, entrambi i trigger presenti, dati intatti.
+
+**Terzo errore di misura di Cowork in due giorni, stessa famiglia.** Il mandato diceva «ci sono cinque appuntamenti, tutti passati»: era la misura della **produzione**, e Codex lavorava sul **demo**, dove sono otto. Ha segnalato lo scarto invece di adattarsi. Il numero era giusto, il mondo no — e non era scritto accanto.
+
+**Un difetto di `salva.sh`, e nasce da me.** Lo script protegge il *codice* in lavorazione di Codex — è nato proprio da quello — ma **non i suoi documenti**: `docs/` è dentro il perimetro «documenti», e Codex scrive il registro in `docs/consegne/` mentre lavora. Un salvataggio lanciato a metà giro ha catturato un registro `GH-37` di quindici righe che diceva «ricognizione in corso», rendendo il mandato **apparentemente chiuso**: con la regola dell'«ultimo elaborato» le postazioni sarebbero state saltate per sempre. Moncone rimosso, mandato rieseguito.
+
+**E la regola dell'«ultimo elaborato» è stata fraintesa per la prima volta.** Codex ha cercato il `GH-NN` **più alto**, l'ha trovato chiuso e ha concluso che non ci fosse altro — invece del più alto **privo di registro**. Non l'ha applicata male: l'ha letta in fretta, e la formulazione lo consente.
+
+**Stato della produzione a fine mattina**: 266 clienti, 288 cani, 458 visite, 14 appuntamenti — contro i 260 / 282 / 456 / 5 con cui era finita la migrazione la notte prima.
+
+### 29 agosto 2026, tarda mattina — Il salone non aveva un nome, e aveva due numeri di telefono
+
+Il giro nato da una domanda di Luigi — *«e sulla parte grafica?»* — ha scoperchiato tre difetti che nessuno stava cercando, tutti sulla **card pubblica**: l'unica superficie che un cliente vede per mesi, e l'unica mai passata da un giro di veste.
+
+**Il salone si chiamava «FROGLETINPOND».** La funzione pubblica costruiva l'insegna con `COALESCE(profiles.business_name, 'Grooming Hub')` unendo il **profilo dell'operatore che aveva creato la scheda**. E i tre profili contengono il prefisso dell'indirizzo email: `frogletinpond`, `ggetto`, `zavaroby`. Quindi ogni cliente che inquadrava un cartoncino leggeva in testa alla pagina l'email di una persona. Il nome vero — **«Grooming HUB»** — stava in `tenants.name` e non lo leggeva nessuno. **Si vedeva in uno screenshot che avevamo entrambi guardato senza notarlo.**
+
+**Due numeri di telefono diversi, uno finto.** Nel pacchetto in produzione: `393332979797` in `whatsapp.js` (usato dalla card) e **`+393331112233`** scritto a mano in `apps/customer/pages/Home.jsx` — un segnaposto, 333 111 22 33, che apriva WhatsApp verso un numero inesistente. Luigi ha confermato che il vero è il primo.
+
+**Il QR lo disegnava un servizio esterno.** `api.qrserver.com`, gratuito, interpellato a ogni visualizzazione e a ogni stampa: dipendenza da terzi per un gesto quotidiano, e il `qr_token` del cane che transitava da un fornitore mai scelto. Sostituito con una libreria locale — e Codex ne ha **scartata una prima**, MIT ma con dipendenze obsolete e dieci vulnerabilità, preferendo rifare il lavoro.
+
+**I token dei metalli non esistevano.** CD-04 dichiarava «zero token nuovi, i `--tier-*` erano già in GH-15»: vero nei riferimenti versionati, **falso nel foglio di stile che l'app carica davvero**. Trovato da Codex durante l'implementazione. È lo stesso errore delle misure di ieri notte, in un'altra forma: una cosa vera in un mondo — il documento — data per vera in un altro, il codice in esecuzione.
+
+**Prima le card stampate.** Prima di toccare qualunque cosa, Luigi ha inquadrato **un cartoncino vero già consegnato**: si apriva sul cane giusto con i dati post-migrazione. Prova migliore di qualunque interrogazione: le card esistono, i token sono sopravvissuti a G6, e ogni cartoncino in giro dipende dall'URL codificato. Il mandato lo porta come vincolo misurato.
+
+**Atto sulla produzione, eseguito da Cowork su autorizzazione esplicita di Luigi** (ore 11:20 circa). La migration `gh38_public_card_tenant_identity` è stata applicata **prima** del frontend, e non dopo: la funzione nuova mantiene la firma, quindi il frontend vecchio continua a funzionare con la funzione nuova, mentre l'inverso avrebbe lasciato la card a chiamare una funzione inesistente.
+
+Controllo prima: 288 pet, **tutti con un tenant valido** — verificato perché la funzione nuova usa un `JOIN` dove la vecchia aveva un `LEFT JOIN`, e un solo pet orfano avrebbe spento la sua card. Controllo dopo: telefono scritto, funzione identità creata, insegna «Grooming HUB», token inventato che torna nullo, e **la funzione eseguita su tutti i 288 token esistenti: zero card rotte**.
+
+Effetto immediato, senza attendere il rilascio: il frontend in produzione leggeva già `businessName`, quindi l'insegna si è corretta da sola. Verificato da Luigi inquadrando di nuovo il cartoncino.
+
+> **Nota**: il salone stava lavorando durante l'atto — i pet erano 282 la mattina e **288** al momento della migration. È sabato.
+
 ### 29 agosto 2026, mattina — Tre giri in quattro ore, e due difetti trovati guardando
 
 `GH-34`, `CD-03` e `GH-35` chiusi in una mattina, tutti nati **guardando l'app in produzione**, non leggendo il codice.
