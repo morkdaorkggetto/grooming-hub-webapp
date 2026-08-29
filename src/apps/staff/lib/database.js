@@ -1,5 +1,6 @@
 import { supabase, getCurrentUser } from '../../../shared/supabase/client';
 import { PILOT_TENANT_SLUG } from '../../../shared/tenant/config';
+import { APPOINTMENT_CAPACITY_MESSAGE } from '../../../shared/tenant/workstationCapacity';
 import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from './demoMode';
 import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 
@@ -57,6 +58,16 @@ const normalizePhoneIt = (value) => {
   if (clean.startsWith('00') && clean.length >= 12) return `+${clean.slice(2)}`;
   if (clean.startsWith('39') && clean.length >= 11) return `+${clean}`;
   return `+39${clean}`;
+};
+
+const throwAppointmentWriteError = (error, fallback) => {
+  if (
+    error?.details === 'GH37_APPOINTMENT_CAPACITY' ||
+    /postazioni sono tutte occupate/i.test(error?.message || '')
+  ) {
+    throw new Error(APPOINTMENT_CAPACITY_MESSAGE);
+  }
+  throw new Error(`${fallback}: ${error?.message || 'errore sconosciuto'}`);
 };
 
 const mapPet = (row) => {
@@ -717,7 +728,7 @@ export const addAppointment = async (input) => {
     notes: input.notes || null, external_calendar: input.external_calendar || null,
     service_id: input.service_id || null,
   }).select('id').single();
-  if (error) throw new Error(`Non riesco a creare l'appuntamento: ${error.message}`);
+  if (error) throwAppointmentWriteError(error, "Non riesco a creare l'appuntamento");
   if (status === 'no_show') await updateClientNoShowScore(petId, -1);
   return data.id;
 };
@@ -864,7 +875,7 @@ export const resolveAppointmentRequest = async (
     p_scheduled_time: decision === 'approved' ? scheduledTime : null,
     p_duration_minutes: decision === 'approved' ? duration : null,
   });
-  if (rpcError) throw new Error(`Non riesco ad aggiornare la richiesta: ${rpcError.message}`);
+  if (rpcError) throwAppointmentWriteError(rpcError, 'Non riesco ad aggiornare la richiesta');
 
   const { data, error } = await supabase.from('appointment_requests')
     .select(APPOINTMENT_REQUEST_SELECT)
@@ -914,7 +925,7 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', appointmentId).eq('tenant_id', tenantId)
     .select('id, pet_id, status').single();
-  if (error) throw new Error(`Non riesco ad aggiornare lo stato: ${error.message}`);
+  if (error) throwAppointmentWriteError(error, 'Non riesco ad aggiornare lo stato');
   if (appointment.status !== 'no_show' && status === 'no_show') await updateClientNoShowScore(appointment.pet_id, -1);
   if (appointment.status === 'no_show' && status !== 'no_show') await updateClientNoShowScore(appointment.pet_id, 1);
   return data;
@@ -932,7 +943,7 @@ export const updateAppointmentApproval = async (appointmentId, approvalStatus) =
   const { data, error } = await supabase.from('appointments')
     .update({ approval_status: approvalStatus, status, updated_at: new Date().toISOString() })
     .eq('id', appointmentId).eq('tenant_id', tenantId).select(APPOINTMENT_SELECT).single();
-  if (error) throw new Error(`Non riesco ad aggiornare la richiesta: ${error.message}`);
+  if (error) throwAppointmentWriteError(error, 'Non riesco ad aggiornare la richiesta');
   return mapAppointment(data);
 };
 
@@ -947,7 +958,7 @@ export const updateAppointmentSchedule = async (appointmentId, updates) => {
     duration_minutes: Number(updates.duration_minutes) || appointment.duration_minutes,
     updated_at: new Date().toISOString(),
   }).eq('id', appointmentId).eq('tenant_id', tenantId).select(APPOINTMENT_SELECT).single();
-  if (error) throw new Error(`Non riesco a spostare l'appuntamento: ${error.message}`);
+  if (error) throwAppointmentWriteError(error, "Non riesco a spostare l'appuntamento");
   return mapAppointment(data);
 };
 

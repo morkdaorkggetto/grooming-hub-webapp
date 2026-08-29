@@ -2,6 +2,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { getBookingSchedule, getDateClosure } from '../../../shared/tenant/bookingSchedule';
+import {
+  APPOINTMENT_CAPACITY_MESSAGE,
+  findCapacityConflictIds,
+  findNextCapacityAvailableTime,
+  getWorkstationCapacity,
+  isAppointmentCapacityAvailable,
+} from '../../../shared/tenant/workstationCapacity';
 import PetAvatar from '../../../shared/ui/PetAvatar';
 import { Button, EmptyState, Fab, Field, Hero, HeroButton, Panel } from '../components/StaffKit';
 import {
@@ -67,28 +74,6 @@ const getAppointmentEnd = (appointment) => {
   const start = new Date(appointment.scheduled_at);
   return new Date(start.getTime() + (Number(appointment.duration_minutes) || DEFAULT_DURATION) * 60000);
 };
-const appointmentsOverlap = (left, right) => {
-  const leftStart = new Date(left.scheduled_at).getTime();
-  const rightStart = new Date(right.scheduled_at).getTime();
-  return leftStart < getAppointmentEnd(right).getTime() && rightStart < getAppointmentEnd(left).getTime();
-};
-const isConflictCandidate = (appointment) => appointment.status !== 'cancelled';
-const formatConflict = (appointment) => `${appointment.client?.name || 'altro pet'}, ${formatTime(appointment.scheduled_at)}–${formatTime(getAppointmentEnd(appointment))}`;
-const toLocalTimeString = (date) => `${`${date.getHours()}`.padStart(2, '0')}:${`${date.getMinutes()}`.padStart(2, '0')}`;
-const findNextAvailableTime = ({ date, time, durationMinutes, appointments }) => {
-  const initial = new Date(`${date}T${time}`);
-  if (Number.isNaN(initial.getTime())) return time;
-  const duration = Number(durationMinutes) || DEFAULT_DURATION;
-  const dayEnd = new Date(`${date}T23:45:00`);
-  let candidateStart = new Date(initial.getTime() + duration * 60000);
-  while (candidateStart <= dayEnd) {
-    const candidate = { scheduled_at: candidateStart.toISOString(), duration_minutes: duration };
-    if (!appointments.some((item) => isConflictCandidate(item) && appointmentsOverlap(candidate, item))) return toLocalTimeString(candidateStart);
-    candidateStart = new Date(candidateStart.getTime() + 15 * 60000);
-  }
-  return time;
-};
-
 const toGoogleDate = (value) => new Date(value).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 const getGoogleCalendarUrl = (appointment) => {
   const name = appointment.client?.name || 'Cliente';
@@ -169,6 +154,10 @@ export default function Calendar() {
     () => getBookingSchedule(tenant?.settings),
     [tenant?.settings]
   );
+  const workstationCapacity = useMemo(
+    () => getWorkstationCapacity(tenant?.settings),
+    [tenant?.settings]
+  );
 
   const loadWeek = useCallback(async () => {
     setLoading(true);
@@ -193,22 +182,22 @@ export default function Calendar() {
     setPetsLoaded(true);
     return pets;
   }, [petOptions, petsLoaded]);
-  const findConflict = useCallback((candidate, excludedId = null) => data.appointments.find((appointment) =>
-    appointment.id !== excludedId && isConflictCandidate(appointment) && appointmentsOverlap(candidate, appointment)
-  ) || null, [data.appointments]);
-  const conflictIds = useMemo(() => {
-    const ids = new Set();
-    const candidates = data.appointments.filter(isConflictCandidate);
-    candidates.forEach((left, index) => candidates.slice(index + 1).forEach((right) => {
-      if (appointmentsOverlap(left, right)) { ids.add(left.id); ids.add(right.id); }
-    }));
-    return ids;
-  }, [data.appointments]);
+  const hasCapacityConflict = useCallback((candidate, excludedId = null) =>
+    !isAppointmentCapacityAvailable({
+      candidate,
+      appointments: data.appointments,
+      capacity: workstationCapacity,
+      excludedId,
+    }), [data.appointments, workstationCapacity]);
+  const conflictIds = useMemo(
+    () => findCapacityConflictIds(data.appointments, workstationCapacity),
+    [data.appointments, workstationCapacity]
+  );
   const makeTags = useCallback((source) => {
     const tags = [];
     if (source.client?.is_blacklisted) tags.push({ tone: 'danger', label: 'Blacklist' });
     else if ((source.client?.no_show_score ?? 0) < 0) tags.push({ tone: 'warning', label: 'A rischio' });
-    if (source.kind === 'appointment' && conflictIds.has(source.id)) tags.push({ tone: 'danger', label: 'Conflitto' });
+    if (source.kind === 'appointment' && conflictIds.has(source.id)) tags.push({ tone: 'danger', label: 'Postazioni piene' });
     if (source.kind === 'appointment' && source.status === 'scheduled') {
       const distance = new Date(source.scheduled_at).getTime() - Date.now();
       if (distance >= 0 && distance <= 86400000) tags.push({ tone: 'warning', label: 'Imminente' });
@@ -297,9 +286,9 @@ export default function Calendar() {
   const manualCandidate = useMemo(() => manualForm.date && manualForm.time ? { scheduled_at: new Date(`${manualForm.date}T${manualForm.time}`).toISOString(), duration_minutes: Number(manualForm.durationMinutes) || DEFAULT_DURATION } : null, [manualForm]);
   const requestCandidate = useMemo(() => requestForm.date && requestForm.time ? { scheduled_at: new Date(`${requestForm.date}T${requestForm.time}`).toISOString(), duration_minutes: Number(requestForm.durationMinutes) || DEFAULT_DURATION } : null, [requestForm]);
   const detailCandidate = useMemo(() => detailForm.date && detailForm.time ? { scheduled_at: new Date(`${detailForm.date}T${detailForm.time}`).toISOString(), duration_minutes: Number(detailForm.durationMinutes) || DEFAULT_DURATION } : null, [detailForm]);
-  const manualConflict = manualCandidate ? findConflict(manualCandidate) : null;
-  const requestConflict = requestCandidate ? findConflict(requestCandidate, selectedItem?.request_kind === 'legacy' ? selectedItem.id : null) : null;
-  const detailConflict = detailCandidate ? findConflict(detailCandidate, selectedItem?.id) : null;
+  const manualConflict = manualCandidate ? hasCapacityConflict(manualCandidate) : false;
+  const requestConflict = requestCandidate ? hasCapacityConflict(requestCandidate, selectedItem?.request_kind === 'legacy' ? selectedItem.id : null) : false;
+  const detailConflict = detailCandidate ? hasCapacityConflict(detailCandidate, selectedItem?.id) : false;
 
   const updateRequestTiming = (field, value) => {
     setRequestForm((current) => {
@@ -320,11 +309,11 @@ export default function Calendar() {
   const submitManual = async (event) => {
     event.preventDefault(); setError(''); setSuccess('');
     if (!manualForm.clientId || !manualCandidate) { setError('Pet, data e ora sono obbligatori.'); return; }
-    if (manualConflict) { setError(`Conflitto con ${formatConflict(manualConflict)}.`); return; }
+    if (manualConflict) { setError(APPOINTMENT_CAPACITY_MESSAGE); return; }
     setSaving(true);
     try {
       await addAppointment({ pet_id: manualForm.clientId, scheduled_at: manualCandidate.scheduled_at, duration_minutes: manualCandidate.duration_minutes, status: 'scheduled', notes: manualForm.notes });
-      const nextTime = findNextAvailableTime({ date: manualForm.date, time: manualForm.time, durationMinutes: manualForm.durationMinutes, appointments: [...data.appointments, { ...manualCandidate, status: 'scheduled' }] });
+      const nextTime = findNextCapacityAvailableTime({ date: manualForm.date, time: manualForm.time, durationMinutes: manualForm.durationMinutes, appointments: [...data.appointments, { ...manualCandidate, status: 'scheduled', approval_status: 'approved' }], capacity: workstationCapacity });
       setManualForm((current) => ({ ...current, time: nextTime, notes: '' }));
       setSuccess('Appuntamento creato. Il prossimo orario libero è già pronto.');
       await loadWeek();
@@ -333,7 +322,7 @@ export default function Calendar() {
   };
   const confirmRequest = async () => {
     if (!selectedItem || !requestCandidate) return;
-    if (requestConflict) { setError(`Conflitto con ${formatConflict(requestConflict)}.`); return; }
+    if (requestConflict) { setError(APPOINTMENT_CAPACITY_MESSAGE); return; }
     setSaving(true); setError(''); setSuccess('');
     try {
       if (selectedItem.request_kind === 'structured') {
@@ -370,7 +359,7 @@ export default function Calendar() {
   const saveSchedule = async (event) => {
     event.preventDefault();
     if (!selectedItem || !detailCandidate) return;
-    if (detailConflict) { setError(`Conflitto con ${formatConflict(detailConflict)}.`); return; }
+    if (detailConflict) { setError(APPOINTMENT_CAPACITY_MESSAGE); return; }
     setSaving(true); setError('');
     try {
       const updated = await updateAppointmentSchedule(selectedItem.id, detailCandidate);
@@ -452,7 +441,7 @@ export default function Calendar() {
             <Field label="Durata (min)" type="number" min="15" step="15" value={manualForm.durationMinutes} onChange={(event) => setManualForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
           </div>
           <Field label="Note" area value={manualForm.notes} onChange={(event) => setManualForm((current) => ({ ...current, notes: event.target.value }))} />
-          {manualConflict && <p className="gh-calendar-conflict">Conflitto con {formatConflict(manualConflict)}.</p>}
+          {manualConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
         </form>
       </Modal>}
 
@@ -480,7 +469,7 @@ export default function Calendar() {
           {selectedItem.request_kind === 'structured' ? (
             <Button staff variant="secondary" onClick={() => navigate('/requests')}>Proponi alternative dalla coda richieste</Button>
           ) : null}
-          {requestConflict && <p className="gh-calendar-conflict">Conflitto con {formatConflict(requestConflict)}.</p>}
+          {requestConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
         </div>
       </Modal>}
 
@@ -492,7 +481,7 @@ export default function Calendar() {
             <Field label="Ora" type="time" value={detailForm.time} onChange={(event) => setDetailForm((current) => ({ ...current, time: event.target.value }))} />
             <Field label="Durata (min)" type="number" min="15" step="15" value={detailForm.durationMinutes} onChange={(event) => setDetailForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
           </div>
-          {detailConflict && <p className="gh-calendar-conflict">Conflitto con {formatConflict(detailConflict)}.</p>}
+          {detailConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <div className="gh-calendar-detail-actions">
             <Button staff variant="whatsapp" icon="whatsapp" onClick={openReminder}>Promemoria</Button>
             <Button staff variant="outline" icon="calendar" onClick={() => window.open(getGoogleCalendarUrl(selectedItem), '_blank', 'noopener,noreferrer')}>Google</Button>
