@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>CD-03 · La stessa pagina, a distanza di un mese</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #root { width: 100vw; height: 100vh; overflow: hidden; }
+  em { font-style: italic; }
+  a { color: var(--color-link); }
+  a:hover { color: var(--color-primary-hover); }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><rect x="70" y="44" width="100" height="72" rx="12" fill="#fbf6f3"/><rect x="80" y="56" width="30" height="9" rx="4" fill="#2b2525"/><rect x="80" y="74" width="80" height="7" rx="3.5" fill="rgba(111,151,146,.35)"/><rect x="80" y="85" width="26" height="7" rx="3.5" fill="rgba(207,193,196,.5)"/><rect x="80" y="96" width="62" height="7" rx="3.5" fill="rgba(111,151,146,.35)"/><rect x="80" y="107" width="44" height="7" rx="3.5" fill="rgba(111,151,146,.35)"/></svg>
+</template>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+<script type="text/babel" src="cd01-cal-note.jsx"></script>
+<script type="text/babel" src="cd02-report-kit.jsx"></script>
+<script type="text/babel" src="cd02-report-viste.jsx"></script>
+<script type="text/babel" src="cd03-mese-kit.jsx"></script>
+<script type="text/babel" src="cd03-mese-viste.jsx"></script>
+<script type="text/babel" src="cd03-mese-note.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const Center = ({ children }) => (
+    <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>
+  );
+  const App = () => (
+    <DesignCanvas>
+      <DCSection
+        id="cd03-estremi"
+        title="CD-03 · I due estremi del mese"
+        subtitle="Aprile e giugno differiscono di cinque volte: è la cosa che a settimane non si vedeva. Composti per primi, come nel giro scorso — chi compone sulla media costruisce una pagina che si rompe due volte su tre."
+      >
+        <DCArtboard id="apr" label="Desktop 1280 · aprile, 146 cani" width={1280} height={1120}>
+          <MeseAprile/>
+        </DCArtboard>
+        <DCArtboard id="giu" label="Desktop 1280 · giugno, 29 cani e una settimana ferma" width={1280} height={1120}>
+          <MeseGiugno/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd03-parziale"
+        title="CD-03 · Il mese in corso"
+        subtitle="Oggi è il 29 agosto. Nessuna proiezione a fine mese: il confronto cambia base e diventa «primi 29 giorni contro primi 29 giorni di luglio». Nella striscia, il mese in corso è tratteggiato."
+      >
+        <DCArtboard id="ago" label="Desktop 1280 · agosto, incompleto" width={1280} height={1220}>
+          <MeseAgosto/>
+        </DCArtboard>
+        <DCArtboard id="mob" label="Mobile 390 · il mese ci sta intero" width={480} height={900}>
+          <Center><MeseMobile/></Center>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd03-domande"
+        title="CD-03 · Le quattro domande di composizione"
+        subtitle="La riga-settimana, il mese incompleto, il confronto che i dati reggono, l’interruttore."
+      >
+        <DCArtboard id="dom" label="Risposte alle quattro domande" width={1280} height={830}>
+          <CD3_Domande/>
+        </DCArtboard>
+        <DCArtboard id="chiusi" label="I giorni chiusi a distanza di mese · campi ⚠ · domande aperte" width={1280} height={720}>
+          <CD3_Chiusi/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={44} y={44} width={340}>
+        <strong>CD-03 · Il mese — composizione</strong><br/><br/>
+        Non ho ricomposto la pagina: <strong>dico cosa cambia quando l’unità cambia</strong>. Tre componenti nuovi soltanto — <em>UnitSwitch</em>, <em>WeekRow</em>, <em>MonthTrend</em> — più una nota per il mese in corso. Tutto il resto è CD-02 così com’è.<br/><br/>
+        Le quattro decisioni:<br/>
+        · <strong>I giorni lavorati vengono prima dei cani.</strong> Sono la scala di lettura: senza, «110 contro 67» dice una cosa falsa.<br/>
+        · <strong>Nessun pro-quota sul mese in corso.</strong> Cambio la base del confronto, non stimo la fine. Una proiezione è un numero inventato con l’aria di essere misurato.<br/>
+        · <strong>Niente spazio apparecchiato per l’anno prima.</strong> Non esiste fino a marzo 2027: un posto vuoto invita a riempirlo con una stima.<br/>
+        · <strong>L’interruttore sta dentro il navigatore</strong>, prima delle frecce. Passando di unità resta la data al centro; toccare una riga-settimana scende di scala.<br/><br/>
+        <strong>Sei mesi, non dodici.</strong> La striscia non finge una storia più lunga di quella che c’è.<br/><br/>
+        <strong>Nessun colore nuovo</strong>: i sei derivati ora sono token, usati per nome.
+      </DCPostIt>
+    </DesignCanvas>
+  );
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

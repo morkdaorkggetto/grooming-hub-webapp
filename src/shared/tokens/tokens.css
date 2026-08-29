@@ -42,6 +42,13 @@
   --color-primary-alpha-22: rgba(111, 151, 146, 0.22);
   --color-primary-alpha-35: rgba(111, 151, 146, 0.35);
   --color-border-alpha-12: rgba(207, 193, 196, 0.12);
+
+  --gh-bar-peak: var(--color-primary-alpha-16);
+  --gh-bar: var(--color-primary-alpha-08);
+  --gh-trend-off: var(--color-primary-alpha-22);
+  --gh-band-off: var(--color-primary-alpha-35);
+  --gh-tint: var(--color-primary-alpha-06);
+  --gh-absent: var(--color-border-alpha-12);
 }
 
 .gh-eyebrow {

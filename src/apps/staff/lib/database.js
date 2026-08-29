@@ -1019,12 +1019,15 @@ export const getPublicPetCardByToken = async (qrToken) => {
   return data;
 };
 
-export const getRevenueReportData = async () => {
+export const getRevenueReportData = async ({ from = null, to = null } = {}) => {
+  if (Boolean(from) !== Boolean(to)) throw new Error('Intervallo report incompleto');
   const { tenantId } = await requireStaff();
-  const { data, error } = await supabase.from('visits').select(`
+  let query = supabase.from('visits').select(`
     id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent,
     pet:pets(id, name, breed, photo_url, customer:customers(id, first_name, last_name, phone))
-  `).eq('tenant_id', tenantId).order('date');
+  `).eq('tenant_id', tenantId);
+  if (from && to) query = query.gte('date', from).lte('date', to);
+  const { data, error } = await query.order('date');
   if (error) throw new Error(`Non riesco a caricare il report incassi: ${error.message}`);
   return (data || []).map((visit) => {
     const pet = mapPet(relation(visit.pet));
