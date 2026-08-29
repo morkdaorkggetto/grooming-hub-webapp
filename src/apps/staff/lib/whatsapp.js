@@ -1,3 +1,5 @@
+import { getBookingTimePreferenceName } from '../../../shared/tenant/bookingSchedule';
+
 const normalizePhone = (phone) => {
   const digits = String(phone || '').replace(/\D/g, '');
   if (!digits) return '';
@@ -146,7 +148,7 @@ export const getAppointmentAlternativesWhatsAppMessage = (appointment, alternati
   const ownerName = appointment?.client?.owner || 'cliente';
   const labels = alternatives.map(({ date, time_preference: preference }) => {
     const day = formatDesiredDate(date);
-    const windowLabel = preference === 'morning' ? 'mattina' : 'pomeriggio';
+    const windowLabel = getBookingTimePreferenceName(preference).toLowerCase() || 'fascia proposta';
     return `${day} ${windowLabel}`;
   });
   const alternativesText = labels.length === 2

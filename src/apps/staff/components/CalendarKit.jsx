@@ -1,16 +1,8 @@
 import React from 'react';
+import { getBookingTimePreferenceName } from '../../../shared/tenant/bookingSchedule';
 import Icon from '../../../shared/ui/Icon';
 import PetAvatar from '../../../shared/ui/PetAvatar';
 import { Button, EmptyState, Panel, SkeletonRow, StateTag } from './StaffKit';
-
-const PREFERENCE_LABELS = {
-  morning: 'mattina',
-  afternoon: 'pomeriggio',
-  flexible: 'a piacere',
-  mattina: 'mattina',
-  pomeriggio: 'pomeriggio',
-  indifferente: 'a piacere',
-};
 
 export function CalendarWhen({ kind, time, preference }) {
   return (
@@ -18,7 +10,7 @@ export function CalendarWhen({ kind, time, preference }) {
       {kind === 'appointment' && <span className="gh-calendar-time">{time}</span>}
       {kind === 'request' && (
         <span className="gh-calendar-band">
-          {PREFERENCE_LABELS[preference] || preference || 'a piacere'}
+          {getBookingTimePreferenceName(preference).toLowerCase() || preference || 'a piacere'}
         </span>
       )}
       {kind === 'visit' && <span className="gh-calendar-visit-mark" aria-label="Senza orario" />}

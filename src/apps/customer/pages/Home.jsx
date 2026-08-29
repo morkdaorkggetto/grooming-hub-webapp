@@ -4,6 +4,7 @@ import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useAuth } from '../../../shared/auth/AuthProvider';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { getTenantWhatsAppPhone } from '../../../shared/tenant/contact';
+import { getBookingTimePreferenceLabel } from '../../../shared/tenant/bookingSchedule';
 import { usePets } from '../hooks/usePets';
 import { useNextAppointment } from '../hooks/useNextAppointment';
 import { usePromotions } from '../hooks/usePromotions';
@@ -41,8 +42,6 @@ const DAY_FMT = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeri
 const TIME_FMT = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' });
 const RELATIVE_DAY_FMT = new Intl.RelativeTimeFormat('it-IT', { numeric: 'auto' });
 const REQUEST_DATE_FMT = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
-const REQUEST_TIME_LABELS = { morning: 'Mattina (9–13)', afternoon: 'Pomeriggio (13–19)', flexible: 'Nessuna preferenza' };
-
 function pickGreetingName(customer, user) {
   if (customer?.first_name) return customer.first_name;
   const local = (user?.email || '').split('@')[0] || '';
@@ -356,7 +355,7 @@ export default function Home() {
                 {REQUEST_DATE_FMT.format(new Date(`${pendingRequest.desired_date}T12:00:00`))}
               </div>
               <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
-                {pendingRequest.pet?.name || 'Pet'} · {pendingRequest.service?.name || 'Indicazione non disponibile'} · {REQUEST_TIME_LABELS[pendingRequest.time_preference] || 'Nessuna preferenza'}
+                {pendingRequest.pet?.name || 'Pet'} · {pendingRequest.service?.name || 'Indicazione non disponibile'} · {getBookingTimePreferenceLabel(pendingRequest.time_preference, 'Nessuna preferenza') || 'Nessuna preferenza'}
               </p>
               <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--color-text-secondary)' }}>
                 Inviata il {new Date(pendingRequest.created_at).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}

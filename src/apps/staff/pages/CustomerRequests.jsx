@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
-import { getBookingSchedule, getDateClosure, isTimePreferenceClosed } from '../../../shared/tenant/bookingSchedule';
+import {
+  getBookingSchedule,
+  getBookingTimePreferenceDefaultTime,
+  getBookingTimePreferenceLabel,
+  getBookingTimePreferenceName,
+  getDateClosure,
+  isTimePreferenceClosed,
+} from '../../../shared/tenant/bookingSchedule';
 import {
   getPendingAppointmentRequests,
   proposeAppointmentRequestAlternatives,
@@ -52,12 +59,6 @@ const formatDesiredDate = (value) =>
     year: 'numeric',
   });
 
-const TIME_PREFERENCE_LABELS = {
-  morning: 'Mattina (9–13)',
-  afternoon: 'Pomeriggio (13–19)',
-  flexible: 'Per me è uguale',
-};
-
 const COAT_CONDITION_LABELS = {
   some_knots: 'Qualche nodo',
   very_matted: 'Molto annodato',
@@ -80,7 +81,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
   const isStructured = request.request_kind === 'structured';
   const service = request.service?.name || getRequestService(request.notes);
   const windowLabel = isStructured
-    ? TIME_PREFERENCE_LABELS[request.time_preference] || 'Nessuna preferenza'
+    ? getBookingTimePreferenceLabel(request.time_preference, 'Nessuna preferenza') || 'Nessuna preferenza'
     : getRequestWindow(request.notes);
   const coatLabels = (request.coat_condition_codes || [])
     .map((value) => COAT_CONDITION_LABELS[value] || value)
@@ -129,7 +130,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
             <div className="gh-request-notes">
               <p className="gh-eyebrow--staff">Alternative proposte</p>
               <p className="gh-body">
-                {request.proposed_alternatives.map((item) => `${formatDesiredDate(item.date)} · ${TIME_PREFERENCE_LABELS[item.time_preference]}`).join(' · ')}
+                {request.proposed_alternatives.map((item) => `${formatDesiredDate(item.date)} · ${getBookingTimePreferenceLabel(item.time_preference)}`).join(' · ')}
               </p>
             </div>
           ) : null}
@@ -173,7 +174,7 @@ function InfoTile({ label, value }) {
 }
 
 function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
-  const defaultTime = request.time_preference === 'afternoon' ? '13:00' : '09:00';
+  const defaultTime = getBookingTimePreferenceDefaultTime(request.time_preference);
   const [date, setDate] = useState(request.desired_date || '');
   const [time, setTime] = useState(defaultTime);
   const [durationMinutes, setDurationMinutes] = useState(request.duration_minutes || 60);
@@ -194,7 +195,7 @@ function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
         <p className="gh-eyebrow--staff">Conferma appuntamento</p>
         <h2 className="gh-panel-title" id="gh-approval-title">Scegli giorno e ora precisi</h2>
         <p className="gh-body">
-          {request.client?.name || 'Pet'} · preferenza cliente: {TIME_PREFERENCE_LABELS[request.time_preference] || 'nessuna'}.
+          {request.client?.name || 'Pet'} · preferenza cliente: {getBookingTimePreferenceLabel(request.time_preference, 'nessuna') || 'nessuna'}.
         </p>
 
         <div className="gh-dialog-fields gh-dialog-fields--three">
@@ -261,8 +262,8 @@ function AlternativesDialog({ request, busy, schedule, onClose, onConfirm }) {
               <div className="gh-dialog-fields" key={index}>
                 <Field label={`Data ${index + 1}`} type="date" min={minDate} value={row.date} onChange={(event) => updateRow(index, 'date', event.target.value)} required />
                 <Field label="Fascia" as="select" value={row.time_preference} onChange={(event) => updateRow(index, 'time_preference', event.target.value)}>
-                  <option value="morning" disabled={isTimePreferenceClosed('morning', closure)}>Mattina</option>
-                  <option value="afternoon" disabled={isTimePreferenceClosed('afternoon', closure)}>Pomeriggio</option>
+                  <option value="morning" disabled={isTimePreferenceClosed('morning', closure)}>{getBookingTimePreferenceName('morning')}</option>
+                  <option value="afternoon" disabled={isTimePreferenceClosed('afternoon', closure)}>{getBookingTimePreferenceName('afternoon')}</option>
                 </Field>
               </div>
             );

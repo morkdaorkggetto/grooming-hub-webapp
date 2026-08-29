@@ -5,6 +5,7 @@ import { useUnsavedChanges } from '../../../shared/navigation/UnsavedChangesProv
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { getTenantWhatsAppPhone } from '../../../shared/tenant/contact';
 import {
+  BOOKING_TIME_PREFERENCES,
   getBookingSchedule,
   getDateClosure,
   isTimePreferenceClosed,
@@ -28,12 +29,6 @@ import { getBookingFullPeriod } from '../lib/bookingDates';
 import './Book.css';
 
 const UNSAVED_MESSAGE = 'Hai una richiesta non inviata. Vuoi davvero lasciare la pagina?';
-
-const TIME_PREFERENCES = [
-  { value: 'morning', label: 'Mattina (9–13)' },
-  { value: 'afternoon', label: 'Pomeriggio (13–19)' },
-  { value: 'flexible', label: 'Per me è uguale' },
-];
 
 const COAT_CONDITIONS = [
   { value: 'some_knots', label: 'Qualche nodo' },
@@ -225,7 +220,7 @@ export default function Book() {
   );
   const selectedPetHasPendingRequest = pendingPetIds.has(petId);
   const selectedService = services.find((service) => service.id === serviceId) || null;
-  const selectedTimePreference = TIME_PREFERENCES.find((item) => item.value === timePreference) || null;
+  const selectedTimePreference = BOOKING_TIME_PREFERENCES.find((item) => item.value === timePreference) || null;
   const selectedCoatLabels = COAT_CONDITIONS.filter((item) => coatConditions.includes(item.value)).map((item) => item.label);
   const needsDeclaredAge = Boolean(selectedPet && !selectedPet.birth_date);
 
@@ -399,7 +394,7 @@ export default function Book() {
                 <DesiredDateStrip dates={dateOptions} value={desiredDate} onChange={handleDateChange} />
                 <p className="gh-book-date-hint">È la data che <em>preferiresti</em> — la confermiamo noi insieme all’orario.</p>
                 <div className="gh-book-chip-row" aria-label="Preferenza oraria facoltativa">
-                  {TIME_PREFERENCES.map((item) => (
+                  {BOOKING_TIME_PREFERENCES.map((item) => (
                     <SelectChip
                       key={item.value}
                       selected={timePreference === item.value}

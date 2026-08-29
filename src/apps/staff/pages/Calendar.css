@@ -452,6 +452,27 @@
   font-weight: 650;
 }
 
+.gh-calendar-load-note {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--gh-border-60);
+  border-radius: var(--gh-r-field);
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.gh-calendar-load-note p {
+  margin: 0;
+}
+
+.gh-calendar-load-note strong {
+  color: var(--color-text-primary);
+  font-weight: 650;
+}
+
 .gh-calendar-detail-actions {
   display: flex;
   flex-wrap: wrap;

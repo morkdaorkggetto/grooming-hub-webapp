@@ -1,11 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
-import { getBookingSchedule, getDateClosure } from '../../../shared/tenant/bookingSchedule';
+import {
+  getBookingSchedule,
+  getBookingTimePreferenceDefaultTime,
+  getDateClosure,
+} from '../../../shared/tenant/bookingSchedule';
 import {
   APPOINTMENT_CAPACITY_MESSAGE,
   findCapacityConflictIds,
   findNextCapacityAvailableTime,
+  getAppointmentLoadNotice,
   getWorkstationCapacity,
   isAppointmentCapacityAvailable,
 } from '../../../shared/tenant/workstationCapacity';
@@ -109,7 +114,7 @@ const downloadIcs = (appointment) => {
 const requestDate = (request) => request.desired_date || (request.scheduled_at ? toLocalDateString(new Date(request.scheduled_at)) : '');
 const requestDefaultTime = (request) => {
   if (request.scheduled_at) return formatTime(request.scheduled_at);
-  return ['afternoon', 'pomeriggio'].includes(request.time_preference) ? '14:00' : '09:00';
+  return getBookingTimePreferenceDefaultTime(request.time_preference);
 };
 const statusLabel = (status) => ({ scheduled: 'Programmato', completed: 'Completato', no_show: 'No-show', cancelled: 'Annullato' }[status] || status);
 
@@ -124,6 +129,18 @@ function Modal({ title, children, footer, onClose, narrow = false }) {
         <div className="gh-modal__body">{children}</div>
         {footer && <footer className="gh-modal__foot">{footer}</footer>}
       </section>
+    </div>
+  );
+}
+
+function AppointmentLoadNote({ notice }) {
+  if (!notice) return null;
+  const appointmentLabel = notice.appointmentCount === 1 ? 'lavorazione' : 'lavorazioni';
+  const workstationLabel = notice.remainingAtStart === 1 ? 'postazione libera' : 'postazioni libere';
+  return (
+    <div className="gh-calendar-load-note" role="status">
+      <p>{notice.weekday} {notice.windowLabel}: <strong>{notice.appointmentCount} {appointmentLabel}</strong> già in programma.</p>
+      {notice.showRemaining ? <p>Alle {notice.time} {notice.remainingAtStart === 1 ? 'resta' : 'restano'} <strong>{notice.remainingAtStart} {workstationLabel}</strong>.</p> : null}
     </div>
   );
 }
@@ -289,6 +306,19 @@ export default function Calendar() {
   const manualConflict = manualCandidate ? hasCapacityConflict(manualCandidate) : false;
   const requestConflict = requestCandidate ? hasCapacityConflict(requestCandidate, selectedItem?.request_kind === 'legacy' ? selectedItem.id : null) : false;
   const detailConflict = detailCandidate ? hasCapacityConflict(detailCandidate, selectedItem?.id) : false;
+  const getLoadNotice = useCallback((candidate, excludedId = null) => getAppointmentLoadNotice({
+    candidate,
+    appointments: data.appointments,
+    capacity: workstationCapacity,
+    excludedId,
+  }), [data.appointments, workstationCapacity]);
+  const manualLoadNotice = manualCandidate && !manualConflict ? getLoadNotice(manualCandidate) : null;
+  const requestLoadNotice = requestCandidate && !requestConflict
+    ? getLoadNotice(requestCandidate, selectedItem?.request_kind === 'legacy' ? selectedItem.id : null)
+    : null;
+  const detailLoadNotice = detailCandidate && !detailConflict
+    ? getLoadNotice(detailCandidate, selectedItem?.id)
+    : null;
 
   const updateRequestTiming = (field, value) => {
     setRequestForm((current) => {
@@ -442,6 +472,7 @@ export default function Calendar() {
           </div>
           <Field label="Note" area value={manualForm.notes} onChange={(event) => setManualForm((current) => ({ ...current, notes: event.target.value }))} />
           {manualConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
+          <AppointmentLoadNote notice={manualLoadNotice} />
         </form>
       </Modal>}
 
@@ -470,6 +501,7 @@ export default function Calendar() {
             <Button staff variant="secondary" onClick={() => navigate('/requests')}>Proponi alternative dalla coda richieste</Button>
           ) : null}
           {requestConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
+          <AppointmentLoadNote notice={requestLoadNotice} />
         </div>
       </Modal>}
 
@@ -482,6 +514,7 @@ export default function Calendar() {
             <Field label="Durata (min)" type="number" min="15" step="15" value={detailForm.durationMinutes} onChange={(event) => setDetailForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
           </div>
           {detailConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
+          <AppointmentLoadNote notice={detailLoadNotice} />
           <div className="gh-calendar-detail-actions">
             <Button staff variant="whatsapp" icon="whatsapp" onClick={openReminder}>Promemoria</Button>
             <Button staff variant="outline" icon="calendar" onClick={() => window.open(getGoogleCalendarUrl(selectedItem), '_blank', 'noopener,noreferrer')}>Google</Button>

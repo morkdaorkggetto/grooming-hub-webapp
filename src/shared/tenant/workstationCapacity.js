@@ -1,3 +1,5 @@
+import { getBookingTimeWindowForTime } from './bookingSchedule.js';
+
 export const APPOINTMENT_CAPACITY_MESSAGE =
   'Le postazioni sono tutte occupate nella fascia scelta.';
 
@@ -107,6 +109,55 @@ export const findCapacityConflictIds = (appointments, capacity) => {
 
 const toLocalTimeString = (date) =>
   `${`${date.getHours()}`.padStart(2, '0')}:${`${date.getMinutes()}`.padStart(2, '0')}`;
+
+const toLocalDateString = (date) =>
+  `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}-${`${date.getDate()}`.padStart(2, '0')}`;
+
+const capitalize = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+
+export const getAppointmentLoadNotice = ({
+  candidate,
+  appointments,
+  capacity,
+  excludedId = null,
+}) => {
+  const candidateInterval = toInterval(
+    { ...candidate, status: 'scheduled', approval_status: 'approved' },
+    'candidate'
+  );
+  if (!candidateInterval) return null;
+
+  const candidateStart = new Date(candidateInterval.startsAt);
+  const window = getBookingTimeWindowForTime(toLocalTimeString(candidateStart));
+  if (!window) return null;
+
+  const date = toLocalDateString(candidateStart);
+  const windowStartsAt = new Date(`${date}T${window.start}`).getTime();
+  const windowEndsAt = new Date(`${date}T${window.end}`).getTime();
+  const intervals = getIntervals(appointments, excludedId);
+  const appointmentsInWindow = intervals.filter((interval) => (
+    interval.startsAt < windowEndsAt && interval.endsAt > windowStartsAt
+  ));
+  if (!appointmentsInWindow.length) return null;
+
+  const occupiedAtStart = intervals.filter((interval) => (
+    interval.startsAt <= candidateInterval.startsAt && interval.endsAt > candidateInterval.startsAt
+  )).length;
+  const normalizedCapacity = Number.isInteger(Number(capacity)) && Number(capacity) > 0
+    ? Number(capacity)
+    : DEFAULT_WORKSTATION_CAPACITY;
+  const remainingAtStart = Math.max(0, normalizedCapacity - occupiedAtStart);
+  const weekday = candidateStart.toLocaleDateString('it-IT', { weekday: 'long' });
+
+  return {
+    weekday: capitalize(weekday),
+    windowLabel: window.name.toLowerCase(),
+    appointmentCount: appointmentsInWindow.length,
+    time: toLocalTimeString(candidateStart),
+    remainingAtStart,
+    showRemaining: occupiedAtStart > 0 && remainingAtStart > 0,
+  };
+};
 
 export const findNextCapacityAvailableTime = ({
   date,
