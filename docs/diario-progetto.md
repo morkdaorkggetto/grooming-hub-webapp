@@ -30,7 +30,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 | 4 | Smontare `grooming-prova-generale` | Luigi |
 | 5 | Ripulire ~100 file duplicati con suffisso « 2» comparsi nel worktree, di cui 82 dentro `docs/` — **alla prossima `salva.sh` verrebbero raccolti come documenti veri** | Luigi |
 
-**La veste è completa.** `CD-02` e `GH-33` hanno chiuso il report incassi la notte fra il 28 e il 29 agosto: era l'ultima superficie vecchia, e con lei è sparita la fascia `AppHeader`.
+**La veste è completa.** `CD-02` e `GH-33` hanno chiuso il report incassi la notte fra il 28 e il 29 agosto: era l'ultima superficie vecchia, e con lei è sparita la fascia `AppHeader`. La mattina del 29, `GH-34` ha chiuso tre rifiniture e `CD-03`/`GH-35` hanno aggiunto il **modo mese** sulla stessa pagina, senza rotte nuove.
 
 **Code aperte, nessuna bloccante:**
 
@@ -359,6 +359,22 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 29 agosto 2026, mattina — Tre giri in quattro ore, e due difetti trovati guardando
+
+`GH-34`, `CD-03` e `GH-35` chiusi in una mattina, tutti nati **guardando l'app in produzione**, non leggendo il codice.
+
+**`GH-34` — tre rifiniture.** L'indirizzo dell'operatore non era in asse con «Esci» (`.gh-hero__right` aveva `align-items: flex-start`, e il testo da 11,5px restava appeso sopra un bersaglio da 44px). Le righe del report non portavano alla scheda del cane, pur avendo già `pet_id` e una rotta che esiste — `/client/:clientId`. E il ritorno alla Dashboard mancava su **Contatti, Nuovo cliente e Nuova visita**, perché ogni pagina che aggiunge un'azione propria si porta via lo spazio del ritorno.
+
+**Sull'ultimo, la soluzione è di Luigi ed è migliore di quella ovvia**: invece di tre pulsanti, l'occhiello «Grooming Hub» del componente `Hero` diventa il ritorno — una modifica sola che vale su ogni pagina, presente e futura. Un pulsante per pagina avrebbe riparato oggi e si sarebbe rotto alla prossima pagina con un'azione propria.
+
+**`CD-03` e `GH-35` — il mese.** Era la proposta di Claude Design al §9.2 di CD-02, accantonata perché sembrava richiedere una rotta nuova. Non la richiede: un interruttore *settimana / mese* sulla stessa pagina fa la stessa cosa e dice una verità in più — è la stessa domanda a due distanze. `getWeeklyRevenueReport` accettava già un intervallo qualsiasi, quindi il costo sul database era zero.
+
+Alla sua domanda «venti giorni su trenta, calendario o apertura?» si è potuto rispondere **apertura**, perché le domeniche sono dichiarate: aprile fa **20 su 26**. Con il limite scritto: le chiusure occasionali non sono modellate, quindi agosto dirà 11 su 26 senza raccontare le ferie.
+
+**Due difetti che nessun test avrebbe trovato.** L'allineamento, perché non rompe niente — è solo storto. E il separatore delle migliaia: `eur()` usava `toLocaleString('it-IT')` senza ottenerlo, e la pagina mostrava «1495 €». **Era già in produzione**, l'ha trovato Claude Design ricontrollando il proprio lavoro, e si vedeva in uno screenshot.
+
+> **Osservazione di metodo.** I tre giri di stamattina sono nati tutti dallo stesso gesto: aprire l'app e guardarla. Il canone non ha un posto per quel gesto — è capitato. Vale la pena renderlo un passo fisso di ogni mandato che tocca una superficie visibile: una lista corta di schermate da aprire, scritta da Cowork ed eseguita da Luigi.
 
 ### 29 agosto 2026, alba — CD-02 e GH-33: la veste è finita
 
