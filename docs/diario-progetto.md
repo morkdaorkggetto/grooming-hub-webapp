@@ -30,7 +30,16 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 | 4 | Smontare `grooming-prova-generale` | Luigi |
 | 5 | Ripulire ~100 file duplicati con suffisso « 2» comparsi nel worktree, di cui 82 dentro `docs/` — **alla prossima `salva.sh` verrebbero raccolti come documenti veri** | Luigi |
 
-**Code aperte, nessuna bloccante**: `WeeklyRevenue` è l'ultima superficie con la veste vecchia (attende `CD-02`); i contatti con lo stesso numero sotto lo stesso cliente si possono unire; i «cognomi-numero» ereditati dal quaderno si possono ripulire; un dubbio sulla ricerca staff da riprodurre prima di chiamarlo difetto; le quattro frasi WhatsApp attendono le parole di Davide; cosa dà un livello fedeltà; se mettere una promozione al lancio.
+**La veste è completa.** `CD-02` e `GH-33` hanno chiuso il report incassi la notte fra il 28 e il 29 agosto: era l'ultima superficie vecchia, e con lei è sparita la fascia `AppHeader`.
+
+**Code aperte, nessuna bloccante:**
+
+- **«Operatività giornaliera» guarda la tabella sbagliata per il passato.** Interroga gli appuntamenti, che sono **5 in tutto** e tutti fra l'11 marzo e il 23 aprile; da allora il salone registra il lavoro come visita — **253 visite dopo l'ultimo appuntamento**. Risultato: il 3 agosto la pagina dice «nessun appuntamento» mentre sono passati sei cani. Per le date passate deve mostrare le visite registrate. Sarà un `GH-` a sé.
+- i contatti con lo stesso numero sotto lo stesso cliente si possono unire (si vede su Carnevale, la fusione lascia due righe identiche);
+- i «cognomi-numero» ereditati dal quaderno si possono ripulire;
+- un dubbio sulla ricerca staff — «mamma parrucchiera 340» non trova, «parrucchiera 340» sì — da riprodurre prima di chiamarlo difetto: il codice letto sembra reggere entrambe;
+- le quattro frasi WhatsApp attendono le parole di Davide; cosa dà un livello fedeltà; se mettere una promozione al lancio;
+- domanda per il salone, sollevata da Claude Design: **le righe che raccontano un'assenza contano come «cani passati»?** Oggi sì.
 
 **Fatto nuovo da sapere**: il salone ha **tre accessi staff** — Davide, Roby e Luigi. L'atto 4 promuove a operatore chiunque possieda schede legacy, e tutti e tre ne possedevano. In pratica ne funziona uno solo, perché la password è nota solo per l'account di Davide.
 
@@ -350,6 +359,20 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 29 agosto 2026, alba — CD-02 e GH-33: la veste è finita
+
+Poche ore dopo G6, l'ultima superficie vecchia. **Claude Design ha consegnato `CD-02` in una notte**, Codex l'ha realizzata in **24 minuti**: build verde, suite RLS 30 PASS / 0 FAIL / 1 SKIP, 77 fixture costruite per le viste estreme e smontate nella stessa sessione, produzione mai letta.
+
+**La verifica dei sei campi ⚠ ha prodotto tre correzioni**, ed è il motivo per cui quella convenzione esiste: due nomi di colonna sbagliati (`discount_percentage` è `discount_percent`, `amount` è `cost`) e — più importante — un campo dato per assente che invece esiste. CD aveva proposto di togliere ovunque la parola «chiuso» con la frase *«meglio muti che bugiardi»*; ma `tenants.settings.booking_schedule` dichiara la domenica. Quindi la domenica dice «chiuso» con verità, il lunedì no perché chiudono solo la mattina, e ogni altro giorno vuoto resta un trattino. Le chiusure occasionali non sono modellate per decisione del 27 agosto, e dedurle sarebbe inventare.
+
+**Scelte editoriali accolte**: «Report incassi» diventa **«Come è andata»**, «Visite registrate» diventa **«Cani passati»**, «Picco» diventa «giorno pieno», «0%» diventa «come la scorsa». È l'unica pagina che parla la lingua dei numeri invece di quella del lavoro: che almeno usi le loro parole.
+
+**Un riquadro su quattro era morto**: «Sconti applicati» mostrava 0,00 € da 456 visite di fila. Tolto dai numeri grandi, resta nella riga di dettaglio.
+
+**Trovato guardando l'app dal vivo**: «Operatività giornaliera» interroga gli appuntamenti anche per le date passate, e gli appuntamenti sono fermi al 23 aprile. Vedi le code aperte.
+
+**Nota di metodo**: da stanotte, quando serve scrivere a Codex, Cowork **compone il testo nel campo ma non invia**. L'Invio resta un gesto di Luigi. Toglie gli errori di trascrizione — ne erano già costati due — senza chiudere il passaggio umano fra chi scrive il mandato e chi lo esegue.
 
 ### 28 agosto 2026, sera — G6: quattro arresti, nessun danno, la produzione è passata
 
