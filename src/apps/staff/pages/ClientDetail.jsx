@@ -29,6 +29,7 @@ import {
   getClientById,
   getClientPromos,
   setClientBlacklistStatus,
+  unlinkCustomerAccount,
   updateClient,
   updateClientNoShowScore,
 } from '../lib/database';
@@ -74,6 +75,7 @@ export default function ClientDetail() {
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [customerInviteEmail, setCustomerInviteEmail] = useState('');
   const [customerInvite, setCustomerInvite] = useState(null);
+  const [unlinkingCustomerAccount, setUnlinkingCustomerAccount] = useState(false);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
   const [pendingEditCropFile, setPendingEditCropFile] = useState(null);
   const [visitForm, setVisitForm] = useState(createEmptyVisitForm);
@@ -297,6 +299,27 @@ export default function ClientDetail() {
     }
   };
 
+  const handleUnlinkCustomerAccount = async () => {
+    if (!client?.customer?.id || !client.customer.user_id) return;
+    const confirmed = window.confirm(
+      'Scollegare questo account? Il cliente non vedra piu le sue schede, ma anagrafica, cani, visite e account non verranno cancellati.'
+    );
+    if (!confirmed) return;
+
+    setUnlinkingCustomerAccount(true);
+    setError('');
+    try {
+      await unlinkCustomerAccount(client.customer.id);
+      setCustomerInvite(null);
+      setCustomerInviteEmail('');
+      await loadClient();
+    } catch (err) {
+      setError(err.message || 'Errore scollegamento account cliente');
+    } finally {
+      setUnlinkingCustomerAccount(false);
+    }
+  };
+
   const handlePrintClientCard = () => {
     if (!client?.qr_token) {
       setError('Il QR non è ancora disponibile. Ricarica la scheda e riprova.');
@@ -361,6 +384,7 @@ export default function ClientDetail() {
   const currentTier = fidelity.currentTier?.key || 'base';
   const visitsTotal = client.visits?.length || 0;
   const visitsValue = client.visits?.reduce((sum, visit) => sum + Number(visit.cost || 0), 0) || 0;
+  const customerAccountLinked = Boolean(client.customer?.user_id);
 
   return (
     <div className="gh-page gh-detail-page">
@@ -551,27 +575,53 @@ export default function ClientDetail() {
           </div>
         </Panel>
 
-        <Panel className="gh-detail-half" bridge eyebrow="Area cliente digitale" title="Collega questa scheda a un account">
+        <Panel
+          className="gh-detail-half"
+          bridge
+          eyebrow="Area cliente digitale"
+          title={customerAccountLinked ? 'Account cliente collegato' : 'Collega questa scheda a un account'}
+        >
           <div className="gh-bridge-layout">
-            <div>
-              <p className="gh-body">
-                Genera un link riservato per collegare questa scheda cane a un account cliente.
-                Il cliente vedrà solo card, fidelity, prossimo appuntamento e contatto WhatsApp.
-              </p>
-              <div className="gh-bridge-form">
-                <Field
-                  aria-label="Email cliente opzionale"
-                  type="email"
-                  value={customerInviteEmail}
-                  onChange={(event) => setCustomerInviteEmail(event.target.value)}
-                  placeholder="Email cliente opzionale"
-                />
-                <Button staff variant="primary" onClick={handleCreateCustomerInvite}>
-                  Genera invito
-                </Button>
+            {customerAccountLinked ? (
+              <div>
+                <p className="gh-body">
+                  L'account {client.customer.email || 'cliente'} puo vedere le schede collegate a questa anagrafica.
+                </p>
+                <p className="gh-meta">
+                  Scollegandolo non cancelli anagrafica, cani, visite o account. Potrai generare subito un nuovo invito.
+                </p>
+                <div className="gh-inline-actions">
+                  <Button
+                    staff
+                    variant="danger"
+                    onClick={handleUnlinkCustomerAccount}
+                    disabled={unlinkingCustomerAccount}
+                  >
+                    {unlinkingCustomerAccount ? 'Scollegamento...' : 'Scollega account'}
+                  </Button>
+                </div>
               </div>
-            </div>
-            {customerInvite && (
+            ) : (
+              <div>
+                <p className="gh-body">
+                  Genera un link riservato per collegare questa scheda cane a un account cliente.
+                  Il cliente vedrà solo card, fidelity, prossimo appuntamento e contatto WhatsApp.
+                </p>
+                <div className="gh-bridge-form">
+                  <Field
+                    aria-label="Email cliente opzionale"
+                    type="email"
+                    value={customerInviteEmail}
+                    onChange={(event) => setCustomerInviteEmail(event.target.value)}
+                    placeholder="Email cliente opzionale"
+                  />
+                  <Button staff variant="primary" onClick={handleCreateCustomerInvite}>
+                    Genera invito
+                  </Button>
+                </div>
+              </div>
+            )}
+            {!customerAccountLinked && customerInvite && (
               <div className="gh-invite-result">
                 <span className="gh-eyebrow--staff">Link invito</span>
                 <p className="gh-body"><strong>Destinatario:</strong> {customerInvite.recipient} · {customerInvite.phone}</p>

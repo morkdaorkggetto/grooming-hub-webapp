@@ -10,6 +10,7 @@ const SUITE_LABEL = process.env.GH_RLS_SUITE_LABEL || 'GH-06 - Suite RLS demo';
 const MARKER = process.env.GH_RLS_MARKER || '[DEMO GH-06]';
 const APPOINTMENT_REQUEST_MARKER = process.env.GH_RLS_APPOINTMENT_MARKER || '[DEMO GH-08]';
 const FIXTURE_PHONE = process.env.GH_RLS_FIXTURE_PHONE || '+393339906001';
+const GH44_PHONE = '+393339904400';
 const FIXTURE_VISIT_ID = process.env.GH_RLS_FIXTURE_VISIT_ID || 'gh-06-rls-luca-visit';
 const OWN_STORAGE_FILE = process.env.GH_RLS_OWN_STORAGE_FILE || 'gh-06-rls-own.png';
 const FOREIGN_STORAGE_FILE = process.env.GH_RLS_FOREIGN_STORAGE_FILE || 'gh-06-rls-foreign.png';
@@ -29,6 +30,10 @@ const ACCOUNTS = {
     email: process.env.GH_RLS_STAFF_EMAIL || 'staff.sonda@test.example',
     passwordEnv: 'GH_RLS_STAFF_PASSWORD',
   },
+  gh44: {
+    email: 'customer.gh44@test.example',
+    password: 'demo-gh44-customer-2026',
+  },
 };
 
 const results = [];
@@ -36,6 +41,7 @@ let fatalError = null;
 let staff = null;
 let mario = null;
 let luca = null;
+let gh44 = null;
 let tenantId = null;
 let marioCustomer = null;
 let lucaCustomer = null;
@@ -48,6 +54,11 @@ let originalCustomerStaffNotes = null;
 const storagePaths = new Set();
 const appointmentRequestIds = new Set();
 const appointmentIds = new Set();
+const gh44PetIds = new Set();
+const gh44InvitationIds = new Set();
+const gh44RequestIds = new Set();
+let gh44CustomerId = null;
+let gh44VisitId = null;
 
 function loadLocalEnv() {
   const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -124,8 +135,8 @@ async function runTest(test, expected, callback) {
 
 async function login(label, account) {
   const client = makeClient();
-  const password = process.env[account.passwordEnv];
-  assert(password, `${account.passwordEnv} e obbligatoria`);
+  const password = account.password || process.env[account.passwordEnv];
+  assert(password, `${account.passwordEnv || 'password fixture'} e obbligatoria`);
   const { data, error } = await client.auth.signInWithPassword({
     email: account.email,
     password,
@@ -195,7 +206,7 @@ async function cleanupStaleFixtures() {
   const { data: markedCustomers, error: customerReadError } = await staff.client
     .from('customers')
     .select('id')
-    .eq('phone', FIXTURE_PHONE);
+    .in('phone', [FIXTURE_PHONE, GH44_PHONE]);
   assertNoError(customerReadError, 'Lettura customer marker pregressi');
 
   for (const customer of markedCustomers || []) {
@@ -224,7 +235,7 @@ async function loadContext() {
 
   const { data: customers, error: customerError } = await staff.client
     .from('customers')
-    .select('id, user_id, tenant_id, staff_notes:customer_staff_notes(notes)')
+    .select('id, user_id, tenant_id, first_name, last_name, email, phone, staff_notes:customer_staff_notes(notes)')
     .eq('tenant_id', tenantId)
     .in('user_id', [mario.user.id, luca.user.id]);
   assertNoError(customerError, 'Customer fixture');
@@ -286,6 +297,82 @@ async function createLucaFixture() {
   fixtureVisit = visit;
 }
 
+async function createGh44Fixture() {
+  const { data: created, error: createError } = await staff.client.rpc('add_customer_with_pet', {
+    p_tenant_id: tenantId,
+    p_customer_first_name: '[DEMO GH-44] Ada',
+    p_customer_last_name: 'Scollegamento',
+    p_customer_email: ACCOUNTS.gh44.email,
+    p_customer_phone: GH44_PHONE,
+    p_pet_name: '[DEMO GH-44] Primo',
+    p_pet_species: 'dog',
+    p_pet_breed: 'Fixture unlink',
+    p_pet_birth_date: '2022-01-01',
+  });
+  assertNoError(createError, 'Creazione customer GH-44');
+  const createdRow = Array.isArray(created) ? created[0] : created;
+  assert(createdRow?.customer_id && createdRow?.pet_id, 'ID fixture GH-44 assenti');
+  gh44CustomerId = createdRow.customer_id;
+  gh44PetIds.add(createdRow.pet_id);
+
+  const { data: extraPets, error: extraPetsError } = await staff.client
+    .from('pets')
+    .insert([2, 3, 4].map((index) => ({
+      tenant_id: tenantId,
+      customer_id: gh44CustomerId,
+      owner_user_id: staff.user.id,
+      name: `[DEMO GH-44] Pet ${index}`,
+      species: 'dog',
+      breed: 'Fixture limite richieste',
+      birth_date: '2022-01-01',
+    })))
+    .select('id, name');
+  assertNoError(extraPetsError, 'Creazione pet aggiuntivi GH-44');
+  extraPets.forEach(({ id }) => gh44PetIds.add(id));
+
+  const { data: visit, error: visitError } = await staff.client
+    .from('visits')
+    .insert({
+      id: 'gh-44-unlink-visit',
+      tenant_id: tenantId,
+      pet_id: createdRow.pet_id,
+      date: '2026-08-30',
+      treatments: '[DEMO GH-44] visita preservazione',
+      cost: 1,
+      discount_percent: 0,
+    })
+    .select('id')
+    .single();
+  assertNoError(visitError, 'Creazione visita GH-44');
+  gh44VisitId = visit.id;
+
+  const invitationId = `inv_gh44_initial_${crypto.randomUUID().replaceAll('-', '')}`;
+  const invitationToken = `gh44-initial-${crypto.randomUUID()}`;
+  const { error: invitationError } = await staff.client
+    .from('customer_invitations')
+    .insert({
+      id: invitationId,
+      token: invitationToken,
+      operator_user_id: staff.user.id,
+      pet_id: createdRow.pet_id,
+      tenant_id: tenantId,
+      phone: GH44_PHONE,
+      first_name: '[DEMO GH-44] Ada',
+      last_name: 'Scollegamento',
+      customer_email: ACCOUNTS.gh44.email,
+      expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    });
+  assertNoError(invitationError, 'Invito iniziale GH-44');
+  gh44InvitationIds.add(invitationId);
+
+  const { data: accepted, error: acceptError } = await gh44.client.rpc(
+    'accept_customer_invite',
+    { p_token: invitationToken }
+  );
+  assertNoError(acceptError, 'Riscatto iniziale GH-44');
+  assert(accepted.customerId === gh44CustomerId, 'Riscatto iniziale su customer inatteso');
+}
+
 async function cleanupCurrentRun() {
   const cleanupErrors = [];
 
@@ -303,6 +390,13 @@ async function cleanupCurrentRun() {
         .delete()
         .in('id', [...appointmentRequestIds]);
       if (error) cleanupErrors.push(`appointment requests: ${error.message}`);
+    }
+    if (gh44InvitationIds.size) {
+      const { error } = await staff.client
+        .from('customer_invitations')
+        .delete()
+        .in('id', [...gh44InvitationIds]);
+      if (error) cleanupErrors.push(`inviti GH-44: ${error.message}`);
     }
   }
 
@@ -331,6 +425,12 @@ async function cleanupCurrentRun() {
   }
 
   if (staff?.client) {
+    if (gh44CustomerId) {
+      const { error } = await staff.client.rpc('unlink_customer_account', {
+        p_customer_id: gh44CustomerId,
+      });
+      if (error) cleanupErrors.push(`unlink finale GH-44: ${error.message}`);
+    }
     for (const objectPath of storagePaths) {
       try {
         await removeStoragePath(staff.client, objectPath);
@@ -343,15 +443,23 @@ async function cleanupCurrentRun() {
       const { error } = await staff.client.from('visits').delete().eq('id', fixtureVisit.id);
       if (error) cleanupErrors.push(`visit: ${error.message}`);
     }
+    if (gh44VisitId) {
+      const { error } = await staff.client.from('visits').delete().eq('id', gh44VisitId);
+      if (error) cleanupErrors.push(`visita GH-44: ${error.message}`);
+    }
     if (fixturePet?.id) {
       const { error } = await staff.client.from('pets').delete().eq('id', fixturePet.id);
       if (error) cleanupErrors.push(`pet: ${error.message}`);
+    }
+    if (gh44PetIds.size) {
+      const { error } = await staff.client.from('pets').delete().in('id', [...gh44PetIds]);
+      if (error) cleanupErrors.push(`pet GH-44: ${error.message}`);
     }
 
     const { data: markedCustomers, error: markedCustomerError } = await staff.client
       .from('customers')
       .select('id')
-      .eq('phone', FIXTURE_PHONE);
+      .in('phone', [FIXTURE_PHONE, GH44_PHONE]);
     if (markedCustomerError) {
       cleanupErrors.push(`customer marker read: ${markedCustomerError.message}`);
     } else {
@@ -386,7 +494,7 @@ async function cleanupCurrentRun() {
   ] = await Promise.all([
     staff.client.from('pets').select('id').ilike('name', `${MARKER}%`),
     staff.client.from('visits').select('id').ilike('treatments', `${MARKER}%`),
-    staff.client.from('customers').select('id').eq('phone', FIXTURE_PHONE),
+    staff.client.from('customers').select('id').in('phone', [FIXTURE_PHONE, GH44_PHONE]),
     staff.client.from('appointment_requests').select('id').ilike('coat_condition_notes', `${APPOINTMENT_REQUEST_MARKER}%`),
     staff.client.from('pet_staff_notes').select('pet_id').ilike('notes', `${MARKER}%`),
     staff.client.from('customer_staff_notes').select('customer_id').ilike('notes', `${MARKER}%`),
@@ -413,6 +521,7 @@ async function main() {
   staff = await login('sonda staff', ACCOUNTS.staff);
   mario = await login('Mario', ACCOUNTS.mario);
   luca = await login('Luca', ACCOUNTS.luca);
+  gh44 = await login('sonda customer GH-44', ACCOUNTS.gh44);
   await cleanupStaleFixtures();
   await loadContext();
 
@@ -529,6 +638,21 @@ async function main() {
   });
 
   await createLucaFixture();
+
+  await runTest(
+    'Fixture customer GH-44 collegata',
+    'customer usa-e-getta, 4 pet, 1 visita e membership customer',
+    async () => {
+      await createGh44Fixture();
+      const { data: pets, error: petsError } = await gh44.client
+        .from('pets')
+        .select('id')
+        .eq('customer_id', gh44CustomerId);
+      assertNoError(petsError, 'Visibilita fixture GH-44');
+      assert(pets.length === 4, `Pet fixture attesi 4, misurati ${pets.length}`);
+      return 'customer collegato, 4 pet e 1 visita';
+    }
+  );
 
   await runTest(
     'Isolamento Mario -> Luca',
@@ -774,6 +898,251 @@ async function main() {
     return `${data.appointment_id}, approved`;
   });
 
+  let gh44ServiceId = null;
+  let gh44FourthPetId = null;
+
+  await runTest(
+    'Tetto richieste aperte per customer',
+    '3 pending su pet distinti; quarta rifiutata dal database',
+    async () => {
+      const { data: service, error: serviceError } = await gh44.client
+        .from('services')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('is_active', true)
+        .order('display_order')
+        .limit(1)
+        .single();
+      assertNoError(serviceError, 'Servizio limite richieste GH-44');
+      gh44ServiceId = service.id;
+
+      const { data: fixturePets, error: petError } = await staff.client
+        .from('pets')
+        .select('id, name')
+        .eq('customer_id', gh44CustomerId);
+      assertNoError(petError, 'Lettura pet limite GH-44');
+      assert(fixturePets.length === 4, `Pet GH-44 attesi 4, misurati ${fixturePets.length}`);
+      const orderedPets = [...fixturePets].sort((left, right) => left.name.localeCompare(right.name));
+
+      const requestPets = orderedPets.slice(0, 3).map(({ id }) => id);
+      for (const [index, petId] of requestPets.entries()) {
+        const { data, error } = await gh44.client.rpc('submit_appointment_request', {
+          p_tenant_id: tenantId,
+          p_pet_id: petId,
+          p_service_id: gh44ServiceId,
+          p_desired_date: desiredDateValue,
+          p_time_preference: 'flexible',
+          p_coat_condition_codes: ['clean_long'],
+          p_coat_condition_notes: `${APPOINTMENT_REQUEST_MARKER} GH-44 limite ${index + 1}`,
+          p_declared_pet_age: null,
+        });
+        assertNoError(error, `Richiesta GH-44 ${index + 1}`);
+        appointmentRequestIds.add(data.id);
+        gh44RequestIds.add(data.id);
+      }
+
+      gh44FourthPetId = orderedPets[3].id;
+      const { error: fourthError } = await gh44.client.rpc('submit_appointment_request', {
+        p_tenant_id: tenantId,
+        p_pet_id: gh44FourthPetId,
+        p_service_id: gh44ServiceId,
+        p_desired_date: desiredDateValue,
+        p_time_preference: 'flexible',
+        p_coat_condition_codes: ['clean_long'],
+        p_coat_condition_notes: `${APPOINTMENT_REQUEST_MARKER} GH-44 quarta`,
+        p_declared_pet_age: null,
+      });
+      assert(fourthError, 'Quarta richiesta GH-44 accettata');
+      assert(
+        fourthError.code === '23514' && fourthError.details === 'GH44_OPEN_REQUEST_LIMIT',
+        `Rifiuto limite inatteso: ${fourthError.code || ''} ${fourthError.message || ''}`
+      );
+
+      const { data: pending, error: pendingError } = await staff.client
+        .from('appointment_requests')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('customer_user_id', gh44.user.id)
+        .eq('status', 'pending');
+      assertNoError(pendingError, 'Conteggio pending GH-44');
+      assert(pending.length === 3, `Pending GH-44 attese 3, misurate ${pending.length}`);
+      return '3 pending su 3 pet, quarta 23514/GH44_OPEN_REQUEST_LIMIT';
+    }
+  );
+
+  await runTest(
+    'Chiusura richiesta libera il tetto',
+    'una rejected, richiesta successiva accettata',
+    async () => {
+      const requestToClose = [...gh44RequestIds][0];
+      assert(requestToClose, 'Richiesta GH-44 da chiudere assente');
+      const { data: closed, error: closeError } = await staff.client.rpc(
+        'resolve_appointment_request_local',
+        {
+          p_request_id: requestToClose,
+          p_decision: 'rejected',
+          p_scheduled_date: null,
+          p_scheduled_time: null,
+          p_duration_minutes: null,
+        }
+      );
+      assertNoError(closeError, 'Chiusura richiesta GH-44');
+      assert(closed.status === 'rejected', `Stato chiusura inatteso: ${closed.status}`);
+
+      const { data, error } = await gh44.client.rpc('submit_appointment_request', {
+        p_tenant_id: tenantId,
+        p_pet_id: gh44FourthPetId,
+        p_service_id: gh44ServiceId,
+        p_desired_date: desiredDateValue,
+        p_time_preference: 'afternoon',
+        p_coat_condition_codes: ['clean_long'],
+        p_coat_condition_notes: `${APPOINTMENT_REQUEST_MARKER} GH-44 dopo chiusura`,
+        p_declared_pet_age: null,
+      });
+      assertNoError(error, 'Richiesta GH-44 dopo chiusura');
+      appointmentRequestIds.add(data.id);
+      gh44RequestIds.add(data.id);
+      return '1 rejected, nuova pending accettata';
+    }
+  );
+
+  await runTest(
+    'Customer non scollega account',
+    'sonda GH-44 non scollega se stessa ne Mario',
+    async () => {
+      const ownAttempt = await gh44.client.rpc('unlink_customer_account', {
+        p_customer_id: gh44CustomerId,
+      });
+      assert(forbiddenRlsError(ownAttempt.error), 'Sonda GH-44 ha scollegato il proprio account');
+
+      const foreignAttempt = await gh44.client.rpc('unlink_customer_account', {
+        p_customer_id: marioCustomer.id,
+      });
+      assert(forbiddenRlsError(foreignAttempt.error), 'Sonda GH-44 ha scollegato Mario');
+
+      const { data: auditRows, error: auditError } = await gh44.client
+        .from('customer_account_unlink_audit')
+        .select('id')
+        .eq('customer_id', gh44CustomerId);
+      assertNoError(auditError, 'Lettura audit customer');
+      assert(auditRows.length === 0, 'Sonda GH-44 vede il registro staff degli scollegamenti');
+
+      const { data: customer, error: customerError } = await staff.client
+        .from('customers')
+        .select('user_id')
+        .eq('id', gh44CustomerId)
+        .single();
+      assertNoError(customerError, 'Verifica customer dopo tentativi unlink');
+      assert(customer.user_id === gh44.user.id, 'Legame fixture modificato dai tentativi negati');
+      return '2 rifiuti 42501, audit invisibile, legame fixture invariato';
+    }
+  );
+
+  await runTest(
+    'Staff scollega e nuovo invito ricollega',
+    'account e dati preservati, invisibilita immediata, nuovo riscatto riuscito',
+    async () => {
+      const petIds = [...gh44PetIds];
+      const { data: visitsBefore, error: visitsBeforeError } = await staff.client
+        .from('visits')
+        .select('id')
+        .in('pet_id', petIds);
+      assertNoError(visitsBeforeError, 'Conteggio visite prima unlink');
+
+      const { data: unlinked, error: unlinkError } = await staff.client.rpc(
+        'unlink_customer_account',
+        { p_customer_id: gh44CustomerId }
+      );
+      assertNoError(unlinkError, 'Scollegamento staff GH-44');
+      assert(unlinked.status === 'unlinked', `Esito unlink inatteso: ${unlinked.status}`);
+      assert(unlinked.disconnectedUserId === gh44.user.id, 'Utente scollegato inatteso');
+      assert(unlinked.performedByUserId === staff.user.id, 'Attore audit inatteso');
+
+      const [customerView, petView, visitView, authView] = await Promise.all([
+        gh44.client.from('customers').select('id').eq('id', gh44CustomerId),
+        gh44.client.from('pets').select('id').in('id', petIds),
+        gh44.client.from('visits').select('id').in('pet_id', petIds),
+        gh44.client.auth.getUser(),
+      ]);
+      assertNoError(customerView.error, 'Customer dopo unlink');
+      assertNoError(petView.error, 'Pet dopo unlink');
+      assertNoError(visitView.error, 'Visite dopo unlink');
+      assertNoError(authView.error, 'Account Auth dopo unlink');
+      assert(customerView.data.length === 0, 'Scheda ancora visibile dopo unlink');
+      assert(petView.data.length === 0, 'Pet ancora visibili dopo unlink');
+      assert(visitView.data.length === 0, 'Visite ancora visibili dopo unlink');
+      assert(authView.data.user?.id === gh44.user.id, 'Account Auth non preservato');
+
+      const { data: preservedCustomer, error: preservedCustomerError } = await staff.client
+        .from('customers')
+        .select('id, user_id')
+        .eq('id', gh44CustomerId)
+        .single();
+      assertNoError(preservedCustomerError, 'Scheda preservata dopo unlink');
+      assert(preservedCustomer.user_id === null, 'Legame customer non rimosso');
+
+      const { data: preservedPets, error: preservedPetsError } = await staff.client
+        .from('pets')
+        .select('id')
+        .eq('customer_id', gh44CustomerId);
+      assertNoError(preservedPetsError, 'Pet preservati dopo unlink');
+      const { data: preservedVisits, error: preservedVisitsError } = await staff.client
+        .from('visits')
+        .select('id')
+        .in('pet_id', petIds);
+      assertNoError(preservedVisitsError, 'Visite preservate dopo unlink');
+      assert(preservedPets.length === 4, `Pet preservati attesi 4, misurati ${preservedPets.length}`);
+      assert(
+        preservedVisits.length === visitsBefore.length,
+        `Visite cambiate: prima ${visitsBefore.length}, dopo ${preservedVisits.length}`
+      );
+
+      const { data: auditRows, error: auditError } = await staff.client
+        .from('customer_account_unlink_audit')
+        .select('disconnected_user_id, performed_by_user_id')
+        .eq('customer_id', gh44CustomerId)
+        .eq('disconnected_user_id', gh44.user.id)
+        .eq('performed_by_user_id', staff.user.id);
+      assertNoError(auditError, 'Audit unlink staff');
+      assert(auditRows.length === 1, `Audit unlink atteso 1, misurato ${auditRows.length}`);
+
+      const invitationId = `inv_gh44_relink_${crypto.randomUUID().replaceAll('-', '')}`;
+      const invitationToken = `gh44-relink-${crypto.randomUUID()}`;
+      const { error: invitationError } = await staff.client
+        .from('customer_invitations')
+        .insert({
+          id: invitationId,
+          token: invitationToken,
+          operator_user_id: staff.user.id,
+          pet_id: petIds[0],
+          tenant_id: tenantId,
+          phone: GH44_PHONE,
+          first_name: '[DEMO GH-44] Ada',
+          last_name: 'Scollegamento',
+          customer_email: ACCOUNTS.gh44.email,
+          expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        });
+      assertNoError(invitationError, 'Nuovo invito dopo unlink');
+      gh44InvitationIds.add(invitationId);
+
+      const { data: accepted, error: acceptError } = await gh44.client.rpc(
+        'accept_customer_invite',
+        { p_token: invitationToken }
+      );
+      assertNoError(acceptError, 'Riscatto nuovo invito');
+      assert(accepted.customerId === gh44CustomerId, 'Nuovo invito ha collegato una scheda inattesa');
+
+      const { data: visiblePets, error: visiblePetsError } = await gh44.client
+        .from('pets')
+        .select('id')
+        .in('id', petIds);
+      assertNoError(visiblePetsError, 'Pet dopo nuovo invito');
+      assert(visiblePets.length === 4, `Pet dopo nuovo invito attesi 4, misurati ${visiblePets.length}`);
+
+      return `0 dati visibili dopo unlink; 4 pet e ${visitsBefore.length} visite preservati; audit staff; nuovo invito ok`;
+    }
+  );
+
   for (const [column, attemptedValue] of [
     ['microchip', `${MARKER} MICROCHIP`],
     ['name', `${MARKER} NAME`],
@@ -883,6 +1252,9 @@ try {
   }
   if (staff?.client) {
     await staff.client.auth.signOut({ scope: 'global' }).catch(() => {});
+  }
+  if (gh44?.client) {
+    await gh44.client.auth.signOut({ scope: 'global' }).catch(() => {});
   }
 }
 

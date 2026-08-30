@@ -308,6 +308,17 @@ export const createCustomerPortalInvite = async (petId, customerEmail = '') => {
   }
 };
 
+export const unlinkCustomerAccount = async (customerId) => {
+  assertDemoWriteAllowed();
+  if (!customerId) throw new Error('Customer non disponibile');
+  await requireStaff();
+  const { data, error } = await supabase.rpc('unlink_customer_account', {
+    p_customer_id: customerId,
+  });
+  if (error) throw new Error(`Non riesco a scollegare l'account: ${error.message}`);
+  return data;
+};
+
 export const acceptCustomerPortalInvite = async (token) => {
   const { data, error } = await supabase.rpc('accept_customer_invite', { p_token: token });
   if (error) throw new Error(`Non riesco ad accettare l'invito: ${error.message}`);

@@ -323,11 +323,19 @@ export default function Book() {
         coatNotes: coatNotes.trim(),
       });
     } catch (error) {
-      setSubmitError(
-        error.code === '23505' || /gia una richiesta|già una richiesta/i.test(error.message || '')
-          ? 'Per questo pet c’è già una richiesta in attesa.'
-          : error.message || 'Invio non riuscito'
-      );
+      if (
+        error.details === 'GH44_OPEN_REQUEST_LIMIT'
+        || /richieste in attesa.*salone/i.test(error.message || '')
+      ) {
+        setSubmitError(error.message);
+      } else if (
+        error.code === '23505'
+        || /gia una richiesta|già una richiesta/i.test(error.message || '')
+      ) {
+        setSubmitError('Per questo pet c’è già una richiesta in attesa.');
+      } else {
+        setSubmitError('Riprova tra un momento — o scrivici direttamente su WhatsApp, va benissimo uguale.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -466,7 +474,7 @@ export default function Book() {
               {submitError ? (
                 <div className="gh-book-error" role="alert">
                   <strong>Non siamo riusciti a inviare la richiesta.</strong>{' '}
-                  Riprova tra un momento — o scrivici direttamente su WhatsApp, va benissimo uguale.
+                  {submitError}
                 </div>
               ) : null}
             </div>
