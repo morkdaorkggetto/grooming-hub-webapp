@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../../../shared/supabase/client';
-import { DEMO_MODE } from '../../lib/demoMode';
 import { ensureOperatorProfile, getUserProfile } from '../../lib/database';
 import { Button, ErrorState, Field, Panel } from '../StaffKit';
 
 /**
  * LoginForm — Componente autenticazione
- * Gestisce signup e signin con Supabase Auth
+ * Gestisce l'accesso dello staff con Supabase Auth
  *
  * Props:
  * - onSuccess: callback dopo autenticazione riuscita
@@ -17,7 +16,6 @@ export default function LoginForm({ currentUser = null, currentRole = null, onSu
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -82,65 +80,6 @@ export default function LoginForm({ currentUser = null, currentRole = null, onSu
   };
 
   /**
-   * Gestisce signup: crea nuovo account + profilo utente
-   */
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccessMessage('');
-
-    // Validazione base
-    if (!email || !password) {
-      setError('Email e password sono obbligatori');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('La password deve contenere almeno 6 caratteri');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // 1. Crea account Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      // 2. Crea profilo utente nella tabella profiles
-      if (authData.user) {
-        try {
-          await ensureOperatorProfile(authData.user);
-        } catch (profileError) {
-          console.error('Errore creazione profilo:', profileError.message);
-          // Non interrompiamo, continua anche se profilo non creato.
-        }
-      }
-
-      setSuccessMessage(
-        'Registrazione completata! Controlla la tua email per confermare.'
-      );
-      setEmail('');
-      setPassword('');
-
-      // Se onSuccess è fornito, attendere un po' prima di chiamare
-      setTimeout(() => {
-        if (onSuccess) onSuccess();
-      }, 2000);
-    } catch (error) {
-      setError(`Errore registrazione: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
    * Gestisce signin: accede con credenziali esistenti
    */
   const handleSignIn = async (e) => {
@@ -195,8 +134,6 @@ export default function LoginForm({ currentUser = null, currentRole = null, onSu
     }
   };
 
-  const handleSubmit = isSignUp ? handleSignUp : handleSignIn;
-
   if (currentUser && !currentRole) {
     return (
       <div className="gh-page gh-login-page">
@@ -231,43 +168,26 @@ export default function LoginForm({ currentUser = null, currentRole = null, onSu
         </div>
 
         <Panel className="gh-login-card">
-          <h2 className="gh-login-card-title">{isSignUp ? 'Crea Account' : 'Accedi'}</h2>
+          <h2 className="gh-login-card-title">Accedi</h2>
           {error && <ErrorState title="Email e password restano inserite" body={error} />}
           {successMessage && <div className="gh-success-state" role="status">{successMessage}</div>}
 
-          <form onSubmit={handleSubmit} className="gh-login-form">
+          <form onSubmit={handleSignIn} className="gh-login-form">
             <Field id="email" label="Email" type="email" placeholder="esempio@email.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
             <Field id="password" label="Password" type="password" placeholder="Almeno 6 caratteri" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} />
 
-            {!isSignUp && (
-              <div className="gh-login-forgot">
-                <button type="button" onClick={handleForgotPassword} disabled={loading} className="gh-login-link">Password dimenticata?</button>
-              </div>
-            )}
+            <div className="gh-login-forgot">
+              <button type="button" onClick={handleForgotPassword} disabled={loading} className="gh-login-link">Password dimenticata?</button>
+            </div>
 
             <Button staff wide type="submit" disabled={loading}>
-              {loading ? 'Caricamento...' : isSignUp ? 'Registrati' : 'Accedi'}
+              {loading ? 'Caricamento...' : 'Accedi'}
             </Button>
           </form>
 
-          {!DEMO_MODE && (
-            <div className="gh-login-toggle">
-              <p className="gh-body">
-                {isSignUp ? 'Hai già un account? ' : 'Non hai un account? '}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSignUp(!isSignUp);
-                    setError('');
-                    setSuccessMessage('');
-                  }}
-                  className="gh-login-link"
-                >
-                  {isSignUp ? 'Accedi' : 'Registrati'}
-                </button>
-              </p>
-            </div>
-          )}
+          <div className="gh-login-toggle">
+            <p className="gh-body">L'accesso allo staff viene attivato dal salone.</p>
+          </div>
         </Panel>
 
         <footer className="gh-login-footer">
