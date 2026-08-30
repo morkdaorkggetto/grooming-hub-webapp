@@ -281,8 +281,6 @@ export const createCustomerPortalInvite = async (petId, customerEmail = '') => {
     const pet = await getPetById(petId, tenantId);
     if (!pet.customer?.phone) throw new Error('Customer associato senza telefono');
     const token = generateInviteToken();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30);
     const { data, error } = await supabase.from('customer_invitations').insert({
       id: `inv_${generateId().replace(/-/g, '')}`,
       token,
@@ -293,7 +291,6 @@ export const createCustomerPortalInvite = async (petId, customerEmail = '') => {
       first_name: pet.customer.first_name,
       last_name: pet.customer.last_name,
       customer_email: customerEmail || null,
-      expires_at: expiresAt.toISOString(),
     }).select('id, token, pet_id, customer_email, expires_at, created_at').single();
     if (error) throw error;
     return {

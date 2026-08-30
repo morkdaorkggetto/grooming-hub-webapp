@@ -50,6 +50,16 @@ const REWARD_REASON_LABELS = {
   correction: 'Correzione',
 };
 
+const formatInviteExpiry = (value) => {
+  const expiry = new Date(value);
+  if (Number.isNaN(expiry.getTime())) return 'Scadenza non disponibile.';
+  const formatted = new Intl.DateTimeFormat('it-IT', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  }).format(expiry);
+  return `Scade il ${formatted}.`;
+};
+
 const formatVisitDate = (dateString) => {
   try {
     return new Date(`${dateString}T12:00:00`).toLocaleDateString('it-IT', {
@@ -626,7 +636,7 @@ export default function ClientDetail() {
                 <span className="gh-eyebrow--staff">Link invito</span>
                 <p className="gh-body"><strong>Destinatario:</strong> {customerInvite.recipient} · {customerInvite.phone}</p>
                 <p className="gh-invite-result__url">{customerInvite.inviteUrl}</p>
-                <p className="gh-meta">Scade tra 30 giorni.</p>
+                <p className="gh-meta">{formatInviteExpiry(customerInvite.expires_at)}</p>
                 <div className="gh-inline-actions">
                   <a className="gh-btn gh-btn--whatsapp" href={getCustomerInviteWhatsAppUrl(customerInvite)} target="_blank" rel="noreferrer">Apri WhatsApp</a>
                   <Button staff variant="outline" onClick={() => navigator.clipboard?.writeText(customerInvite.inviteUrl)}>Copia link</Button>

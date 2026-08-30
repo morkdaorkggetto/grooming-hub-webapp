@@ -15,6 +15,8 @@ const FIXTURE_VISIT_ID = process.env.GH_RLS_FIXTURE_VISIT_ID || 'gh-06-rls-luca-
 const OWN_STORAGE_FILE = process.env.GH_RLS_OWN_STORAGE_FILE || 'gh-06-rls-own.png';
 const FOREIGN_STORAGE_FILE = process.env.GH_RLS_FOREIGN_STORAGE_FILE || 'gh-06-rls-foreign.png';
 const FOREIGN_TENANT_FILE = process.env.GH_RLS_FOREIGN_TENANT_FILE || 'gh-06-rls-foreign-tenant.png';
+const GH45_CLIENT_PHOTO_FILE = 'gh-45-client-photo.png';
+const GH45_PET_AVATAR_FILE = 'gh-45-pet-avatar.png';
 const FOREIGN_TENANT_ID = '00000000-0000-4000-8000-000000000606';
 
 const ACCOUNTS = {
@@ -52,6 +54,7 @@ let originalOwnerNotes = null;
 let originalPetStaffNotes = null;
 let originalCustomerStaffNotes = null;
 const storagePaths = new Set();
+const gh45StoragePaths = new Set();
 const appointmentRequestIds = new Set();
 const appointmentIds = new Set();
 const gh44PetIds = new Set();
@@ -147,10 +150,14 @@ async function login(label, account) {
   return { client, user: data.user };
 }
 
-async function removeStoragePath(client, objectPath) {
+async function removeStoragePath(client, objectPath, bucket = 'pet-avatars') {
   if (!objectPath) return;
-  const { error } = await client.storage.from('pet-avatars').remove([objectPath]);
+  const { error } = await client.storage.from(bucket).remove([objectPath]);
   if (error && !/not found/i.test(error.message || '')) throw error;
+}
+
+function trackGh45Storage(bucket, objectPath) {
+  gh45StoragePaths.add(`${bucket}\n${objectPath}`);
 }
 
 async function cleanupStaleFixtures() {
@@ -360,7 +367,6 @@ async function createGh44Fixture() {
       first_name: '[DEMO GH-44] Ada',
       last_name: 'Scollegamento',
       customer_email: ACCOUNTS.gh44.email,
-      expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     });
   assertNoError(invitationError, 'Invito iniziale GH-44');
   gh44InvitationIds.add(invitationId);
@@ -436,6 +442,14 @@ async function cleanupCurrentRun() {
         await removeStoragePath(staff.client, objectPath);
       } catch (error) {
         cleanupErrors.push(`storage ${objectPath}: ${error.message}`);
+      }
+    }
+    for (const trackedPath of gh45StoragePaths) {
+      const [bucket, objectPath] = trackedPath.split('\n');
+      try {
+        await removeStoragePath(staff.client, objectPath, bucket);
+      } catch (error) {
+        cleanupErrors.push(`storage GH-45 ${bucket}/${objectPath}: ${error.message}`);
       }
     }
 
@@ -638,6 +652,208 @@ async function main() {
   });
 
   await createLucaFixture();
+
+  const gh45ClientPhotoPath = `${staff.user.id}/${GH45_CLIENT_PHOTO_FILE}`;
+  const gh45PetAvatarPath = `${tenantId}/${fixturePet.id}/${GH45_PET_AVATAR_FILE}`;
+
+  await runTest(
+    'Storage staff e lettura pubblica GH-45',
+    'staff crea e sostituisce in entrambi i bucket; URL pubblici leggibili senza sessione',
+    async () => {
+      trackGh45Storage('client-photos', gh45ClientPhotoPath);
+      trackGh45Storage('pet-avatars', gh45PetAvatarPath);
+
+      for (const [bucket, objectPath] of [
+        ['client-photos', gh45ClientPhotoPath],
+        ['pet-avatars', gh45PetAvatarPath],
+      ]) {
+        const initial = new TextEncoder().encode(`[DEMO GH-45] ${bucket} iniziale`);
+        const replacement = new TextEncoder().encode(`[DEMO GH-45] ${bucket} sostituito`);
+        const { error: uploadError } = await staff.client.storage
+          .from(bucket)
+          .upload(objectPath, initial, { contentType: 'image/png', upsert: false });
+        assertNoError(uploadError, `Upload staff ${bucket}`);
+        const { error: updateError } = await staff.client.storage
+          .from(bucket)
+          .update(objectPath, replacement, { contentType: 'image/png' });
+        assertNoError(updateError, `Update staff ${bucket}`);
+
+        const publicUrl = staff.client.storage.from(bucket).getPublicUrl(objectPath).data.publicUrl;
+        const response = await fetch(`${publicUrl}?gh45=${Date.now()}`);
+        assert(response.ok, `Lettura pubblica ${bucket}: HTTP ${response.status}`);
+      }
+
+      return '2 upload, 2 update, 2 letture pubbliche HTTP 200';
+    }
+  );
+
+  await runTest(
+    'Storage utente senza legami GH-45',
+    'nessuna scrittura o cancellazione in client-photos e pet-avatars',
+    async () => {
+      const { data: memberships, error: membershipError } = await staff.client
+        .from('tenant_memberships')
+        .select('tenant_id')
+        .eq('user_id', gh44.user.id);
+      assertNoError(membershipError, 'Membership sonda senza legami');
+      assert(memberships.length === 0, `Sonda senza legami ha ${memberships.length} membership`);
+
+      const clientUpload = await gh44.client.storage
+        .from('client-photos')
+        .upload(`${gh44.user.id}/gh-45-unlinked.png`, new TextEncoder().encode('denied'), {
+          contentType: 'image/png',
+          upsert: false,
+        });
+      assert(forbiddenStorageError(clientUpload.error), 'Sonda senza legami ha scritto client-photos');
+
+      const avatarUpload = await gh44.client.storage
+        .from('pet-avatars')
+        .upload(gh45PetAvatarPath, new TextEncoder().encode('denied'), {
+          contentType: 'image/png',
+          upsert: true,
+        });
+      assert(forbiddenStorageError(avatarUpload.error), 'Sonda senza legami ha scritto pet-avatars');
+
+      const clientUpdate = await gh44.client.storage
+        .from('client-photos')
+        .update(gh45ClientPhotoPath, new TextEncoder().encode('denied'), { contentType: 'image/png' });
+      assert(forbiddenStorageError(clientUpdate.error), 'Sonda senza legami ha sostituito client-photos');
+
+      const avatarUpdate = await gh44.client.storage
+        .from('pet-avatars')
+        .update(gh45PetAvatarPath, new TextEncoder().encode('denied'), { contentType: 'image/png' });
+      assert(forbiddenStorageError(avatarUpdate.error), 'Sonda senza legami ha sostituito pet-avatars');
+
+      await gh44.client.storage.from('client-photos').remove([gh45ClientPhotoPath]);
+      await gh44.client.storage.from('pet-avatars').remove([gh45PetAvatarPath]);
+
+      for (const [bucket, objectPath] of [
+        ['client-photos', gh45ClientPhotoPath],
+        ['pet-avatars', gh45PetAvatarPath],
+      ]) {
+        const publicUrl = staff.client.storage.from(bucket).getPublicUrl(objectPath).data.publicUrl;
+        const response = await fetch(`${publicUrl}?gh45-unlinked=${Date.now()}`);
+        assert(response.ok, `Sonda senza legami ha cancellato ${bucket}`);
+      }
+
+      return '4 scritture rifiutate; 2 delete senza effetto; oggetti ancora pubblici';
+    }
+  );
+
+  await runTest(
+    'Storage customer non proprietario GH-45',
+    'Mario non sostituisce o cancella oggetti staff in nessuno dei due bucket',
+    async () => {
+      const clientUpdate = await mario.client.storage
+        .from('client-photos')
+        .update(gh45ClientPhotoPath, new TextEncoder().encode('denied'), { contentType: 'image/png' });
+      assert(forbiddenStorageError(clientUpdate.error), 'Mario ha sostituito client-photos');
+
+      const avatarUpdate = await mario.client.storage
+        .from('pet-avatars')
+        .update(gh45PetAvatarPath, new TextEncoder().encode('denied'), { contentType: 'image/png' });
+      assert(forbiddenStorageError(avatarUpdate.error), 'Mario ha sostituito pet-avatars altrui');
+
+      await mario.client.storage.from('client-photos').remove([gh45ClientPhotoPath]);
+      await mario.client.storage.from('pet-avatars').remove([gh45PetAvatarPath]);
+
+      for (const [bucket, objectPath] of [
+        ['client-photos', gh45ClientPhotoPath],
+        ['pet-avatars', gh45PetAvatarPath],
+      ]) {
+        const publicUrl = staff.client.storage.from(bucket).getPublicUrl(objectPath).data.publicUrl;
+        const response = await fetch(`${publicUrl}?gh45-customer=${Date.now()}`);
+        assert(response.ok, `Mario ha cancellato ${bucket}`);
+      }
+
+      return '2 update rifiutati; 2 delete senza effetto; oggetti invariati';
+    }
+  );
+
+  await runTest(
+    'Invito con durata tenant GH-45',
+    'expires_at memorizzato a 3 giorni anche se il chiamante propone 30 giorni',
+    async () => {
+      const invitationId = `inv_gh45_duration_${crypto.randomUUID().replaceAll('-', '')}`;
+      const { data, error } = await staff.client
+        .from('customer_invitations')
+        .insert({
+          id: invitationId,
+          token: `gh45-duration-${crypto.randomUUID()}`,
+          operator_user_id: staff.user.id,
+          pet_id: fixturePet.id,
+          tenant_id: tenantId,
+          phone: '+393260004501',
+          first_name: '[DEMO GH-45] Durata',
+          last_name: 'Tre giorni',
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        })
+        .select('id, created_at, expires_at')
+        .single();
+      assertNoError(error, 'Creazione invito durata GH-45');
+      gh44InvitationIds.add(invitationId);
+
+      const durationSeconds = (Date.parse(data.expires_at) - Date.parse(data.created_at)) / 1000;
+      assert(
+        durationSeconds >= 259199 && durationSeconds <= 259201,
+        `Durata invito inattesa: ${durationSeconds} secondi`
+      );
+      return `${durationSeconds} secondi (3 giorni)`;
+    }
+  );
+
+  await runTest(
+    'Inviti scaduto e gia usato GH-45',
+    'GH_INVITE_EXPIRED e GH_INVITE_ALREADY_USED restano distinti',
+    async () => {
+      const expiredId = `inv_gh45_expired_${crypto.randomUUID().replaceAll('-', '')}`;
+      const usedId = `inv_gh45_used_${crypto.randomUUID().replaceAll('-', '')}`;
+      const expiredToken = `gh45-expired-${crypto.randomUUID()}`;
+      const usedToken = `gh45-used-${crypto.randomUUID()}`;
+      const common = {
+        operator_user_id: staff.user.id,
+        pet_id: fixturePet.id,
+        tenant_id: tenantId,
+        first_name: '[DEMO GH-45] Stato',
+        last_name: 'Invito',
+      };
+
+      const { error: insertError } = await staff.client.from('customer_invitations').insert([
+        { ...common, id: expiredId, token: expiredToken, phone: '+393260004502' },
+        {
+          ...common,
+          id: usedId,
+          token: usedToken,
+          phone: '+393260004503',
+          accepted_at: new Date().toISOString(),
+          accepted_by: mario.user.id,
+        },
+      ]);
+      assertNoError(insertError, 'Creazione inviti stato GH-45');
+      gh44InvitationIds.add(expiredId);
+      gh44InvitationIds.add(usedId);
+
+      const { error: expireError } = await staff.client
+        .from('customer_invitations')
+        .update({ expires_at: new Date(Date.now() - 60 * 1000).toISOString() })
+        .eq('id', expiredId);
+      assertNoError(expireError, 'Scadenza fixture GH-45');
+
+      const [expiredResult, usedResult] = await Promise.all([
+        gh44.client.rpc('accept_customer_invite', { p_token: expiredToken }),
+        gh44.client.rpc('accept_customer_invite', { p_token: usedToken }),
+      ]);
+      assert(
+        expiredResult.error?.message?.includes('GH_INVITE_EXPIRED'),
+        `Errore scaduto inatteso: ${expiredResult.error?.message || 'successo'}`
+      );
+      assert(
+        usedResult.error?.message?.includes('GH_INVITE_ALREADY_USED'),
+        `Errore usato inatteso: ${usedResult.error?.message || 'successo'}`
+      );
+      return 'GH_INVITE_EXPIRED / GH_INVITE_ALREADY_USED';
+    }
+  );
 
   await runTest(
     'Fixture customer GH-44 collegata',
@@ -1120,7 +1336,6 @@ async function main() {
           first_name: '[DEMO GH-44] Ada',
           last_name: 'Scollegamento',
           customer_email: ACCOUNTS.gh44.email,
-          expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         });
       assertNoError(invitationError, 'Nuovo invito dopo unlink');
       gh44InvitationIds.add(invitationId);
@@ -1177,7 +1392,7 @@ async function main() {
     return 'marker scritto';
   });
 
-  await runTest('Storage customer sul pet proprio', 'upload e delete riusciti', async () => {
+  await runTest('Storage customer sul pet proprio', 'upload, update e delete riusciti', async () => {
     const objectPath = `${tenantId}/${marioPet.id}/${OWN_STORAGE_FILE}`;
     storagePaths.add(objectPath);
     const payload = new TextEncoder().encode(`${MARKER} own storage`);
@@ -1185,12 +1400,17 @@ async function main() {
       .from('pet-avatars')
       .upload(objectPath, payload, { contentType: 'image/png', upsert: false });
     assertNoError(uploadError, 'Upload pet proprio');
+    const replacement = new TextEncoder().encode(`${MARKER} own storage updated`);
+    const { error: updateError } = await mario.client.storage
+      .from('pet-avatars')
+      .update(objectPath, replacement, { contentType: 'image/png' });
+    assertNoError(updateError, 'Update pet proprio');
     const { error: removeError } = await mario.client.storage
       .from('pet-avatars')
       .remove([objectPath]);
     assertNoError(removeError, 'Delete pet proprio');
     storagePaths.delete(objectPath);
-    return 'upload 200, delete riuscita';
+    return 'upload, update e delete riusciti';
   });
 
   await runTest('Storage customer sul pet altrui', 'HTTP 403', async () => {
