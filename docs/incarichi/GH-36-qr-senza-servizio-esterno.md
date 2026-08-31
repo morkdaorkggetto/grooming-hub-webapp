@@ -34,7 +34,9 @@ Verificato nello stesso pacchetto: `VITE_PUBLIC_APP_URL` è correttamente `https
 
 **Il contenuto codificato non cambia di un carattere.** Resta `{origine pubblica}/client-card/{qr_token}`, con l'origine presa da `VITE_PUBLIC_APP_URL` come adesso.
 
-> **Non è una cautela astratta, è un vincolo misurato.** Il 29/8 Luigi ha inquadrato con il telefono **un cartoncino già stampato e consegnato**: si è aperta la card del cane giusto, con i dati aggiornati dopo la migrazione. Quindi le card in circolazione esistono, i token sono sopravvissuti a G6, e **ogni cartoncino già dato ai clienti dipende da questa riga**. Se l'URL codificato cambia, diventano carta straccia.
+> **Vincolo misurato.** Il 29/8 Luigi ha inquadrato con il telefono il QR di un cane: si è aperta la card giusta, con i dati aggiornati dopo la migrazione. **I token sono sopravvissuti a G6.**
+>
+> **Correzione del 31/8**: qui era scritto *«un cartoncino già stampato e consegnato»*. **Errore di Cowork**: il QR era stato inquadrato **dallo schermo del gestionale**, e **nessun cartoncino è mai stato stampato né consegnato.** L'invariante resta, per una ragione diversa: **i token non si possono rigenerare**, quindi l'URL codificato è permanente per costruzione.
 
 **L'aspetto non cambia.** Stessa posizione, stessa dimensione a schermo, stessa card in stampa. Questa non è una modifica di veste: se si vede una differenza, l'invariante non è soddisfatta.
 

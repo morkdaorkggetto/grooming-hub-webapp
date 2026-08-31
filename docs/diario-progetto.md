@@ -464,7 +464,11 @@ Il giro nato da una domanda di Luigi — *«e sulla parte grafica?»* — ha sco
 
 **I token dei metalli non esistevano.** CD-04 dichiarava «zero token nuovi, i `--tier-*` erano già in GH-15»: vero nei riferimenti versionati, **falso nel foglio di stile che l'app carica davvero**. Trovato da Codex durante l'implementazione. È lo stesso errore delle misure di ieri notte, in un'altra forma: una cosa vera in un mondo — il documento — data per vera in un altro, il codice in esecuzione.
 
-**Prima le card stampate.** Prima di toccare qualunque cosa, Luigi ha inquadrato **un cartoncino vero già consegnato**: si apriva sul cane giusto con i dati post-migrazione. Prova migliore di qualunque interrogazione: le card esistono, i token sono sopravvissuti a G6, e ogni cartoncino in giro dipende dall'URL codificato. Il mandato lo porta come vincolo misurato.
+**La prova del QR.** Prima di toccare qualunque cosa, Luigi ha inquadrato con il telefono il QR di un cane: si apriva sulla scheda giusta con i dati post-migrazione. **I token sono sopravvissuti a G6** — prova migliore di qualunque interrogazione.
+
+> **Correzione del 31/8.** Nel primo resoconto era scritto che si trattava di *«un cartoncino vero già consegnato»* e che *«le card in circolazione dipendono da questa riga»*. **Falso, e l'errore è di Cowork**: Luigi aveva inquadrato il QR **dallo schermo del gestionale**. **Nessun cartoncino è mai stato stampato né consegnato.** L'inferenza era stata scritta come misura in questo diario e in due mandati, `GH-36` e `GH-38`, entrambi corretti.
+>
+> È la stessa distrazione delle cardinalità di venerdì notte, in un'altra forma: **dedurre il mondo da un gesto osservato, invece di chiedere.** L'invariante che ne discendeva — l'URL codificato non cambia — **resta giusta**, ma per un'altra ragione: i token **non si possono rigenerare**, quindi il formato è permanente per costruzione.
 
 **Atto sulla produzione, eseguito da Cowork su autorizzazione esplicita di Luigi** (ore 11:20 circa). La migration `gh38_public_card_tenant_identity` è stata applicata **prima** del frontend, e non dopo: la funzione nuova mantiene la firma, quindi il frontend vecchio continua a funzionare con la funzione nuova, mentre l'inverso avrebbe lasciato la card a chiamare una funzione inesistente.
 

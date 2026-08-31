@@ -45,7 +45,9 @@ Ogni fixture rimossa nella stessa sessione, zero residui.
 
 ## Passo finale — lo guarda Luigi (regola 5)
 
-Nel registro: **inquadrare con il telefono un cartoncino già stampato** e verificare che mostri ancora la foto giusta. È l'unica prova che riguarda gli oggetti che i clienti hanno già in mano.
+Nel registro: **inquadrare con il telefono il QR di un cane dal gestionale** e verificare che la pagina mostri la foto giusta.
+
+> **Nota, corretta il 31/8**: **nessun cartoncino è ancora stato stampato né consegnato.** Un'affermazione contraria comparsa in `GH-36`, `GH-38` e nel diario era un'inferenza di Cowork da un gesto osservato, non una misura. Le card si stamperanno con la campagna inviti.
 
 ## Chiusura
 

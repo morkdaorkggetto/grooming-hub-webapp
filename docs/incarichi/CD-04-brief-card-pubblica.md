@@ -11,7 +11,7 @@ Un cartoncino stampato con un codice QR, consegnato al cliente. Lo inquadra col 
 
 Le pagine del gestionale le guardano due persone che ci lavorano dentro. **Questa la guarda chi deve decidere se fidarsi.**
 
-Ed è già in circolazione: le card stampate esistono, sono state distribuite, e sono state verificate funzionanti dopo la migrazione di ieri notte — inquadrando un cartoncino vero con un telefono vero.
+> **Correzione del 31/8.** Qui era scritto che le card stampate esistevano e circolavano già. **Non è vero**: era un'inferenza di Cowork da un gesto osservato — il QR era stato inquadrato **dallo schermo del gestionale**. **Nessun cartoncino è ancora stato stampato né consegnato**; si stamperanno con la campagna inviti. Il resto del brief resta valido: la pagina è comunque il primo contatto, e lo sarà davvero dal primo invito.
 
 ## Non è mai passata da un giro di veste — misurato
 

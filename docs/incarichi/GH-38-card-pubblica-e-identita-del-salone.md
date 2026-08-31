@@ -27,7 +27,9 @@ Nel pacchetto pubblicato: `dS = "https://api.qrserver.com/v1/create-qr-code/"`. 
 
 **Il contenuto codificato non cambia di un carattere**: resta `{origine pubblica}/client-card/{qr_token}`.
 
-> **Vincolo misurato, non cautela astratta.** Il 29/8 Luigi ha inquadrato **un cartoncino già stampato e consegnato**: si è aperta la card del cane giusto con i dati aggiornati dopo la migrazione. Le card in circolazione esistono e dipendono da questa riga. Se l'URL cambia, diventano carta straccia.
+> **Vincolo misurato, non cautela astratta.** Il 29/8 Luigi ha inquadrato con il telefono il QR di un cane: si è aperta la card giusta con i dati aggiornati dopo la migrazione. **I token sono sopravvissuti a G6.**
+>
+> **Correzione del 31/8**: qui era scritto *«un cartoncino già stampato e consegnato»* e *«le card in circolazione esistono»*. **Errore di Cowork**: il QR era stato inquadrato **dallo schermo del gestionale**, e **nessun cartoncino è mai stato stampato né consegnato.** L'invariante resta valida per una ragione diversa e più forte: **i token non si possono rigenerare** — non esiste alcun gesto né funzione — quindi l'URL codificato è permanente per costruzione, e cambiarne il formato romperebbe ogni cartoncino stampato da qui in avanti.
 
 ---
 
