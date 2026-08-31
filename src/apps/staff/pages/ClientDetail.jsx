@@ -60,6 +60,11 @@ const formatInviteExpiry = (value) => {
   return `Scade il ${formatted}.`;
 };
 
+const getConfiguredInviteDurationDays = (settings) => {
+  const value = Number(settings?.customer_invite_expiry_days);
+  return Number.isInteger(value) && value > 0 ? value : 3;
+};
+
 const formatVisitDate = (dateString) => {
   try {
     return new Date(`${dateString}T12:00:00`).toLocaleDateString('it-IT', {
@@ -83,7 +88,6 @@ export default function ClientDetail() {
   const [showAddVisitModal, setShowAddVisitModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
-  const [customerInviteEmail, setCustomerInviteEmail] = useState('');
   const [customerInvite, setCustomerInvite] = useState(null);
   const [unlinkingCustomerAccount, setUnlinkingCustomerAccount] = useState(false);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
@@ -301,9 +305,13 @@ export default function ClientDetail() {
   };
 
   const handleCreateCustomerInvite = async () => {
+    if (!tenant?.name) {
+      setError('Il nome del salone non è disponibile. Ricarica la pagina e riprova.');
+      return;
+    }
     try {
-      const invite = await createCustomerPortalInvite(clientId, customerInviteEmail.trim());
-      setCustomerInvite(invite);
+      const invite = await createCustomerPortalInvite(clientId);
+      setCustomerInvite({ ...invite, salonName: tenant.name });
     } catch (err) {
       setError(err.message || 'Errore creazione invito cliente');
     }
@@ -321,7 +329,6 @@ export default function ClientDetail() {
     try {
       await unlinkCustomerAccount(client.customer.id);
       setCustomerInvite(null);
-      setCustomerInviteEmail('');
       await loadClient();
     } catch (err) {
       setError(err.message || 'Errore scollegamento account cliente');
@@ -395,6 +402,7 @@ export default function ClientDetail() {
   const visitsTotal = client.visits?.length || 0;
   const visitsValue = client.visits?.reduce((sum, visit) => sum + Number(visit.cost || 0), 0) || 0;
   const customerAccountLinked = Boolean(client.customer?.user_id);
+  const inviteDurationDays = getConfiguredInviteDurationDays(tenant?.settings);
 
   return (
     <div className="gh-page gh-detail-page">
@@ -614,17 +622,27 @@ export default function ClientDetail() {
             ) : (
               <div>
                 <p className="gh-body">
-                  Genera un link riservato per collegare questa scheda cane a un account cliente.
-                  Il cliente vedrà solo card, fidelity, prossimo appuntamento e contatto WhatsApp.
+                  Il collegamento apre l'area cliente con tutti i suoi cani, lo storico completo delle visite,
+                  il prossimo appuntamento e le richieste.
                 </p>
-                <div className="gh-bridge-form">
-                  <Field
-                    aria-label="Email cliente opzionale"
-                    type="email"
-                    value={customerInviteEmail}
-                    onChange={(event) => setCustomerInviteEmail(event.target.value)}
-                    placeholder="Email cliente opzionale"
-                  />
+                <div className="gh-request-info-grid gh-request-info-grid--three">
+                  <div className="gh-request-info">
+                    <span className="gh-meta">Destinatario</span>
+                    <p className="gh-request-info__value">{client.owner}</p>
+                  </div>
+                  <div className="gh-request-info">
+                    <span className="gh-meta">Via</span>
+                    <p className="gh-request-info__value">WhatsApp · {client.phone}</p>
+                  </div>
+                  <div className="gh-request-info">
+                    <span className="gh-meta">Scadenza</span>
+                    <p className="gh-request-info__value">
+                      {inviteDurationDays} {inviteDurationDays === 1 ? 'giorno' : 'giorni'} dalla creazione
+                    </p>
+                  </div>
+                </div>
+                <p className="gh-meta">L'app prepara il messaggio: l'invio resta a te su WhatsApp.</p>
+                <div className="gh-inline-actions">
                   <Button staff variant="primary" onClick={handleCreateCustomerInvite}>
                     Genera invito
                   </Button>
@@ -635,6 +653,7 @@ export default function ClientDetail() {
               <div className="gh-invite-result">
                 <span className="gh-eyebrow--staff">Link invito</span>
                 <p className="gh-body"><strong>Destinatario:</strong> {customerInvite.recipient} · {customerInvite.phone}</p>
+                <p className="gh-meta"><strong>Via:</strong> WhatsApp · invio manuale</p>
                 <p className="gh-invite-result__url">{customerInvite.inviteUrl}</p>
                 <p className="gh-meta">{formatInviteExpiry(customerInvite.expires_at)}</p>
                 <div className="gh-inline-actions">

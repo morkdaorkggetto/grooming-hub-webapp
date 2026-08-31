@@ -164,8 +164,24 @@ export const getAppointmentAlternativesWhatsAppUrl = (appointment, alternatives)
     getAppointmentAlternativesWhatsAppMessage(appointment, alternatives)
   );
 
-export const getCustomerInviteWhatsAppMessage = ({ recipient, petName, inviteUrl } = {}) =>
-  `Ciao ${recipient || 'cliente'}, qui trovi l'accesso alla scheda di ${petName || 'il tuo cane'}: ${inviteUrl}`;
+export const getCustomerInviteDurationDays = ({ created_at: createdAt, expires_at: expiresAt } = {}) => {
+  const created = new Date(createdAt).getTime();
+  const expires = new Date(expiresAt).getTime();
+  if (!Number.isFinite(created) || !Number.isFinite(expires) || expires <= created) return null;
+  return Math.max(1, Math.round((expires - created) / (24 * 60 * 60 * 1000)));
+};
+
+export const getCustomerInviteWhatsAppMessage = (invite = {}) => {
+  const salonName = String(invite.salonName || '').trim() || 'il tuo salone';
+  const petName = String(invite.petName || '').trim() || 'il tuo cane';
+  const inviteUrl = String(invite.inviteUrl || '').trim();
+  const durationDays = getCustomerInviteDurationDays(invite);
+  const durationText = durationDays
+    ? `${durationDays} ${durationDays === 1 ? 'giorno' : 'giorni'}`
+    : 'fino alla scadenza indicata';
+
+  return `Ciao! Siamo ${salonName}. Qui trovi l'area dedicata a ${petName}: tutti i tuoi cani, lo storico completo delle visite, il prossimo appuntamento e le richieste. Il collegamento vale ${durationText}. ${inviteUrl}`.trim();
+};
 
 export const getCustomerInviteWhatsAppUrl = (invite) =>
   buildWhatsAppUrl(invite?.phone, getCustomerInviteWhatsAppMessage(invite));

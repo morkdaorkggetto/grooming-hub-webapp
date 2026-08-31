@@ -447,12 +447,12 @@ export default function CustomerRequests() {
         <Panel
           bridge
           eyebrow="Pipeline cliente"
-          title="Appuntamenti ora, boutique dopo"
+          title="Richieste da confermare"
           right={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>}
         >
           <div className="gh-request-pipeline">
               <p className="gh-body">
-                Questa pagina gestisce le richieste appuntamento reali. Quando gli ordini boutique avranno tabelle dedicate, finiranno qui nello stesso flusso operativo.
+                Qui arrivano le richieste appuntamento inviate dai clienti, da confermare o rifiutare con una risposta operativa.
               </p>
           </div>
         </Panel>

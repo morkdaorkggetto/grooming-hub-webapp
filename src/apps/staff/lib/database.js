@@ -274,7 +274,7 @@ export const ensureOperatorProfile = async (user) => {
   return profile;
 };
 
-export const createCustomerPortalInvite = async (petId, customerEmail = '') => {
+export const createCustomerPortalInvite = async (petId) => {
   try {
     assertDemoWriteAllowed();
     const { user, tenantId } = await requireStaff();
@@ -290,8 +290,7 @@ export const createCustomerPortalInvite = async (petId, customerEmail = '') => {
       phone: pet.customer.phone,
       first_name: pet.customer.first_name,
       last_name: pet.customer.last_name,
-      customer_email: customerEmail || null,
-    }).select('id, token, pet_id, customer_email, expires_at, created_at').single();
+    }).select('id, token, pet_id, expires_at, created_at').single();
     if (error) throw error;
     return {
       ...data,
