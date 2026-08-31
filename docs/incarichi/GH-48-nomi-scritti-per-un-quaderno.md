@@ -39,9 +39,11 @@ charlie / loki / lucky                       nomi veri, minuscoli
 
 ## Invarianti
 
+> **Correzione del 30/8, decisione di Luigi durante l'esecuzione.** Il mandato diceva originariamente «il tuo cane». È stato corretto in **«il tuo pet»** perché **non tutti gli animali da toelettatura sono cani**, e la misura lo conferma: il campo `species` è **vuoto per tutti e 288** — il database non sa che quelli siano cani, lo davamo per scontato noi. Il ripiego deve essere neutro. Il testo qui sotto è già aggiornato; la deviazione è dichiarata anche nel registro.
+
 **1 · Il ripiego scatta solo dove la certezza è totale.**
 
-Il messaggio d'invito dice **«il tuo cane»** invece del nome **soltanto** quando il nome è vuoto, oppure **coincide esattamente con la razza** a meno di maiuscole e spazi. Nient'altro.
+Il messaggio d'invito dice **«il tuo pet»** invece del nome **soltanto** quando il nome è vuoto, oppure **coincide esattamente con la razza** a meno di maiuscole e spazi. Nient'altro.
 
 Copre `chihuahua`, `Meticcio`, `York` senza toccare `Milo maltese`, che un nome vero ce l'ha. **Non inventare euristiche più larghe**: un automatismo che indovina è peggio di uno che tace, e qui sbagliare significa scrivere a un cliente il nome sbagliato del suo cane.
 
@@ -63,7 +65,7 @@ Così chi legge «andrà a … per **Specie JackRussel**» corregge **il dato**,
 
 Dichiara nel registro, misurate sul demo con fixture usa-e-getta:
 
-- cane con nome **uguale alla razza** → il messaggio dice «il tuo cane», e il **testo integrale** è riportato nel registro;
+- cane con nome **uguale alla razza** → il messaggio dice «il tuo pet», e il **testo integrale** è riportato nel registro;
 - cane con nome tipo **`Milo maltese`** → il messaggio **usa il nome**, perché non coincide con la razza;
 - cane con **nome vuoto** → ripiego;
 - cane con **nome normale** → nessun cambiamento rispetto a oggi;
