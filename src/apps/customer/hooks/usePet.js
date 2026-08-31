@@ -48,12 +48,12 @@ export function usePet(petId) {
   }, [authLoading, tenantLoading, fetchPet]);
 
   const updatePet = useCallback(
-    async ({ owner_notes, coat_preferences, photo_url }) => {
+    async ({ owner_notes, coat_preferences }) => {
       if (!user || !tenantId || !petId) {
         throw new Error('Sessione o pet non disponibili.');
       }
 
-      const payload = { owner_notes, coat_preferences, photo_url };
+      const payload = { owner_notes, coat_preferences };
       const { data: updated, error: updateError } = await supabase
         .from('pets')
         .update(payload)

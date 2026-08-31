@@ -9,6 +9,7 @@ const EXPECTED_BASELINE_PETS = Number(process.env.GH_RLS_EXPECTED_PET_COUNT || '
 const SUITE_LABEL = process.env.GH_RLS_SUITE_LABEL || 'GH-06 - Suite RLS demo';
 const MARKER = process.env.GH_RLS_MARKER || '[DEMO GH-06]';
 const APPOINTMENT_REQUEST_MARKER = process.env.GH_RLS_APPOINTMENT_MARKER || '[DEMO GH-08]';
+const GH49_MARKER = '[DEMO GH-49]';
 const FIXTURE_PHONE = process.env.GH_RLS_FIXTURE_PHONE || '+393339906001';
 const GH44_PHONE = '+393339904400';
 const FIXTURE_VISIT_ID = process.env.GH_RLS_FIXTURE_VISIT_ID || 'gh-06-rls-luca-visit';
@@ -36,6 +37,10 @@ const ACCOUNTS = {
     email: 'customer.gh44@test.example',
     password: 'demo-gh44-customer-2026',
   },
+  foreignStaff: {
+    email: 'staff.gh49.foreign@test.example',
+    password: 'demo-gh49-foreign-staff-2026',
+  },
 };
 
 const results = [];
@@ -44,6 +49,7 @@ let staff = null;
 let mario = null;
 let luca = null;
 let gh44 = null;
+let foreignStaff = null;
 let tenantId = null;
 let marioCustomer = null;
 let lucaCustomer = null;
@@ -51,6 +57,8 @@ let marioPet = null;
 let fixturePet = null;
 let fixtureVisit = null;
 let originalOwnerNotes = null;
+let originalCoatPreferences = null;
+let originalPhotoUrl = null;
 let originalPetStaffNotes = null;
 let originalCustomerStaffNotes = null;
 const storagePaths = new Set();
@@ -60,6 +68,7 @@ const appointmentIds = new Set();
 const gh44PetIds = new Set();
 const gh44InvitationIds = new Set();
 const gh44RequestIds = new Set();
+const gh49PromotionIds = new Set();
 let gh44CustomerId = null;
 let gh44VisitId = null;
 
@@ -168,6 +177,12 @@ async function cleanupStaleFixtures() {
   assertNoError(petNoteCleanup.error, 'Pulizia note pet pregresse');
   assertNoError(customerNoteCleanup.error, 'Pulizia note customer pregresse');
 
+  const { error: promotionCleanupError } = await staff.client
+    .from('promotions')
+    .delete()
+    .ilike('title', `${GH49_MARKER}%`);
+  assertNoError(promotionCleanupError, 'Pulizia promozioni GH-49 pregresse');
+
   const { data: staleRequests, error: staleRequestReadError } = await staff.client
     .from('appointment_requests')
     .select('id, appointment_id')
@@ -253,7 +268,7 @@ async function loadContext() {
 
   const { data: marioPets, error: marioPetError } = await staff.client
     .from('pets')
-    .select('id, name, microchip, owner_notes, staff_notes:pet_staff_notes(notes)')
+    .select('id, name, microchip, owner_notes, coat_preferences, photo_url, staff_notes:pet_staff_notes(notes)')
     .eq('tenant_id', tenantId)
     .eq('customer_id', marioCustomer.id)
     .order('name');
@@ -261,6 +276,8 @@ async function loadContext() {
   assert(marioPets.length === 2, `Pet Mario attesi 2, misurati ${marioPets.length}`);
   marioPet = marioPets.find((item) => item.name === 'Luna') || marioPets[0];
   originalOwnerNotes = marioPet.owner_notes;
+  originalCoatPreferences = marioPet.coat_preferences;
+  originalPhotoUrl = marioPet.photo_url;
   originalPetStaffNotes = relation(marioPet.staff_notes)?.notes || null;
   originalCustomerStaffNotes = relation(marioCustomer.staff_notes)?.notes || null;
 }
@@ -383,6 +400,13 @@ async function cleanupCurrentRun() {
   const cleanupErrors = [];
 
   if (staff?.client) {
+    if (gh49PromotionIds.size) {
+      const { error } = await staff.client
+        .from('promotions')
+        .delete()
+        .in('id', [...gh49PromotionIds]);
+      if (error) cleanupErrors.push(`promozioni GH-49: ${error.message}`);
+    }
     if (appointmentIds.size) {
       const { error } = await staff.client
         .from('appointments')
@@ -406,12 +430,16 @@ async function cleanupCurrentRun() {
     }
   }
 
-  if (mario?.client && marioPet?.id) {
-    const { error } = await mario.client
+  if (staff?.client && marioPet?.id) {
+    const { error } = await staff.client
       .from('pets')
-      .update({ owner_notes: originalOwnerNotes })
+      .update({
+        owner_notes: originalOwnerNotes,
+        coat_preferences: originalCoatPreferences,
+        photo_url: originalPhotoUrl,
+      })
       .eq('id', marioPet.id);
-    if (error) cleanupErrors.push(`owner_notes: ${error.message}`);
+    if (error) cleanupErrors.push(`ripristino pet GH-49: ${error.message}`);
   }
 
   if (staff?.client && marioPet?.id) {
@@ -505,6 +533,7 @@ async function cleanupCurrentRun() {
     { data: requests },
     { data: petNotes },
     { data: customerNotes },
+    { data: promotions },
   ] = await Promise.all([
     staff.client.from('pets').select('id').ilike('name', `${MARKER}%`),
     staff.client.from('visits').select('id').ilike('treatments', `${MARKER}%`),
@@ -512,10 +541,11 @@ async function cleanupCurrentRun() {
     staff.client.from('appointment_requests').select('id').ilike('coat_condition_notes', `${APPOINTMENT_REQUEST_MARKER}%`),
     staff.client.from('pet_staff_notes').select('pet_id').ilike('notes', `${MARKER}%`),
     staff.client.from('customer_staff_notes').select('customer_id').ilike('notes', `${MARKER}%`),
+    staff.client.from('promotions').select('id').ilike('title', `${GH49_MARKER}%`),
   ]);
-  const measured = `${pets?.length || 0} pet, ${visits?.length || 0} visite, ${customers?.length || 0} customer, ${requests?.length || 0} richieste, ${petNotes?.length || 0} note pet, ${customerNotes?.length || 0} note customer`;
+  const measured = `${pets?.length || 0} pet, ${visits?.length || 0} visite, ${customers?.length || 0} customer, ${requests?.length || 0} richieste, ${petNotes?.length || 0} note pet, ${customerNotes?.length || 0} note customer, ${promotions?.length || 0} promozioni`;
   addResult(
-    pets?.length === 0 && visits?.length === 0 && customers?.length === 0 && requests?.length === 0 && petNotes?.length === 0 && customerNotes?.length === 0 ? 'PASS' : 'FAIL',
+    pets?.length === 0 && visits?.length === 0 && customers?.length === 0 && requests?.length === 0 && petNotes?.length === 0 && customerNotes?.length === 0 && promotions?.length === 0 ? 'PASS' : 'FAIL',
     'Pulizia fixture',
     '0 residui marker',
     measured
@@ -536,6 +566,7 @@ async function main() {
   mario = await login('Mario', ACCOUNTS.mario);
   luca = await login('Luca', ACCOUNTS.luca);
   gh44 = await login('sonda customer GH-44', ACCOUNTS.gh44);
+  foreignStaff = await login('staff tenant estraneo GH-49', ACCOUNTS.foreignStaff);
   await cleanupStaleFixtures();
   await loadContext();
 
@@ -551,6 +582,121 @@ async function main() {
     );
     return `${data.length} pet`;
   });
+
+  await runTest(
+    'Promozioni staff crea, modifica, disattiva e riordina GH-49',
+    '3 promozioni nel tenant con ordine 10/20/30 e una sola visibile ora',
+    async () => {
+      const now = Date.now();
+      const { data: created, error: createError } = await staff.client
+        .from('promotions')
+        .insert([
+          {
+            tenant_id: tenantId,
+            title: `${GH49_MARKER} Attiva iniziale`,
+            body: `${GH49_MARKER} stesse parole nel gestionale e nell area cliente`,
+            valid_from: new Date(now - 60 * 60 * 1000).toISOString(),
+            valid_to: new Date(now + 24 * 60 * 60 * 1000).toISOString(),
+            display_order: 30,
+            is_active: true,
+          },
+          {
+            tenant_id: tenantId,
+            title: `${GH49_MARKER} Da disattivare`,
+            body: `${GH49_MARKER} non deve apparire`,
+            display_order: 20,
+            is_active: true,
+          },
+          {
+            tenant_id: tenantId,
+            title: `${GH49_MARKER} Futura`,
+            body: `${GH49_MARKER} fuori finestra`,
+            valid_from: new Date(now + 24 * 60 * 60 * 1000).toISOString(),
+            valid_to: new Date(now + 48 * 60 * 60 * 1000).toISOString(),
+            display_order: 10,
+            is_active: true,
+          },
+        ])
+        .select('id, title');
+      assertNoError(createError, 'Creazione promozioni GH-49');
+      created.forEach(({ id }) => gh49PromotionIds.add(id));
+
+      const active = created.find(({ title }) => title.includes('Attiva iniziale'));
+      const disabled = created.find(({ title }) => title.includes('Da disattivare'));
+      const future = created.find(({ title }) => title.includes('Futura'));
+      assert(active && disabled && future, 'Fixture promozioni incomplete');
+
+      const [activeUpdate, disableUpdate] = await Promise.all([
+        staff.client
+          .from('promotions')
+          .update({ title: `${GH49_MARKER} Attiva modificata` })
+          .eq('id', active.id),
+        staff.client
+          .from('promotions')
+          .update({ is_active: false })
+          .eq('id', disabled.id),
+      ]);
+      assertNoError(activeUpdate.error, 'Modifica promozione GH-49');
+      assertNoError(disableUpdate.error, 'Disattivazione promozione GH-49');
+
+      const { error: reorderError } = await staff.client.rpc('reorder_promotions', {
+        p_ids: [active.id, future.id, disabled.id],
+      });
+      assertNoError(reorderError, 'Riordino promozioni GH-49');
+
+      const { data: measured, error: readError } = await staff.client
+        .from('promotions')
+        .select('id, title, is_active, display_order')
+        .in('id', [active.id, future.id, disabled.id])
+        .order('display_order');
+      assertNoError(readError, 'Rilettura promozioni GH-49');
+      assert(measured.map(({ display_order }) => display_order).join(',') === '10,20,30', 'Ordine inatteso');
+      assert(measured[0].title.endsWith('Attiva modificata'), 'Modifica titolo non persistita');
+      assert(measured[2].is_active === false, 'Disattivazione non persistita');
+      return '3 create, 1 modifica, 1 disattivazione, ordine 10/20/30';
+    }
+  );
+
+  await runTest(
+    'Promozioni customer rispettano stato e finestra GH-49',
+    'solo la promozione attiva e in finestra e visibile',
+    async () => {
+      const { data, error } = await mario.client
+        .from('promotions')
+        .select('id, title, is_active, valid_from, valid_to')
+        .ilike('title', `${GH49_MARKER}%`);
+      assertNoError(error, 'Lettura promozioni customer GH-49');
+      assert(data.length === 1, `Promozioni visibili attese 1, misurate ${data.length}`);
+      assert(data[0].title === `${GH49_MARKER} Attiva modificata`, `Titolo visibile inatteso: ${data[0].title}`);
+      return `1 visibile: ${data[0].title}`;
+    }
+  );
+
+  await runTest(
+    'Staff fuori tenant non vede ne modifica promozioni GH-49',
+    '0 righe visibili, 0 righe modificate e riordino rifiutato',
+    async () => {
+      const ids = [...gh49PromotionIds];
+      const visible = await foreignStaff.client
+        .from('promotions')
+        .select('id')
+        .in('id', ids);
+      assertNoError(visible.error, 'Lettura promozioni da staff estraneo');
+      assert(visible.data.length === 0, `Staff estraneo vede ${visible.data.length} promozioni`);
+
+      const update = await foreignStaff.client
+        .from('promotions')
+        .update({ title: `${GH49_MARKER} VIOLAZIONE` })
+        .eq('id', ids[0])
+        .select('id');
+      assertNoError(update.error, 'UPDATE filtrato da staff estraneo');
+      assert(update.data.length === 0, `Staff estraneo modifica ${update.data.length} righe`);
+
+      const reorder = await foreignStaff.client.rpc('reorder_promotions', { p_ids: ids });
+      assert(forbiddenRlsError(reorder.error), `Riordino estraneo non rifiutato: ${reorder.error?.message || 'successo'}`);
+      return '0 lette, 0 modificate, RPC 42501';
+    }
+  );
 
   await runTest(
     'Portale customer legge il proprio nucleo',
@@ -1361,6 +1507,7 @@ async function main() {
   for (const [column, attemptedValue] of [
     ['microchip', `${MARKER} MICROCHIP`],
     ['name', `${MARKER} NAME`],
+    ['photo_url', `https://example.invalid/${encodeURIComponent(GH49_MARKER)}/customer.png`],
   ]) {
     await runTest(
       `Whitelist customer protegge ${column}`,
@@ -1390,6 +1537,45 @@ async function main() {
     assertNoError(error, 'UPDATE owner_notes');
     assert(data.owner_notes === `${MARKER} OWNER NOTES`, 'owner_notes non aggiornato');
     return 'marker scritto';
+  });
+
+  await runTest('Whitelist customer consente coat_preferences', 'preferenze scritte e ripristinabili', async () => {
+    const attempted = { gh49_test: `${GH49_MARKER} preferenze` };
+    const { data, error } = await mario.client
+      .from('pets')
+      .update({ coat_preferences: attempted })
+      .eq('id', marioPet.id)
+      .select('coat_preferences')
+      .single();
+    assertNoError(error, 'UPDATE coat_preferences');
+    assert(data.coat_preferences?.gh49_test === attempted.gh49_test, 'coat_preferences non aggiornato');
+    return 'preferenze scritte';
+  });
+
+  await runTest('Staff continua a sostituire photo_url GH-49', 'foto staff aggiornata, leggibile e ripristinata', async () => {
+    const fixtureUrl = staff.client.storage
+      .from('pet-avatars')
+      .getPublicUrl(gh45PetAvatarPath).data.publicUrl;
+    const { data: updated, error: updateError } = await staff.client
+      .from('pets')
+      .update({ photo_url: fixtureUrl })
+      .eq('id', marioPet.id)
+      .select('photo_url')
+      .single();
+    assertNoError(updateError, 'UPDATE photo_url staff');
+    assert(updated.photo_url === fixtureUrl, 'photo_url staff non persistita');
+    const response = await fetch(`${fixtureUrl}?gh49=${Date.now()}`);
+    assert(response.ok, `Foto staff non leggibile: HTTP ${response.status}`);
+
+    const { data: restored, error: restoreError } = await staff.client
+      .from('pets')
+      .update({ photo_url: originalPhotoUrl })
+      .eq('id', marioPet.id)
+      .select('photo_url')
+      .single();
+    assertNoError(restoreError, 'Ripristino photo_url staff');
+    assert(restored.photo_url === originalPhotoUrl, 'photo_url originale non ripristinita');
+    return 'update staff, HTTP 200, ripristino originale';
   });
 
   await runTest('Storage customer sul pet proprio', 'upload, update e delete riusciti', async () => {
@@ -1451,12 +1637,15 @@ async function main() {
     return 'marker scritto';
   });
 
-  addResult(
-    'SKIP',
-    'Staff fuori tenant',
-    '0 righe da un secondo tenant reale',
-    'demo con un solo tenant; fixture cross-tenant non disponibile'
-  );
+  await runTest('Staff fuori tenant', '0 righe da un secondo tenant reale', async () => {
+    const { data, error } = await foreignStaff.client
+      .from('pets')
+      .select('id')
+      .eq('tenant_id', tenantId);
+    assertNoError(error, 'Lettura pet da staff fuori tenant');
+    assert(data.length === 0, `Staff estraneo vede ${data.length} pet`);
+    return '0 pet';
+  });
 }
 
 try {
@@ -1475,6 +1664,9 @@ try {
   }
   if (gh44?.client) {
     await gh44.client.auth.signOut({ scope: 'global' }).catch(() => {});
+  }
+  if (foreignStaff?.client) {
+    await foreignStaff.client.auth.signOut({ scope: 'global' }).catch(() => {});
   }
 }
 

@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
-import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { useUnsavedChanges } from '../../../shared/navigation/UnsavedChangesProvider';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
 import Eyebrow from '../../../shared/ui/Eyebrow';
@@ -9,7 +8,6 @@ import Icon from '../../../shared/ui/Icon';
 import Skeleton from '../../../shared/ui/Skeleton';
 import { usePet } from '../hooks/usePet';
 import { usePetVisits } from '../hooks/usePetVisits';
-import { removePetPhoto, resizePetPhoto, uploadPetPhoto } from '../lib/petPhoto';
 import './Pet.css';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('it-IT', {
@@ -70,12 +68,11 @@ function draftFromPet(pet) {
   return {
     ownerNotes: pet?.owner_notes || '',
     coatPreferences: formatCoatPreferences(pet?.coat_preferences),
-    photoUrl: pet?.photo_url || '',
   };
 }
 
-function PetAvatar({ pet, previewUrl }) {
-  const source = previewUrl || pet.photo_url;
+function PetAvatar({ pet }) {
+  const source = pet.photo_url;
   if (source) {
     return <img src={source} alt={`Foto di ${pet.name}`} className="gh-pet-avatar" />;
   }
@@ -228,36 +225,22 @@ function MessagePage({ title, body, onRetry }) {
 export default function Pet() {
   const { loading: authLoading } = useRequireCustomer();
   const { petId } = useParams();
-  const { tenantId } = useTenant();
   const { data: pet, loading, error, refetch, updatePet } = usePet(petId);
   const { data: visits, loading: visitsLoading, error: visitsError, refetch: refetchVisits } = usePetVisits(petId);
   const [mode, setMode] = useState('viewing');
   const [activeSection, setActiveSection] = useState(null);
   const [draft, setDraft] = useState(draftFromPet(null));
-  const [pendingPhoto, setPendingPhoto] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [photoBusy, setPhotoBusy] = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (pet && mode !== 'editing' && mode !== 'saving') setDraft(draftFromPet(pet));
   }, [pet, mode]);
 
-  useEffect(
-    () => () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    },
-    [previewUrl]
-  );
-
   const originalDraft = useMemo(() => draftFromPet(pet), [pet]);
   const isDirty =
     mode === 'editing' &&
     (draft.ownerNotes !== originalDraft.ownerNotes ||
-      draft.coatPreferences !== originalDraft.coatPreferences ||
-      draft.photoUrl !== originalDraft.photoUrl ||
-      Boolean(pendingPhoto));
+      draft.coatPreferences !== originalDraft.coatPreferences);
   const editing = mode === 'editing' || mode === 'saving';
   const saving = mode === 'saving';
   const confirmNavigation = useUnsavedChanges(isDirty || saving, UNSAVED_MESSAGE);
@@ -271,68 +254,27 @@ export default function Pet() {
 
   const cancelEditing = () => {
     if (isDirty && !window.confirm('Annullare le modifiche non salvate?')) return;
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    setPendingPhoto(null);
     setDraft(draftFromPet(pet));
     setSaveError(null);
     setActiveSection(null);
     setMode('viewing');
   };
 
-  const beginPhotoEditing = () => {
-    if (editing && activeSection !== 'photo') return;
-    if (!editing) beginEditing('photo');
-    fileInputRef.current?.click();
-  };
-
-  const handlePhotoChange = async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-
-    setPhotoBusy(true);
-    setSaveError(null);
-    try {
-      const resized = await resizePetPhoto(file);
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      setPendingPhoto(resized);
-      setPreviewUrl(URL.createObjectURL(resized));
-    } catch (photoError) {
-      setSaveError(photoError.message);
-    } finally {
-      setPhotoBusy(false);
-    }
-  };
-
   const saveChanges = async () => {
-    if (photoBusy || !isDirty) return;
+    if (!isDirty) return;
     setMode('saving');
     setSaveError(null);
-    let uploadedPath = null;
 
     try {
-      let photoUrl = draft.photoUrl || null;
-      if (pendingPhoto) {
-        const uploaded = await uploadPetPhoto({ file: pendingPhoto, tenantId, petId });
-        uploadedPath = uploaded.path;
-        photoUrl = uploaded.publicUrl;
-      }
-
       const updated = await updatePet({
         owner_notes: draft.ownerNotes.trim() || null,
         coat_preferences: draft.coatPreferences.trim() || null,
-        photo_url: photoUrl,
       });
 
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-      setPendingPhoto(null);
       setDraft(draftFromPet(updated));
       setActiveSection(null);
       setMode('saved');
     } catch (updateError) {
-      if (uploadedPath) await removePetPhoto(uploadedPath);
       setSaveError(updateError.message || 'Non e stato possibile salvare le modifiche.');
       setMode('editing');
     }
@@ -366,39 +308,13 @@ export default function Pet() {
 
         <header className="gh-pet-hero">
           <div className="gh-pet-avatar-wrap">
-            <PetAvatar pet={pet} previewUrl={previewUrl} />
-            <button
-              type="button"
-              onClick={beginPhotoEditing}
-              disabled={photoBusy || saving || (editing && activeSection !== 'photo')}
-              aria-label={`Cambia la foto di ${pet.name}`}
-              title="Cambia foto"
-              className="gh-pet-photo-button"
-            >
-              <Icon name="camera" size={17} />
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handlePhotoChange}
-              className="gh-pet-file-input"
-            />
+            <PetAvatar pet={pet} />
           </div>
 
           <div className="gh-pet-hero-copy">
             <Eyebrow>Scheda pet</Eyebrow>
             <h1>{pet.name}</h1>
             <p>{heroMeta}</p>
-            {activeSection === 'photo' && (
-              <div className="gh-pet-photo-edit">
-                <button type="button" className="gh-pet-text-action" onClick={beginPhotoEditing} disabled={photoBusy || saving}>
-                  <Icon name="camera" size={15} />
-                  {photoBusy ? 'Preparazione foto...' : 'Scegli una foto'}
-                </button>
-                <EditActions saving={saving} dirty={isDirty} onCancel={cancelEditing} onSave={saveChanges} />
-              </div>
-            )}
           </div>
         </header>
 

@@ -17,7 +17,11 @@ import {
   SkeletonRow,
   StatStrip,
 } from '../components/StaffKit';
-import { getAllPets, getPendingAppointmentRequests } from '../lib/database';
+import {
+  getActivePromotionCount,
+  getAllPets,
+  getPendingAppointmentRequests,
+} from '../lib/database';
 import { getFidelityTierSnapshot } from '../lib/fidelity';
 
 const formatRequestTiming = (request) => {
@@ -55,6 +59,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [activePromotionCount, setActivePromotionCount] = useState(0);
 
   useEffect(() => {
     loadClients();
@@ -94,12 +99,14 @@ export default function Dashboard() {
     try {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
-      const [data, requestData] = await Promise.all([
+      const [data, requestData, promotionCount] = await Promise.all([
         getAllPets(),
         getPendingAppointmentRequests(),
+        getActivePromotionCount(),
       ]);
       setClients(data);
       setPendingRequests(requestData);
+      setActivePromotionCount(promotionCount);
     } catch (err) {
       setError(err.message || 'Errore nel caricamento clienti');
       console.error(err);
@@ -188,6 +195,15 @@ export default function Dashboard() {
       icon: 'paw',
       accent: 'var(--color-warning-text)',
       onClick: () => navigate('/requests'),
+    },
+    {
+      eyebrow: 'Comunicazione',
+      title: 'Promozioni',
+      description: "Iniziative pubblicate nell'area cliente del salone",
+      metric: `${activePromotionCount} visibili`,
+      icon: 'sparkle',
+      accent: 'var(--color-secondary)',
+      onClick: () => navigate('/promotions'),
     },
   ];
 
@@ -286,6 +302,19 @@ export default function Dashboard() {
               ))}
             </div>
           </Panel>
+        )}
+
+        {activePromotionCount === 0 && (
+          <Panel
+            className="gh-dashboard-promotions"
+            eyebrow="Area cliente"
+            title="Non ci sono promozioni visibili in questo momento"
+            right={(
+              <Button staff variant="outline" onClick={() => navigate('/promotions')}>
+                Gestisci promozioni
+              </Button>
+            )}
+          />
         )}
 
         <div className="gh-dashboard-overview">

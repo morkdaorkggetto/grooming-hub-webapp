@@ -5,10 +5,8 @@ import { useTenant } from '../../../shared/tenant/TenantProvider';
 /**
  * usePromotions — fetch delle promozioni attive del tenant corrente.
  *
- * Filtro client-side ridondante con la policy RLS `promotions_customer_select_active`
- * di M32 (already filters is_active=true e valid_to>=now()), ma esplicitiamo
- * comunque per chiarezza del contratto della query — la RLS resta il vero
- * gate di sicurezza.
+ * Il filtro client-side replica la policy RLS su stato e finestra temporale;
+ * la RLS resta il gate di sicurezza.
  *
  * Ordering: display_order ASC (campo controllato dall'operatore).
  *
@@ -34,6 +32,7 @@ export function usePromotions() {
       .select('*')
       .eq('tenant_id', tenantId)
       .eq('is_active', true)
+      .or(`valid_from.is.null,valid_from.lte.${nowIso}`)
       .or(`valid_to.is.null,valid_to.gte.${nowIso}`)
       .order('display_order', { ascending: true });
 

@@ -18,6 +18,7 @@ import CustomerLogin from './pages/CustomerLogin';
 import CustomerInvite from './pages/CustomerInvite';
 import CustomerPortal from './pages/CustomerPortal';
 import CustomerRequests from './pages/CustomerRequests';
+import PromotionsManager from './pages/PromotionsManager';
 import { DEMO_MODE } from './lib/demoMode';
 
 /**
@@ -262,6 +263,15 @@ export default function App() {
             element={
               <ProtectedRoute isAuthenticated={!!user} profile={profile}>
                 <Contacts />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/promotions"
+            element={
+              <ProtectedRoute isAuthenticated={!!user} profile={profile}>
+                <PromotionsManager />
               </ProtectedRoute>
             }
           />

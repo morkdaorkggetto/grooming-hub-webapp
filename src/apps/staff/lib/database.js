@@ -21,6 +21,7 @@ const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, durati
 const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, staff_responded_at, proposed_alternatives, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_PET_SELECT = `id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone)`;
+const PROMOTION_SELECT = 'id, tenant_id, title, body, image_url, valid_from, valid_to, cta_label, cta_url, display_order, is_active, created_at';
 
 const generateId = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
@@ -1083,6 +1084,122 @@ export const getPublicSalonIdentity = async () => {
   });
   if (error) throw new Error(`Non riesco a caricare il contatto del salone: ${error.message}`);
   return data || null;
+};
+
+const normalizePromotionPayload = (input = {}) => {
+  const title = String(input.title || '').trim();
+  const body = String(input.body || '').trim() || null;
+  const ctaLabel = String(input.cta_label || '').trim() || null;
+  const ctaUrl = String(input.cta_url || '').trim() || null;
+  const validFrom = input.valid_from ? new Date(input.valid_from) : null;
+  const validTo = input.valid_to ? new Date(input.valid_to) : null;
+
+  if (!title) throw new Error('Il titolo della promozione e obbligatorio.');
+  if (validFrom && Number.isNaN(validFrom.getTime())) throw new Error('Data di inizio non valida.');
+  if (validTo && Number.isNaN(validTo.getTime())) throw new Error('Data di fine non valida.');
+  if (validFrom && validTo && validTo <= validFrom) {
+    throw new Error('La fine della promozione deve essere successiva all inizio.');
+  }
+  if (Boolean(ctaLabel) !== Boolean(ctaUrl)) {
+    throw new Error('Etichetta e indirizzo del pulsante vanno compilati insieme.');
+  }
+  if (ctaUrl && !ctaUrl.startsWith('/') && !/^https?:\/\//i.test(ctaUrl)) {
+    throw new Error('L indirizzo del pulsante deve iniziare con /, http:// oppure https://.');
+  }
+
+  return {
+    title,
+    body,
+    image_url: String(input.image_url || '').trim() || null,
+    valid_from: validFrom?.toISOString() || null,
+    valid_to: validTo?.toISOString() || null,
+    cta_label: ctaLabel,
+    cta_url: ctaUrl,
+    is_active: input.is_active !== false,
+  };
+};
+
+export const getStaffPromotions = async () => {
+  const { tenantId } = await requireStaff();
+  const { data, error } = await supabase
+    .from('promotions')
+    .select(PROMOTION_SELECT)
+    .eq('tenant_id', tenantId)
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true });
+  if (error) throw new Error(`Non riesco a caricare le promozioni: ${error.message}`);
+  return data || [];
+};
+
+export const getActivePromotionCount = async () => {
+  const { tenantId } = await requireStaff();
+  const nowIso = new Date().toISOString();
+  const { count, error } = await supabase
+    .from('promotions')
+    .select('id', { count: 'exact', head: true })
+    .eq('tenant_id', tenantId)
+    .eq('is_active', true)
+    .or(`valid_from.is.null,valid_from.lte.${nowIso}`)
+    .or(`valid_to.is.null,valid_to.gte.${nowIso}`);
+  if (error) throw new Error(`Non riesco a contare le promozioni attive: ${error.message}`);
+  return count || 0;
+};
+
+export const createStaffPromotion = async (input) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  const payload = normalizePromotionPayload(input);
+  const { data: last, error: orderError } = await supabase
+    .from('promotions')
+    .select('display_order')
+    .eq('tenant_id', tenantId)
+    .order('display_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (orderError) throw new Error(`Non riesco a preparare l ordine: ${orderError.message}`);
+
+  const { data, error } = await supabase
+    .from('promotions')
+    .insert({ ...payload, tenant_id: tenantId, display_order: Number(last?.display_order || 0) + 10 })
+    .select(PROMOTION_SELECT)
+    .single();
+  if (error) throw new Error(`Non riesco a creare la promozione: ${error.message}`);
+  return data;
+};
+
+export const updateStaffPromotion = async (promotionId, input) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  const payload = normalizePromotionPayload(input);
+  const { data, error } = await supabase
+    .from('promotions')
+    .update(payload)
+    .eq('id', promotionId)
+    .eq('tenant_id', tenantId)
+    .select(PROMOTION_SELECT)
+    .maybeSingle();
+  if (error) throw new Error(`Non riesco a modificare la promozione: ${error.message}`);
+  if (!data) throw new Error('Promozione non trovata o accesso negato.');
+  return data;
+};
+
+export const reorderStaffPromotions = async (orderedIds) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  const sourceIds = Array.isArray(orderedIds) ? orderedIds : [];
+  const ids = [...new Set(sourceIds.filter(Boolean))];
+  if (ids.length !== sourceIds.length) throw new Error('Ordine promozioni non valido.');
+
+  const { data: owned, error: ownedError } = await supabase
+    .from('promotions')
+    .select('id')
+    .eq('tenant_id', tenantId)
+    .in('id', ids);
+  if (ownedError) throw new Error(`Non riesco a verificare l ordine: ${ownedError.message}`);
+  if ((owned || []).length !== ids.length) throw new Error('Una promozione non appartiene al salone.');
+
+  const { error } = await supabase.rpc('reorder_promotions', { p_ids: ids });
+  if (error) throw new Error(`Non riesco a riordinare le promozioni: ${error.message}`);
 };
 
 export const getRevenueReportData = async ({ from = null, to = null } = {}) => {

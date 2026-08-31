@@ -1,0 +1,126 @@
+.gh-promotions-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.gh-promotions-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.gh-promotions-form__wide {
+  grid-column: 1 / -1;
+}
+
+.gh-promotions-toggle {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.gh-promotions-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+.gh-promotions-loading {
+  padding: 28px 20px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.gh-promotions-list {
+  display: grid;
+}
+
+.gh-promotion-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  min-height: 118px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.gh-promotion-row:last-child {
+  border-bottom: 0;
+}
+
+.gh-promotion-row__main {
+  min-width: 0;
+}
+
+.gh-promotion-row__title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.gh-promotion-row h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.gh-promotion-row__body {
+  max-width: 720px;
+  margin: 7px 0 0;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.gh-promotion-row__meta,
+.gh-promotion-row__cta {
+  margin-top: 7px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.gh-promotion-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.gh-promotion-order {
+  width: 42px;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.gh-promotion-order--up svg {
+  transform: rotate(-90deg);
+}
+
+.gh-promotion-order--down svg {
+  transform: rotate(90deg);
+}
+
+@media (max-width: 720px) {
+  .gh-promotions-form,
+  .gh-promotion-row {
+    grid-template-columns: 1fr;
+  }
+
+  .gh-promotion-row {
+    gap: 14px;
+    padding: 16px 13px;
+  }
+
+  .gh-promotion-row__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42px 42px;
+  }
+}
