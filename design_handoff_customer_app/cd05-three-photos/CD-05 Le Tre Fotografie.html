@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>CD-05 · Le tre fotografie · composizione</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #root { width: 100vw; height: 100vh; overflow: hidden; }
+  em { font-style: italic; }
+  a { color: var(--color-link); }
+  a:hover { color: var(--color-primary-hover); }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><circle cx="112" cy="72" r="30" fill="none" stroke="#fbf6f3" stroke-width="3"/><circle cx="112" cy="72" r="22" fill="rgba(251,246,243,.85)"/><circle cx="140" cy="96" r="14" fill="#fbf6f3" stroke="#6f9792" stroke-width="3"/><rect x="86" y="118" width="52" height="7" rx="3.5" fill="#fbf6f3"/></svg>
+</template>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+<script type="text/babel" src="cd01-cal-note.jsx"></script>
+<script type="text/babel" src="cd04-card-kit.jsx"></script>
+<script type="text/babel" src="cd05-foto-kit.jsx"></script>
+<script type="text/babel" src="cd05-foto-viste.jsx"></script>
+<script type="text/babel" src="cd05-foto-note.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const Center = ({ children }) => (
+    <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>
+  );
+  const App = () => (
+    <DesignCanvas>
+      <DCSection
+        id="cd05-owner"
+        title="CD-05 · App clienti — la scheda del cane"
+        subtitle="Composta da zero e da una, non da quattro: con 1,6 visite di media per cane, l’album pieno è il caso raro. Protagonista il ritratto del proprietario; il riconoscimento è la pastiglia, e una riga spiega perché è fatto così."
+      >
+        <DCArtboard id="ow-0" label="390 · nessuna foto delle due, nessun album — l’85% dei cani oggi" width={480} height={900}>
+          <Center><OwnerVuoto/></Center>
+        </DCArtboard>
+        <DCArtboard id="ow-1" label="390 · una foto d’album, ritratto messo" width={480} height={900}>
+          <Center><OwnerUna/></Center>
+        </DCArtboard>
+        <DCArtboard id="ow-sb" label="390 · c’è solo la foto del salone — al centro va quella, e l’invito arriva qui" width={480} height={900}>
+          <Center><OwnerSoloBanco/></Center>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd05-album"
+        title="CD-05 · La galleria — un foglio, non una pagina"
+        subtitle="Nessuna rotta nuova. Una foto sola occupa tutta la larghezza: mai quattro caselle di cui due vuote. Ogni foto porta la data della lavorazione e la distanza in parole; nessun testo dei trattamenti."
+      >
+        <DCArtboard id="al-1" label="390 · una foto — lo stato più probabile per mesi" width={480} height={900}>
+          <Center><OwnerAlbum1/></Center>
+        </DCArtboard>
+        <DCArtboard id="al-4" label="390 · quattro foto — il caso raro" width={480} height={900}>
+          <Center><OwnerAlbum4/></Center>
+        </DCArtboard>
+        <DCArtboard id="al-ap" label="390 · foto aperta — un gesto solo per salvare o mandare" width={480} height={900}>
+          <Center><OwnerAperta/></Center>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd05-staff"
+        title="CD-05 · Gestionale — la stessa scheda al banco"
+        subtitle="Il medaglione si ribalta: al centro il riconoscimento, il ritratto è la pastiglia. E il gesto del salone è «allega», dentro la registrazione della visita — il posto dove passano comunque a fine serata."
+      >
+        <DCArtboard id="st-2" label="Desktop 1280 · due fotografie, medaglione ribaltato" width={1280} height={1000}>
+          <StaffDue/>
+        </DCArtboard>
+        <DCArtboard id="st-1" label="Desktop 1280 · il proprietario non ne ha messa nessuna" width={1280} height={1000}>
+          <StaffSola/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd05-colonne"
+        title="CD-05 · La colonna sola, e il medaglione a due fotografie"
+        subtitle="La prima volta in cinque giri che una composizione richiede colonne nuove. Lo dichiaro invece di arbitrare un conflitto che nessun disegno può risolvere."
+      >
+        <DCArtboard id="col" label="Tre cose in una colonna · il controcampo" width={1280} height={560}>
+          <CD5_Colonne/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd05-scelte"
+        title="CD-05 · Il pulsante, la galleria, il gesto del salone"
+        subtitle="Quattro decisioni, e in ognuna la stessa regola di CD-04: non apparecchiare un posto per qualcosa che non è ancora accaduto."
+      >
+        <DCArtboard id="alb" label="Pulsante · sovrapposizione · salvataggio · allega" width={1280} height={900}>
+          <CD5_Album/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd05-domande"
+        title="CD-05 · Le cinque domande nominate"
+        subtitle="Chi vede cosa, e cosa succede nel caso più comune di tutti — che è il vuoto."
+      >
+        <DCArtboard id="dom" label="Le quattro domande di visibilità" width={1280} height={860}>
+          <CD5_Domande/>
+        </DCArtboard>
+        <DCArtboard id="campi" label="Campi ⚠ · domande aperte" width={1280} height={680}>
+          <CD5_Campi/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={44} y={44} width={340}>
+        <strong>CD-05 · Le tre fotografie</strong><br/><br/>
+        <strong>Non è una colonna da arbitrare: sono tre colonne che ne occupano una.</strong> Se le due foto vivono nello stesso posto, ogni disegno che faccio è un modo elegante di far perdere qualcuno. Chiedo due colonne nuove — prima volta in cinque giri, e la decisione è vostra.<br/><br/>
+        Le decisioni:<br/>
+        · <strong>La colonna attuale resta al salone</strong>, non per anzianità: è l’unica già popolata, e quei 42 cani sono cani fotografati al banco.<br/>
+        · <strong>Il medaglione di CD-04 non si ricompone.</strong> Cambia una cosa: una pastiglia, il controcampo. Chi sta al centro dipende da chi guarda.<br/>
+        · <strong>Album vuoto = nessun pulsante.</strong> Una riga al suo posto. Un pulsante spento su 288 cani su 288 è la barra fedeltà da capo.<br/>
+        · <strong>La galleria è un foglio, non una pagina</strong> — con una foto sola, navigare costa più della cosa che si va a vedere. Zero rotte nuove.<br/>
+        · <strong>Un solo gesto per salvare</strong>: apre il menù del telefono, che contiene già WhatsApp e il rullino.<br/>
+        · <strong>Il verbo è «allega», il posto è la registrazione di fine serata.</strong> Facoltativo e senza sollecito: se diventa un dovere, quello che si perde non è la foto — è la registrazione.<br/><br/>
+        <strong>Zero colori nuovi, zero token nuovi.</strong>
+      </DCPostIt>
+    </DesignCanvas>
+  );
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
