@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>CD-06 · La settimana di Roby · composizione</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #root { width: 100vw; height: 100vh; overflow: hidden; }
+  em { font-style: italic; }
+  a { color: var(--color-link); }
+  a:hover { color: var(--color-primary-hover); }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><rect x="46" y="40" width="148" height="80" rx="9" fill="#fbf6f3"/><g fill="rgba(111,151,146,.22)"><rect x="54" y="56" width="17" height="24" rx="3"/><rect x="75" y="56" width="17" height="24" rx="3"/><rect x="96" y="56" width="17" height="24" rx="3"/><rect x="117" y="56" width="17" height="24" rx="3"/><rect x="138" y="56" width="17" height="24" rx="3"/><rect x="159" y="56" width="17" height="24" rx="3"/></g><rect x="75" y="56" width="17" height="24" rx="3" fill="#6f9792"/><rect x="138" y="56" width="17" height="24" rx="3" fill="#6f9792"/><rect x="54" y="90" width="122" height="6" rx="3" fill="rgba(207,193,196,.7)"/></svg>
+</template>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+<script type="text/babel" src="cd01-cal-note.jsx"></script>
+<script type="text/babel" src="cd06-planning-kit.jsx"></script>
+<script type="text/babel" src="cd06-planning-viste.jsx"></script>
+<script type="text/babel" src="cd06-planning-note.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const Center = ({ children }) => (
+    <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>
+  );
+  const App = () => (
+    <DesignCanvas>
+      <DCSection
+        id="cd06-tipo"
+        title="CD-06 · La settimana tipo — e quella futura, bianca"
+        subtitle="I due stati che saranno la norma, composti per primi. Grana a mezze giornate: cinque cani su tre postazioni sono un quinto della capienza, e una griglia oraria trasformerebbe il vuoto in un reticolo da riempire."
+      >
+        <DCArtboard id="tipo" label="Desktop 1280 · tre appuntamenti, una richiesta, nove entrati senza ora" width={1280} height={820}>
+          <PlanTipo/>
+        </DCArtboard>
+        <DCArtboard id="vuota" label="Desktop 1280 · la settimana prossima — bianca, e non è un errore" width={1280} height={820}>
+          <PlanVuota/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd06-piena"
+        title="CD-06 · La settimana piena — il nono decile"
+        subtitle="Dieci cani in un giorno, il margine che si stringe due volte, e le etichette del cane sull’appuntamento. È il caso raro: composto per ultimo."
+      >
+        <DCArtboard id="piena" label="Desktop 1280 · settimana piena, margine esaurito il mar e il ven" width={1280} height={880}>
+          <PlanPiena/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd06-modi"
+        title="CD-06 · Telefono e modo giorno"
+        subtitle="Sotto i 640px la settimana cambia forma: scorre in verticale, non si rimpicciolisce. E il modo giorno fa la cosa che la settimana non può fare — elencare per nome chi è entrato senza appuntamento."
+      >
+        <DCArtboard id="mob" label="Mobile 390 · la settimana scorre in verticale" width={480} height={900}>
+          <Center><PlanMobile/></Center>
+        </DCArtboard>
+        <DCArtboard id="giorno" label="Desktop 1280 · modo giorno — la giornata da lavorare" width={1280} height={860}>
+          <PlanGiorno/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd06-grana"
+        title="CD-06 · La grana, e l’occupazione senza ora"
+        subtitle="Le due domande più difficili del brief. La seconda si risolve con una linea tratteggiata: le lavorazioni senza ora appartengono al giorno, non a una fascia."
+      >
+        <DCArtboard id="grana" label="Domande 1 e 2" width={1280} height={780}>
+          <CD6_Grana/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="cd06-margine"
+        title="CD-06 · Il margine, il vuoto toccabile, i due modi"
+        subtitle="Un vuoto e uno spazio tenuto non sono la stessa cosa, e finora la vista aveva solo il vuoto."
+      >
+        <DCArtboard id="marg" label="Domande 3, 4 e 6" width={1280} height={980}>
+          <CD6_Margine/>
+        </DCArtboard>
+        <DCArtboard id="forma" label="Il vincolo del computer · le etichette e il preavviso" width={1280} height={720}>
+          <CD6_Forma/>
+        </DCArtboard>
+        <DCArtboard id="campi" label="Campi ⚠ · domande aperte" width={1280} height={720}>
+          <CD6_Campi/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={44} y={44} width={340}>
+        <strong>CD-06 · La settimana di Roby</strong><br/><br/>
+        <strong>Grana: mezze giornate.</strong> Non ore. Una griglia oraria sarebbe vuota per l’80% e direbbe a vista «sei quasi fermo» — falso. Mattina 9–13 e pomeriggio 13–19 sono già i contenitori del salone; l’ora precisa vive sull’appuntamento.<br/><br/>
+        <strong>L’occupazione senza ora sta nel piede della colonna</strong>, sotto una linea tratteggiata: appartiene al giorno, non a una fascia. «4 entrati senza appuntamento» — <em>visits.date</em> resta muta e non si deduce.<br/><br/>
+        <strong>L’idea nuova: il margine.</strong> Un vuoto e uno spazio tenuto non sono la stessa cosa. Un riquadro tratteggiato con scritto per chi è: «tenuto per chi entra ×2». La capienza vera non è tre postazioni — è tre meno chi arriverà senza avvisare, e il margine è quella sottrazione resa disegno.<br/><br/>
+        <strong>Toccando un vuoto</strong> si apre il modulo che esiste già, con giorno, fascia e un’ora proposta. Nessun appuntamento creato: il cliente resta da scegliere, ed è lì che vivono i controlli.<br/><br/>
+        <strong>Sotto 640px la settimana si ribalta</strong>, non si rimpicciolisce.<br/><br/>
+        <strong>⚠ Il buco della mia idea è dichiarato</strong> in §9.1: il margine per fascia userebbe un numero che i dati non reggono. Leggetelo prima di implementare.
+      </DCPostIt>
+    </DesignCanvas>
+  );
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

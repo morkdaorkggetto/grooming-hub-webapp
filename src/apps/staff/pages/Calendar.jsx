@@ -8,26 +8,29 @@ import { useTenant } from '../../../shared/tenant/TenantProvider';
 import {
   getBookingSchedule,
   getBookingTimePreferenceDefaultTime,
+  getBookingTimeWindowForPreference,
+  getBookingTimeWindowForTime,
+  getBookingTimeWindows,
   getDateClosure,
 } from '../../../shared/tenant/bookingSchedule';
 import {
   APPOINTMENT_CAPACITY_MESSAGE,
   findCapacityConflictIds,
+  findFirstCapacityAvailableTime,
   findNextCapacityAvailableTime,
+  getAppointmentWindowLoad,
   getAppointmentLoadNotice,
   getWorkstationCapacity,
   isAppointmentCapacityAvailable,
 } from '../../../shared/tenant/workstationCapacity';
 import PetAvatar from '../../../shared/ui/PetAvatar';
 import WarmNotice from '../../../shared/ui/WarmNotice';
-import { Button, EmptyState, Fab, Field, Hero, HeroButton, Panel } from '../components/StaffKit';
+import { Button, Fab, Field, Hero, HeroButton, Panel } from '../components/StaffKit';
 import {
-  CalendarDay,
-  CalendarDayStrip,
   CalendarLoading,
   CalendarNavigation,
-  CalendarQueue,
-  CalendarWeekSummary,
+  CalendarPlanningDay,
+  CalendarPlanningWeek,
 } from '../components/CalendarKit';
 import {
   addAppointment,
@@ -69,7 +72,7 @@ const startOfWeek = (dateString) => {
   return toLocalDateString(date);
 };
 const formatTime = (iso) => new Date(iso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-const formatDayLabel = (dateString) => new Date(`${dateString}T12:00:00`).toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+const formatFullDayLabel = (dateString) => new Date(`${dateString}T12:00:00`).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 const formatWeekLabel = (from, to) => {
   const start = new Date(`${from}T12:00:00`);
   const end = new Date(`${to}T12:00:00`);
@@ -121,6 +124,18 @@ const requestDefaultTime = (request) => {
   if (request.scheduled_at) return formatTime(request.scheduled_at);
   return getBookingTimePreferenceDefaultTime(request.time_preference);
 };
+const requestLeadTimeLabel = (request) => {
+  if (!request.created_at) return '';
+  const target = request.scheduled_at
+    ? new Date(request.scheduled_at)
+    : requestDate(request)
+      ? new Date(`${requestDate(request)}T${requestDefaultTime(request)}`)
+      : null;
+  const created = new Date(request.created_at);
+  if (!target || Number.isNaN(target.getTime()) || Number.isNaN(created.getTime())) return '';
+  const hours = Math.max(0, Math.round((target.getTime() - created.getTime()) / 3600000));
+  return `Preavviso ${hours} ${hours === 1 ? 'ora' : 'ore'}`;
+};
 const statusLabel = (status) => ({ scheduled: 'Programmato', completed: 'Completato', no_show: 'Assenza', cancelled: 'Annullato' }[status] || status);
 
 function Modal({ title, children, footer, onClose, narrow = false }) {
@@ -165,6 +180,7 @@ export default function Calendar() {
   const [searchParams] = useSearchParams();
   const openedQueryClientRef = useRef('');
   const latestWeekLoadRef = useRef(0);
+  const [calendarMode, setCalendarMode] = useState('week');
   const [weekStart, setWeekStart] = useState(() => startOfWeek(todayString()));
   const weekEnd = addDays(weekStart, 6);
   const [selectedDay, setSelectedDay] = useState(todayString());
@@ -190,6 +206,7 @@ export default function Calendar() {
     () => getWorkstationCapacity(tenant?.settings),
     [tenant?.settings]
   );
+  const bookingTimeWindows = useMemo(() => getBookingTimeWindows(), []);
 
   const loadWeek = useCallback(async () => {
     const requestId = latestWeekLoadRef.current + 1;
@@ -238,11 +255,10 @@ export default function Calendar() {
     if (source.client?.is_blacklisted) tags.push({ tone: 'danger', label: 'Blacklist' });
     else if ((source.client?.no_show_score ?? 0) < 0) tags.push({ tone: 'warning', label: 'A rischio' });
     if (source.kind === 'appointment' && conflictIds.has(source.id)) tags.push({ tone: 'danger', label: 'Postazioni piene' });
-    if (source.kind === 'appointment' && source.status === 'scheduled') {
-      const distance = new Date(source.scheduled_at).getTime() - Date.now();
-      if (distance >= 0 && distance <= 86400000) tags.push({ tone: 'warning', label: 'Imminente' });
+    if (source.kind === 'appointment' && source.status !== 'scheduled') {
+      const statusTone = source.status === 'completed' ? 'success' : source.status === 'cancelled' ? 'neutral' : 'danger';
+      tags.push({ tone: statusTone, label: source.status === 'no_show' ? 'No-show' : statusLabel(source.status) });
     }
-    if (source.kind === 'appointment' && source.status !== 'scheduled') tags.push({ tone: source.status === 'completed' ? 'success' : 'danger', label: statusLabel(source.status) });
     return tags;
   }, [conflictIds]);
 
@@ -250,11 +266,13 @@ export default function Calendar() {
     const requests = data.requests.map((request) => ({
       ...request, kind: 'request', petName: request.client?.name || 'Pet', photo: request.client?.photo,
       preference: request.time_preference || (request.scheduled_at ? formatTime(request.scheduled_at) : 'flexible'),
+      leadTimeLabel: requestLeadTimeLabel(request),
       subtitle: [request.service?.name || request.notes || 'Bisogno non specificato', request.client?.owner].filter(Boolean).join(' · '),
     }));
     const appointments = data.appointments.map((appointment) => ({
       ...appointment, kind: 'appointment', petName: appointment.client?.name || 'Pet', photo: appointment.client?.photo,
       time: formatTime(appointment.scheduled_at),
+      serviceLabel: appointment.service?.name || 'Appuntamento',
       subtitle: [appointment.client?.owner, appointment.notes].filter(Boolean).join(' · ') || 'Appuntamento',
     }));
     const visits = data.visits.map((visit) => ({
@@ -266,26 +284,67 @@ export default function Calendar() {
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, index) => {
     const date = addDays(weekStart, index);
     const parsed = new Date(`${date}T12:00:00`);
-    return {
-      date, label: formatDayLabel(date), shortWeekday: parsed.toLocaleDateString('it-IT', { weekday: 'narrow' }), dayNumber: parsed.getDate(),
-      closure: getDateClosure(date, bookingSchedule),
-      items: calendarItems.filter((item) => {
-        const itemDate = item.kind === 'request' ? requestDate(item) : item.kind === 'visit' ? item.date : toLocalDateString(new Date(item.scheduled_at));
-        return itemDate === date;
+    const closure = getDateClosure(date, bookingSchedule);
+    const items = calendarItems.filter((item) => {
+      const itemDate = item.kind === 'request' ? requestDate(item) : item.kind === 'visit' ? item.date : toLocalDateString(new Date(item.scheduled_at));
+      return itemDate === date;
+    });
+    const appointments = items.filter((item) => item.kind === 'appointment');
+    const requests = items.filter((item) => item.kind === 'request');
+    const visits = items.filter((item) => item.kind === 'visit');
+    const bands = bookingTimeWindows.map((window) => ({
+      date,
+      window,
+      isClosed: closure.isClosed || closure.closedTimePreferences.includes(window.value),
+      appointments: appointments.filter((item) => getBookingTimeWindowForTime(item.time)?.value === window.value),
+      requests: requests.filter((item) => {
+        const requestWindow = getBookingTimeWindowForPreference(item.preference)
+          || (item.scheduled_at ? getBookingTimeWindowForTime(formatTime(item.scheduled_at)) : null);
+        return requestWindow?.value === window.value;
       }),
+      load: getAppointmentWindowLoad({ appointments: data.appointments, date, window, capacity: workstationCapacity }),
+    }));
+    const placedIds = new Set(bands.flatMap((band) => [...band.appointments, ...band.requests]).map((item) => `${item.kind}-${item.id}`));
+    return {
+      date,
+      weekday: parsed.toLocaleDateString('it-IT', { weekday: 'short' }),
+      dayNumber: parsed.getDate(),
+      isToday: date === todayString(),
+      closure,
+      bands,
+      visits,
+      unplacedItems: [...requests, ...appointments].filter((item) => !placedIds.has(`${item.kind}-${item.id}`)),
     };
-  }), [bookingSchedule, calendarItems, weekStart]);
+  }), [bookingSchedule, bookingTimeWindows, calendarItems, data.appointments, weekStart, workstationCapacity]);
 
-  const openManual = useCallback(async (clientId = '') => {
+  const openManual = useCallback(async (clientId = '', preset = null) => {
     setError('');
     try {
       await ensurePets();
-      setManualForm((current) => ({ ...current, clientId: clientId || current.clientId || '', date: selectedDay >= weekStart && selectedDay <= weekEnd ? selectedDay : todayString() }));
+      const date = preset?.date || (selectedDay >= weekStart && selectedDay <= weekEnd ? selectedDay : todayString());
+      setSelectedDay(date);
+      setManualForm((current) => ({
+        ...current,
+        clientId: clientId || current.clientId || '',
+        date,
+        time: preset?.time || current.time,
+      }));
       setModal('manual');
     } catch (loadError) {
       setError(loadError.message || 'Non riesco a caricare i pet');
     }
   }, [ensurePets, selectedDay, weekEnd, weekStart]);
+
+  const openPlanningBand = useCallback((band) => {
+    const time = findFirstCapacityAvailableTime({
+      appointments: data.appointments,
+      date: band.date,
+      window: band.window,
+      durationMinutes: DEFAULT_DURATION,
+      capacity: workstationCapacity,
+    });
+    openManual('', { date: band.date, time });
+  }, [data.appointments, openManual, workstationCapacity]);
   const openWork = async () => {
     setError('');
     try {
@@ -462,11 +521,40 @@ export default function Calendar() {
   };
 
   const weekIsEmpty = calendarItems.length === 0;
-  const pendingItems = calendarItems.filter((item) => item.kind === 'request');
+  const selectedPlanningDay = weekDays.find((day) => day.date === selectedDay) || weekDays[0];
+  const planningSummary = {
+    appointments: data.appointments.filter((item) => item.status !== 'cancelled').length,
+    requests: data.requests.length,
+    walkIns: data.visits.length,
+    capacity: workstationCapacity,
+  };
+  const selectPlanningDay = (date) => {
+    setSelectedDay(date);
+    setWeekStart(startOfWeek(date));
+    setCalendarMode('day');
+  };
+  const moveCalendar = (amount) => {
+    if (calendarMode === 'week') {
+      setWeekStart((current) => addDays(current, amount * 7));
+      setSelectedDay((current) => addDays(current, amount * 7));
+      return;
+    }
+    const nextDate = addDays(selectedDay, amount);
+    setSelectedDay(nextDate);
+    setWeekStart(startOfWeek(nextDate));
+  };
+  const goToToday = () => {
+    const today = todayString();
+    setSelectedDay(today);
+    setWeekStart(startOfWeek(today));
+  };
+  const planningRangeLabel = calendarMode === 'week'
+    ? formatWeekLabel(weekStart, weekEnd)
+    : formatFullDayLabel(selectedDay);
 
   return (
     <div className="gh-page">
-      <Hero title="Calendario" subtitle="Richieste da decidere, appuntamenti fissati e lavorazioni registrate." right={(
+      <Hero title="Dove lo metto" subtitle="La settimana a colpo d'occhio, per collocare chi arriva al banco" right={(
         <div className="gh-calendar-actions">
           <HeroButton onClick={() => navigate('/dashboard')}>Dashboard</HeroButton>
           <HeroButton className="gh-calendar-work-action" onClick={openWork}>Registra lavorazione</HeroButton>
@@ -487,23 +575,33 @@ export default function Calendar() {
             </div>
           </Panel>
         ) : null}
-        <div className="gh-calendar-layout">
-          <Panel className="gh-calendar-main" flush>
-            <CalendarNavigation rangeLabel={formatWeekLabel(weekStart, weekEnd)}
-              onPrevious={() => setWeekStart(addDays(weekStart, -7))} onNext={() => setWeekStart(addDays(weekStart, 7))}
-              onToday={() => { const start = startOfWeek(todayString()); setWeekStart(start); setSelectedDay(todayString()); }}
-              dateValue={selectedDay} onDate={(event) => { if (event.target.value) { setWeekStart(startOfWeek(event.target.value)); setSelectedDay(event.target.value); } }} />
-            <CalendarDayStrip days={weekDays} selectedDate={selectedDay} onSelect={setSelectedDay} />
-            {loading ? <CalendarLoading /> : <>
-              {weekIsEmpty && <div className="gh-calendar-week-empty"><EmptyState title="Settimana ancora vuota" body="Puoi fissare un appuntamento ricevuto per telefono o registrare una lavorazione già svolta." action={<div className="gh-calendar-detail-actions"><Button staff onClick={() => openManual()}>Nuovo appuntamento</Button><Button staff variant="outline" onClick={openWork}>Registra lavorazione</Button></div>} /></div>}
-              <div className="gh-calendar-week">{weekDays.map((day) => <CalendarDay day={day} today={day.date === todayString()} selected={day.date === selectedDay} onOpen={openItem} key={day.date} />)}</div>
-            </>}
-          </Panel>
-          <aside className="gh-calendar-aside">
-            <CalendarQueue items={pendingItems} onOpen={openItem} />
-            <CalendarWeekSummary appointments={data.appointments.filter((item) => item.status !== 'cancelled').length} visits={data.visits.length} requests={data.requests.length} onOpenReport={() => navigate('/reports/weekly')} />
-          </aside>
-        </div>
+        <CalendarNavigation
+          mode={calendarMode}
+          rangeLabel={planningRangeLabel}
+          onMode={setCalendarMode}
+          onPrevious={() => moveCalendar(-1)}
+          onNext={() => moveCalendar(1)}
+          onToday={goToToday}
+          dateValue={selectedDay}
+          onDate={(event) => {
+            if (!event.target.value) return;
+            setSelectedDay(event.target.value);
+            setWeekStart(startOfWeek(event.target.value));
+          }}
+          summary={planningSummary}
+        />
+        {weekIsEmpty && calendarMode === 'week' && !loading ? (
+          <div className="gh-calendar-future-note" role="status">
+            Questa settimana è ancora tutta da riempire: è la condizione normale quando si guarda avanti, non un errore.
+          </div>
+        ) : null}
+        <Panel className="gh-calendar-main" flush>
+          {loading ? <CalendarLoading /> : calendarMode === 'week' ? (
+            <CalendarPlanningWeek days={weekDays} onOpen={openItem} onBook={openPlanningBand} onSelectDay={selectPlanningDay} />
+          ) : (
+            <CalendarPlanningDay day={selectedPlanningDay} onOpen={openItem} onBook={openPlanningBand} />
+          )}
+        </Panel>
       </main>
       <Fab label="Registra lavorazione" icon="pencil" onClick={openWork} />
 

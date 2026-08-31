@@ -162,17 +162,23 @@ const TierDot = ({ tier }) => (
   <span title={tier} style={{ width: 8, height: 8, borderRadius: 999, flexShrink: 0, background: { bronzo: 'var(--tier-bronze)', argento: 'var(--tier-silver)', oro: 'var(--tier-gold)', base: GH.bd }[tier] }}/>
 );
 
-// ── Stati appuntamento/cliente: vocabolario unico, 7 voci. ──
+// ── Stati appuntamento/cliente: vocabolario unico, 8 voci. ──
+// CD-06: aggiunte `completato` e `annullato` — la tabella delle etichette le
+// tiene entrambe, e mancavano al vocabolario che dichiarava di essere unico.
 const STATES = {
   confermato: ['var(--color-success-text)', 'var(--color-success-bg)', 'Confermato'],
+  completato: ['var(--color-success-text)', 'var(--color-success-bg)', 'Completato'],
+  annullato: ['var(--color-text-secondary)', 'var(--color-surface-soft)', 'Annullato'],
   attesa: ['var(--color-warning-text)', 'var(--color-warning-bg)', 'In attesa'],
   noshow: ['var(--color-danger-text)', 'var(--color-danger-bg)', 'No-show'],
   attivo: ['var(--color-success-text)', 'var(--color-success-bg)', 'Attivo'],
   rischio: ['var(--color-warning-text)', 'var(--color-warning-bg)', 'A rischio'],
   blacklist: ['var(--color-danger-text)', 'var(--color-danger-bg)', 'Blacklist'],
 };
+// Guardia: una chiave sconosciuta degrada a un'etichetta neutra, non a una
+// pagina bianca — questo componente è condiviso da GH-15, CD-01 e CD-06.
 const StateTag = ({ s, label }) => {
-  const m = STATES[s];
+  const m = STATES[s] || ['var(--color-text-secondary)', 'var(--color-surface-soft)', s];
   return <span style={{ fontSize: 10, fontWeight: 700, color: m[0], background: m[1], borderRadius: 5, padding: '3px 7px', whiteSpace: 'nowrap' }}>{label || m[2]}</span>;
 };
 

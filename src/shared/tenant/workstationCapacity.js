@@ -51,6 +51,58 @@ const getPeakConcurrency = (intervals) => {
   return peak;
 };
 
+export const getAppointmentWindowLoad = ({
+  appointments,
+  date,
+  window,
+  capacity,
+}) => {
+  const normalizedCapacity = Number.isInteger(Number(capacity)) && Number(capacity) > 0
+    ? Number(capacity)
+    : DEFAULT_WORKSTATION_CAPACITY;
+  if (!date || !window?.start || !window?.end) {
+    return { occupied: 0, available: normalizedCapacity, capacity: normalizedCapacity };
+  }
+
+  const startsAt = new Date(`${date}T${window.start}`).getTime();
+  const endsAt = new Date(`${date}T${window.end}`).getTime();
+  const intervals = getIntervals(appointments).filter((interval) => (
+    interval.startsAt < endsAt && interval.endsAt > startsAt
+  ));
+  const occupied = getPeakConcurrency(intervals);
+  return {
+    occupied,
+    available: Math.max(0, normalizedCapacity - occupied),
+    capacity: normalizedCapacity,
+  };
+};
+
+export const findFirstCapacityAvailableTime = ({
+  appointments,
+  date,
+  window,
+  durationMinutes = DEFAULT_DURATION_MINUTES,
+  capacity,
+}) => {
+  if (!date || !window?.start || !window?.end) return window?.start || '';
+  const duration = Number(durationMinutes) || DEFAULT_DURATION_MINUTES;
+  const end = new Date(`${date}T${window.end}`).getTime();
+  let candidateStart = new Date(`${date}T${window.start}`);
+
+  while (candidateStart.getTime() + duration * 60000 <= end) {
+    const candidate = {
+      scheduled_at: candidateStart.toISOString(),
+      duration_minutes: duration,
+    };
+    if (isAppointmentCapacityAvailable({ candidate, appointments, capacity })) {
+      return toLocalTimeString(candidateStart);
+    }
+    candidateStart = new Date(candidateStart.getTime() + 15 * 60000);
+  }
+
+  return window.start;
+};
+
 export const isAppointmentCapacityAvailable = ({
   candidate,
   appointments,

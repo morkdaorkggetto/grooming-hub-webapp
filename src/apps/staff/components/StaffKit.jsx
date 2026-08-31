@@ -170,7 +170,10 @@ export function TierDot({ tier = 'base' }) {
 }
 
 export function StateTag({ tone = 'success', children }) {
-  return <span className={`gh-state-tag gh-state-tag--${tone}`}>{children}</span>;
+  const normalizedTone = ['success', 'warning', 'danger', 'neutral', 'operator', 'customer'].includes(tone)
+    ? tone
+    : 'neutral';
+  return <span className={`gh-state-tag gh-state-tag--${normalizedTone}`}>{children}</span>;
 }
 
 export function SkeletonRow() {

@@ -16,6 +16,8 @@ const Icon = ({ name, size = 18, stroke = 1.75, color = 'currentColor', style = 
     search:   <g><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></g>,
     plus:     <path d="M12 5v14M5 12h14"/>,
     arrow:    <path d="M5 12h14M13 6l6 6-6 6"/>,
+    'arrow-left':   <path d="M19 12H5M11 6l-6 6 6 6"/>,
+    'chevron-left': <path d="M15 6l-6 6 6 6"/>,
     check:    <path d="M5 13l4 4L19 7"/>,
     bath:     <g><path d="M3 11h18v4a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-4z"/><path d="M6 11V6a2 2 0 0 1 2-2h1"/></g>,
     scissors: <g><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 7.5L21 20M8.5 16.5L21 4"/></g>,

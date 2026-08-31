@@ -8,7 +8,7 @@ const WEEKDAYS = [
   'saturday',
 ];
 
-const BOOKING_TIME_WINDOWS = Object.freeze({
+export const BOOKING_TIME_WINDOWS = Object.freeze({
   morning: Object.freeze({
     value: 'morning',
     name: 'Mattina',
@@ -65,6 +65,11 @@ export const getBookingTimePreferenceName = (value, flexibleLabel = 'a piacere')
 
 export const getBookingTimePreferenceDefaultTime = (value) =>
   BOOKING_TIME_WINDOWS[normalizeTimePreference(value)]?.start || BOOKING_TIME_WINDOWS.morning.start;
+
+export const getBookingTimeWindows = () => Object.values(BOOKING_TIME_WINDOWS);
+
+export const getBookingTimeWindowForPreference = (value) =>
+  BOOKING_TIME_WINDOWS[normalizeTimePreference(value)] || null;
 
 export const getBookingTimeWindowForTime = (value) => {
   const minutes = toMinutes(value);
