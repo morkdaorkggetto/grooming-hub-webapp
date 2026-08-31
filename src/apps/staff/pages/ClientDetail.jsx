@@ -40,7 +40,11 @@ import {
   getClientCardPath,
   getClientCardUrl,
 } from '../lib/qrCode';
-import { getClientWhatsAppUrl, getCustomerInviteWhatsAppUrl } from '../lib/whatsapp';
+import {
+  getClientWhatsAppUrl,
+  getCustomerInviteWhatsAppMessage,
+  getCustomerInviteWhatsAppUrl,
+} from '../lib/whatsapp';
 
 const REWARD_REASON_LABELS = {
   visit: 'Visita',
@@ -403,6 +407,13 @@ export default function ClientDetail() {
   const visitsValue = client.visits?.reduce((sum, visit) => sum + Number(visit.cost || 0), 0) || 0;
   const customerAccountLinked = Boolean(client.customer?.user_id);
   const inviteDurationDays = getConfiguredInviteDurationDays(tenant?.settings);
+  const customerInvitePreview = getCustomerInviteWhatsAppMessage({
+    salonName: tenant?.name,
+    petName: client.name,
+    petBreed: client.breed,
+    durationDays: inviteDurationDays,
+    inviteUrl: '[link invito]',
+  });
 
   return (
     <div className="gh-page gh-detail-page">
@@ -625,10 +636,14 @@ export default function ClientDetail() {
                   Il collegamento apre l'area cliente con tutti i suoi cani, lo storico completo delle visite,
                   il prossimo appuntamento e le richieste.
                 </p>
-                <div className="gh-request-info-grid gh-request-info-grid--three">
+                <div className="gh-request-info-grid">
                   <div className="gh-request-info">
                     <span className="gh-meta">Destinatario</span>
                     <p className="gh-request-info__value">{client.owner}</p>
+                  </div>
+                  <div className="gh-request-info">
+                    <span className="gh-meta">Cane</span>
+                    <p className="gh-request-info__value">{client.name || '—'}</p>
                   </div>
                   <div className="gh-request-info">
                     <span className="gh-meta">Via</span>
@@ -640,6 +655,10 @@ export default function ClientDetail() {
                       {inviteDurationDays} {inviteDurationDays === 1 ? 'giorno' : 'giorni'} dalla creazione
                     </p>
                   </div>
+                </div>
+                <div className="gh-request-notes">
+                  <span className="gh-meta">Messaggio WhatsApp</span>
+                  <p className="gh-body">{customerInvitePreview}</p>
                 </div>
                 <p className="gh-meta">L'app prepara il messaggio: l'invio resta a te su WhatsApp.</p>
                 <div className="gh-inline-actions">

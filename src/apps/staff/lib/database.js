@@ -298,6 +298,7 @@ export const createCustomerPortalInvite = async (petId) => {
       recipient: pet.owner,
       phone: pet.phone,
       petName: pet.name,
+      petBreed: pet.breed,
     };
   } catch (error) {
     throw new Error(`Non riesco a creare l'invito cliente: ${error.message}`);

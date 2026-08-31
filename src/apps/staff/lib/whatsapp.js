@@ -68,15 +68,39 @@ const formatAppointmentRange = ({ scheduledAt, date, time, durationMinutes = 60 
   return `${formatDateTime(start)}-${endTime}`;
 };
 
+const CUSTOMER_PET_FALLBACK = 'il tuo pet';
+
+const normalizeComparablePetLabel = (value) =>
+  String(value || '')
+    .trim()
+    .replace(/\s+/g, '')
+    .toLocaleLowerCase('it-IT');
+
+export const getCustomerFacingPetName = ({ petName, petBreed } = {}) => {
+  const name = String(petName || '').trim();
+  const breed = String(petBreed || '').trim();
+  if (!name) return CUSTOMER_PET_FALLBACK;
+  if (breed && normalizeComparablePetLabel(name) === normalizeComparablePetLabel(breed)) {
+    return CUSTOMER_PET_FALLBACK;
+  }
+  return name;
+};
+
 export const getClientWhatsAppUrl = (client) => {
   const ownerName = client?.owner || 'cliente';
-  const petName = client?.name || 'il tuo cane';
+  const petName = getCustomerFacingPetName({
+    petName: client?.name,
+    petBreed: client?.breed,
+  });
   const message = `Ciao ${ownerName}, ti scriviamo per ${petName}.`;
   return buildWhatsAppUrl(client?.phone, message);
 };
 
 export const getAppointmentWhatsAppUrl = (appointment) => {
-  const clientName = appointment?.client?.name || 'il tuo cane';
+  const clientName = getCustomerFacingPetName({
+    petName: appointment?.client?.name,
+    petBreed: appointment?.client?.breed,
+  });
   const ownerName = appointment?.client?.owner || 'cliente';
   const when = appointment?.scheduled_at
     ? new Date(appointment.scheduled_at).toLocaleString('it-IT', {
@@ -121,7 +145,10 @@ export const getCustomerAppointmentRequestWhatsAppUrl = ({
 };
 
 export const getAppointmentApprovalWhatsAppMessage = (appointment, approvalStatus) => {
-  const clientName = appointment?.client?.name || 'il tuo cane';
+  const clientName = getCustomerFacingPetName({
+    petName: appointment?.client?.name,
+    petBreed: appointment?.client?.breed,
+  });
   const ownerName = appointment?.client?.owner || 'cliente';
   const when = formatAppointmentRange({
     scheduledAt: appointment?.scheduled_at,
@@ -144,7 +171,10 @@ export const getAppointmentApprovalWhatsAppUrl = (appointment, approvalStatus) =
   );
 
 export const getAppointmentAlternativesWhatsAppMessage = (appointment, alternatives = []) => {
-  const clientName = appointment?.client?.name || 'il tuo cane';
+  const clientName = getCustomerFacingPetName({
+    petName: appointment?.client?.name,
+    petBreed: appointment?.client?.breed,
+  });
   const ownerName = appointment?.client?.owner || 'cliente';
   const labels = alternatives.map(({ date, time_preference: preference }) => {
     const day = formatDesiredDate(date);
@@ -164,23 +194,38 @@ export const getAppointmentAlternativesWhatsAppUrl = (appointment, alternatives)
     getAppointmentAlternativesWhatsAppMessage(appointment, alternatives)
   );
 
-export const getCustomerInviteDurationDays = ({ created_at: createdAt, expires_at: expiresAt } = {}) => {
+export const getCustomerInviteDurationDays = ({
+  created_at: createdAt,
+  expires_at: expiresAt,
+  durationDays,
+} = {}) => {
   const created = new Date(createdAt).getTime();
   const expires = new Date(expiresAt).getTime();
-  if (!Number.isFinite(created) || !Number.isFinite(expires) || expires <= created) return null;
-  return Math.max(1, Math.round((expires - created) / (24 * 60 * 60 * 1000)));
+  if (Number.isFinite(created) && Number.isFinite(expires) && expires > created) {
+    return Math.max(1, Math.round((expires - created) / (24 * 60 * 60 * 1000)));
+  }
+  const configuredDuration = Number(durationDays);
+  return Number.isInteger(configuredDuration) && configuredDuration > 0
+    ? configuredDuration
+    : null;
 };
 
 export const getCustomerInviteWhatsAppMessage = (invite = {}) => {
   const salonName = String(invite.salonName || '').trim() || 'il tuo salone';
-  const petName = String(invite.petName || '').trim() || 'il tuo cane';
+  const petName = getCustomerFacingPetName({
+    petName: invite.petName,
+    petBreed: invite.petBreed,
+  });
+  const petArea = petName === CUSTOMER_PET_FALLBACK
+    ? "Questa è l'area per il tuo pet"
+    : `Qui trovi l'area dedicata a ${petName}`;
   const inviteUrl = String(invite.inviteUrl || '').trim();
   const durationDays = getCustomerInviteDurationDays(invite);
   const durationText = durationDays
     ? `${durationDays} ${durationDays === 1 ? 'giorno' : 'giorni'}`
     : 'fino alla scadenza indicata';
 
-  return `Ciao! Siamo ${salonName}. Qui trovi l'area dedicata a ${petName}: tutti i tuoi cani, lo storico completo delle visite, il prossimo appuntamento e le richieste. Il collegamento vale ${durationText}. ${inviteUrl}`.trim();
+  return `Ciao! Siamo ${salonName}. ${petArea}: tutti i tuoi pet, lo storico completo delle visite, il prossimo appuntamento e le richieste. Il collegamento vale ${durationText}. ${inviteUrl}`.trim();
 };
 
 export const getCustomerInviteWhatsAppUrl = (invite) =>
@@ -188,7 +233,11 @@ export const getCustomerInviteWhatsAppUrl = (invite) =>
 
 export const getCustomerDirectoryWhatsAppUrl = (customer) => {
   const ownerName = customer?.owner_name || 'cliente';
-  const petName = customer?.pet_name || customer?.pending_pet_name || 'il tuo cane';
+  const onlyPet = customer?.pets?.length === 1 ? customer.pets[0] : null;
+  const petName = getCustomerFacingPetName({
+    petName: customer?.pet_name || customer?.pending_pet_name,
+    petBreed: onlyPet?.breed,
+  });
   const message = `Ciao ${ownerName}, ti scriviamo per ${petName}.`;
   return buildWhatsAppUrl(customer?.phone, message);
 };
