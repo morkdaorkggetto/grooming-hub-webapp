@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   getAppointments,
   updateAppointmentApproval,
+  updateAppointmentStatus,
 } from '../lib/database';
 import {
   buildWhatsAppUrl,
@@ -62,7 +63,7 @@ const getStatusLabel = (appointment) => {
   if (appointment.approval_status === 'rejected') return 'Richiesta rifiutata';
   if (appointment.status === 'completed') return 'Completato';
   if (appointment.status === 'cancelled') return 'Annullato';
-  if (appointment.status === 'no_show') return 'No-show';
+  if (appointment.status === 'no_show') return 'Assenza';
   return 'Programmato';
 };
 
@@ -169,6 +170,25 @@ export default function DailyAppointments() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleAbsence = async (appointment, isAbsent) => {
+    setSuccess('');
+    setError('');
+    try {
+      setUpdatingId(appointment.id);
+      await updateAppointmentStatus(appointment.id, isAbsent ? 'no_show' : 'scheduled');
+      setSuccess(
+        isAbsent
+          ? `Assenza registrata per ${formatLongDate(selectedDate)}.`
+          : 'Assenza annullata: appuntamento e punteggio sono stati ripristinati.'
+      );
+      await loadAppointments();
+    } catch (err) {
+      setError(err.message || "Errore nell'aggiornamento dell'assenza");
+    } finally {
+      setUpdatingId('');
+    }
+  };
+
   const renderAppointmentRow = (appointment) => {
     const tone = getAppointmentTone(appointment);
     const timeRange = `${formatTimeOnly(appointment.scheduled_at)} - ${formatTimeOnly(
@@ -209,9 +229,23 @@ export default function DailyAppointments() {
                 </Button>
               </>
             ) : (
-              <Button staff variant="success" onClick={() => navigate(`/client/${appointment.pet_id}/add-visit?appointmentId=${appointment.id}`)} disabled={!canMarkCompleted}>
-                Registra lavorazione
-              </Button>
+              <>
+                {canMarkCompleted ? (
+                  <>
+                    <Button staff variant="success" onClick={() => navigate(`/client/${appointment.pet_id}/add-visit?appointmentId=${appointment.id}`)} disabled={updatingId === appointment.id}>
+                      Registra lavorazione
+                    </Button>
+                    <Button staff variant="danger" onClick={() => handleAbsence(appointment, true)} disabled={updatingId === appointment.id}>
+                      {updatingId === appointment.id ? 'Aggiorno...' : 'Segna assenza'}
+                    </Button>
+                  </>
+                ) : null}
+                {appointment.status === 'no_show' ? (
+                  <Button staff variant="outline" onClick={() => handleAbsence(appointment, false)} disabled={updatingId === appointment.id}>
+                    {updatingId === appointment.id ? 'Aggiorno...' : 'Annulla assenza'}
+                  </Button>
+                ) : null}
+              </>
             )}
           </div>
         </div>

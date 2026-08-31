@@ -11,6 +11,7 @@ const MARKER = process.env.GH_RLS_MARKER || '[DEMO GH-06]';
 const APPOINTMENT_REQUEST_MARKER = process.env.GH_RLS_APPOINTMENT_MARKER || '[DEMO GH-08]';
 const GH49_MARKER = '[DEMO GH-49]';
 const GH50_MARKER = '[DEMO GH-50]';
+const GH52_MARKER = '[DEMO GH-52]';
 const FIXTURE_PHONE = process.env.GH_RLS_FIXTURE_PHONE || '+393339906001';
 const GH44_PHONE = '+393339904400';
 const FIXTURE_VISIT_ID = process.env.GH_RLS_FIXTURE_VISIT_ID || 'gh-06-rls-luca-visit';
@@ -19,6 +20,7 @@ const FOREIGN_STORAGE_FILE = process.env.GH_RLS_FOREIGN_STORAGE_FILE || 'gh-06-r
 const FOREIGN_TENANT_FILE = process.env.GH_RLS_FOREIGN_TENANT_FILE || 'gh-06-rls-foreign-tenant.png';
 const GH45_CLIENT_PHOTO_FILE = 'gh-45-client-photo.png';
 const GH45_PET_AVATAR_FILE = 'gh-45-pet-avatar.png';
+const GH52_APPOINTMENT_ID = 'gh-52-rls-absence-appointment';
 const FOREIGN_TENANT_ID = '00000000-0000-4000-8000-000000000606';
 
 const ACCOUNTS = {
@@ -61,8 +63,11 @@ let originalOwnerNotes = null;
 let originalCoatPreferences = null;
 let originalPhotoUrl = null;
 let originalOwnerPhotoUrl = null;
+let originalNoShowScore = null;
+let originalBlacklistStatus = null;
 let originalPetStaffNotes = null;
 let originalCustomerStaffNotes = null;
+let gh52Baseline = null;
 const storagePaths = new Set();
 const gh45StoragePaths = new Set();
 const appointmentRequestIds = new Set();
@@ -116,6 +121,46 @@ function assertNoError(error, label) {
 
 function relation(value) {
   return Array.isArray(value) ? value[0] || null : value || null;
+}
+
+function toLocalDateValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function netRevenue(visits) {
+  return (visits || []).reduce((total, visit) => {
+    const gross = Number(visit.cost) || 0;
+    const discount = Number(visit.discount_percent) || 0;
+    return total + gross * (1 - discount / 100);
+  }, 0);
+}
+
+async function readGh52ReportSnapshot() {
+  assert(gh52Baseline, 'Baseline report GH-52 assente');
+  const [weekResult, monthResult, linkedVisitResult] = await Promise.all([
+    staff.client.from('visits').select('id, cost, discount_percent')
+      .eq('tenant_id', tenantId)
+      .gte('date', gh52Baseline.weekStart)
+      .lte('date', gh52Baseline.weekEnd),
+    staff.client.from('visits').select('id, cost, discount_percent')
+      .eq('tenant_id', tenantId)
+      .gte('date', gh52Baseline.monthStart)
+      .lte('date', gh52Baseline.monthEnd),
+    staff.client.from('visits').select('id').eq('appointment_id', GH52_APPOINTMENT_ID),
+  ]);
+  assertNoError(weekResult.error, 'Report settimanale GH-52');
+  assertNoError(monthResult.error, 'Report mensile GH-52');
+  assertNoError(linkedVisitResult.error, 'Visite collegate GH-52');
+  return {
+    weekCount: weekResult.data.length,
+    weekRevenue: netRevenue(weekResult.data),
+    monthCount: monthResult.data.length,
+    monthRevenue: netRevenue(monthResult.data),
+    linkedVisits: linkedVisitResult.data.length,
+  };
 }
 
 function forbiddenStorageError(error) {
@@ -202,6 +247,24 @@ async function cleanupStaleFixtures() {
     assertNoError(error, 'Pulizia appuntamenti GH-08 pregressi');
   }
 
+  const { data: staleAbsence, error: staleAbsenceReadError } = await staff.client
+    .from('appointments')
+    .select('id, status')
+    .eq('id', GH52_APPOINTMENT_ID)
+    .maybeSingle();
+  assertNoError(staleAbsenceReadError, 'Lettura assenza GH-52 pregressa');
+  if (staleAbsence?.status === 'no_show') {
+    const { error } = await staff.client.rpc('set_staff_appointment_status', {
+      p_appointment_id: GH52_APPOINTMENT_ID,
+      p_status: 'scheduled',
+    });
+    assertNoError(error, 'Ripristino assenza GH-52 pregressa');
+  }
+  if (staleAbsence) {
+    const { error } = await staff.client.from('appointments').delete().eq('id', GH52_APPOINTMENT_ID);
+    assertNoError(error, 'Pulizia appuntamento GH-52 pregresso');
+  }
+
   const { data: markedPets, error: petReadError } = await staff.client
     .from('pets')
     .select('id, tenant_id')
@@ -270,7 +333,7 @@ async function loadContext() {
 
   const { data: marioPets, error: marioPetError } = await staff.client
     .from('pets')
-    .select('id, name, microchip, owner_notes, coat_preferences, photo_url, owner_photo_url, staff_notes:pet_staff_notes(notes)')
+    .select('id, name, microchip, owner_notes, coat_preferences, photo_url, owner_photo_url, no_show_score, is_blacklisted, staff_notes:pet_staff_notes(notes)')
     .eq('tenant_id', tenantId)
     .eq('customer_id', marioCustomer.id)
     .order('name');
@@ -281,6 +344,8 @@ async function loadContext() {
   originalCoatPreferences = marioPet.coat_preferences;
   originalPhotoUrl = marioPet.photo_url;
   originalOwnerPhotoUrl = marioPet.owner_photo_url;
+  originalNoShowScore = marioPet.no_show_score;
+  originalBlacklistStatus = marioPet.is_blacklisted;
   originalPetStaffNotes = relation(marioPet.staff_notes)?.notes || null;
   originalCustomerStaffNotes = relation(marioCustomer.staff_notes)?.notes || null;
 }
@@ -411,6 +476,20 @@ async function cleanupCurrentRun() {
       if (error) cleanupErrors.push(`promozioni GH-49: ${error.message}`);
     }
     if (appointmentIds.size) {
+      if (appointmentIds.has(GH52_APPOINTMENT_ID)) {
+        const { data: absence } = await staff.client
+          .from('appointments')
+          .select('status')
+          .eq('id', GH52_APPOINTMENT_ID)
+          .maybeSingle();
+        if (absence?.status === 'no_show') {
+          const { error } = await staff.client.rpc('set_staff_appointment_status', {
+            p_appointment_id: GH52_APPOINTMENT_ID,
+            p_status: 'scheduled',
+          });
+          if (error) cleanupErrors.push(`ripristino assenza GH-52: ${error.message}`);
+        }
+      }
       const { error } = await staff.client
         .from('appointments')
         .delete()
@@ -441,6 +520,8 @@ async function cleanupCurrentRun() {
         coat_preferences: originalCoatPreferences,
         photo_url: originalPhotoUrl,
         owner_photo_url: originalOwnerPhotoUrl,
+        no_show_score: originalNoShowScore,
+        is_blacklisted: originalBlacklistStatus,
       })
       .eq('id', marioPet.id);
     if (error) cleanupErrors.push(`ripristino pet GH-49: ${error.message}`);
@@ -538,6 +619,7 @@ async function cleanupCurrentRun() {
     { data: petNotes },
     { data: customerNotes },
     { data: promotions },
+    { data: gh52Appointments },
   ] = await Promise.all([
     staff.client.from('pets').select('id').ilike('name', `${MARKER}%`),
     staff.client.from('visits').select('id').ilike('treatments', `${MARKER}%`),
@@ -546,10 +628,11 @@ async function cleanupCurrentRun() {
     staff.client.from('pet_staff_notes').select('pet_id').ilike('notes', `${MARKER}%`),
     staff.client.from('customer_staff_notes').select('customer_id').ilike('notes', `${MARKER}%`),
     staff.client.from('promotions').select('id').ilike('title', `${GH49_MARKER}%`),
+    staff.client.from('appointments').select('id').eq('id', GH52_APPOINTMENT_ID),
   ]);
-  const measured = `${pets?.length || 0} pet, ${visits?.length || 0} visite, ${customers?.length || 0} customer, ${requests?.length || 0} richieste, ${petNotes?.length || 0} note pet, ${customerNotes?.length || 0} note customer, ${promotions?.length || 0} promozioni`;
+  const measured = `${pets?.length || 0} pet, ${visits?.length || 0} visite, ${customers?.length || 0} customer, ${requests?.length || 0} richieste, ${petNotes?.length || 0} note pet, ${customerNotes?.length || 0} note customer, ${promotions?.length || 0} promozioni, ${gh52Appointments?.length || 0} appuntamenti GH-52`;
   addResult(
-    pets?.length === 0 && visits?.length === 0 && customers?.length === 0 && requests?.length === 0 && petNotes?.length === 0 && customerNotes?.length === 0 && promotions?.length === 0 ? 'PASS' : 'FAIL',
+    pets?.length === 0 && visits?.length === 0 && customers?.length === 0 && requests?.length === 0 && petNotes?.length === 0 && customerNotes?.length === 0 && promotions?.length === 0 && gh52Appointments?.length === 0 ? 'PASS' : 'FAIL',
     'Pulizia fixture',
     '0 residui marker',
     measured
@@ -1757,6 +1840,152 @@ async function main() {
       });
     assert(forbiddenStorageError(error), `Atteso 403, ricevuto ${error?.statusCode || error?.message || 'successo'}`);
     return `HTTP ${error.statusCode || 403}`;
+  });
+
+  await runTest('Fixture appuntamento assenza GH-52', 'programmato nella settimana corrente; report misurati', async () => {
+    const scheduledDate = new Date();
+    scheduledDate.setHours(3, 0, 0, 0);
+    const weekStart = new Date(scheduledDate);
+    const mondayOffset = (weekStart.getDay() + 6) % 7;
+    weekStart.setDate(weekStart.getDate() - mondayOffset);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    const monthStart = new Date(scheduledDate.getFullYear(), scheduledDate.getMonth(), 1);
+    const monthEnd = new Date(scheduledDate.getFullYear(), scheduledDate.getMonth() + 1, 0);
+
+    const { error } = await staff.client.from('appointments').insert({
+      id: GH52_APPOINTMENT_ID,
+      user_id: staff.user.id,
+      pet_id: marioPet.id,
+      tenant_id: tenantId,
+      scheduled_at: scheduledDate.toISOString(),
+      duration_minutes: 15,
+      status: 'scheduled',
+      approval_status: 'approved',
+      appointment_source: 'operator',
+      notes: `${GH52_MARKER} assenza datata`,
+    });
+    assertNoError(error, 'Creazione appuntamento GH-52');
+    appointmentIds.add(GH52_APPOINTMENT_ID);
+
+    gh52Baseline = {
+      scheduledAt: scheduledDate.toISOString(),
+      weekStart: toLocalDateValue(weekStart),
+      weekEnd: toLocalDateValue(weekEnd),
+      monthStart: toLocalDateValue(monthStart),
+      monthEnd: toLocalDateValue(monthEnd),
+      petScore: Number(originalNoShowScore || 0),
+      petBlacklist: Boolean(originalBlacklistStatus),
+    };
+    gh52Baseline = { ...gh52Baseline, ...(await readGh52ReportSnapshot()) };
+    return `${gh52Baseline.weekCount} visite / EUR ${gh52Baseline.weekRevenue.toFixed(2)} settimana; ${gh52Baseline.monthCount} visite / EUR ${gh52Baseline.monthRevenue.toFixed(2)} mese`;
+  });
+
+  await runTest('Customer non segna assenza GH-52', 'RPC 42501 e stato invariato', async () => {
+    const { error: rpcError } = await mario.client.rpc('set_staff_appointment_status', {
+      p_appointment_id: GH52_APPOINTMENT_ID,
+      p_status: 'no_show',
+    });
+    assert(forbiddenRlsError(rpcError), `RPC customer non vietata: ${rpcError?.code || rpcError?.message || 'successo'}`);
+
+    const { data: directRows, error: directError } = await mario.client
+      .from('appointments')
+      .update({ status: 'no_show' })
+      .eq('id', GH52_APPOINTMENT_ID)
+      .select('id');
+    if (directError) assert(forbiddenRlsError(directError), `UPDATE customer inatteso: ${directError.message}`);
+    else assert(directRows.length === 0, `Customer ha aggiornato ${directRows.length} appuntamenti`);
+
+    const [{ data: appointment, error: appointmentError }, { data: pet, error: petError }] = await Promise.all([
+      staff.client.from('appointments').select('status').eq('id', GH52_APPOINTMENT_ID).single(),
+      staff.client.from('pets').select('no_show_score').eq('id', marioPet.id).single(),
+    ]);
+    assertNoError(appointmentError, 'Rilettura appuntamento GH-52');
+    assertNoError(petError, 'Rilettura punteggio GH-52');
+    assert(appointment.status === 'scheduled', `Stato modificato a ${appointment.status}`);
+    assert(Number(pet.no_show_score || 0) === gh52Baseline.petScore, 'Punteggio modificato dal customer');
+    return '42501, 0 righe dirette, scheduled';
+  });
+
+  await runTest('Staff segna assenza datata GH-52', 'no_show, -1, zero visite e incassi invariati', async () => {
+    const { error } = await staff.client.rpc('set_staff_appointment_status', {
+      p_appointment_id: GH52_APPOINTMENT_ID,
+      p_status: 'no_show',
+    });
+    assertNoError(error, 'RPC assenza staff GH-52');
+
+    const [{ data: appointment, error: appointmentError }, { data: pet, error: petError }, report] = await Promise.all([
+      staff.client.from('appointments').select('status, scheduled_at').eq('id', GH52_APPOINTMENT_ID).single(),
+      staff.client.from('pets').select('no_show_score, is_blacklisted').eq('id', marioPet.id).single(),
+      readGh52ReportSnapshot(),
+    ]);
+    assertNoError(appointmentError, 'Rilettura assenza GH-52');
+    assertNoError(petError, 'Rilettura pet assenza GH-52');
+    assert(appointment.status === 'no_show', `Stato atteso no_show, ricevuto ${appointment.status}`);
+    assert(
+      new Date(appointment.scheduled_at).getTime() === new Date(gh52Baseline.scheduledAt).getTime(),
+      `Data appuntamento modificata: ${gh52Baseline.scheduledAt} -> ${appointment.scheduled_at}`
+    );
+    assert(Number(pet.no_show_score) === gh52Baseline.petScore - 1, `Punteggio atteso ${gh52Baseline.petScore - 1}, ricevuto ${pet.no_show_score}`);
+    assert(Boolean(pet.is_blacklisted) === (gh52Baseline.petScore - 1 <= -3), 'Blacklist non coerente con la soglia');
+    assert(report.linkedVisits === 0, `${report.linkedVisits} visite create per l'assenza`);
+    assert(report.weekCount === gh52Baseline.weekCount && report.weekRevenue === gh52Baseline.weekRevenue, 'Report settimanale modificato');
+    assert(report.monthCount === gh52Baseline.monthCount && report.monthRevenue === gh52Baseline.monthRevenue, 'Report mensile modificato');
+    return `${appointment.scheduled_at}; score ${pet.no_show_score}; 0 visite; EUR ${report.weekRevenue.toFixed(2)} invariati`;
+  });
+
+  await runTest('Doppio segna assenza GH-52', 'stato no_show e punteggio ancora -1', async () => {
+    const { error } = await staff.client.rpc('set_staff_appointment_status', {
+      p_appointment_id: GH52_APPOINTMENT_ID,
+      p_status: 'no_show',
+    });
+    assertNoError(error, 'Seconda RPC assenza GH-52');
+    const { data: pet, error: petError } = await staff.client
+      .from('pets')
+      .select('no_show_score')
+      .eq('id', marioPet.id)
+      .single();
+    assertNoError(petError, 'Punteggio dopo doppio click GH-52');
+    assert(Number(pet.no_show_score) === gh52Baseline.petScore - 1, `Doppio conteggio: ${pet.no_show_score}`);
+    return `score ${pet.no_show_score}`;
+  });
+
+  await runTest('Customer non annulla assenza GH-52', 'RPC 42501 e assenza invariata', async () => {
+    const { error: rpcError } = await mario.client.rpc('set_staff_appointment_status', {
+      p_appointment_id: GH52_APPOINTMENT_ID,
+      p_status: 'scheduled',
+    });
+    assert(forbiddenRlsError(rpcError), `Undo customer non vietato: ${rpcError?.code || rpcError?.message || 'successo'}`);
+    const { data: appointment, error } = await staff.client
+      .from('appointments')
+      .select('status')
+      .eq('id', GH52_APPOINTMENT_ID)
+      .single();
+    assertNoError(error, 'Rilettura assenza dopo customer GH-52');
+    assert(appointment.status === 'no_show', `Customer ha ripristinato ${appointment.status}`);
+    return '42501, no_show';
+  });
+
+  await runTest('Staff annulla assenza GH-52', 'scheduled, punteggio e report ripristinati', async () => {
+    const { error } = await staff.client.rpc('set_staff_appointment_status', {
+      p_appointment_id: GH52_APPOINTMENT_ID,
+      p_status: 'scheduled',
+    });
+    assertNoError(error, 'RPC annulla assenza staff GH-52');
+    const [{ data: appointment, error: appointmentError }, { data: pet, error: petError }, report] = await Promise.all([
+      staff.client.from('appointments').select('status').eq('id', GH52_APPOINTMENT_ID).single(),
+      staff.client.from('pets').select('no_show_score, is_blacklisted').eq('id', marioPet.id).single(),
+      readGh52ReportSnapshot(),
+    ]);
+    assertNoError(appointmentError, 'Rilettura ripristino appuntamento GH-52');
+    assertNoError(petError, 'Rilettura ripristino pet GH-52');
+    assert(appointment.status === 'scheduled', `Stato ripristinato a ${appointment.status}`);
+    assert(Number(pet.no_show_score || 0) === gh52Baseline.petScore, `Punteggio non ripristinato: ${pet.no_show_score}`);
+    assert(Boolean(pet.is_blacklisted) === gh52Baseline.petBlacklist, 'Blacklist non ripristinata');
+    assert(report.linkedVisits === 0, `${report.linkedVisits} visite residue`);
+    assert(report.weekCount === gh52Baseline.weekCount && report.weekRevenue === gh52Baseline.weekRevenue, 'Report settimanale divergente dopo undo');
+    assert(report.monthCount === gh52Baseline.monthCount && report.monthRevenue === gh52Baseline.monthRevenue, 'Report mensile divergente dopo undo');
+    return `scheduled; score ${pet.no_show_score}; settimana e mese invariati`;
   });
 
   await runTest('Staff aggiorna campo staff-only', 'nota pet modificata', async () => {

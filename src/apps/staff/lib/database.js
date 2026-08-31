@@ -6,7 +6,6 @@ import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 
 const CLIENT_PHOTOS_BUCKET = 'client-photos';
 const PET_AVATARS_BUCKET = 'pet-avatars';
-const BLACKLIST_THRESHOLD = -3;
 const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
 const ACQUISITION_SOURCES = ['manual', 'whatsapp', 'qr'];
 const CUSTOMER_RELATIONSHIP_STATUSES = ['lead', 'contacted', 'active', 'archived'];
@@ -791,19 +790,6 @@ export const removeVisitPhoto = async (visitId, petId) => {
   }
 };
 
-export const updateClientNoShowScore = async (petId, delta) => {
-  assertDemoWriteAllowed();
-  const { tenantId } = await requireStaff();
-  const pet = await getPetById(petId, tenantId);
-  const nextScore = Number(pet.no_show_score || 0) + Number(delta);
-  if (Number.isNaN(nextScore)) throw new Error('Delta punteggio non valido');
-  const { data, error } = await supabase.from('pets').update({
-    no_show_score: nextScore, is_blacklisted: nextScore <= BLACKLIST_THRESHOLD,
-  }).eq('id', petId).eq('tenant_id', tenantId).select('id, no_show_score, is_blacklisted').single();
-  if (error) throw new Error(`Non riesco ad aggiornare il punteggio: ${error.message}`);
-  return data;
-};
-
 export const setClientBlacklistStatus = async (petId, isBlacklisted) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
@@ -820,6 +806,7 @@ export const addAppointment = async (input) => {
   const status = input.status || 'scheduled';
   if (!petId || !input.scheduled_at) throw new Error('Pet e data sono obbligatori');
   if (!APPOINTMENT_STATUSES.includes(status)) throw new Error('Stato appuntamento non valido');
+  if (status === 'no_show') throw new Error("L'assenza si segna su un appuntamento programmato");
   await getPetById(petId, tenantId);
   const { data, error } = await supabase.from('appointments').insert({
     id: generateId(), user_id: user.id, pet_id: petId, tenant_id: tenantId,
@@ -831,7 +818,6 @@ export const addAppointment = async (input) => {
     service_id: input.service_id || null,
   }).select('id').single();
   if (error) throwAppointmentWriteError(error, "Non riesco a creare l'appuntamento");
-  if (status === 'no_show') await updateClientNoShowScore(petId, -1);
   return data.id;
 };
 
@@ -1056,18 +1042,13 @@ const getStaffAppointment = async (appointmentId, tenantId) => {
 
 export const updateAppointmentStatus = async (appointmentId, status) => {
   assertDemoWriteAllowed();
-  const { tenantId } = await requireStaff();
+  await requireStaff();
   if (!APPOINTMENT_STATUSES.includes(status)) throw new Error('Stato appuntamento non valido');
-  const appointment = await getStaffAppointment(appointmentId, tenantId);
-  if (appointment.approval_status === 'pending') throw new Error('Conferma o rifiuta prima la richiesta');
-  if (appointment.approval_status === 'rejected') throw new Error('Non puoi aggiornare uno slot rifiutato');
-  const { data, error } = await supabase.from('appointments')
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq('id', appointmentId).eq('tenant_id', tenantId)
-    .select('id, pet_id, status').single();
+  const { data, error } = await supabase.rpc('set_staff_appointment_status', {
+    p_appointment_id: appointmentId,
+    p_status: status,
+  });
   if (error) throwAppointmentWriteError(error, 'Non riesco ad aggiornare lo stato');
-  if (appointment.status !== 'no_show' && status === 'no_show') await updateClientNoShowScore(appointment.pet_id, -1);
-  if (appointment.status === 'no_show' && status !== 'no_show') await updateClientNoShowScore(appointment.pet_id, 1);
   return data;
 };
 
@@ -1131,12 +1112,20 @@ export const getClientById = async (petId) => {
     if (!user) throw new Error('Utente non autenticato');
     const profile = await getUserProfile(user.id);
     const pet = await getPetById(petId, profile?.tenant_id || null);
-    const { data, error } = await supabase.from('reward_points').select('*')
-      .eq('pet_id', petId).eq('tenant_id', pet.tenant_id).order('created_at', { ascending: false });
-    if (error) throw error;
+    const [pointsResult, absencesResult] = await Promise.all([
+      supabase.from('reward_points').select('*')
+        .eq('pet_id', petId).eq('tenant_id', pet.tenant_id).order('created_at', { ascending: false }),
+      supabase.from('appointments').select('id, scheduled_at, status')
+        .eq('pet_id', petId).eq('tenant_id', pet.tenant_id).eq('status', 'no_show')
+        .order('scheduled_at', { ascending: false }),
+    ]);
+    if (pointsResult.error) throw pointsResult.error;
+    if (absencesResult.error) throw absencesResult.error;
     return {
-      ...pet, rewardPoints: data || [],
-      rewardPointsTotal: (data || []).reduce((sum, item) => sum + Number(item.points || 0), 0),
+      ...pet,
+      rewardPoints: pointsResult.data || [],
+      rewardPointsTotal: (pointsResult.data || []).reduce((sum, item) => sum + Number(item.points || 0), 0),
+      noShowAppointments: absencesResult.data || [],
     };
   } catch (error) {
     throw new Error(`Non riesco a caricare il pet: ${error.message}`);

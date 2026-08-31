@@ -1350,12 +1350,32 @@
   gap: 9px;
 }
 
-.gh-score-actions {
-  margin-top: 11px;
+.gh-absence-history {
+  padding: 0;
+  margin: 13px 0;
+  list-style: none;
+  border-top: 1px solid var(--gh-border-60);
 }
 
-.gh-score-actions .gh-btn--ghost {
+.gh-absence-history li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 42px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--gh-border-60);
+}
+
+.gh-absence-history span {
+  font-weight: 700;
   color: var(--color-danger-text);
+}
+
+.gh-absence-history time {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .gh-modal--narrow {
@@ -2447,6 +2467,16 @@
 
   .gh-identity__copy {
     width: 100%;
+  }
+
+  .gh-absence-history li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .gh-absence-history time {
+    text-align: left;
   }
 
   .gh-identity__title-line,

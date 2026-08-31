@@ -121,7 +121,7 @@ const requestDefaultTime = (request) => {
   if (request.scheduled_at) return formatTime(request.scheduled_at);
   return getBookingTimePreferenceDefaultTime(request.time_preference);
 };
-const statusLabel = (status) => ({ scheduled: 'Programmato', completed: 'Completato', no_show: 'No-show', cancelled: 'Annullato' }[status] || status);
+const statusLabel = (status) => ({ scheduled: 'Programmato', completed: 'Completato', no_show: 'Assenza', cancelled: 'Annullato' }[status] || status);
 
 function Modal({ title, children, footer, onClose, narrow = false }) {
   return (
@@ -427,6 +427,7 @@ export default function Calendar() {
   const saveSchedule = async (event) => {
     event.preventDefault();
     if (!selectedItem || !detailCandidate) return;
+    if (selectedItem.status === 'no_show') return;
     if (detailConflict) { setError(APPOINTMENT_CAPACITY_MESSAGE); return; }
     setSaving(true); setError('');
     try {
@@ -441,8 +442,16 @@ export default function Calendar() {
     setSaving(true); setError('');
     try {
       await updateAppointmentStatus(selectedItem.id, status);
+      const previousStatus = selectedItem.status;
       setSelectedItem((current) => ({ ...current, status }));
-      setSuccess(`Stato aggiornato: ${statusLabel(status)}.`); await loadWeek();
+      setSuccess(
+        status === 'no_show'
+          ? 'Assenza registrata con la data dell’appuntamento.'
+          : previousStatus === 'no_show'
+            ? 'Assenza annullata: appuntamento e punteggio sono stati ripristinati.'
+            : `Stato aggiornato: ${statusLabel(status)}.`
+      );
+      await loadWeek();
     } catch (saveError) { setError(saveError.message || 'Non riesco ad aggiornare lo stato'); }
     finally { setSaving(false); }
   };
@@ -545,13 +554,13 @@ export default function Calendar() {
         </div>
       </Modal>}
 
-      {modal === 'detail' && selectedItem && <Modal title={`Appuntamento · ${selectedItem.petName}`} onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict)} onClick={saveSchedule}>Salva orario</Button></>}>
+      {modal === 'detail' && selectedItem && <Modal title={`Appuntamento · ${selectedItem.petName}`} onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict) || selectedItem.status === 'no_show'} onClick={saveSchedule}>Salva orario</Button></>}>
         <form className="gh-calendar-form-stack" onSubmit={saveSchedule}>
           <div className="gh-calendar-modal-context"><PetAvatar name={selectedItem.petName} photo={selectedItem.photo} size={42} tier="base" /><div><strong>{selectedItem.petName}</strong><span>{selectedItem.client?.owner || 'Proprietario non indicato'} · {statusLabel(selectedItem.status)}</span></div></div>
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
-            <Field label="Data" type="date" value={detailForm.date} onChange={(event) => setDetailForm((current) => ({ ...current, date: event.target.value }))} />
-            <Field label="Ora" type="time" value={detailForm.time} onChange={(event) => setDetailForm((current) => ({ ...current, time: event.target.value }))} />
-            <Field label="Durata (min)" type="number" min="15" step="15" value={detailForm.durationMinutes} onChange={(event) => setDetailForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
+            <Field label="Data" type="date" value={detailForm.date} disabled={selectedItem.status === 'no_show'} onChange={(event) => setDetailForm((current) => ({ ...current, date: event.target.value }))} />
+            <Field label="Ora" type="time" value={detailForm.time} disabled={selectedItem.status === 'no_show'} onChange={(event) => setDetailForm((current) => ({ ...current, time: event.target.value }))} />
+            <Field label="Durata (min)" type="number" min="15" step="15" value={detailForm.durationMinutes} disabled={selectedItem.status === 'no_show'} onChange={(event) => setDetailForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
           </div>
           {detailConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <AppointmentLoadNote notice={detailLoadNotice} />
@@ -569,9 +578,18 @@ export default function Calendar() {
             <Button staff variant="outline" icon="plus" onClick={() => { setModal(null); openManual(selectedItem.pet_id); }}>Nuovo per lo stesso cliente</Button>
           </div>
           <div className="gh-calendar-detail-actions">
-            <Button staff variant="outline" disabled={selectedItem.status === 'no_show'} onClick={() => changeStatus('no_show')}>No-show</Button>
-            <Button staff variant="danger" disabled={selectedItem.status === 'cancelled'} onClick={() => changeStatus('cancelled')}>Annulla</Button>
-            {selectedItem.status !== 'scheduled' && <Button staff variant="ghost" onClick={() => changeStatus('scheduled')}>Ripristina programmato</Button>}
+            {selectedItem.status === 'scheduled' ? (
+              <Button staff variant="danger" onClick={() => changeStatus('no_show')}>Segna assenza</Button>
+            ) : null}
+            {selectedItem.status === 'no_show' ? (
+              <Button staff variant="outline" onClick={() => changeStatus('scheduled')}>Annulla assenza</Button>
+            ) : null}
+            {selectedItem.status !== 'no_show' ? (
+              <Button staff variant="danger" disabled={selectedItem.status === 'cancelled'} onClick={() => changeStatus('cancelled')}>Annulla appuntamento</Button>
+            ) : null}
+            {selectedItem.status === 'cancelled' ? (
+              <Button staff variant="ghost" onClick={() => changeStatus('scheduled')}>Ripristina programmato</Button>
+            ) : null}
           </div>
         </form>
       </Modal>}

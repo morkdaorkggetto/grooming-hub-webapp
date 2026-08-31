@@ -31,7 +31,6 @@ import {
   setClientBlacklistStatus,
   unlinkCustomerAccount,
   updateClient,
-  updateClientNoShowScore,
 } from '../lib/database';
 import { getFidelityTierSnapshot } from '../lib/fidelity';
 import { isSupportedImageFile } from '../lib/imageFiles';
@@ -79,6 +78,15 @@ const formatVisitDate = (dateString) => {
   } catch {
     return dateString;
   }
+};
+
+const formatAbsenceDate = (value) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('it-IT', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  }).format(date);
 };
 
 function StaffPhotoMedallion({ client, swapped, onSwap }) {
@@ -295,15 +303,6 @@ export default function ClientDetail() {
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
-    }
-  };
-
-  const handleAdjustNoShowScore = async (delta) => {
-    try {
-      await updateClientNoShowScore(clientId, delta);
-      await loadClient();
-    } catch (err) {
-      setError(err.message || 'Errore aggiornamento punteggio');
     }
   };
 
@@ -744,13 +743,17 @@ export default function ClientDetail() {
             <ScoreScale />
             <p className="gh-meta">Regola automatica: da -3 in giù il cliente entra in blacklist.</p>
           </div>
-          <div className="gh-inline-actions gh-score-actions">
-            <Button staff variant="danger" onClick={() => handleAdjustNoShowScore(-1)}>
-              Segna No-show (-1)
-            </Button>
-            <Button staff variant="success" icon="check" onClick={() => handleAdjustNoShowScore(1)}>
-              Segna Presenza (+1)
-            </Button>
+          {client.noShowAppointments?.length ? (
+            <ul className="gh-absence-history" aria-label="Assenze registrate">
+              {client.noShowAppointments.map((appointment) => (
+                <li key={appointment.id}>
+                  <span>Assenza</span>
+                  <time dateTime={appointment.scheduled_at}>{formatAbsenceDate(appointment.scheduled_at)}</time>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <div className="gh-inline-actions">
             <Button staff variant="ghost" onClick={handleToggleBlacklist}>
               {client.is_blacklisted ? 'Rimuovi da blacklist' : 'Inserisci in blacklist'}
             </Button>
