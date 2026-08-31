@@ -451,7 +451,7 @@ export default function Pet() {
           }}
           className="gh-pet-back-link"
         >
-          <Icon name="chevron" size={14} />
+          <Icon name="chevron-left" size={14} />
           I tuoi pet
         </Link>
 

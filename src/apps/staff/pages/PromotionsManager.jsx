@@ -234,8 +234,8 @@ export default function PromotionsManager() {
                     <div className="gh-promotion-row__actions">
                       <Button staff variant="ghost" icon="pencil" aria-label={`Modifica ${promotion.title}`} title="Modifica" onClick={() => openEdit(promotion)} disabled={saving} />
                       <Button staff variant="outline" onClick={() => handleToggle(promotion)} disabled={saving}>{promotion.is_active ? 'Disattiva' : 'Attiva'}</Button>
-                      <Button staff variant="ghost" icon="chevron" className="gh-promotion-order gh-promotion-order--up" aria-label={`Sposta su ${promotion.title}`} title="Sposta su" onClick={() => handleMove(index, -1)} disabled={saving || index === 0} />
-                      <Button staff variant="ghost" icon="chevron" className="gh-promotion-order gh-promotion-order--down" aria-label={`Sposta giu ${promotion.title}`} title="Sposta giu" onClick={() => handleMove(index, 1)} disabled={saving || index === promotions.length - 1} />
+                      <Button staff variant="ghost" icon="chevron-up" className="gh-promotion-order" aria-label={`Sposta su ${promotion.title}`} title="Sposta su" onClick={() => handleMove(index, -1)} disabled={saving || index === 0} />
+                      <Button staff variant="ghost" icon="chevron-down" className="gh-promotion-order" aria-label={`Sposta giu ${promotion.title}`} title="Sposta giu" onClick={() => handleMove(index, 1)} disabled={saving || index === promotions.length - 1} />
                     </div>
                   </article>
                 );

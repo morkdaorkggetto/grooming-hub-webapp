@@ -100,14 +100,6 @@
   padding-left: 0;
 }
 
-.gh-promotion-order--up svg {
-  transform: rotate(-90deg);
-}
-
-.gh-promotion-order--down svg {
-  transform: rotate(90deg);
-}
-
 @media (max-width: 720px) {
   .gh-promotions-form,
   .gh-promotion-row {

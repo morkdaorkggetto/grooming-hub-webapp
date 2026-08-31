@@ -20,10 +20,6 @@
   gap: 14px;
 }
 
-.gh-icon--back {
-  transform: rotate(180deg);
-}
-
 .gh-report-navigation {
   display: flex;
   min-width: 0;

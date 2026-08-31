@@ -69,7 +69,11 @@ const PATHS = {
     </g>
   ),
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+  'arrow-left': <path d="M19 12H5M11 6l-6 6 6 6" />,
   chevron: <path d="M9 6l6 6-6 6" />,
+  'chevron-left': <path d="M15 6l-6 6 6 6" />,
+  'chevron-up': <path d="M6 15l6-6 6 6" />,
+  'chevron-down': <path d="M6 9l6 6 6-6" />,
   check: <path d="M5 13l4 4L19 7" />,
   camera: (
     <g>

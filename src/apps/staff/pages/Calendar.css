@@ -68,10 +68,6 @@
   padding: 0;
 }
 
-.gh-calendar-next svg {
-  transform: rotate(180deg);
-}
-
 .gh-calendar-date-jump {
   display: flex;
   height: 38px;

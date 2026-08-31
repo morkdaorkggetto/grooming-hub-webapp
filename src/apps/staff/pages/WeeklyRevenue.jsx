@@ -187,7 +187,7 @@ const ReportNavigation = ({ unit, label, onUnitChange, onPrevious, onCurrent, on
           disabled={previousDisabled}
           onClick={onPrevious}
         >
-          <Icon name="arrow" size={15} className="gh-icon--back" />
+          <Icon name="arrow-left" size={15} />
         </Button>
         <span className="gh-report-week-nav__label">{label}</span>
         <Button
@@ -667,7 +667,7 @@ export default function WeeklyRevenue() {
         subtitle={`Cani passati e incassato, ${unit === 'week' ? 'settimana' : 'mese'} per ${unit === 'week' ? 'settimana' : 'mese'}`}
         right={(
           <HeroButton onClick={() => navigate('/dashboard')}>
-            <Icon name="arrow" size={14} className="gh-icon--back" />
+            <Icon name="arrow-left" size={14} />
             Dashboard
           </HeroButton>
         )}

@@ -96,9 +96,9 @@ export function CalendarNavigation({ rangeLabel, onPrevious, onNext, onToday, on
   return (
     <div className="gh-calendar-nav">
       <div className="gh-calendar-nav__stepper">
-        <Button staff variant="ghost" icon="arrow" aria-label="Settimana precedente" title="Settimana precedente" onClick={onPrevious} />
+        <Button staff variant="ghost" icon="arrow-left" aria-label="Settimana precedente" title="Settimana precedente" onClick={onPrevious} />
         <strong>{rangeLabel}</strong>
-        <Button staff variant="ghost" icon="arrow" aria-label="Settimana successiva" title="Settimana successiva" className="gh-calendar-next" onClick={onNext} />
+        <Button staff variant="ghost" icon="arrow" aria-label="Settimana successiva" title="Settimana successiva" onClick={onNext} />
       </div>
       <div className="gh-calendar-nav__tools">
         <Button staff variant="outline" onClick={onToday}>Questa settimana</Button>
