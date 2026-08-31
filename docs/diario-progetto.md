@@ -370,6 +370,41 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 31 agosto 2026, pomeriggio — Il salone comincia a chiedere cose
+
+Prima giornata in cui **le richieste arrivano dal salone invece che dall'analisi**. Sono arrivate perché hanno cominciato a usare lo strumento: **26 appuntamenti in tre giorni**, contro 17 in tutta la storia precedente.
+
+**Un campo obbligatorio produceva dati falsi** (`GH-52`). Domanda di Davide: *«quando un cane non viene portato e lo segniamo come no-show, la scheda chiede per forza la somma. Come facciamo a segnare che non è venuto e quando?»* Non potevano: il costo è obbligatorio nel modulo visita, il pulsante no-show cambiava **un punteggio senza data**, e lo stato `no_show` degli appuntamenti esisteva nel database **senza un gesto per impostarlo** — zero occorrenze in produzione.
+
+E la prova di cosa avevano fatto era nei dati: **tre visite da 1,00 € e una da 0,10 €**, con dentro «non è venuto», «ha saltato l'appuntamento senza avvisare», «appuntamento rimandato per ciclo». **Si erano inventati un euro per superare un campo obbligatorio.** Quei quattro euro compaiono negli incassi, e le assenze restano nascoste in un campo di testo libero.
+
+> **Un campo obbligatorio che non si può soddisfare onestamente produce dati falsi.** Non è indisciplina: è il modulo che chiede una cosa che in quel caso non esiste.
+
+Ora l'assenza è **uno stato datato dell'appuntamento**: non crea visite, non tocca gli incassi, muove il punteggio **una volta sola** perché reagisce alla transizione e non al clic, ed è **reversibile**. Le quattro visite finte restano da ripulire: coda annotata.
+
+**Le frecce del calendario puntavano al contrario** (`GH-53`). Segnalato da Luigi guardando la produzione: a sinistra `→`, a destra `←`. Causa: `.gh-calendar-next svg { transform: rotate(180deg) }` — **la rotazione era sul pulsante sbagliato**. Il comportamento era corretto; erano i simboli a mentire.
+
+Su osservazione di Luigi — *«a maggior ragione»* — il mandato è stato allargato dalla riparazione alla causa: **la direzione della freccia non è più una decisione dei fogli di stile.** Due file diversi ruotavano la stessa icona con due meccanismi diversi, e uno sbagliava. Ora esiste un'icona rivolta a sinistra, e nessuna pagina decide più una direzione. *Non* sono stati unificati i due navigatori: hanno bisogni diversi — **a essere comune è la freccia, non il navigatore.**
+
+**Un ordine invertito, scoperto per caso.** `salva.sh` committa **e pubblica**, quindi salvando i documenti erano saliti anche i commit di Codex: il frontend di `GH-52` era **online senza la sua funzione nel database**. Il gesto «segna assenza» chiamava qualcosa che in produzione non esisteva. Nessun danno — era un gesto nuovo che nessuno aveva usato — ma è la prima volta che la regola *prima il database* è stata violata, e non da una decisione: **da un effetto collaterale dello script di salvataggio.**
+
+**Capienza portata a 3**, su richiesta del salone e con effetto immediato: la terza postazione è operativa da oggi. Primo cambio di impostazione fatto **perché il salone è cambiato**, non per correggere un difetto. La guardia ha lasciato passare perché si sale: tornare a due con tre lavorazioni già prenotate verrebbe rifiutato.
+
+**`CD-06` — la settimana di Roby.** Richiesta prevedibile e arrivata puntuale: *«una vista tipo planning per sapere dove collocare le prenotazioni dei clienti che arrivano in negozio»*. Le misure che le danno forma:
+
+| | |
+|---|---:|
+| cani al giorno, mediana | **5** |
+| giornata piena (nono decile) | 10 |
+| record | 14 |
+| postazioni | 3 |
+
+**Cinque cani su tre postazioni sono un quinto della capienza teorica**: la settimana è quasi vuota e lo resterà. Quindi la vista **non serve a incastrare in uno spazio scarso — serve a orientarsi senza aprire sette pagine.** Una griglia fitta da agenda medica risolverebbe un problema che non esiste.
+
+E una cosa che Luigi ha chiarito e che nessuno aveva ancora detto: **il cliente che entra e lascia il cane ci sarà sempre.** La registrazione a fine serata si ridurrà, il flusso diretto no. Da cui: **la capienza vera di una giornata è tre postazioni meno chi arriverà senza avvisare**, e alla composizione è stato chiesto di mostrare anche **lo spazio lasciato libero apposta** — riempire fino a tre è un errore, non un risultato.
+
+**Le etichette del calendario**, decise nella stessa conversazione: il punteggio del cane resta sull'appuntamento perché è una sua proprietà; **«Imminente» sparisce** perché è un conto alla rovescia senza nessuna azione attaccata; e nasce altrove il **preavviso** — quanto passa fra la richiesta e la data desiderata — che vive sulla richiesta, dove si decide se accettarla.
+
 ### 30-31 agosto 2026 — Il salone si chiama ZavaRoby, e i cani hanno tre fotografie
 
 **Il salone non si chiamava come credevamo.** `tenants.name` valeva «Grooming HUB» — che è **il nome del software**, non del negozio. Il negozio è **ZavaRoby Pet Station**: è il nome sul cartello, sui social, e l'unico che un cliente riconosca. La card pubblica diceva quindi a degli sconosciuti un nome mai sentito.
