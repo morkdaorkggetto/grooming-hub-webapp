@@ -56,9 +56,9 @@ export async function resizePetPhoto(file) {
   }
 }
 
-export async function uploadPetPhoto({ file, tenantId, petId }) {
+export async function uploadOwnerPetPhoto({ file, tenantId, petId }) {
   const uniquePart = globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2);
-  const path = `${tenantId}/${petId}/${Date.now()}-${uniquePart}.jpg`;
+  const path = `${tenantId}/${petId}/owner/${Date.now()}-${uniquePart}.jpg`;
   const { error } = await supabase.storage.from('pet-avatars').upload(path, file, {
     cacheControl: '3600',
     contentType: file.type,
@@ -72,5 +72,14 @@ export async function uploadPetPhoto({ file, tenantId, petId }) {
 
 export async function removePetPhoto(path) {
   if (!path) return;
-  await supabase.storage.from('pet-avatars').remove([path]);
+  const { error } = await supabase.storage.from('pet-avatars').remove([path]);
+  if (error) throw error;
+}
+
+export function ownerPetPhotoPathFromUrl(url, tenantId, petId) {
+  const marker = '/storage/v1/object/public/pet-avatars/';
+  const index = typeof url === 'string' ? url.indexOf(marker) : -1;
+  if (index === -1) return null;
+  const path = decodeURIComponent(url.slice(index + marker.length));
+  return path.startsWith(`${tenantId}/${petId}/owner/`) ? path : null;
 }

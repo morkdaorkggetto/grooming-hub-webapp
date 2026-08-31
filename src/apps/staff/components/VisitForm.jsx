@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import WarmNotice from '../../../shared/ui/WarmNotice';
 import { Button, DayChip, ErrorState, Field } from './StaffKit';
 
@@ -7,6 +7,7 @@ export const createEmptyVisitForm = () => ({
   treatments: '',
   issues: '',
   cost: '',
+  photoFile: null,
 });
 
 const toDateValue = (daysAgo) => {
@@ -36,10 +37,22 @@ export default function VisitForm({
   submitLabel = 'Salva Visita',
 }) {
   const dateInputRef = useRef(null);
+  const photoInputRef = useRef(null);
+  const [photoPreview, setPhotoPreview] = useState('');
   const today = toDateValue(0);
   const yesterday = toDateValue(1);
   const beforeYesterday = toDateValue(2);
   const isPresetDate = [today, yesterday, beforeYesterday].includes(value.date);
+
+  useEffect(() => {
+    if (!value.photoFile) {
+      setPhotoPreview('');
+      return undefined;
+    }
+    const previewUrl = URL.createObjectURL(value.photoFile);
+    setPhotoPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [value.photoFile]);
 
   const updateField = (field, fieldValue) => {
     onChange({ ...value, [field]: fieldValue });
@@ -119,6 +132,41 @@ export default function VisitForm({
           onChange={(event) => updateField('issues', event.target.value)}
           disabled={submitting}
         />
+
+        <div className="gh-visit-photo-field">
+          <span className="gh-eyebrow--staff gh-field-label">Foto per il proprietario</span>
+          <input
+            ref={photoInputRef}
+            className="gh-visit-photo-input"
+            type="file"
+            accept="image/*,.heic,.heif"
+            onChange={(event) => updateField('photoFile', event.target.files?.[0] || null)}
+            disabled={submitting}
+          />
+          <div className={`gh-visit-photo-slot${value.photoFile ? ' gh-visit-photo-slot--attached' : ''}`}>
+            <div className="gh-visit-photo-slot__thumb">
+              {photoPreview ? <img src={photoPreview} alt="Anteprima foto allegata" /> : <span aria-hidden="true">+</span>}
+            </div>
+            <button
+              type="button"
+              className="gh-visit-photo-slot__copy"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={submitting}
+            >
+              <strong>{value.photoFile ? '1 foto allegata' : 'Allega una foto dalla galleria'}</strong>
+              <small>{value.photoFile ? 'la vedrà il proprietario nella sua pagina' : 'quella che avete già mandato su WhatsApp'}</small>
+            </button>
+            {value.photoFile ? (
+              <button type="button" className="gh-visit-photo-slot__action" onClick={() => updateField('photoFile', null)} disabled={submitting}>
+                Rimuovi
+              </button>
+            ) : (
+              <button type="button" className="gh-visit-photo-slot__action" onClick={() => photoInputRef.current?.click()} disabled={submitting}>
+                Scegli
+              </button>
+            )}
+          </div>
+        </div>
 
         <Field
           className="gh-visit-cost-field"

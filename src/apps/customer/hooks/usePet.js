@@ -6,7 +6,7 @@ import { useTenant } from '../../../shared/tenant/TenantProvider';
 const PET_FIELDS = `
   id, tenant_id, customer_id, owner_user_id, name, species, breed,
   birth_date, sex, microchip, weight_kg, neutered, color,
-  coat_preferences, owner_notes, photo_url, created_at, updated_at
+  coat_preferences, owner_notes, photo_url, owner_photo_url, created_at, updated_at
 `;
 
 /** Fetch e update whitelist della singola scheda pet customer. */
@@ -48,12 +48,16 @@ export function usePet(petId) {
   }, [authLoading, tenantLoading, fetchPet]);
 
   const updatePet = useCallback(
-    async ({ owner_notes, coat_preferences }) => {
+    async (updates) => {
       if (!user || !tenantId || !petId) {
         throw new Error('Sessione o pet non disponibili.');
       }
 
-      const payload = { owner_notes, coat_preferences };
+      const writableFields = ['owner_notes', 'coat_preferences', 'owner_photo_url'];
+      const payload = Object.fromEntries(
+        Object.entries(updates || {}).filter(([key]) => writableFields.includes(key))
+      );
+      if (!Object.keys(payload).length) throw new Error('Nessuna modifica disponibile.');
       const { data: updated, error: updateError } = await supabase
         .from('pets')
         .update(payload)

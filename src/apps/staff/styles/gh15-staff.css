@@ -956,6 +956,27 @@
   font-size: 11px;
 }
 
+.gh-visit-row__photo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.gh-visit-row__photo img {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.gh-visit-row__photo .gh-btn {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+}
+
 .gh-dashboard-stack {
   display: flex;
   flex-direction: column;
@@ -1028,6 +1049,88 @@
   display: flex;
   align-items: flex-start;
   gap: 18px;
+}
+
+.gh-staff-medallion {
+  width: 112px;
+  height: 112px;
+  position: relative;
+  flex: 0 0 112px;
+}
+
+.gh-staff-medallion__main {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  border: 2px solid var(--gh-border-60);
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-family: var(--font-serif);
+  font-size: 42px;
+}
+
+.gh-staff-medallion__main img,
+.gh-staff-medallion__side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gh-staff-medallion__side {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  overflow: hidden;
+  padding: 0;
+  border: 3px solid var(--color-bg-main);
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+
+.gh-staff-photo-explainer {
+  margin: 11px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.gh-staff-album-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.gh-staff-album-thumb { min-width: 0; margin: 0; }
+
+.gh-staff-album-thumb img {
+  width: 100%;
+  aspect-ratio: 1;
+  display: block;
+  border-radius: var(--gh-r-field);
+  object-fit: cover;
+}
+
+.gh-staff-album-thumb figcaption {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gh-staff-album-note {
+  margin: 11px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--gh-border-35);
 }
 
 .gh-identity__copy {
@@ -1331,6 +1434,82 @@
 
 .gh-visit-editor {
   display: block;
+}
+
+.gh-visit-photo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gh-visit-photo-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.gh-visit-photo-slot {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 11px;
+  border: 1px dashed var(--gh-border-60);
+  border-radius: var(--gh-r-field);
+  background: var(--color-surface-main);
+}
+
+.gh-visit-photo-slot--attached {
+  border-color: var(--color-primary);
+  background: var(--color-surface-soft);
+}
+
+.gh-visit-photo-slot__thumb {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--gh-tint);
+  color: var(--color-primary);
+  font-size: 20px;
+}
+
+.gh-visit-photo-slot__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.gh-visit-photo-slot__copy {
+  min-width: 0;
+  flex: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.gh-visit-photo-slot__copy strong,
+.gh-visit-photo-slot__copy small { display: block; }
+.gh-visit-photo-slot__copy strong { font-size: 13px; }
+.gh-visit-photo-slot__copy small { margin-top: 2px; color: var(--color-text-secondary); font-size: 11.5px; }
+
+.gh-visit-photo-slot__action {
+  min-height: 40px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .gh-visit-form__section {
@@ -2252,6 +2431,10 @@
 
   .gh-identity {
     flex-direction: column;
+  }
+
+  .gh-staff-album-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .gh-detail-stack {

@@ -63,11 +63,16 @@ export default function AddVisit() {
         treatments: formData.treatments || null,
         issues: formData.issues || null,
         cost,
+        photoFile: formData.photoFile || null,
       };
-      if (appointmentId) await completeAppointmentWithVisit(appointmentId, visitInput);
-      else await addVisit(clientId, visitInput);
+      const result = appointmentId
+        ? await completeAppointmentWithVisit(appointmentId, visitInput)
+        : await addVisit(clientId, visitInput);
       navigate(`/client/${clientId}`, {
-        state: appointmentId ? { visitCompletedWithAppointment: true } : null,
+        state: {
+          visitCompletedWithAppointment: Boolean(appointmentId),
+          visitPhotoUploadError: result?.photoUploadError || null,
+        },
       });
     } catch (err) {
       setError(err.message || 'Errore nell’aggiunta della visita');

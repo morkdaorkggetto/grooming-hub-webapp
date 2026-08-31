@@ -10,6 +10,7 @@ const SUITE_LABEL = process.env.GH_RLS_SUITE_LABEL || 'GH-06 - Suite RLS demo';
 const MARKER = process.env.GH_RLS_MARKER || '[DEMO GH-06]';
 const APPOINTMENT_REQUEST_MARKER = process.env.GH_RLS_APPOINTMENT_MARKER || '[DEMO GH-08]';
 const GH49_MARKER = '[DEMO GH-49]';
+const GH50_MARKER = '[DEMO GH-50]';
 const FIXTURE_PHONE = process.env.GH_RLS_FIXTURE_PHONE || '+393339906001';
 const GH44_PHONE = '+393339904400';
 const FIXTURE_VISIT_ID = process.env.GH_RLS_FIXTURE_VISIT_ID || 'gh-06-rls-luca-visit';
@@ -59,6 +60,7 @@ let fixtureVisit = null;
 let originalOwnerNotes = null;
 let originalCoatPreferences = null;
 let originalPhotoUrl = null;
+let originalOwnerPhotoUrl = null;
 let originalPetStaffNotes = null;
 let originalCustomerStaffNotes = null;
 const storagePaths = new Set();
@@ -268,7 +270,7 @@ async function loadContext() {
 
   const { data: marioPets, error: marioPetError } = await staff.client
     .from('pets')
-    .select('id, name, microchip, owner_notes, coat_preferences, photo_url, staff_notes:pet_staff_notes(notes)')
+    .select('id, name, microchip, owner_notes, coat_preferences, photo_url, owner_photo_url, staff_notes:pet_staff_notes(notes)')
     .eq('tenant_id', tenantId)
     .eq('customer_id', marioCustomer.id)
     .order('name');
@@ -278,6 +280,7 @@ async function loadContext() {
   originalOwnerNotes = marioPet.owner_notes;
   originalCoatPreferences = marioPet.coat_preferences;
   originalPhotoUrl = marioPet.photo_url;
+  originalOwnerPhotoUrl = marioPet.owner_photo_url;
   originalPetStaffNotes = relation(marioPet.staff_notes)?.notes || null;
   originalCustomerStaffNotes = relation(marioCustomer.staff_notes)?.notes || null;
 }
@@ -437,6 +440,7 @@ async function cleanupCurrentRun() {
         owner_notes: originalOwnerNotes,
         coat_preferences: originalCoatPreferences,
         photo_url: originalPhotoUrl,
+        owner_photo_url: originalOwnerPhotoUrl,
       })
       .eq('id', marioPet.id);
     if (error) cleanupErrors.push(`ripristino pet GH-49: ${error.message}`);
@@ -1578,8 +1582,138 @@ async function main() {
     return 'update staff, HTTP 200, ripristino originale';
   });
 
+  await runTest('Ritratto owner non sovrascrive foto salone GH-50', 'owner_photo_url scritto; photo_url invariato', async () => {
+    const salonUrl = staff.client.storage.from('pet-avatars').getPublicUrl(gh45PetAvatarPath).data.publicUrl;
+    const ownerPath = `${tenantId}/${marioPet.id}/owner/gh-50-owner-portrait.png`;
+    storagePaths.add(ownerPath);
+    const { error: salonError } = await staff.client
+      .from('pets')
+      .update({ photo_url: salonUrl })
+      .eq('id', marioPet.id);
+    assertNoError(salonError, 'Impostazione foto salone GH-50');
+
+    const { error: uploadError } = await mario.client.storage
+      .from('pet-avatars')
+      .upload(ownerPath, new TextEncoder().encode(`${GH50_MARKER} owner portrait`), {
+        contentType: 'image/png',
+        upsert: false,
+      });
+    assertNoError(uploadError, 'Upload ritratto owner GH-50');
+    const ownerUrl = mario.client.storage.from('pet-avatars').getPublicUrl(ownerPath).data.publicUrl;
+    const { data: customerUpdate, error: customerError } = await mario.client
+      .from('pets')
+      .update({ owner_photo_url: ownerUrl, photo_url: `${ownerUrl}?forbidden=photo_url` })
+      .eq('id', marioPet.id)
+      .select('owner_photo_url, photo_url')
+      .single();
+    assertNoError(customerError, 'UPDATE ritratto owner GH-50');
+    assert(customerUpdate.owner_photo_url === ownerUrl, 'owner_photo_url non persistita');
+    assert(customerUpdate.photo_url === salonUrl, 'photo_url salone sovrascritta dal customer');
+
+    const { data: measured, error: measureError } = await staff.client
+      .from('pets')
+      .select('owner_photo_url, photo_url')
+      .eq('id', marioPet.id)
+      .single();
+    assertNoError(measureError, 'Controllo staff fotografie GH-50');
+    assert(measured.owner_photo_url === ownerUrl && measured.photo_url === salonUrl, 'Colonne GH-50 divergenti');
+    return 'ritratto owner presente; URL salone identico al valore pre-update customer';
+  });
+
+  await runTest('Customer non scrive visits.photo_url GH-50', 'valore visita invariato', async () => {
+    const { data: ownVisits, error: ownVisitError } = await staff.client
+      .from('visits')
+      .select('id, photo_url')
+      .eq('pet_id', marioPet.id)
+      .limit(1);
+    assertNoError(ownVisitError, 'Lettura visita Mario GH-50');
+    assert(ownVisits.length === 1, 'Visita Mario assente');
+    const visit = ownVisits[0];
+    const attempted = `https://example.invalid/${encodeURIComponent(GH50_MARKER)}/visit.png`;
+    const { error } = await mario.client
+      .from('visits')
+      .update({ photo_url: attempted })
+      .eq('id', visit.id);
+    if (error) assert(forbiddenRlsError(error), `Errore inatteso: ${error.message}`);
+    const { data: measured, error: measuredError } = await staff.client
+      .from('visits')
+      .select('photo_url')
+      .eq('id', visit.id)
+      .single();
+    assertNoError(measuredError, 'Rilettura visita Mario GH-50');
+    assert(measured.photo_url === visit.photo_url, 'Customer ha modificato visits.photo_url');
+    return `invariato (${String(visit.photo_url)})`;
+  });
+
+  await runTest('Staff allega e rimuove foto visita GH-50', 'foto persistita, leggibile e rimossa', async () => {
+    const objectPath = `${tenantId}/${fixturePet.id}/visits/${fixtureVisit.id}/gh-50-visit.png`;
+    storagePaths.add(objectPath);
+    const { error: uploadError } = await staff.client.storage
+      .from('pet-avatars')
+      .upload(objectPath, new TextEncoder().encode(`${GH50_MARKER} visit photo`), {
+        contentType: 'image/png',
+        upsert: false,
+      });
+    assertNoError(uploadError, 'Upload foto visita staff GH-50');
+    const photoUrl = staff.client.storage.from('pet-avatars').getPublicUrl(objectPath).data.publicUrl;
+    const { data: attached, error: attachError } = await staff.client
+      .from('visits')
+      .update({ photo_url: photoUrl })
+      .eq('id', fixtureVisit.id)
+      .select('photo_url')
+      .single();
+    assertNoError(attachError, 'Allegato foto visita GH-50');
+    assert(attached.photo_url === photoUrl, 'Foto visita non persistita');
+    const response = await fetch(`${photoUrl}?gh50=${Date.now()}`);
+    assert(response.ok, `Foto visita non leggibile: HTTP ${response.status}`);
+    const { data: removed, error: removeDbError } = await staff.client
+      .from('visits')
+      .update({ photo_url: null })
+      .eq('id', fixtureVisit.id)
+      .select('photo_url')
+      .single();
+    assertNoError(removeDbError, 'Rimozione colonna foto visita GH-50');
+    assert(removed.photo_url === null, 'Foto visita ancora associata');
+    const { error: removeStorageError } = await staff.client.storage.from('pet-avatars').remove([objectPath]);
+    assertNoError(removeStorageError, 'Rimozione file visita GH-50');
+    storagePaths.delete(objectPath);
+    return 'persistita, HTTP 200, colonna null, oggetto rimosso';
+  });
+
+  await runTest('Customer non vede foto di pet altrui GH-50', '0 pet e 0 visite', async () => {
+    const fixtureUrl = staff.client.storage.from('pet-avatars').getPublicUrl(gh45PetAvatarPath).data.publicUrl;
+    const [petUpdate, visitUpdate] = await Promise.all([
+      staff.client.from('pets').update({ owner_photo_url: fixtureUrl }).eq('id', fixturePet.id),
+      staff.client.from('visits').update({ photo_url: fixtureUrl }).eq('id', fixtureVisit.id),
+    ]);
+    assertNoError(petUpdate.error, 'Fixture owner_photo_url altrui GH-50');
+    assertNoError(visitUpdate.error, 'Fixture visits.photo_url altrui GH-50');
+    const [petRead, visitRead] = await Promise.all([
+      mario.client.from('pets').select('id, owner_photo_url').eq('id', fixturePet.id),
+      mario.client.from('visits').select('id, photo_url').eq('id', fixtureVisit.id),
+    ]);
+    assertNoError(petRead.error, 'Lettura pet altrui GH-50');
+    assertNoError(visitRead.error, 'Lettura visita altrui GH-50');
+    assert(petRead.data.length === 0, `Mario vede ${petRead.data.length} pet altrui`);
+    assert(visitRead.data.length === 0, `Mario vede ${visitRead.data.length} visite altrui`);
+    return '0 pet e 0 visite';
+  });
+
+  await runTest('Customer non scrive nello spazio visite GH-50', 'HTTP 403', async () => {
+    const objectPath = `${tenantId}/${marioPet.id}/visits/forbidden/${GH50_MARKER.replaceAll(/[^a-z0-9]/gi, '-').toLowerCase()}.png`;
+    storagePaths.add(objectPath);
+    const { error } = await mario.client.storage
+      .from('pet-avatars')
+      .upload(objectPath, new TextEncoder().encode(`${GH50_MARKER} forbidden visit space`), {
+        contentType: 'image/png',
+        upsert: false,
+      });
+    assert(forbiddenStorageError(error), `Atteso 403, ricevuto ${error?.statusCode || error?.message || 'successo'}`);
+    return `HTTP ${error.statusCode || 403}`;
+  });
+
   await runTest('Storage customer sul pet proprio', 'upload, update e delete riusciti', async () => {
-    const objectPath = `${tenantId}/${marioPet.id}/${OWN_STORAGE_FILE}`;
+    const objectPath = `${tenantId}/${marioPet.id}/owner/${OWN_STORAGE_FILE}`;
     storagePaths.add(objectPath);
     const payload = new TextEncoder().encode(`${MARKER} own storage`);
     const { error: uploadError } = await mario.client.storage
@@ -1600,7 +1734,7 @@ async function main() {
   });
 
   await runTest('Storage customer sul pet altrui', 'HTTP 403', async () => {
-    const objectPath = `${tenantId}/${fixturePet.id}/${FOREIGN_STORAGE_FILE}`;
+    const objectPath = `${tenantId}/${fixturePet.id}/owner/${FOREIGN_STORAGE_FILE}`;
     storagePaths.add(objectPath);
     const { error } = await mario.client.storage
       .from('pet-avatars')
@@ -1613,7 +1747,7 @@ async function main() {
   });
 
   await runTest('Storage customer su tenant estraneo', 'HTTP 403', async () => {
-    const objectPath = `${FOREIGN_TENANT_ID}/${marioPet.id}/${FOREIGN_TENANT_FILE}`;
+    const objectPath = `${FOREIGN_TENANT_ID}/${marioPet.id}/owner/${FOREIGN_TENANT_FILE}`;
     storagePaths.add(objectPath);
     const { error } = await mario.client.storage
       .from('pet-avatars')

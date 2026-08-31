@@ -22,7 +22,7 @@ export function usePetVisits(petId) {
     setError(null);
     const { data: rows, error: fetchError } = await supabase
       .from('visits')
-      .select('id, tenant_id, pet_id, date, treatments, issues, created_at')
+      .select('id, tenant_id, pet_id, date, treatments, issues, photo_url, created_at')
       .eq('tenant_id', tenantId)
       .eq('pet_id', petId)
       .order('date', { ascending: false });

@@ -280,7 +280,7 @@ export function DayChip({ label, sub, pressed = false, ...props }) {
   );
 }
 
-export function VisitRow({ visit, date, onDelete }) {
+export function VisitRow({ visit, date, onDelete, onRemovePhoto }) {
   const price = Number(visit.cost || 0).toLocaleString('it-IT', {
     style: 'currency',
     currency: 'EUR',
@@ -293,6 +293,21 @@ export function VisitRow({ visit, date, onDelete }) {
           {visit.treatments || 'Nessun dettaglio registrato'}
         </span>
         {visit.issues && <span className="gh-visit-row__issues">{visit.issues}</span>}
+        {visit.photo_url && (
+          <span className="gh-visit-row__photo">
+            <img src={visit.photo_url} alt="Foto allegata alla visita" />
+            {onRemovePhoto && (
+              <Button
+                staff
+                variant="ghost"
+                icon="trash"
+                aria-label="Rimuovi foto dalla visita"
+                title="Rimuovi foto dalla visita"
+                onClick={onRemovePhoto}
+              />
+            )}
+          </span>
+        )}
       </span>
       <span className="gh-price">{price}</span>
       {onDelete && (

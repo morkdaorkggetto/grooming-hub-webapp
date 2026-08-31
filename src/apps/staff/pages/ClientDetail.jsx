@@ -14,7 +14,6 @@ import {
   Hero,
   HeroButton,
   Panel,
-  PetAvatar,
   ScoreScale,
   SkeletonRow,
   VisitRow,
@@ -28,6 +27,7 @@ import {
   deleteVisit,
   getClientById,
   getClientPromos,
+  removeVisitPhoto,
   setClientBlacklistStatus,
   unlinkCustomerAccount,
   updateClient,
@@ -81,6 +81,29 @@ const formatVisitDate = (dateString) => {
   }
 };
 
+function StaffPhotoMedallion({ client, swapped, onSwap }) {
+  const recognition = client.photo || null;
+  const ownerPortrait = client.owner_photo_url || null;
+  const hasBoth = Boolean(recognition && ownerPortrait);
+  const defaultMain = recognition || ownerPortrait;
+  const defaultSide = hasBoth ? ownerPortrait : null;
+  const main = swapped && hasBoth ? defaultSide : defaultMain;
+  const side = swapped && hasBoth ? defaultMain : defaultSide;
+
+  return (
+    <div className="gh-staff-medallion">
+      <div className="gh-staff-medallion__main">
+        {main ? <img src={main} alt={`Foto di ${client.name}`} /> : <span>{client.name?.charAt(0)?.toUpperCase() || '?'}</span>}
+      </div>
+      {side && (
+        <button type="button" className="gh-staff-medallion__side" onClick={onSwap} aria-label="Scambia le due foto" title="Scambia le due foto">
+          <img src={side} alt="" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function ClientDetail() {
   const { clientId } = useParams();
   const navigate = useNavigate();
@@ -96,6 +119,7 @@ export default function ClientDetail() {
   const [unlinkingCustomerAccount, setUnlinkingCustomerAccount] = useState(false);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
   const [pendingEditCropFile, setPendingEditCropFile] = useState(null);
+  const [photosSwapped, setPhotosSwapped] = useState(false);
   const [visitForm, setVisitForm] = useState(createEmptyVisitForm);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -191,10 +215,23 @@ export default function ClientDetail() {
       return;
     }
     try {
-      await addVisit(clientId, visitForm);
+      const result = await addVisit(clientId, visitForm);
       setShowAddVisitModal(false);
       setVisitForm(createEmptyVisitForm());
-      loadClient();
+      await loadClient();
+      if (result?.photoUploadError) {
+        setError(`Visita salvata, ma foto non allegata: ${result.photoUploadError}`);
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleRemoveVisitPhoto = async (visitId) => {
+    if (!window.confirm('Rimuovere la foto da questa visita? La visita resterà nello storico.')) return;
+    try {
+      await removeVisitPhoto(visitId, clientId);
+      await loadClient();
     } catch (err) {
       setError(err.message);
     }
@@ -436,6 +473,12 @@ export default function ClientDetail() {
         {location.state?.visitCompletedWithAppointment ? (
           <div className="gh-success-state" role="status">Visita registrata e appuntamento chiuso insieme.</div>
         ) : null}
+        {location.state?.visitPhotoUploadError ? (
+          <ErrorState
+            title="Visita salvata, foto non allegata"
+            body={location.state.visitPhotoUploadError}
+          />
+        ) : null}
         {error && (
           <ErrorState
             title="Operazione non completata"
@@ -450,7 +493,11 @@ export default function ClientDetail() {
 
         <Panel className="gh-identity-panel">
           <div className="gh-identity">
-            <PetAvatar name={client.name} photo={client.photo} size={112} tier={currentTier} />
+            <StaffPhotoMedallion
+              client={client}
+              swapped={photosSwapped}
+              onSwap={() => setPhotosSwapped((current) => !current)}
+            />
             <div className="gh-identity__copy">
               <div className="gh-identity__title-line">
                 <div>
@@ -485,6 +532,11 @@ export default function ClientDetail() {
                   Elimina
                 </Button>
               </div>
+              <p className="gh-staff-photo-explainer">
+                {client.owner_photo_url
+                  ? 'La pastiglia è la foto messa dal proprietario. Al centro resta la foto di riconoscimento del salone.'
+                  : 'Il proprietario non ha messo una sua foto. Il medaglione non mostra spazi vuoti in attesa.'}
+              </p>
             </div>
           </div>
         </Panel>
@@ -706,6 +758,27 @@ export default function ClientDetail() {
         </Panel>
 
         <Panel
+          eyebrow="Album del proprietario"
+          title={client.visits?.some((visit) => visit.photo_url) ? 'Foto inviate dopo le lavorazioni' : 'Nessuna foto'}
+        >
+          {client.visits?.some((visit) => visit.photo_url) ? (
+            <>
+              <div className="gh-staff-album-grid">
+                {client.visits.filter((visit) => visit.photo_url).map((visit) => (
+                  <figure key={visit.id} className="gh-staff-album-thumb">
+                    <img src={visit.photo_url} alt={`${client.name}, visita del ${formatVisitDate(visit.date)}`} />
+                    <figcaption className="gh-num">{formatVisitDate(visit.date)}</figcaption>
+                  </figure>
+                ))}
+              </div>
+              <p className="gh-meta gh-staff-album-note">In sola lettura e in piccolo: mostra ciò che vede il proprietario.</p>
+            </>
+          ) : (
+            <p className="gh-meta">Nessuna foto allegata alle visite di {client.name}.</p>
+          )}
+        </Panel>
+
+        <Panel
           eyebrow="Visite"
           title={`${visitsTotal} registrate · ${visitsValue.toLocaleString('it-IT', {
             style: 'currency',
@@ -725,6 +798,7 @@ export default function ClientDetail() {
                 visit={visit}
                 date={formatVisitDate(visit.date)}
                 onDelete={() => handleDeleteVisit(visit.id)}
+                onRemovePhoto={visit.photo_url ? () => handleRemoveVisitPhoto(visit.id) : null}
               />
             ))
           ) : (
@@ -798,7 +872,7 @@ export default function ClientDetail() {
                 <Field label="Note" area rows="3" value={editForm.notes} onChange={(event) => setEditForm({ ...editForm, notes: event.target.value })} />
 
                 <div>
-                  <span className="gh-eyebrow--staff gh-field-label">Foto del cane</span>
+                  <span className="gh-eyebrow--staff gh-field-label">Foto di riconoscimento</span>
                   {(editForm.photo || editPhotoPreview) && (
                     <div className="gh-edit-photo-preview">
                       <img src={editPhotoPreview || editForm.photo} alt="Anteprima foto" />
@@ -807,7 +881,7 @@ export default function ClientDetail() {
                   )}
                   <div className="gh-photo-picker">
                     <p className="gh-meta">
-                      {editForm.photo || editPhotoPreview ? 'Sostituisci foto del cane' : 'Aggiungi foto del cane'}
+                      {editForm.photo || editPhotoPreview ? 'Sostituisci foto di riconoscimento' : 'Aggiungi foto di riconoscimento'}
                     </p>
                     <div className="gh-inline-actions">
                       <label className="gh-btn gh-btn--primary gh-file-button">

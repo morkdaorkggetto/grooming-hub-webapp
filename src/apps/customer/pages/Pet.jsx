@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useUnsavedChanges } from '../../../shared/navigation/UnsavedChangesProvider';
@@ -8,6 +8,12 @@ import Icon from '../../../shared/ui/Icon';
 import Skeleton from '../../../shared/ui/Skeleton';
 import { usePet } from '../hooks/usePet';
 import { usePetVisits } from '../hooks/usePetVisits';
+import {
+  ownerPetPhotoPathFromUrl,
+  removePetPhoto,
+  resizePetPhoto,
+  uploadOwnerPetPhoto,
+} from '../lib/petPhoto';
 import './Pet.css';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('it-IT', {
@@ -71,15 +77,115 @@ function draftFromPet(pet) {
   };
 }
 
-function PetAvatar({ pet }) {
-  const source = pet.photo_url;
-  if (source) {
-    return <img src={source} alt={`Foto di ${pet.name}`} className="gh-pet-avatar" />;
-  }
+function DualPetMedallion({ pet, swapped, onSwap }) {
+  const ownerPhoto = pet.owner_photo_url || null;
+  const salonPhoto = pet.photo_url || null;
+  const hasBoth = Boolean(ownerPhoto && salonPhoto);
+  const defaultMain = ownerPhoto || salonPhoto;
+  const defaultSide = hasBoth ? salonPhoto : null;
+  const main = swapped && hasBoth ? defaultSide : defaultMain;
+  const side = swapped && hasBoth ? defaultMain : defaultSide;
 
   return (
-    <div aria-label={`Nessuna foto per ${pet.name}`} className="gh-pet-avatar gh-pet-avatar--empty">
-      {(pet.name || '?').charAt(0).toUpperCase()}
+    <div className="gh-pet-medallion">
+      <div className="gh-pet-medallion__main">
+        {main ? (
+          <img src={main} alt={`Foto di ${pet.name}`} />
+        ) : (
+          <span aria-label={`Nessuna foto per ${pet.name}`}>
+            {(pet.name || '?').charAt(0).toUpperCase()}
+          </span>
+        )}
+      </div>
+      {side && (
+        <button
+          type="button"
+          className="gh-pet-medallion__side"
+          onClick={onSwap}
+          aria-label="Scambia le due foto"
+          title="Scambia le due foto"
+        >
+          <img src={side} alt="" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+const RELATIVE_DATE_FORMAT = new Intl.RelativeTimeFormat('it-IT', { numeric: 'auto' });
+
+function relativeVisitDate(value) {
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return '';
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const days = Math.round((date.getTime() - today.getTime()) / 86400000);
+  if (Math.abs(days) < 31) return RELATIVE_DATE_FORMAT.format(days, 'day');
+  const months = Math.round(days / 30.44);
+  if (Math.abs(months) < 12) return RELATIVE_DATE_FORMAT.format(months, 'month');
+  return RELATIVE_DATE_FORMAT.format(Math.round(months / 12), 'year');
+}
+
+function AlbumSheet({ pet, photos, selected, onSelect, onClose }) {
+  const active = selected ? photos.find((photo) => photo.id === selected) : null;
+  const onePhoto = photos.length === 1;
+
+  const sharePhoto = async () => {
+    if (!active) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${pet.name} dopo il bagno`, url: active.photo_url });
+      } catch (error) {
+        if (error?.name !== 'AbortError') window.open(active.photo_url, '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+    window.open(active.photo_url, '_blank', 'noopener,noreferrer');
+  };
+
+  return (
+    <div className="gh-pet-album-scrim" role="presentation" onMouseDown={onClose}>
+      <section
+        className="gh-pet-album-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pet-album-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="gh-pet-album-sheet__head">
+          <div>
+            <Eyebrow>Dopo il bagno</Eyebrow>
+            <h2 id="pet-album-title">
+              {active ? `${pet.name}, quella volta` : onePhoto ? `${pet.name}, l’ultima volta` : `${pet.name} da noi`}
+            </h2>
+          </div>
+          <button type="button" className="gh-pet-album-close" onClick={onClose} aria-label="Chiudi album">×</button>
+        </header>
+
+        <div className="gh-pet-album-sheet__body">
+          {active ? (
+            <div className="gh-pet-album-opened">
+              <img src={active.photo_url} alt={`${pet.name} dopo il bagno`} />
+              <div className="gh-pet-album-date">{DATE_FORMAT.format(new Date(`${active.date}T12:00:00`))}</div>
+              <div className="gh-pet-album-relative">{relativeVisitDate(active.date)}</div>
+              <button type="button" className="gh-pet-album-share" onClick={sharePhoto}>
+                <Icon name="arrow" size={18} />
+                <span><strong>Salva o inoltra</strong><small>si apre il menù del telefono</small></span>
+              </button>
+            </div>
+          ) : (
+            <div className={`gh-pet-album-grid${onePhoto ? ' gh-pet-album-grid--single' : ''}`}>
+              {photos.map((photo) => (
+                <button type="button" key={photo.id} className="gh-pet-album-shot" onClick={() => onSelect(photo.id)}>
+                  <img src={photo.photo_url} alt={`${pet.name}, ${DATE_FORMAT.format(new Date(`${photo.date}T12:00:00`))}`} />
+                  <strong>{DATE_FORMAT.format(new Date(`${photo.date}T12:00:00`))}</strong>
+                  <span>{relativeVisitDate(photo.date)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
@@ -231,6 +337,11 @@ export default function Pet() {
   const [activeSection, setActiveSection] = useState(null);
   const [draft, setDraft] = useState(draftFromPet(null));
   const [saveError, setSaveError] = useState(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photosSwapped, setPhotosSwapped] = useState(false);
+  const [albumOpen, setAlbumOpen] = useState(false);
+  const [selectedAlbumPhoto, setSelectedAlbumPhoto] = useState(null);
+  const photoInputRef = useRef(null);
 
   useEffect(() => {
     if (pet && mode !== 'editing' && mode !== 'saving') setDraft(draftFromPet(pet));
@@ -280,6 +391,41 @@ export default function Pet() {
     }
   };
 
+  const handleOwnerPhoto = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !pet) return;
+
+    setPhotoUploading(true);
+    setSaveError(null);
+    let uploadedPath = null;
+    let photoSaved = false;
+    try {
+      const prepared = await resizePetPhoto(file);
+      const uploaded = await uploadOwnerPetPhoto({
+        file: prepared,
+        tenantId: pet.tenant_id,
+        petId: pet.id,
+      });
+      uploadedPath = uploaded.path;
+      const previousPath = ownerPetPhotoPathFromUrl(
+        pet.owner_photo_url,
+        pet.tenant_id,
+        pet.id
+      );
+      await updatePet({ owner_photo_url: uploaded.publicUrl });
+      photoSaved = true;
+      if (previousPath) await removePetPhoto(previousPath).catch(() => {});
+      setPhotosSwapped(false);
+      setMode('saved');
+    } catch (photoError) {
+      if (uploadedPath && !photoSaved) await removePetPhoto(uploadedPath).catch(() => {});
+      setSaveError(photoError.message || 'Non e stato possibile salvare la foto.');
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
   if (authLoading || loading) return <LoadingPage />;
   if (error) {
     return <MessagePage title="Non riusciamo a caricare la scheda" body={error.message} onRetry={refetch} />;
@@ -290,6 +436,9 @@ export default function Pet() {
 
   const age = calculateAge(pet.birth_date);
   const heroMeta = [formatSpecies(pet.species), pet.breed, age].filter(Boolean).join(' · ');
+  const albumPhotos = visits.filter((visit) => visit.photo_url).slice(0, 4);
+  const hasBothPortraits = Boolean(pet.owner_photo_url && pet.photo_url);
+  const showOwnerPhotoInvite = Boolean(pet.photo_url && !pet.owner_photo_url);
 
   return (
     <main className="gh-pet-page">
@@ -307,16 +456,63 @@ export default function Pet() {
         </Link>
 
         <header className="gh-pet-hero">
-          <div className="gh-pet-avatar-wrap">
-            <PetAvatar pet={pet} />
+          <div className="gh-pet-photo-column">
+            <div className="gh-pet-avatar-wrap">
+              <DualPetMedallion
+                pet={pet}
+                swapped={photosSwapped}
+                onSwap={() => setPhotosSwapped((current) => !current)}
+              />
+            </div>
+            {hasBothPortraits && (
+              <p className="gh-pet-photo-explainer">
+                La foto piccola è quella che usiamo noi al banco per riconoscerlo. <strong>Toccala per scambiarle.</strong>
+              </p>
+            )}
           </div>
 
           <div className="gh-pet-hero-copy">
             <Eyebrow>Scheda pet</Eyebrow>
             <h1>{pet.name}</h1>
             <p>{heroMeta}</p>
+            {pet.owner_photo_url && pet.photo_url && (
+              <button
+                type="button"
+                className="gh-pet-text-action gh-pet-photo-replace"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={photoUploading}
+              >
+                <Icon name="camera" size={15} />
+                {photoUploading ? 'Caricamento...' : 'Cambia la tua foto'}
+              </button>
+            )}
           </div>
         </header>
+
+        <input
+          ref={photoInputRef}
+          className="gh-pet-photo-input"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleOwnerPhoto}
+          disabled={photoUploading}
+        />
+
+        {showOwnerPhotoInvite && (
+          <section className="gh-pet-photo-invite">
+            <strong>Questa è la foto che facciamo noi, per riconoscerlo.</strong>
+            <p>Se ne hai una che ti piace di più, mettila tu: la nostra resta qui sotto.</p>
+            <button
+              type="button"
+              className="gh-pet-album-gesture"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={photoUploading}
+            >
+              <Icon name="camera" size={19} />
+              <span>{photoUploading ? 'Caricamento...' : 'Metti la tua foto'}</span>
+            </button>
+          </section>
+        )}
 
         <div className="gh-pet-feedback" aria-live="polite">
           {mode === 'saved' && (
@@ -401,6 +597,28 @@ export default function Pet() {
                 </div>
               )}
             </section>
+
+            <section className="gh-pet-section gh-pet-album-section">
+              {albumPhotos.length ? (
+                <button
+                  type="button"
+                  className="gh-pet-album-gesture"
+                  onClick={() => {
+                    setSelectedAlbumPhoto(null);
+                    setAlbumOpen(true);
+                  }}
+                >
+                  <Icon name="camera" size={20} />
+                  <span>
+                    <strong>{albumPhotos.length === 1 ? `La foto di ${pet.name}` : `Le foto di ${pet.name}`}</strong>
+                    <small>{albumPhotos.length === 1 ? 'dall’ultima lavorazione' : `le ultime ${albumPhotos.length} lavorazioni`}</small>
+                  </span>
+                  <Icon name="chevron" size={16} />
+                </button>
+              ) : (
+                <p className="gh-pet-album-empty">Dopo il prossimo bagno troverai qui la sua foto</p>
+              )}
+            </section>
           </div>
 
           <aside className="gh-pet-booking-sidebar">
@@ -411,6 +629,18 @@ export default function Pet() {
           </aside>
         </div>
       </div>
+      {albumOpen && (
+        <AlbumSheet
+          pet={pet}
+          photos={albumPhotos}
+          selected={selectedAlbumPhoto}
+          onSelect={setSelectedAlbumPhoto}
+          onClose={() => {
+            setAlbumOpen(false);
+            setSelectedAlbumPhoto(null);
+          }}
+        />
+      )}
     </main>
   );
 }

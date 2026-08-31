@@ -5,6 +5,7 @@ import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from './demoMode';
 import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 
 const CLIENT_PHOTOS_BUCKET = 'client-photos';
+const PET_AVATARS_BUCKET = 'pet-avatars';
 const BLACKLIST_THRESHOLD = -3;
 const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
 const ACQUISITION_SOURCES = ['manual', 'whatsapp', 'qr'];
@@ -16,7 +17,7 @@ const APPOINTMENT_SOURCES = ['operator', 'customer'];
 const STAFF_ROLES = ['owner', 'staff'];
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
-const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, discount_percent, created_at, updated_at)`;
+const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, discount_percent, photo_url, created_at, updated_at)`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, staff_responded_at, proposed_alternatives, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
@@ -214,6 +215,44 @@ const deletePhoto = async (url) => {
     .from(CLIENT_PHOTOS_BUCKET)
     .remove([decodeURIComponent(url.slice(index + marker.length))]);
   if (error) throw error;
+};
+
+const publicStoragePath = (url, bucket) => {
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const index = typeof url === 'string' ? url.indexOf(marker) : -1;
+  return index === -1 ? null : decodeURIComponent(url.slice(index + marker.length));
+};
+
+const uploadVisitPhoto = async ({ tenantId, petId, visitId, file }) => {
+  const path = `${tenantId}/${petId}/visits/${visitId}/${Date.now()}-${generateId()}.${fileExtension(file)}`;
+  const { error: uploadError } = await supabase.storage.from(PET_AVATARS_BUCKET).upload(path, file, {
+    upsert: false,
+    contentType: getSafeImageMimeType(file),
+  });
+  if (uploadError) throw uploadError;
+
+  const photoUrl = supabase.storage.from(PET_AVATARS_BUCKET).getPublicUrl(path).data.publicUrl;
+  const { error: updateError } = await supabase
+    .from('visits')
+    .update({ photo_url: photoUrl })
+    .eq('id', visitId)
+    .eq('pet_id', petId)
+    .eq('tenant_id', tenantId);
+  if (updateError) {
+    await supabase.storage.from(PET_AVATARS_BUCKET).remove([path]);
+    throw updateError;
+  }
+  return photoUrl;
+};
+
+const attachOptionalVisitPhoto = async (context) => {
+  if (!context.file) return null;
+  try {
+    await uploadVisitPhoto(context);
+    return null;
+  } catch (error) {
+    return error.message || 'caricamento non riuscito';
+  }
 };
 
 const applyPhoto = async (userId, petId, file) => {
@@ -669,12 +708,18 @@ export const addVisit = async (petId, input) => {
     cost: Number.parseFloat(input.cost), discount_percent: input.discount_percent || 0,
   }).select('id').single();
   if (error) throw new Error(`Non riesco ad aggiungere la visita: ${error.message}`);
-  return data.id;
+  const photoUploadError = await attachOptionalVisitPhoto({
+    tenantId,
+    petId,
+    visitId: data.id,
+    file: input.photoFile,
+  });
+  return { id: data.id, photoUploadError };
 };
 
 export const completeAppointmentWithVisit = async (appointmentId, input) => {
   assertDemoWriteAllowed();
-  await requireStaff();
+  const { tenantId } = await requireStaff();
   if (!appointmentId) throw new Error('Appuntamento non disponibile');
   if (!input.date || !input.cost || Number(input.cost) <= 0) {
     throw new Error('Data e costo positivo sono obbligatori');
@@ -687,15 +732,63 @@ export const completeAppointmentWithVisit = async (appointmentId, input) => {
     p_cost: Number(input.cost),
   });
   if (error) throw new Error(`Non riesco a chiudere lavorazione e appuntamento: ${error.message}`);
-  return data?.id || data;
+  const visitId = data?.id || data;
+  const petId = data?.pet_id;
+  const photoUploadError = petId
+    ? await attachOptionalVisitPhoto({ tenantId, petId, visitId, file: input.photoFile })
+    : input.photoFile
+      ? 'la visita è stata salvata, ma non è stato possibile associare la foto'
+      : null;
+  return { id: visitId, photoUploadError };
 };
 
 export const deleteVisit = async (visitId, petId) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
   await getPetById(petId, tenantId);
+  const { data: visit, error: visitError } = await supabase
+    .from('visits')
+    .select('photo_url')
+    .eq('id', visitId)
+    .eq('pet_id', petId)
+    .eq('tenant_id', tenantId)
+    .single();
+  if (visitError) throw new Error(`Non riesco a leggere la visita: ${visitError.message}`);
   const { error } = await supabase.from('visits').delete().eq('id', visitId).eq('tenant_id', tenantId);
   if (error) throw new Error(`Non riesco a eliminare la visita: ${error.message}`);
+  const photoPath = publicStoragePath(visit.photo_url, PET_AVATARS_BUCKET);
+  if (photoPath) await supabase.storage.from(PET_AVATARS_BUCKET).remove([photoPath]);
+};
+
+export const removeVisitPhoto = async (visitId, petId) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  await getPetById(petId, tenantId);
+  const { data: visit, error: readError } = await supabase
+    .from('visits')
+    .select('photo_url')
+    .eq('id', visitId)
+    .eq('pet_id', petId)
+    .eq('tenant_id', tenantId)
+    .single();
+  if (readError) throw new Error(`Non riesco a leggere la foto visita: ${readError.message}`);
+  if (!visit.photo_url) return;
+
+  const { error: updateError } = await supabase
+    .from('visits')
+    .update({ photo_url: null })
+    .eq('id', visitId)
+    .eq('pet_id', petId)
+    .eq('tenant_id', tenantId);
+  if (updateError) throw new Error(`Non riesco a rimuovere la foto visita: ${updateError.message}`);
+
+  const photoPath = publicStoragePath(visit.photo_url, PET_AVATARS_BUCKET);
+  if (!photoPath) return;
+  const { error: removeError } = await supabase.storage.from(PET_AVATARS_BUCKET).remove([photoPath]);
+  if (removeError) {
+    await supabase.from('visits').update({ photo_url: visit.photo_url }).eq('id', visitId).eq('tenant_id', tenantId);
+    throw new Error(`Non riesco a rimuovere il file della visita: ${removeError.message}`);
+  }
 };
 
 export const updateClientNoShowScore = async (petId, delta) => {
