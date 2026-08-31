@@ -370,6 +370,40 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 30-31 agosto 2026 — Il salone si chiama ZavaRoby, e i cani hanno tre fotografie
+
+**Il salone non si chiamava come credevamo.** `tenants.name` valeva «Grooming HUB» — che è **il nome del software**, non del negozio. Il negozio è **ZavaRoby Pet Station**: è il nome sul cartello, sui social, e l'unico che un cliente riconosca. La card pubblica diceva quindi a degli sconosciuti un nome mai sentito.
+
+È **lo stesso difetto di sabato in forma più sottile**: prima l'insegna mostrava «FROGLETINPOND», l'email di un operatore; poi il nome del programma. In entrambi i casi un'identità che non era quella del salone. Corretto con **un solo valore nel tenant**, e la modifica è comparsa immediatamente in tre punti — insegna della card, riga di chiusura, messaggio d'invito — senza rilascio. La prova che il nome è un dato e non una stringa.
+
+L'app staff continua a chiamarsi «Grooming Hub» in cima, ed è giusto: **quello è lo strumento**, e lo vedono solo Davide e Roby.
+
+**I nomi scritti per un quaderno** (`GH-46`, `GH-48`). Misurato: **169 clienti su 267 hanno cifre nel nominativo**, e **105 sono solo un numero di telefono**. Il messaggio d'invito avrebbe scritto «Ciao 3333589030» a un cliente su tre — con dentro un collegamento, cioè qualcosa di indistinguibile da una truffa. I **cani** invece hanno un nome nel 96% dei casi: è il quaderno di una toelettatura, dove le persone si annotano col cellulare e gli animali si chiamano per nome. Il messaggio quindi **non saluta il padrone**: nomina il salone e il cane.
+
+Poi il problema gemello: **63 cani su 288 hanno per nome la propria razza** — `chihuahua`, `Meticcio`, `York`, `barboncino nero`, e un `non pervenuto`. Ripiego adottato: si dice «il tuo pet» **solo quando il nome coincide esattamente con la razza**. Nient'altro, perché `Milo maltese` un nome ce l'ha.
+
+> **Un cambio di destinatario, non un problema di formattazione.** Quei campi sono stati scritti per un quaderno, non per gli occhi del proprietario: erano appunti privati — «il barboncino nero», «quello della pizzeria». Con il primo invito, **267 schede scritte in privato vengono mostrate alle persone che descrivono.**
+
+Da cui la scelta di progetto: il riquadro dell'invito mostra **prima di generare** nominativo, numero, nome del cane e testo che partirà. Così l'operatore corregge **il dato**, non il messaggio. **La campagna inviti è l'unica occasione in cui qualcuno guarderà quelle 267 schede una per una**: è un'occasione di pulizia, non solo un rischio.
+
+**«Il tuo cane» → «il tuo pet»** (correzione di Luigi in corsa): il campo `species` è **vuoto per tutti e 288**. Il database non sa che quelli siano cani — lo davamo per scontato noi.
+
+**Le promozioni non si potevano scrivere** (`GH-49`). La tabella esisteva dai tempi di G6, completa; l'app clienti aveva la pagina che la legge; **nel gestionale non c'era nessuna schermata per crearne una**. La sezione vuota non poteva quindi funzionare da stimolo: Davide non la vede mai, e non aveva un pulsante. Ora c'è la gestione, e il promemoria sta **in Dashboard, accanto alla mano che può agire**. Scoperto e corretto anche un difetto della policy: controllava `valid_to` ma **non `valid_from`**, quindi una promozione programmata in anticipo sarebbe stata visibile subito.
+
+**Le tre fotografie** (`CD-05`, `GH-50`). Il salone e il proprietario si contendevano una colonna sola, e per due ragioni entrambe legittime: la foto di Davide e Roby **non è un ritratto**, è un segno di riconoscimento — inquadra il dettaglio storto, altrimenti restano «mille barboncini che si assomigliano tutti». Quella del proprietario è il gesto per cui una persona riapre un'applicazione.
+
+Non erano in conflitto: erano **due fotografie in un posto solo**, e ne è emersa una terza. Ora sono tre colonne — riconoscimento del salone, ritratto del proprietario, album delle lavorazioni — e nessuna sovrascrive l'altra. Anche lo **spazio su disco** è separato: il cliente scrive solo dentro `{salone}/{cane}/owner/`.
+
+> **Le due frasi che risolvono il conflitto** sono di Claude Design e valgono più del codice: *«La foto piccola è quella che usiamo noi al banco per riconoscerlo»* trasforma una foto sgraziata in un **segno di mestiere**; *«Se ne hai una che ti piace di più, mettila tu: la nostra resta qui sotto»* toglie al proprietario la stessa paura che aveva il salone.
+
+**Altre chiusure**: la porta di registrazione sulla pagina staff, che prometteva una mail mai spedita (`GH-43`); il calendario che poteva mostrare la settimana sbagliata cambiando periodo troppo in fretta (`GH-42`); il tetto alle richieste aperte e **il gesto di scollegamento di un account**, che mancava e che la funzione di riscatto già prometteva (`GH-44`); foto legacy e scadenza degli inviti a tre giorni (`GH-45`).
+
+**Suite RLS: da 30 casi a 49**, senza SKIP.
+
+**Un fatto di igiene da risolvere**: il repository vive sulla **Scrivania sincronizzata con iCloud**. Ha già prodotto un centinaio di file duplicati con suffisso « 2» e, il 31, sessantasette file segnalati da git come modificati **senza una sola differenza di contenuto** — `Resource deadlock avoided`, cioè file che iCloud teneva fuori dal disco. La correzione pulita è spostare il repository fuori da Scrivania e Documenti; costa la riscrittura del percorso in tutti i mandati, quindi va fatta a mente fresca e con tutto il resto fermo.
+
+**Una nota di metodo**: Cowork ha **inviato per errore un messaggio a Codex** provando a cancellarlo dal campo di scrittura. Contenuto innocuo, ma la regola era esplicita — *l'Invio è di Luigi*. Da ora Cowork scrive nel campo **solo** testo destinato a essere inviato, e non lo tocca più per correggere o pulire.
+
 ### 29-30 agosto 2026 — Prima del primo invito: quello che si può fare con un collegamento in mano
 
 Il giro è nato da una domanda di Davide sui **doppioni** — capita che un cliente chieda un appuntamento, se ne dimentichi e ne chieda un altro — e si è allargato a tutto ciò che accade quando un estraneo ha in mano un invito.
