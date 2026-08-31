@@ -370,6 +370,32 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 29-30 agosto 2026 — Prima del primo invito: quello che si può fare con un collegamento in mano
+
+Il giro è nato da una domanda di Davide sui **doppioni** — capita che un cliente chieda un appuntamento, se ne dimentichi e ne chieda un altro — e si è allargato a tutto ciò che accade quando un estraneo ha in mano un invito.
+
+**Cinque mandati chiusi**: `GH-41` avviso di doppione, `GH-42` risposte in ritardo del calendario, `GH-43` porta staff senza registrazione, `GH-44` tetto alle richieste e scollegamento, `GH-45` foto e scadenza degli inviti. Suite RLS passata da **30 a 41 casi**.
+
+**Il flusso di registrazione del cliente era già costruito, e nessuno l'aveva mai guardato tutto insieme.** Misurato: l'invito si aggancia **per numero di telefono**, non per cane — quindi serve **un invito per cliente, non per cane**, e chi riscatta vede tutti i propri animali. I 267 clienti hanno **267 telefoni distinti e zero email**: il salone conosce le persone per telefono, l'app le autentica per email, e il ponte è che **l'email la sceglie il cliente al momento del riscatto**. Il salone non la conosce e non deve conoscerla.
+
+**Il modello di minaccia, misurato invece che immaginato.** Alla domanda di Luigi — *«possiedo il link e comincio a registrare cani fantasma per danneggiarti»* — la risposta è che **non si può**: su `pets` il cliente ha solo `SELECT` e `UPDATE`, e l'aggiornamento passa da una whitelist che lascia sopravvivere **tre campi soli** (note del proprietario, preferenze manto, foto). Tutto il resto viene ripristinato dal database, **blacklist e punteggio no-show compresi**. Non può creare cani, schede o visite; non vede altri clienti; non ottiene accessi staff; non può prendersi un telefono altrui, perché è unico per salone.
+
+> **Il rischio serio non era il danno: era l'irreversibilità.** Tre delle sei righe della tabella delle minacce si chiudevano con lo stesso gesto — **scollegare un account da una scheda** — che non esisteva. E la funzione di riscatto lo prometteva già: davanti a un telefono occupato diceva *«contatta il salone per riassegnare l'anagrafica»*, cioè rimandava a qualcosa che nessuno aveva costruito.
+
+**La scoperta di sicurezza della giornata**, trovata cercando altro. Le foto dei cani stanno tutte — **42 su 42** — nel secchio legacy `client-photos`, mentre `pet-avatars`, creato durante G6 e con permessi scritti bene, era **vuoto**. E su quello legacy vivevano quattro policy generate dal pannello di Supabase agli inizi — `client_photos_auth_all` — che concedevano **lettura, scrittura, modifica e cancellazione a qualunque utente autenticato**, senza controllo di proprietà né di salone.
+
+Conseguenza: dal primo invito in poi, un cliente qualsiasi avrebbe potuto **cancellare o sostituire tutte le foto dei cani del salone**, che compaiono anche sulla card pubblica. Non era sfruttabile oggi — gli account erano tre, tutti del salone — ma si sarebbe acceso esattamente il giorno del primo invito.
+
+> **Perché era sopravvissuto all'irrigidimento di agosto**: `GH-10` guardava funzioni, tabelle e policy dello schema `public`. **I permessi dei secchi non erano in perimetro.** Non distrazione: confine. È il tipo di angolo che si ripete, e per questo è scritto qui.
+
+**Cinque atti sulla produzione in una giornata**, tutti applicati da Cowork su autorizzazione esplicita di Luigi, tutti **prima** del frontend: identità e QR della card, capienza delle postazioni, soglie fedeltà, tetto e scollegamento, foto e scadenza. Ogni volta con le misure prima e dopo, e ogni volta con un controllo di sicurezza preventivo — il più utile: **la funzione della card pubblica eseguita su tutti i 288 token esistenti**, per accertare che nessun cartoncino stampato smettesse di aprirsi.
+
+**Le impostazioni del salone contengono ora sei cose**, tutte modificabili senza una build: giorni di chiusura, capienza, recapito WhatsApp, soglie fedeltà, durata degli inviti (**3 giorni**, decisione di Luigi: un collegamento in una chat sopravvive a inoltri e cambi di telefono), tetto alle richieste aperte (**3**).
+
+**Altri due difetti chiusi**: la pagina di accesso staff invitava a **registrarsi**, promettendo una mail di conferma che non parte — e nessuno deve potersi iscrivere come operatore da sé; e il calendario poteva **mostrare la settimana sbagliata** se si cambiava periodo prima che finisse il caricamento, difetto preesistente trovato da Codex mentre provava altro, e diventato quotidiano il giorno in cui il salone ha ripreso a usare quella schermata.
+
+**Da sapere**: durante le prove è stata inviata una mail di reimpostazione password all'alias `frogletinpond+gh43invite@gmail.com`, che è **la casella di Davide**. Era la sola prova possibile che l'invio funzioni davvero. **Il recupero password funziona, ma attraverso il servizio email predefinito di Supabase**, dichiaratamente limitato e senza garanzia di consegna. È la chiave del salone: prima o poi serve un servizio di invio vero.
+
 ### 29 agosto 2026, mezzogiorno — Il calendario è tornato vivo, e il salone lo ha detto senza dirlo
 
 **Nove appuntamenti creati oggi.** Il calendario aveva **17 record in tutta la sua storia**, tutti fra l'11 marzo e il 23 aprile, e **zero da allora** — era la ragione per cui CD-01 aveva potuto ripensarlo invece di rivestirlo: «nessuno ci ha costruito abitudini sopra».
