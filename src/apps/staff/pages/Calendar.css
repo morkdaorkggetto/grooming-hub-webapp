@@ -1059,11 +1059,11 @@
 }
 
 .gh-planning-walkins--filled {
-  background: var(--color-text-primary);
+  background: var(--gh-tint);
 }
 
 .gh-planning-walkins--filled .gh-planning-walkins__summary {
-  color: var(--color-surface-main);
+  color: var(--color-text-secondary);
 }
 
 .gh-planning-walkins__summary {
@@ -1093,8 +1093,8 @@
 }
 
 .gh-planning-walkins--filled .gh-planning-walkins__dots i {
-  background: var(--color-surface-main);
-  opacity: 1;
+  background: var(--color-primary);
+  opacity: .75;
 }
 
 .gh-planning-cancelled {
@@ -1207,8 +1207,8 @@
   padding: 7px 13px;
   border: 0;
   border-top: 1px solid var(--gh-border-35);
-  background: var(--color-text-primary);
-  color: var(--color-surface-main);
+  background: var(--gh-tint);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font: inherit;
   text-align: left;
@@ -1223,15 +1223,15 @@
 .gh-planning-walkin-row span,
 .gh-planning-walkin-row small {
   overflow: hidden;
-  color: var(--color-surface-main);
+  color: var(--color-text-secondary);
   font-size: 11.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .gh-planning-walkin-row > i {
-  background: var(--color-surface-main);
-  opacity: 1;
+  background: var(--color-primary);
+  opacity: .75;
 }
 
 .gh-planning-walkin-row span {

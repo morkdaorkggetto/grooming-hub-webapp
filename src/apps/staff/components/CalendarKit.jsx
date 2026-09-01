@@ -49,7 +49,7 @@ function PlanningMargin({ load }) {
   return (
     <div className={`gh-planning-margin${full ? ' gh-planning-margin--tight' : ''}`}>
       <Icon name="paw" size={14} />
-      <span>{full ? 'Nessuna libera per chi entra' : <><b className="gh-num">{load.available}</b> {load.available === 1 ? 'libera' : 'libere'} per chi entra</>}</span>
+      <span>{full ? 'Nessuna libera per chi arriva' : <><b className="gh-num">{load.available}</b> {load.available === 1 ? 'libera' : 'libere'} per chi arriva</>}</span>
     </div>
   );
 }
@@ -61,7 +61,7 @@ function WalkInFooter({ visits, onOpen, detailed = false }) {
         <span className="gh-planning-walkins__dots" aria-hidden="true">
           {Array.from({ length: Math.min(visits.length, 6) }, (_, index) => <i key={index} />)}
         </span>
-        <span><b className="gh-num">{visits.length}</b> {visits.length === 1 ? 'entrato' : 'entrati'} senza appuntamento</span>
+        <span><b className="gh-num">{visits.length}</b> {visits.length === 1 ? 'lavorato' : 'lavorati'} sul momento</span>
       </div>
       {detailed && visits.map((visit) => (
         <button className="gh-planning-walkin-row" type="button" onClick={() => onOpen(visit)} key={visit.id}>
@@ -163,7 +163,7 @@ export function CalendarNavigation({ mode, rangeLabel, compactRangeLabel, onMode
         <div className="gh-planning-summary">
           <span><b className="gh-num">{summary.appointments}</b> prenotati</span>
           {summary.requests > 0 && <span className="gh-planning-summary__pending"><b className="gh-num">{summary.requests}</b> da confermare</span>}
-          <span><b className="gh-num">{summary.walkIns}</b> entrati senza appuntamento</span>
+          <span><b className="gh-num">{summary.walkIns}</b> {summary.walkIns === 1 ? 'lavorato' : 'lavorati'} sul momento</span>
         </div>
       )}
     </div>
@@ -210,7 +210,7 @@ export function CalendarPlanningDay({ day, onOpen, onBook }) {
       )}
       <UnplacedItems items={day.dayUnplacedItems || day.unplacedItems} onOpen={onOpen} />
       <section className="gh-planning-day-view__walkins">
-        <header><span>Entrati senza appuntamento</span><strong>{day.visits.length} {day.visits.length === 1 ? 'pet' : 'pet'}, nessuna ora</strong></header>
+        <header><span>Lavorati sul momento</span><strong>{day.visits.length} pet, senza ora fissata</strong></header>
         <WalkInFooter visits={day.visits} onOpen={onOpen} detailed />
       </section>
     </div>
