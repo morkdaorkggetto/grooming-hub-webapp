@@ -370,6 +370,38 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
 
+### 1 settembre 2026 — Guardando la settimana di Roby: quattro correzioni, e una misura che quasi ci inganna
+
+`GH-54` è in produzione da meno di dodici ore e Luigi la guarda. Quattro cose, tutte di superficie, raccolte in `GH-55` in forma breve.
+
+**Una parola che dice il falso.** Il badge del margine dice **«Tenuto per chi entra ×1»**, ma `load.available` è capienza meno appuntamenti: **è il resto**. Nessuno lo sta tenendo — se ci si prenota dentro, non protesta niente.
+
+> **L'intenzione di progetto stava tutta dentro una parola, e una parola da sola non tiene niente.** `CD-06` voleva insegnare che riempire fino a tre è un errore; l'implementazione mostra un'aritmetica e la chiama intenzione. Diventerà vera quando il salone dichiarerà nelle impostazioni **quante postazioni vuole tenere libere** — allora il badge conterà contro una riserva che esiste.
+
+**Un gesto sparito nel formato di ripiego.** Sotto i 640px il foglio di stile nasconde «Vai a data» **e «Questa settimana»**: sul telefono, oggi, **non c'è modo di tornare a oggi** se non premendo `‹` tante volte quante se ne è andati avanti. È la stessa famiglia di guasto contro cui `CD-06` aveva messo in guardia per il piede — e si è ripresentata nella stessa vista, il giorno dopo.
+
+**Annullare e eliminare non sono la stessa cosa.** Il gesto «Annulla appuntamento» esiste già; quello che manca è **«Elimina»**, per la riga inserita per errore. Registrare un errore di battitura come disdetta **inquina le disdette con gli errori di inserimento**, e da quel momento nessuno dei due numeri dice più niente. Rinviato a un mandato con migrazione, per una trappola trovata leggendo `GH-52`: **cancellare un appuntamento segnato come assenza lascerebbe il punto tolto al cane per sempre**, perché il punteggio si muove sulla transizione e non sulla riga. La chiusura non è compensare, è vietare: si elimina solo ciò che è `programmato` o `annullato`.
+
+#### La misura che quasi ci inganna
+
+Luigi chiede di distinguere per colore le lavorazioni senza appuntamento. Per capire quanto pesano, conto:
+
+| | visite | su appuntamento | senza |
+|---|---:|---:|---:|
+| ultimi 14 giorni | 18 | **13** | 5 |
+| 15-60 giorni fa | 166 | 0 | 166 |
+| oltre 60 giorni | 286 | 0 | 286 |
+
+Letta così, la proporzione si è **capovolta**: il 72% del lavoro nasce da una prenotazione, contro lo 0% di sempre. Ed è il rovescio esatto del «**5,1 su 5,2 entra senza appuntamento**» su cui `CD-06` è stata costruita interamente.
+
+**Non è vero.** Diciotto visite in quattordici giorni fanno **1,5 cani al giorno** contro una mediana storica di **5**: mancano circa tre quarti delle lavorazioni, **non ancora registrate**. E le mancanti stanno quasi tutte dalla parte dei senza appuntamento, perché la prenotata sta sul calendario e chiede di essere chiusa, mentre quella entrata alle undici si registra a fine serata, se ci si ricorda.
+
+> **Il numero non dice che il salone ha cambiato modo di lavorare. Dice che il salone registra meglio ciò che ha prenotato.** Su una misura così non si ridisegna niente: è la stessa famiglia di errore che ha fermato la catena G6 quattro volte — prendere per misura ciò che è inferenza.
+
+**Coda aperta, e vale più di una riga di interfaccia**: *quante lavorazioni non vengono registrate?* Se il divario 1,5 contro 5 regge fra un mese, il salone sta perdendo circa tre cani al giorno di storia clinica e di incasso.
+
+---
+
 ### 31 agosto 2026, pomeriggio — Il salone comincia a chiedere cose
 
 Prima giornata in cui **le richieste arrivano dal salone invece che dall'analisi**. Sono arrivate perché hanno cominciato a usare lo strumento: **26 appuntamenti in tre giorni**, contro 17 in tutta la storia precedente.
