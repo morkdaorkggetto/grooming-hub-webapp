@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
 import { getBookingTimePreferenceName } from '../../../shared/tenant/bookingSchedule';
 import Icon from '../../../shared/ui/Icon';
 import { Button, StateTag } from './StaffKit';
@@ -133,6 +133,147 @@ function UnplacedItems({ items, onOpen }) {
       {items.map((item) => item.kind === 'request'
         ? <RequestChip item={item} onOpen={onOpen} key={`unplaced-request-${item.id}`} />
         : <AppointmentChip item={item} onOpen={onOpen} key={`unplaced-appointment-${item.id}`} />)}
+    </div>
+  );
+}
+
+const petOptionLabel = (pet) =>
+  `${pet.name} · ${pet.owner || 'proprietario non indicato'}`;
+
+export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate }) {
+  const listId = useId();
+  const selected = options.find((pet) => pet.id === selectedId) || null;
+  const [query, setQuery] = useState(selected ? petOptionLabel(selected) : '');
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const normalizedQuery = query.trim().toLocaleLowerCase('it');
+  const selectedLabel = selected ? petOptionLabel(selected) : '';
+  const allMatches = useMemo(() => selected && query === selectedLabel ? [selected] : options.filter((pet) => {
+    if (!normalizedQuery) return true;
+    return [pet.name, pet.owner, pet.phone, pet.breed]
+      .some((value) => String(value || '').toLocaleLowerCase('it').includes(normalizedQuery));
+  }), [normalizedQuery, options, query, selected, selectedLabel]);
+  const matches = allMatches.slice(0, 12);
+  const canCreate = Boolean(query.trim());
+  const optionCount = matches.length + (canCreate ? 1 : 0);
+
+  useEffect(() => {
+    if (selected) setQuery(selectedLabel);
+  }, [selected, selectedLabel]);
+
+  const choosePet = (pet) => {
+    onSelect(pet.id);
+    setQuery(petOptionLabel(pet));
+    setOpen(false);
+    setActiveIndex(-1);
+  };
+  const chooseCreate = () => {
+    onCreate(query.trim());
+    setOpen(false);
+    setActiveIndex(-1);
+  };
+  const moveActive = (amount) => {
+    if (!optionCount) return;
+    setOpen(true);
+    setActiveIndex((current) => {
+      if (current < 0) return amount > 0 ? 0 : optionCount - 1;
+      return (current + amount + optionCount) % optionCount;
+    });
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      moveActive(1);
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      moveActive(-1);
+      return;
+    }
+    if (event.key === 'Enter' && open && activeIndex >= 0) {
+      event.preventDefault();
+      if (activeIndex < matches.length) choosePet(matches[activeIndex]);
+      else chooseCreate();
+      return;
+    }
+    if (event.key === 'Escape' && open) {
+      event.preventDefault();
+      setOpen(false);
+      setActiveIndex(-1);
+      if (selected) setQuery(petOptionLabel(selected));
+    }
+  };
+
+  return (
+    <div
+      className="gh-pet-combobox"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
+    >
+      <label className="gh-pet-combobox__field">
+        <span className="gh-eyebrow--staff gh-field-label">Pet</span>
+        <input
+          type="search"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={open}
+          aria-controls={listId}
+          aria-activedescendant={activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
+          value={query}
+          placeholder="Cerca per pet, proprietario o telefono"
+          autoComplete="off"
+          onFocus={() => {
+            setOpen(true);
+            setActiveIndex(optionCount ? 0 : -1);
+          }}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            onSelect('');
+            setOpen(true);
+            setActiveIndex(0);
+          }}
+          onKeyDown={handleKeyDown}
+        />
+      </label>
+      <span className="gh-sr-only" aria-live="polite">
+        {open ? `${allMatches.length} ${allMatches.length === 1 ? 'risultato' : 'risultati'}.` : ''}
+      </span>
+      {open && optionCount > 0 && (
+        <div className="gh-pet-combobox__list" id={listId} role="listbox">
+          {matches.map((pet, index) => (
+            <button
+              id={`${listId}-${index}`}
+              className="gh-pet-combobox__option"
+              type="button"
+              role="option"
+              aria-selected={index === activeIndex}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => choosePet(pet)}
+              key={pet.id}
+            >
+              <strong>{pet.name}</strong>
+              <span>{pet.owner || 'Proprietario non indicato'}</span>
+            </button>
+          ))}
+          {canCreate && (
+            <button
+              id={`${listId}-${matches.length}`}
+              className="gh-pet-combobox__create"
+              type="button"
+              role="option"
+              aria-selected={activeIndex === matches.length}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={chooseCreate}
+            >
+              {matches.length
+                ? <>Nessun altro pet per «{query.trim()}» — creane uno nuovo</>
+                : <>Nessun pet per «{query.trim()}» — creane uno nuovo</>}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

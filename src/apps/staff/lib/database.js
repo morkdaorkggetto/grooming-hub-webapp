@@ -436,6 +436,55 @@ export const getCalendarPetOptions = async () => {
   }
 };
 
+export const createCalendarCustomerPet = async (input) => {
+  assertDemoWriteAllowed();
+  const { tenantId } = await requireStaff();
+  const owner = splitCustomerName(input?.ownerName || '');
+  const petName = String(input?.petName || '').trim();
+  const phone = String(input?.phone || '').trim();
+  const phoneNotProvided = input?.phoneNotProvided === true;
+
+  if (!owner.firstName) throw new Error('Il nome del proprietario e obbligatorio');
+  if (!petName) throw new Error('Il nome del pet e obbligatorio');
+  if (!phoneNotProvided && !phone) {
+    throw new Error('Inserisci il telefono oppure dichiara che non e stato fornito');
+  }
+
+  const { data, error } = await supabase.rpc('create_calendar_customer_pet', {
+    p_tenant_id: tenantId,
+    p_customer_first_name: owner.firstName,
+    p_customer_last_name: owner.lastName,
+    p_customer_phone: phoneNotProvided ? null : phone,
+    p_phone_not_provided: phoneNotProvided,
+    p_pet_name: petName,
+    p_pet_species: String(input?.species || '').trim() || null,
+    p_pet_breed: String(input?.breed || '').trim() || null,
+    p_pet_sex: input?.sex || null,
+  });
+  if (error) throw new Error(`Non riesco a creare il nuovo pet: ${error.message}`);
+  const result = Array.isArray(data) ? data[0] : data;
+  if (!result?.outcome) throw new Error('Esito della creazione non disponibile');
+  if (result.outcome === 'phone_conflict') {
+    return {
+      outcome: result.outcome,
+      existingCustomerId: result.customer_id,
+      existingCustomerName: customerName({
+        first_name: result.existing_first_name,
+        last_name: result.existing_last_name,
+      }),
+      existingPhone: result.existing_phone,
+    };
+  }
+  if (result.outcome !== 'created' || !result.customer_id || !result.pet_id) {
+    throw new Error('Customer e pet non risultano creati');
+  }
+  return {
+    outcome: result.outcome,
+    customerId: result.customer_id,
+    petId: result.pet_id,
+  };
+};
+
 export const getCustomerDirectory = async () => {
   const { tenantId } = await requireStaff();
   const { data, error } = await supabase

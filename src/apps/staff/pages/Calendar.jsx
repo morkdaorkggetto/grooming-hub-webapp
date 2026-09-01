@@ -24,16 +24,20 @@ import {
   isAppointmentCapacityAvailable,
 } from '../../../shared/tenant/workstationCapacity';
 import PetAvatar from '../../../shared/ui/PetAvatar';
+import Modal from '../../../shared/ui/Modal';
 import WarmNotice from '../../../shared/ui/WarmNotice';
 import { Button, Fab, Field, Hero, HeroButton, Panel } from '../components/StaffKit';
 import {
   CalendarLoading,
   CalendarNavigation,
+  CalendarPetCombobox,
   CalendarPlanningDay,
   CalendarPlanningWeek,
 } from '../components/CalendarKit';
 import {
+  addPetToCustomer,
   addAppointment,
+  createCalendarCustomerPet,
   getCalendarPetOptions,
   getCalendarWeekData,
   resolveAppointmentRequest,
@@ -52,6 +56,7 @@ import './Calendar.css';
 
 const DEFAULT_DURATION = 60;
 const DEFAULT_FORM = { clientId: '', date: '', time: '09:00', durationMinutes: DEFAULT_DURATION, notes: '' };
+const DEFAULT_NEW_PET = { petName: '', ownerName: '', phone: '', phoneNotProvided: false, breed: '' };
 
 const toLocalDateString = (date) => {
   const year = date.getFullYear();
@@ -147,21 +152,6 @@ const requestLeadTimeLabel = (request) => {
 };
 const statusLabel = (status) => ({ scheduled: 'Programmato', completed: 'Completato', no_show: 'Assenza', cancelled: 'Annullato' }[status] || status);
 
-function Modal({ title, children, footer, onClose, narrow = false }) {
-  return (
-    <div className="gh-modal-scrim" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className={`gh-modal${narrow ? ' gh-modal--narrow' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
-        <header className="gh-modal__head">
-          <h2 className="gh-calendar-modal-title">{title}</h2>
-          <button className="gh-calendar-modal-close" type="button" onClick={onClose}>Chiudi</button>
-        </header>
-        <div className="gh-modal__body">{children}</div>
-        {footer && <footer className="gh-modal__foot">{footer}</footer>}
-      </section>
-    </div>
-  );
-}
-
 function AppointmentLoadNote({ notice }) {
   if (!notice) return null;
   const appointmentLabel = notice.appointmentCount === 1 ? 'lavorazione' : 'lavorazioni';
@@ -204,6 +194,11 @@ export default function Calendar() {
   const [modal, setModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [manualForm, setManualForm] = useState(() => ({ ...DEFAULT_FORM, date: todayString() }));
+  const [manualPetCreation, setManualPetCreation] = useState(false);
+  const [manualPetDraft, setManualPetDraft] = useState(DEFAULT_NEW_PET);
+  const [manualPetError, setManualPetError] = useState('');
+  const [manualPhoneConflict, setManualPhoneConflict] = useState(null);
+  const [creatingPet, setCreatingPet] = useState(false);
   const [requestForm, setRequestForm] = useState({ date: '', time: '09:00', durationMinutes: DEFAULT_DURATION, message: '' });
   const [detailForm, setDetailForm] = useState({ date: '', time: '', durationMinutes: DEFAULT_DURATION });
   const [workPetId, setWorkPetId] = useState('');
@@ -343,6 +338,10 @@ export default function Calendar() {
         date,
         time: preset?.time || current.time,
       }));
+      setManualPetCreation(false);
+      setManualPetDraft(DEFAULT_NEW_PET);
+      setManualPetError('');
+      setManualPhoneConflict(null);
       setModal('manual');
     } catch (loadError) {
       setError(loadError.message || 'Non riesco a caricare i pet');
@@ -359,6 +358,61 @@ export default function Calendar() {
     });
     openManual('', { date: band.date, time });
   }, [data.appointments, openManual, workstationCapacity]);
+  const beginManualPetCreation = (petName) => {
+    setManualForm((current) => ({ ...current, clientId: '' }));
+    setManualPetDraft({ ...DEFAULT_NEW_PET, petName });
+    setManualPetError('');
+    setManualPhoneConflict(null);
+    setManualPetCreation(true);
+  };
+  const selectCreatedPet = async (petId) => {
+    const pets = await getCalendarPetOptions();
+    setPetOptions(pets);
+    setPetsLoaded(true);
+    setManualForm((current) => ({ ...current, clientId: petId }));
+    setManualPetCreation(false);
+    setManualPhoneConflict(null);
+    setManualPetError('');
+    setSuccess('Pet creato e selezionato. Puoi completare l’appuntamento.');
+  };
+  const createManualPet = async (existingCustomerId = null) => {
+    setManualPetError('');
+    setSuccess('');
+    const petName = manualPetDraft.petName.trim();
+    if (!petName) {
+      setManualPetError('Il nome del pet e obbligatorio.');
+      return;
+    }
+    if (!existingCustomerId && !manualPetDraft.ownerName.trim()) {
+      setManualPetError('Il nome del proprietario e obbligatorio.');
+      return;
+    }
+    if (!existingCustomerId && !manualPetDraft.phoneNotProvided && !manualPetDraft.phone.trim()) {
+      setManualPetError('Inserisci il telefono oppure dichiara che non e stato fornito.');
+      return;
+    }
+    setCreatingPet(true);
+    try {
+      if (existingCustomerId) {
+        const created = await addPetToCustomer(existingCustomerId, {
+          name: petName,
+          breed: manualPetDraft.breed,
+        });
+        await selectCreatedPet(created.pet_id);
+        return;
+      }
+      const created = await createCalendarCustomerPet(manualPetDraft);
+      if (created.outcome === 'phone_conflict') {
+        setManualPhoneConflict(created);
+        return;
+      }
+      await selectCreatedPet(created.petId);
+    } catch (createError) {
+      setManualPetError(createError.message || 'Non riesco a creare il pet.');
+    } finally {
+      setCreatingPet(false);
+    }
+  };
   const openWork = async () => {
     setError('');
     try {
@@ -571,7 +625,7 @@ export default function Calendar() {
     : formatFullDayLabel(selectedDay);
 
   return (
-    <div className="gh-page">
+    <div className={`gh-page${modal === 'manual' ? ' gh-calendar-page--booking-open' : ''}`}>
       <Hero title="Dove lo metto" subtitle="La settimana a colpo d'occhio, per collocare chi arriva al banco" right={(
         <div className="gh-calendar-actions">
           <HeroButton onClick={() => navigate('/dashboard')}>Dashboard</HeroButton>
@@ -624,11 +678,67 @@ export default function Calendar() {
       </main>
       <Fab label="Registra lavorazione" icon="pencil" onClick={openWork} />
 
-      {modal === 'manual' && <Modal title="Nuovo appuntamento" onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(manualConflict)} onClick={submitManual}>Salva appuntamento</Button></>}>
+      {modal === 'manual' && <Modal variant="side" title="Nuovo appuntamento" onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={manualPetCreation || !manualForm.clientId || Boolean(manualConflict)} onClick={submitManual}>Salva appuntamento</Button></>}>
         <form className="gh-calendar-form-stack" onSubmit={submitManual}>
-          <Field label="Pet" as="select" value={manualForm.clientId} onChange={(event) => setManualForm((current) => ({ ...current, clientId: event.target.value }))} required>
-            <option value="">Seleziona pet</option>{petOptions.map((pet) => <option value={pet.id} key={pet.id}>{pet.name} · {pet.owner || 'senza proprietario'}</option>)}
-          </Field>
+          <CalendarPetCombobox
+            options={petOptions}
+            selectedId={manualForm.clientId}
+            onSelect={(clientId) => {
+              setManualForm((current) => ({ ...current, clientId }));
+              if (clientId) {
+                setManualPetCreation(false);
+                setManualPhoneConflict(null);
+                setManualPetError('');
+              }
+            }}
+            onCreate={beginManualPetCreation}
+          />
+          {manualPetCreation && (
+            <section className="gh-calendar-new-pet" aria-label="Crea un nuovo pet">
+              <header>
+                <strong>Nuovo pet</strong>
+                <span>Cliente e pet vengono salvati insieme.</span>
+              </header>
+              <Field label="Nome pet" value={manualPetDraft.petName} onChange={(event) => setManualPetDraft((current) => ({ ...current, petName: event.target.value }))} required />
+              <Field label="Proprietario" value={manualPetDraft.ownerName} onChange={(event) => setManualPetDraft((current) => ({ ...current, ownerName: event.target.value }))} required />
+              <Field
+                label="Telefono"
+                type="tel"
+                pattern="[0-9+(). /-]*"
+                value={manualPetDraft.phone}
+                disabled={manualPetDraft.phoneNotProvided}
+                onChange={(event) => setManualPetDraft((current) => ({ ...current, phone: event.target.value }))}
+              />
+              <label className="gh-calendar-phone-absence">
+                <input
+                  type="checkbox"
+                  checked={manualPetDraft.phoneNotProvided}
+                  onChange={(event) => setManualPetDraft((current) => ({
+                    ...current,
+                    phoneNotProvided: event.target.checked,
+                    phone: event.target.checked ? '' : current.phone,
+                  }))}
+                />
+                <span>Il telefono non è stato fornito</span>
+              </label>
+              <Field label="Razza (facoltativa)" value={manualPetDraft.breed} onChange={(event) => setManualPetDraft((current) => ({ ...current, breed: event.target.value }))} />
+              {manualPetError && <p className="gh-calendar-new-pet__error" role="alert">{manualPetError}</p>}
+              {manualPhoneConflict ? (
+                <div className="gh-calendar-phone-conflict" role="status">
+                  <p>Questo numero è di <strong>{manualPhoneConflict.existingCustomerName}</strong>. È un altro suo pet?</p>
+                  <div className="gh-inline-actions">
+                    <Button staff loading={creatingPet} onClick={() => createManualPet(manualPhoneConflict.existingCustomerId)}>Sì, aggiungilo</Button>
+                    <Button staff variant="outline" onClick={() => setManualPhoneConflict(null)}>No, correggi il numero</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="gh-inline-actions">
+                  <Button staff loading={creatingPet} onClick={() => createManualPet()}>Crea e seleziona il pet</Button>
+                  <Button staff variant="ghost" onClick={() => setManualPetCreation(false)}>Annulla</Button>
+                </div>
+              )}
+            </section>
+          )}
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
             <Field label="Data" type="date" value={manualForm.date} onChange={(event) => setManualForm((current) => ({ ...current, date: event.target.value }))} required />
             <Field label="Ora" type="time" value={manualForm.time} onChange={(event) => setManualForm((current) => ({ ...current, time: event.target.value }))} required />
