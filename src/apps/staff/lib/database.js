@@ -71,6 +71,17 @@ const throwAppointmentWriteError = (error, fallback) => {
   throw new Error(`${fallback}: ${error?.message || 'errore sconosciuto'}`);
 };
 
+const throwAppointmentDeleteError = (error) => {
+  const messages = {
+    GH58_APPOINTMENT_COMPLETED: 'Un appuntamento completato conserva una lavorazione vera e non si elimina.',
+    GH58_APPOINTMENT_NO_SHOW: 'Prima usa «Annulla assenza»: il punto torna al pet e poi potrai eliminare la riga.',
+    GH58_APPOINTMENT_CUSTOMER_SOURCE: 'Questo appuntamento nasce da una richiesta del cliente: usa «Annulla appuntamento» per conservarne la storia.',
+    GH58_APPOINTMENT_VISIT_LINKED: 'Questo appuntamento ha una lavorazione collegata e non si elimina.',
+  };
+  if (messages[error?.details]) throw new Error(messages[error.details]);
+  throw new Error(`Non riesco a eliminare l'appuntamento: ${error?.message || 'errore sconosciuto'}`);
+};
+
 const mapPet = (row) => {
   if (!row) return null;
   const rawCustomer = relation(row.customer);
@@ -1135,10 +1146,12 @@ export const updateAppointmentSchedule = async (appointmentId, updates) => {
 
 export const deleteAppointment = async (appointmentId) => {
   assertDemoWriteAllowed();
-  const { tenantId } = await requireStaff();
-  await getStaffAppointment(appointmentId, tenantId);
-  const { error } = await supabase.from('appointments').delete().eq('id', appointmentId).eq('tenant_id', tenantId);
-  if (error) throw new Error(`Non riesco a eliminare l'appuntamento: ${error.message}`);
+  await requireStaff();
+  const { data, error } = await supabase.rpc('delete_staff_appointment', {
+    p_appointment_id: appointmentId,
+  });
+  if (error) throwAppointmentDeleteError(error);
+  return data;
 };
 
 export const exportData = async () => {

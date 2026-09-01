@@ -38,6 +38,7 @@ import {
   addPetToCustomer,
   addAppointment,
   createCalendarCustomerPet,
+  deleteAppointment,
   getCalendarPetOptions,
   getCalendarWeekData,
   resolveAppointmentRequest,
@@ -201,6 +202,7 @@ export default function Calendar() {
   const [creatingPet, setCreatingPet] = useState(false);
   const [requestForm, setRequestForm] = useState({ date: '', time: '09:00', durationMinutes: DEFAULT_DURATION, message: '' });
   const [detailForm, setDetailForm] = useState({ date: '', time: '', durationMinutes: DEFAULT_DURATION });
+  const [deleteError, setDeleteError] = useState('');
   const [workPetId, setWorkPetId] = useState('');
   const bookingSchedule = useMemo(
     () => getBookingSchedule(tenant?.settings),
@@ -582,6 +584,25 @@ export default function Calendar() {
     } catch (saveError) { setError(saveError.message || 'Non riesco ad aggiornare lo stato'); }
     finally { setSaving(false); }
   };
+  const openDeleteConfirmation = () => {
+    setDeleteError('');
+    setModal('delete');
+  };
+  const confirmDelete = async () => {
+    if (!selectedItem) return;
+    setSaving(true); setDeleteError(''); setSuccess('');
+    try {
+      await deleteAppointment(selectedItem.id);
+      setModal(null);
+      setSelectedItem(null);
+      setSuccess('Appuntamento eliminato: la riga inserita per errore non fa più parte della storia.');
+      await loadWeek();
+    } catch (deleteFailure) {
+      setDeleteError(deleteFailure.message || "Non riesco a eliminare l'appuntamento.");
+    } finally {
+      setSaving(false);
+    }
+  };
   const openReminder = () => {
     const url = getAppointmentWhatsAppUrl(selectedItem);
     if (!url) { setError('Numero cliente non disponibile per WhatsApp.'); return; }
@@ -818,7 +839,25 @@ export default function Calendar() {
               <Button staff variant="ghost" onClick={() => changeStatus('scheduled')}>Ripristina programmato</Button>
             ) : null}
           </div>
+          {selectedItem.status !== 'completed'
+            && selectedItem.appointment_source === 'operator'
+            && !selectedItem.requested_by_customer_id ? (
+              <div className="gh-calendar-form-stack">
+                <p className="gh-calendar-form-helper">Solo se questa riga è stata inserita per errore.</p>
+                <div className="gh-inline-actions">
+                  <Button staff variant="ghost" onClick={openDeleteConfirmation}>Elimina</Button>
+                </div>
+              </div>
+            ) : null}
         </form>
+      </Modal>}
+
+      {modal === 'delete' && selectedItem && <Modal title="Elimina appuntamento" narrow onClose={() => setModal('detail')} footer={<><Button staff variant="ghost" onClick={() => setModal('detail')}>Torna indietro</Button><Button staff variant="danger" loading={saving} onClick={confirmDelete}>Elimina definitivamente</Button></>}>
+        <div className="gh-calendar-form-stack">
+          <p className="gh-body"><strong>Elimini l&apos;appuntamento di {selectedItem.petName} di {formatFullDayLabel(toLocalDateString(new Date(selectedItem.scheduled_at)))} alle {formatTime(selectedItem.scheduled_at)}?</strong></p>
+          <p className="gh-body">Sparisce del tutto. Se invece il cliente ha disdetto, usa «Annulla appuntamento»: resta come fatto.</p>
+          {deleteError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{deleteError}</p> : null}
+        </div>
       </Modal>}
     </div>
   );
