@@ -395,15 +395,16 @@
 }
 
 .gh-calendar-modal-close {
-  width: 38px;
+  min-width: 58px;
   height: 38px;
-  padding: 0;
+  padding: 0 10px;
   border: 1px solid var(--gh-border-60);
   border-radius: var(--gh-r-button);
   background: transparent;
   color: var(--color-text-primary);
   cursor: pointer;
-  font-size: 21px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .gh-calendar-form-grid {
@@ -681,8 +682,17 @@
   gap: 9px;
 }
 
-.gh-planning-navigation > strong {
+.gh-planning-range {
+  display: inline-flex;
   min-width: 176px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
   text-align: center;
   font-family: var(--font-serif);
   font-size: 16px;
@@ -691,15 +701,14 @@
   text-transform: capitalize;
 }
 
+.gh-planning-range__compact {
+  display: none;
+}
+
 .gh-planning-navigation > .gh-btn {
   width: 36px;
   height: 36px;
   padding: 0;
-}
-
-.gh-planning-navigation > .gh-btn:nth-last-of-type(1) {
-  width: auto;
-  padding: 0 12px;
 }
 
 .gh-planning-switch {
@@ -728,9 +737,16 @@
 }
 
 .gh-planning-summary {
-  gap: 16px;
+  gap: 6px;
   color: var(--color-text-secondary);
   font-size: 12px;
+  white-space: nowrap;
+}
+
+.gh-planning-summary span + span::before {
+  margin-right: 6px;
+  color: var(--color-text-secondary);
+  content: '·';
 }
 
 .gh-planning-summary b {
@@ -1034,9 +1050,20 @@
 }
 
 .gh-planning-walkins {
-  margin-top: auto;
   border-top: 1px dashed var(--gh-border-60);
   background: var(--gh-absent);
+}
+
+.gh-planning-day__foot {
+  margin-top: auto;
+}
+
+.gh-planning-walkins--filled {
+  background: var(--color-text-primary);
+}
+
+.gh-planning-walkins--filled .gh-planning-walkins__summary {
+  color: var(--color-surface-main);
 }
 
 .gh-planning-walkins__summary {
@@ -1063,6 +1090,65 @@
   border-radius: 999px;
   background: var(--color-text-secondary);
   opacity: .75;
+}
+
+.gh-planning-walkins--filled .gh-planning-walkins__dots i {
+  background: var(--color-surface-main);
+  opacity: 1;
+}
+
+.gh-planning-cancelled {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 0;
+  border-top: 1px solid var(--gh-border-60);
+  background: var(--gh-absent);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+}
+
+.gh-planning-cancelled small {
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gh-planning-cancelled--many {
+  display: block;
+}
+
+.gh-planning-cancelled--many summary {
+  min-height: 38px;
+  padding: 11px 9px 6px;
+  cursor: pointer;
+}
+
+.gh-planning-cancelled--many div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 9px 8px;
+}
+
+.gh-planning-cancelled--many button {
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 1px solid var(--gh-border-60);
+  border-radius: var(--gh-r-field);
+  background: var(--color-surface-main);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10.5px;
 }
 
 .gh-planning-day-view {
@@ -1121,8 +1207,8 @@
   padding: 7px 13px;
   border: 0;
   border-top: 1px solid var(--gh-border-35);
-  background: transparent;
-  color: var(--color-text-primary);
+  background: var(--color-text-primary);
+  color: var(--color-surface-main);
   cursor: pointer;
   font: inherit;
   text-align: left;
@@ -1137,10 +1223,15 @@
 .gh-planning-walkin-row span,
 .gh-planning-walkin-row small {
   overflow: hidden;
-  color: var(--color-text-secondary);
+  color: var(--color-surface-main);
   font-size: 11.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.gh-planning-walkin-row > i {
+  background: var(--color-surface-main);
+  opacity: 1;
 }
 
 .gh-planning-walkin-row span {
@@ -1185,18 +1276,17 @@
   .gh-planning-navigation {
     display: grid;
     min-width: 0;
-    grid-template-columns: 46px minmax(0, 1fr) 46px;
+    grid-template-columns: auto 46px minmax(0, 1fr) 46px;
     gap: 8px;
   }
 
   .gh-planning-switch {
-    grid-column: 1 / -1;
     justify-self: start;
   }
 
   .gh-planning-switch button {
-    height: 46px;
-    padding: 0 18px;
+    min-height: 44px;
+    padding: 0 10px;
   }
 
   .gh-planning-navigation > .gh-btn {
@@ -1204,21 +1294,37 @@
     height: 46px;
   }
 
-  .gh-planning-navigation > strong {
+  .gh-planning-range {
     min-width: 0;
+    min-height: 44px;
     align-self: center;
+    padding: 0 2px;
     font-size: 14px;
   }
 
-  .gh-planning-navigation > .gh-btn:nth-last-of-type(1),
   .gh-planning-navigation .gh-calendar-date-jump {
     display: none;
   }
 
+  .gh-planning-range__wide {
+    display: none;
+  }
+
+  .gh-planning-range__compact {
+    display: inline;
+  }
+
   .gh-planning-summary {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 5px 12px;
+    display: flex;
+    width: 100%;
+    gap: 4px;
+    overflow: hidden;
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+
+  .gh-planning-summary span + span::before {
+    margin-right: 4px;
   }
 
   .gh-calendar-main .gh-panel__body {
@@ -1257,6 +1363,12 @@
     min-height: 44px;
   }
 
+  .gh-planning-cancelled,
+  .gh-planning-cancelled--many summary,
+  .gh-planning-cancelled--many button {
+    min-height: 44px;
+  }
+
   .gh-planning-day-view {
     min-height: 0;
     padding: 10px;
@@ -1273,5 +1385,24 @@
 
   .gh-planning-walkin-row small {
     grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 389px) {
+  .gh-planning-navigation {
+    grid-template-columns: minmax(0, 1fr) 46px 46px;
+  }
+
+  .gh-planning-previous {
+    grid-column: 2;
+  }
+
+  .gh-planning-next {
+    grid-column: 3;
+  }
+
+  .gh-planning-range {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 }

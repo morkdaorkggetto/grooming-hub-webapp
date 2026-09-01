@@ -82,6 +82,15 @@ const formatWeekLabel = (from, to) => {
     ? `${start.getDate()}–${end.getDate()} ${endMonth} ${end.getFullYear()}`
     : `${start.getDate()} ${startMonth} – ${end.getDate()} ${endMonth} ${end.getFullYear()}`;
 };
+const formatCompactWeekLabel = (from, to) => {
+  const start = new Date(`${from}T12:00:00`);
+  const end = new Date(`${to}T12:00:00`);
+  const startMonth = start.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '');
+  const endMonth = end.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '');
+  return startMonth === endMonth
+    ? `${start.getDate()}–${end.getDate()} ${endMonth}`
+    : `${start.getDate()} ${startMonth} – ${end.getDate()} ${endMonth}`;
+};
 
 const getAppointmentEnd = (appointment) => {
   const start = new Date(appointment.scheduled_at);
@@ -144,7 +153,7 @@ function Modal({ title, children, footer, onClose, narrow = false }) {
       <section className={`gh-modal${narrow ? ' gh-modal--narrow' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
         <header className="gh-modal__head">
           <h2 className="gh-calendar-modal-title">{title}</h2>
-          <button className="gh-calendar-modal-close" type="button" aria-label="Chiudi" onClick={onClose}>×</button>
+          <button className="gh-calendar-modal-close" type="button" onClick={onClose}>Chiudi</button>
         </header>
         <div className="gh-modal__body">{children}</div>
         {footer && <footer className="gh-modal__foot">{footer}</footer>}
@@ -290,13 +299,16 @@ export default function Calendar() {
       return itemDate === date;
     });
     const appointments = items.filter((item) => item.kind === 'appointment');
+    const activeAppointments = appointments.filter((item) => item.status !== 'cancelled');
+    const cancelledAppointments = appointments.filter((item) => item.status === 'cancelled');
     const requests = items.filter((item) => item.kind === 'request');
     const visits = items.filter((item) => item.kind === 'visit');
     const bands = bookingTimeWindows.map((window) => ({
       date,
       window,
       isClosed: closure.isClosed || closure.closedTimePreferences.includes(window.value),
-      appointments: appointments.filter((item) => getBookingTimeWindowForTime(item.time)?.value === window.value),
+      appointments: activeAppointments.filter((item) => getBookingTimeWindowForTime(item.time)?.value === window.value),
+      dayAppointments: appointments.filter((item) => getBookingTimeWindowForTime(item.time)?.value === window.value),
       requests: requests.filter((item) => {
         const requestWindow = getBookingTimeWindowForPreference(item.preference)
           || (item.scheduled_at ? getBookingTimeWindowForTime(formatTime(item.scheduled_at)) : null);
@@ -304,7 +316,7 @@ export default function Calendar() {
       }),
       load: getAppointmentWindowLoad({ appointments: data.appointments, date, window, capacity: workstationCapacity }),
     }));
-    const placedIds = new Set(bands.flatMap((band) => [...band.appointments, ...band.requests]).map((item) => `${item.kind}-${item.id}`));
+    const placedIds = new Set(bands.flatMap((band) => [...band.dayAppointments, ...band.requests]).map((item) => `${item.kind}-${item.id}`));
     return {
       date,
       weekday: parsed.toLocaleDateString('it-IT', { weekday: 'short' }),
@@ -313,7 +325,9 @@ export default function Calendar() {
       closure,
       bands,
       visits,
-      unplacedItems: [...requests, ...appointments].filter((item) => !placedIds.has(`${item.kind}-${item.id}`)),
+      cancelledAppointments,
+      unplacedItems: [...requests, ...activeAppointments].filter((item) => !placedIds.has(`${item.kind}-${item.id}`)),
+      dayUnplacedItems: [...requests, ...appointments].filter((item) => !placedIds.has(`${item.kind}-${item.id}`)),
     };
   }), [bookingSchedule, bookingTimeWindows, calendarItems, data.appointments, weekStart, workstationCapacity]);
 
@@ -520,13 +534,14 @@ export default function Calendar() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const weekIsEmpty = calendarItems.length === 0;
+  const weekIsEmpty = data.requests.length === 0
+    && data.visits.length === 0
+    && data.appointments.every((item) => item.status === 'cancelled');
   const selectedPlanningDay = weekDays.find((day) => day.date === selectedDay) || weekDays[0];
   const planningSummary = {
     appointments: data.appointments.filter((item) => item.status !== 'cancelled').length,
     requests: data.requests.length,
     walkIns: data.visits.length,
-    capacity: workstationCapacity,
   };
   const selectPlanningDay = (date) => {
     setSelectedDay(date);
@@ -550,6 +565,9 @@ export default function Calendar() {
   };
   const planningRangeLabel = calendarMode === 'week'
     ? formatWeekLabel(weekStart, weekEnd)
+    : formatFullDayLabel(selectedDay);
+  const compactPlanningRangeLabel = calendarMode === 'week'
+    ? formatCompactWeekLabel(weekStart, weekEnd)
     : formatFullDayLabel(selectedDay);
 
   return (
@@ -578,6 +596,7 @@ export default function Calendar() {
         <CalendarNavigation
           mode={calendarMode}
           rangeLabel={planningRangeLabel}
+          compactRangeLabel={compactPlanningRangeLabel}
           onMode={setCalendarMode}
           onPrevious={() => moveCalendar(-1)}
           onNext={() => moveCalendar(1)}

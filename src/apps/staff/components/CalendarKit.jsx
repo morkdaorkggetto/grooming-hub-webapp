@@ -49,14 +49,14 @@ function PlanningMargin({ load }) {
   return (
     <div className={`gh-planning-margin${full ? ' gh-planning-margin--tight' : ''}`}>
       <Icon name="paw" size={14} />
-      <span>{full ? 'Poco spazio per chi entra' : <>Tenuto per chi entra <b className="gh-num">×{load.available}</b></>}</span>
+      <span>{full ? 'Nessuna libera per chi entra' : <><b className="gh-num">{load.available}</b> {load.available === 1 ? 'libera' : 'libere'} per chi entra</>}</span>
     </div>
   );
 }
 
 function WalkInFooter({ visits, onOpen, detailed = false }) {
   return (
-    <div className={`gh-planning-walkins${detailed ? ' gh-planning-walkins--detailed' : ''}`}>
+    <div className={`gh-planning-walkins${visits.length ? ' gh-planning-walkins--filled' : ''}${detailed ? ' gh-planning-walkins--detailed' : ''}`}>
       <div className="gh-planning-walkins__summary">
         <span className="gh-planning-walkins__dots" aria-hidden="true">
           {Array.from({ length: Math.min(visits.length, 6) }, (_, index) => <i key={index} />)}
@@ -75,7 +75,33 @@ function WalkInFooter({ visits, onOpen, detailed = false }) {
   );
 }
 
-function PlanningBand({ band, onOpen, onBook }) {
+function CancelledFooter({ appointments, onOpen }) {
+  if (!appointments.length) return null;
+  const label = `${appointments.length} ${appointments.length === 1 ? 'annullato' : 'annullati'}`;
+  if (appointments.length === 1) {
+    return (
+      <button className="gh-planning-cancelled" type="button" onClick={() => onOpen(appointments[0])}>
+        <span><b className="gh-num">1</b> annullato</span>
+        <small>{appointments[0].petName} · apri</small>
+      </button>
+    );
+  }
+  return (
+    <details className="gh-planning-cancelled gh-planning-cancelled--many">
+      <summary>{label}</summary>
+      <div>
+        {appointments.map((appointment) => (
+          <button type="button" onClick={() => onOpen(appointment)} key={appointment.id}>
+            {appointment.petName}
+          </button>
+        ))}
+      </div>
+    </details>
+  );
+}
+
+function PlanningBand({ band, onOpen, onBook, showCancelled = false }) {
+  const appointments = showCancelled ? band.dayAppointments : band.appointments;
   return (
     <section className={`gh-planning-band${band.isClosed ? ' gh-planning-band--closed' : ''}`}>
       <header className="gh-planning-band__head">
@@ -87,7 +113,7 @@ function PlanningBand({ band, onOpen, onBook }) {
       ) : (
         <div className="gh-planning-band__body">
           {band.requests.map((item) => <RequestChip item={item} onOpen={onOpen} key={`request-${item.id}`} />)}
-          {band.appointments.map((item) => <AppointmentChip item={item} onOpen={onOpen} key={`appointment-${item.id}`} />)}
+          {appointments.map((item) => <AppointmentChip item={item} onOpen={onOpen} key={`appointment-${item.id}`} />)}
           <PlanningMargin load={band.load} />
           <button className="gh-planning-book" type="button" onClick={() => onBook(band)}>
             <Icon name="plus" size={13} />
@@ -111,7 +137,7 @@ function UnplacedItems({ items, onOpen }) {
   );
 }
 
-export function CalendarNavigation({ mode, rangeLabel, onMode, onPrevious, onNext, onToday, onDate, dateValue, summary }) {
+export function CalendarNavigation({ mode, rangeLabel, compactRangeLabel, onMode, onPrevious, onNext, onToday, onDate, dateValue, summary }) {
   return (
     <div className="gh-planning-toolbar">
       <div className="gh-planning-navigation">
@@ -122,10 +148,12 @@ export function CalendarNavigation({ mode, rangeLabel, onMode, onPrevious, onNex
             </button>
           ))}
         </div>
-        <Button staff variant="outline" icon="chevron-left" aria-label={mode === 'week' ? 'Settimana precedente' : 'Giorno precedente'} onClick={onPrevious} />
-        <strong>{rangeLabel}</strong>
-        <Button staff variant="outline" icon="chevron" aria-label={mode === 'week' ? 'Settimana successiva' : 'Giorno successivo'} onClick={onNext} />
-        <Button staff variant="outline" onClick={onToday}>{mode === 'week' ? 'Questa settimana' : 'Oggi'}</Button>
+        <Button staff className="gh-planning-previous" variant="outline" icon="chevron-left" aria-label={mode === 'week' ? 'Settimana precedente' : 'Giorno precedente'} onClick={onPrevious} />
+        <button className="gh-planning-range" type="button" aria-label={mode === 'week' ? 'Torna a questa settimana' : 'Torna a oggi'} onClick={onToday}>
+          <span className="gh-planning-range__wide">{rangeLabel}</span>
+          <span className="gh-planning-range__compact">{compactRangeLabel || rangeLabel}</span>
+        </button>
+        <Button staff className="gh-planning-next" variant="outline" icon="chevron" aria-label={mode === 'week' ? 'Settimana successiva' : 'Giorno successivo'} onClick={onNext} />
         <label className="gh-calendar-date-jump">
           <span>Vai a data</span>
           <input type="date" value={dateValue} onChange={onDate} />
@@ -136,7 +164,6 @@ export function CalendarNavigation({ mode, rangeLabel, onMode, onPrevious, onNex
           <span><b className="gh-num">{summary.appointments}</b> prenotati</span>
           {summary.requests > 0 && <span className="gh-planning-summary__pending"><b className="gh-num">{summary.requests}</b> da confermare</span>}
           <span><b className="gh-num">{summary.walkIns}</b> entrati senza appuntamento</span>
-          <span><b className="gh-num">{summary.capacity}</b> postazioni</span>
         </div>
       )}
     </div>
@@ -160,7 +187,10 @@ export function CalendarPlanningWeek({ days, onOpen, onBook, onSelectDay }) {
               <UnplacedItems items={day.unplacedItems} onOpen={onOpen} />
             </>
           )}
-          <WalkInFooter visits={day.visits} onOpen={onOpen} />
+          <footer className="gh-planning-day__foot">
+            <WalkInFooter visits={day.visits} onOpen={onOpen} />
+            <CancelledFooter appointments={day.cancelledAppointments} onOpen={onOpen} />
+          </footer>
         </article>
       ))}
     </div>
@@ -175,10 +205,10 @@ export function CalendarPlanningDay({ day, onOpen, onBook }) {
         <section className="gh-planning-day-view__closed"><span>chiuso</span></section>
       ) : (
         <div className="gh-planning-day-view__bands">
-          {day.bands.map((band) => <PlanningBand band={band} onOpen={onOpen} onBook={onBook} key={band.window.value} />)}
+          {day.bands.map((band) => <PlanningBand band={band} onOpen={onOpen} onBook={onBook} showCancelled key={band.window.value} />)}
         </div>
       )}
-      <UnplacedItems items={day.unplacedItems} onOpen={onOpen} />
+      <UnplacedItems items={day.dayUnplacedItems || day.unplacedItems} onOpen={onOpen} />
       <section className="gh-planning-day-view__walkins">
         <header><span>Entrati senza appuntamento</span><strong>{day.visits.length} {day.visits.length === 1 ? 'pet' : 'pet'}, nessuna ora</strong></header>
         <WalkInFooter visits={day.visits} onOpen={onOpen} detailed />
