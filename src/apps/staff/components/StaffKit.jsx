@@ -292,6 +292,7 @@ export function VisitRow({ visit, date, onDelete, onRemovePhoto }) {
     <div className="gh-visit-row">
       <span className="gh-meta gh-num">{date}</span>
       <span className="gh-visit-row__main">
+        {visit.service?.name && <span className="gh-meta">{visit.service.name}</span>}
         <span className="gh-visit-row__treatment">
           {visit.treatments || 'Nessun dettaglio registrato'}
         </span>

@@ -16,7 +16,7 @@ const APPOINTMENT_SOURCES = ['operator', 'customer'];
 const STAFF_ROLES = ['owner', 'staff'];
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
-const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, discount_percent, photo_url, created_at, updated_at)`;
+const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, service_id, date, treatments, issues, cost, discount_percent, photo_url, created_at, updated_at, service:services(id, name))`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, service:services(id, name, duration_minutes), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, staff_responded_at, proposed_alternatives, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
@@ -761,10 +761,20 @@ export const addVisit = async (petId, input) => {
   const { tenantId } = await requireStaff();
   await getPetById(petId, tenantId);
   if (!input.cost || input.cost <= 0) throw new Error('Il costo deve essere maggiore di zero');
+  const serviceId = input.service_id || null;
+  if (serviceId) {
+    const { data: service, error: serviceError } = await supabase.from('services')
+      .select('id')
+      .eq('id', serviceId)
+      .eq('tenant_id', tenantId)
+      .maybeSingle();
+    if (serviceError || !service) throw new Error('Il servizio scelto non è disponibile');
+  }
   const { data, error } = await supabase.from('visits').insert({
     id: generateId(), pet_id: petId, tenant_id: tenantId, date: input.date,
     treatments: input.treatments || null, issues: input.issues || null,
     cost: Number.parseFloat(input.cost), discount_percent: input.discount_percent || 0,
+    service_id: serviceId,
   }).select('id').single();
   if (error) throw new Error(`Non riesco ad aggiungere la visita: ${error.message}`);
   const photoUploadError = await attachOptionalVisitPhoto({
@@ -789,6 +799,7 @@ export const completeAppointmentWithVisit = async (appointmentId, input) => {
     p_treatments: input.treatments || null,
     p_issues: input.issues || null,
     p_cost: Number(input.cost),
+    p_service_id: input.service_id || null,
   });
   if (error) throw new Error(`Non riesco a chiudere lavorazione e appuntamento: ${error.message}`);
   const visitId = data?.id || data;
@@ -799,6 +810,41 @@ export const completeAppointmentWithVisit = async (appointmentId, input) => {
       ? 'la visita è stata salvata, ma non è stato possibile associare la foto'
       : null;
   return { id: visitId, photoUploadError };
+};
+
+export const getVisitFormContext = async (appointmentId = null) => {
+  const { tenantId } = await requireStaff();
+  const appointmentPromise = appointmentId
+    ? supabase.from('appointments')
+      .select('id, service_id')
+      .eq('id', appointmentId)
+      .eq('tenant_id', tenantId)
+      .single()
+    : Promise.resolve({ data: null, error: null });
+
+  const [servicesResult, appointmentResult] = await Promise.all([
+    supabase.from('services')
+      .select('id, name, price_cents, is_active, display_order')
+      .eq('tenant_id', tenantId)
+      .order('display_order')
+      .order('name'),
+    appointmentPromise,
+  ]);
+
+  if (servicesResult.error) {
+    throw new Error(`Non riesco a caricare i servizi: ${servicesResult.error.message}`);
+  }
+  if (appointmentResult.error) {
+    throw new Error(`Non riesco a leggere il servizio dell'appuntamento: ${appointmentResult.error.message}`);
+  }
+
+  const appointmentServiceId = appointmentResult.data?.service_id || null;
+  return {
+    appointment: appointmentResult.data,
+    services: (servicesResult.data || []).filter(
+      (service) => service.is_active || service.id === appointmentServiceId
+    ),
+  };
 };
 
 export const deleteVisit = async (visitId, petId) => {

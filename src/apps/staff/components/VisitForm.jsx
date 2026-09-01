@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import WarmNotice from '../../../shared/ui/WarmNotice';
+import { getVisitFormContext } from '../lib/database';
 import { Button, DayChip, ErrorState, Field } from './StaffKit';
 
 export const createEmptyVisitForm = () => ({
@@ -7,8 +8,12 @@ export const createEmptyVisitForm = () => ({
   treatments: '',
   issues: '',
   cost: '',
+  service_id: '',
   photoFile: null,
 });
+
+const servicePrice = (service) =>
+  service ? (Number(service.price_cents || 0) / 100).toFixed(2) : '';
 
 const toDateValue = (daysAgo) => {
   const date = new Date();
@@ -34,15 +39,24 @@ export default function VisitForm({
   error = '',
   submitting = false,
   modal = false,
+  appointmentId = '',
   submitLabel = 'Salva Visita',
 }) {
   const dateInputRef = useRef(null);
   const photoInputRef = useRef(null);
+  const valueRef = useRef(value);
   const [photoPreview, setPhotoPreview] = useState('');
+  const [services, setServices] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
+  const [servicesError, setServicesError] = useState('');
   const today = toDateValue(0);
   const yesterday = toDateValue(1);
   const beforeYesterday = toDateValue(2);
   const isPresetDate = [today, yesterday, beforeYesterday].includes(value.date);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   useEffect(() => {
     if (!value.photoFile) {
@@ -54,8 +68,47 @@ export default function VisitForm({
     return () => URL.revokeObjectURL(previewUrl);
   }, [value.photoFile]);
 
+  useEffect(() => {
+    let active = true;
+    setServicesLoading(true);
+    setServicesError('');
+    getVisitFormContext(appointmentId)
+      .then(({ services: loadedServices, appointment }) => {
+        if (!active) return;
+        setServices(loadedServices);
+        const appointmentServiceId = appointment?.service_id || '';
+        const currentValue = valueRef.current;
+        if (appointmentServiceId && !currentValue.service_id) {
+          const selectedService = loadedServices.find(({ id }) => id === appointmentServiceId);
+          onChange({
+            ...currentValue,
+            service_id: appointmentServiceId,
+            cost: currentValue.cost || servicePrice(selectedService),
+          });
+        }
+      })
+      .catch((loadError) => {
+        if (active) setServicesError(loadError.message || 'Servizi non disponibili');
+      })
+      .finally(() => {
+        if (active) setServicesLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [appointmentId, onChange]);
+
   const updateField = (field, fieldValue) => {
     onChange({ ...value, [field]: fieldValue });
+  };
+
+  const updateService = (serviceId) => {
+    const selectedService = services.find(({ id }) => id === serviceId);
+    onChange({
+      ...value,
+      service_id: serviceId,
+      cost: selectedService ? servicePrice(selectedService) : value.cost,
+    });
   };
 
   const openDatePicker = () => {
@@ -168,18 +221,34 @@ export default function VisitForm({
           </div>
         </div>
 
-        <Field
-          className="gh-visit-cost-field"
-          label="Costo (€) *"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-          value={value.cost}
-          onChange={(event) => updateField('cost', event.target.value)}
-          disabled={submitting}
-          required
-        />
+        <div className="gh-visit-form__grid">
+          <Field
+            label="Servizio"
+            as="select"
+            value={value.service_id}
+            onChange={(event) => updateService(event.target.value)}
+            disabled={submitting || servicesLoading}
+          >
+            <option value="">Nessun servizio</option>
+            {services.map((service) => (
+              <option key={service.id} value={service.id}>{service.name}</option>
+            ))}
+          </Field>
+
+          <Field
+            className="gh-visit-cost-field"
+            label="Costo (€) *"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            value={value.cost}
+            onChange={(event) => updateField('cost', event.target.value)}
+            disabled={submitting}
+            required
+          />
+        </div>
+        {servicesError && <span className="gh-meta" role="status">{servicesError}</span>}
       </div>
 
       <div className={modal ? 'gh-modal__foot' : 'gh-visit-form__actions'}>

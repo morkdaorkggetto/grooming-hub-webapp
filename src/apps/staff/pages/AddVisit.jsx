@@ -63,6 +63,7 @@ export default function AddVisit() {
         treatments: formData.treatments || null,
         issues: formData.issues || null,
         cost,
+        service_id: formData.service_id || null,
         photoFile: formData.photoFile || null,
       };
       const result = appointmentId
@@ -143,6 +144,7 @@ export default function AddVisit() {
             onCancel={handleCancel}
             error={error}
             submitting={submitting}
+            appointmentId={appointmentId}
             submitLabel={appointmentId ? 'Salva e chiudi appuntamento' : 'Salva visita'}
           />
         </Panel>
