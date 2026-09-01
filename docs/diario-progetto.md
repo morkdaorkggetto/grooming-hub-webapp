@@ -14,7 +14,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 >
 > **G6 è stato eseguito la sera del 28 agosto**: schema multi-tenant, dati veri, `clients` non esiste più, l'app clienti ha una porta.
 >
-> **Da tre giorni le richieste non arrivano più dall'analisi ma dal banco.** In produzione: **271 clienti, 292 pet, 271 appuntamenti**. Il calendario, che in tutta la sua storia aveva 17 record fermi ad aprile, è la superficie su cui si lavora tutti i giorni.
+> **Da tre giorni le richieste non arrivano più dall'analisi ma dal banco.** In produzione: **271 clienti, 292 pet, 470 visite, 35 appuntamenti**. Il calendario, che fino al 28 agosto aveva **17 record in tutta la sua storia** e nessuno dopo il 23 aprile, ne ha guadagnati **diciotto in tre giorni**: è la superficie su cui si lavora tutti i giorni.
 
 **Il 31 agosto è nata la vista «Dove lo metto»** (`CD-06` → `GH-54`): la settimana a colpo d'occhio, per collocare chi arriva al banco. È la prima superficie del progetto **chiesta dal salone con parole sue** — Roby — invece che dedotta da noi.
 
