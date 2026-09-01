@@ -8,39 +8,40 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 29 agosto 2026, sera.*
+*Aggiornato il 1 settembre 2026.*
 
-> # La produzione è multi-tenant, e il salone la sta usando.
+> # Il salone usa lo strumento, e adesso è lo strumento a doversi adattare.
 >
-> **G6 è stato eseguito la sera del 28 agosto.** Il gestionale gira sul nuovo schema con i dati veri, la vecchia tabella `clients` non esiste più, e l'app clienti ha una porta d'ingresso.
+> **G6 è stato eseguito la sera del 28 agosto**: schema multi-tenant, dati veri, `clients` non esiste più, l'app clienti ha una porta.
 >
-> **Il 29 agosto il salone ci ha lavorato dentro tutto il giorno.** Al mattino: 260 clienti, 282 cani, 456 visite, 5 appuntamenti. A fine giornata: **266 clienti, 288 cani, 458 visite, 14 appuntamenti** — e nove di quei quattordici sono nati oggi.
+> **Da tre giorni le richieste non arrivano più dall'analisi ma dal banco.** In produzione: **271 clienti, 292 pet, 271 appuntamenti**. Il calendario, che in tutta la sua storia aveva 17 record fermi ad aprile, è la superficie su cui si lavora tutti i giorni.
 
-**Il fatto della giornata non è un mandato: è che il calendario è tornato vivo.** Aveva 17 record in tutta la sua storia, tutti fra l'11 marzo e il 23 aprile, e zero da allora. Oggi Davide ci ha passato la giornata di lavoro. E da lì è arrivata la richiesta delle postazioni: non una domanda teorica, ma uno che stava usando lo strumento e ha sbattuto contro un muro.
+**Il 31 agosto è nata la vista «Dove lo metto»** (`CD-06` → `GH-54`): la settimana a colpo d'occhio, per collocare chi arriva al banco. È la prima superficie del progetto **chiesta dal salone con parole sue** — Roby — invece che dedotta da noi.
 
-> **Un dato mancante non è una preferenza espressa.** Per mesi abbiamo letto «17 appuntamenti e poi più nulla» come «il calendario non serve». Serviva: non era usabile.
+Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, guardandola mentre viene usata: `GH-55` (annullati fuori dalla griglia, intestazione telefono, distinzione fatto/piano), `GH-56` (il fatto arretra, e cambia nome), `GH-57` (il modulo si accosta, il pet si cerca, e si crea senza inventare).
 
-**Fatto il 29 agosto**: sette mandati chiusi — `GH-34` rifiniture, `CD-03`+`GH-35` modo mese, `CD-04`+`GH-38` card pubblica e identità, `GH-37` postazioni, `GH-39` avviso di carico, `GH-40` soglie fedeltà, `GH-41` avviso di doppione, `GH-42` risposte in ritardo del calendario. **Tre atti sulla produzione**, applicati da Cowork su autorizzazione esplicita di Luigi, sempre **prima** del frontend e mai dopo.
-
-**Quattro difetti trovati guardando, non leggendo**: l'insegna della card pubblica diceva «FROGLETINPOND» invece del nome del salone; un numero di telefono finto in produzione; il QR disegnato da un servizio esterno; il separatore delle migliaia assente. Nessuno rompeva niente — per questo nessuna suite li avrebbe visti.
+> **Tre giri di fila, e in tutti e tre il difetto stava nella mia frase, non nell'esecuzione di Codex.** «Neutro forte» è diventato un blocco nero; «testo secondario» è diventato un contrasto sotto soglia; «nessun dato toccato» contraddiceva le controprove nello stesso documento. **Un mandato scritto male non produce un rifiuto: produce esattamente ciò che ha chiesto.**
 
 **Restano da fare, in ordine di importanza:**
 
 | # | Cosa | Chi |
 |---|---|---|
-| 1 | Rimuovere le due foto orfane via Storage API (percorsi nel §4 di `GH-12`) | Luigi |
-| 2 | Attivare «Leaked password protection» sul prod | Luigi |
-| 3 | Smontare `grooming-prova-generale` | Luigi |
-| 4 | **Capienza a 3** quando apre la terza postazione — una riga di impostazioni, nessun rilascio | Cowork su richiesta |
-| 5 | **Schermata impostazioni del salone** — rinviata a dopo il 1° settembre per decisione di Luigi: prima una settimana d'uso, poi si sa cosa serve davvero | dopo il test |
+| 1 | **`GH-58`: eliminare un appuntamento** — con la sua migrazione e la trappola sul punteggio delle assenze | da scrivere |
+| 2 | **Le quattro visite finte** da 1,00 € e 0,10 € ancora in produzione, che compaiono negli incassi | Cowork su autorizzazione |
+| 3 | **Riallineare `design_handoff_staff_app/`** — documenta rese superate due volte: prima di un nuovo brief a CD | Cowork |
+| 4 | Rimuovere le due foto orfane via Storage API (§4 di `GH-12`) | Luigi |
+| 5 | Attivare «Leaked password protection» sul prod · smontare `grooming-prova-generale` | Luigi |
+| 6 | **Schermata impostazioni del salone** — ora ha cinque cose da ospitare, non più due | dopo il test |
 
-*(Accesso di Codex alla produzione: revocato il 29/8 riportandolo sull'organizzazione del demo. Duplicati « 2» nel worktree: rimossi.)*
+*(Accesso di Codex alla produzione: revocato il 29/8. La suite RLS è stata rieseguita il 1/9 dopo due giri di digiuno: **60 PASS, 0 FAIL, 0 SKIP**.)*
 
-**La veste è completa**, gestionale e card pubblica comprese. `CD-02`/`GH-33` hanno chiuso il report incassi, `CD-03`/`GH-35` gli hanno aggiunto il modo mese, `CD-04`/`GH-38` hanno vestito la card pubblica — l'unica superficie che un cliente vede per mesi, e l'ultima a non parlare la lingua del prodotto.
-
-**Quattro cose vivono ora in `tenants.settings`** e nessuna richiede una build per cambiare: giorni di chiusura, numero WhatsApp, capienza delle postazioni, soglie fedeltà. È il motivo per cui la schermata di impostazioni è diventata necessaria.
+**Sette cose vivono in `tenants.settings`** e nessuna richiede una build per cambiare: giorni e fasce di chiusura, numero WhatsApp, capienza delle postazioni, soglie fedeltà, scadenza degli inviti, tetto delle richieste aperte — più il nome del salone in `tenants.name`. **Non ci vivono gli orari 9–13 / 13–19**, che stanno ancora nella definizione di fascia condivisa da `GH-39`, **né la riserva per chi arriva senza appuntamento**, che oggi non esiste. Sono le due cose che rendono la schermata impostazioni non più rinviabile.
 
 **Code aperte, nessuna bloccante:**
+
+- **L'8% dei clienti non potrà mai essere invitato, e nessuno se ne accorgerà.** L'invito si aggancia **per telefono**; misurati il 1/9: su 271 clienti, **21 non hanno un telefono utilizzabile** — 6 con due numeri nello stesso campo, 8 con una cifra di troppo o di meno, e **7 in cui il telefono non è un numero**: `+39alfredo`, `+39Alfredo`, `+39ClienteAlfredo`, `+39ragazzoclienteAlfredo`. Qualcuno ha scritto un nome nel campo del telefono e la migrazione gli ha messo davanti il prefisso. **Non è urgente oggi — nessun cliente è ancora stato invitato. Diventa urgente il giorno prima del primo invito.**
+- **Quante lavorazioni non vengono registrate?** Misurato il 1/9: **18 visite in 14 giorni, cioè 1,5 al giorno**, contro una mediana storica di 5. Mancano circa tre quarti del lavoro, e le mancanti sono quasi tutte dalla parte di chi arriva senza appuntamento. Se il divario regge fra un mese, il salone sta perdendo **tre cani al giorno di storia clinica e di incasso**.
+- **L'elenco dei pet è il verbale di una fretta.** 110 pet su 292 condividono il nome con un altro; **12 si chiamano «barboncino»**, 5 «maltese», 4 «chihuahua»; 6 hanno per nome un numero. `GH-57` ha rimosso la causa meccanica — ora si cerca invece di scorrere — ma **lo storico resta da ripulire**.
 
 - **«Operatività giornaliera» guarda la tabella sbagliata per il passato.** Interroga gli appuntamenti, che erano **5** e tutti fra l'11 marzo e il 23 aprile; da allora il salone registra il lavoro come visita — **253 visite dopo l'ultimo appuntamento**. Il 3 agosto la pagina dice «nessun appuntamento» mentre sono passati sei cani. Per le date passate deve mostrare le visite registrate. Sarà un `GH-` a sé.
 - i contatti con lo stesso numero sotto lo stesso cliente si possono unire (si vede su Carnevale, la fusione lascia due righe identiche);
@@ -369,6 +370,56 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 1 settembre 2026 — Tre giri in una notte, e il campo del telefono contiene un nome
+
+`GH-55`, `GH-56`, `GH-57` chiusi di seguito, tutti nati **guardando la vista mentre veniva usata**. I primi due di sola superficie; il terzo con una migrazione, applicata in produzione da Cowork su autorizzazione esplicita di Luigi, **prima** del frontend.
+
+**Cosa è cambiato**: gli annullati escono dalla griglia settimanale e scendono nel piede; sul telefono intestazione e riepilogo stanno in una riga e **la data ridiventa il ritorno a oggi** — non c'era più modo di tornare al presente, era sparito in silenzio sotto i 640px; le lavorazioni già avvenute si distinguono dagli appuntamenti **arretrando** invece di gridare; il modulo di prenotazione **si accosta** invece di coprire la griglia che serve a scegliere; il campo pet **si cerca** invece di scorrersi.
+
+#### Tre volte di fila l'errore era nella frase, non nell'esecuzione
+
+**«Nel neutro forte»** → un blocco quasi nero, l'elemento più rumoroso della pagina, dato all'informazione meno urgente. **«Testo secondario»** → contrasto misurato **4,19:1** dove ne servono 4,5. **«Nessun dato toccato»** scritto fra le invarianti di un mandato che dieci righe dopo chiedeva fixture sul demo: Codex si è fermato, **non ha cercato aggiramenti**, e ha spostato le prove nel browser.
+
+> **Un mandato scritto male non produce un rifiuto: produce esattamente ciò che ha chiesto.** È la contropartita di una catena che esegue alla lettera — e la ragione per cui il passo di regola 5, l'occhio di Luigi, non è una cortesia.
+
+Ne sono uscite due regole. **Il peso visivo segue l'agibilità, non la categoria**: fra due elementi pesa di più quello su cui si può agire, e ciò che è già accaduto si distingue arretrando. E il suo corollario: **l'arretramento appartiene al contenitore, non alle lettere** — smorzare il testo non fa arretrare l'informazione, la rende solo illeggibile a chi lavora sotto luce non sua.
+
+#### «Entrato senza appuntamento» definiva il cliente per ciò che gli mancava
+
+In un salone dove per novanta giorni su novanta quello **era** il modo normale di venire, la normalità veniva descritta come un'eccezione — e con un verbo che faceva del cane il soggetto di un'intrusione. Il salone non ha *subito* un ingresso: **ha preso in carico un cane sul momento.**
+
+Nuovo lessico, e non ne esistono altri: **`lavorati sul momento`** per i cani già passati, **`chi arriva`** per lo spazio futuro del margine, **`senza ora fissata`** al posto di «nessuna ora». Scartato «al banco», che al banco ci arriva anche chi viene solo a prenotare.
+
+Stessa famiglia, il badge del margine: diceva **«Tenuto per chi entra ×1»**, ma il numero era **capienza meno appuntamenti** — il resto, che nessuno stava tenendo. **L'intenzione di progetto stava tutta dentro una parola, e una parola da sola non tiene niente.**
+
+#### Il banco non deve inventare
+
+Misurato prima di scrivere `GH-57`: **292 pet in un menù senza ricerca**, di cui **110 condividono il nome** con un altro. **Dodici si chiamano «barboncino»**, cinque «maltese», quattro «chihuahua», sei hanno per nome un numero.
+
+> **Con 292 voci e nessuna ricerca, creare è più veloce che trovare.** L'elenco non è un registro di nomi: è il verbale di una fretta, e la fretta aveva una causa meccanica.
+
+Per questo la creazione vive **in coda a una ricerca vuota** e non in testa all'elenco: in testa competerebbe col cercare, e vincerebbe sempre.
+
+E per questo cliente e pet nascono ora da **una funzione transazionale** invece che da inserimenti diretti dal browser con pulizia scritta a mano: al banco, con un cane al guinzaglio, è lo scenario in cui la pulizia si interrompe a metà e lascia orfani.
+
+#### La guardia sul telefono esisteva e perdeva
+
+`customers_tenant_phone_unique` confronta **il testo**, non le cifre: lo stesso numero scritto in due modi passava indisturbato. La funzione nuova confronta sulle sole cifre — e **non confronta sotto le otto**, perché altrimenti bloccherebbe chi un numero non ce l'ha.
+
+Contando quanti sono, è emersa la cosa più grossa della giornata: **su 271 clienti, 21 non hanno un telefono utilizzabile.** Sei hanno due numeri infilati nello stesso campo, otto hanno una cifra di troppo o di meno, e **sette non contengono un numero affatto** — fra cui quattro clienti il cui telefono è letteralmente `+39alfredo`, `+39Alfredo`, `+39ClienteAlfredo`, `+39ragazzoclienteAlfredo`. Qualcuno ha scritto un nome nel campo del telefono, e la migrazione ci ha messo davanti il prefisso.
+
+**L'invito all'app clienti si aggancia per telefono.** Quei ventuno — l'8% — **non potranno mai essere agganciati**, e non lo scoprirà nessuno finché non proveranno. Coda aperta, non urgente oggi perché nessun cliente è ancora stato invitato: **urgente il giorno prima del primo invito.**
+
+#### E il telefono non si inventa
+
+Nella funzione, il telefono si scrive **oppure** si dichiara esplicitamente che non è stato dato, e resta vuoto. Nessuna terza via.
+
+> È l'applicazione diretta di quello che il 31 agosto ci ha insegnato un costo obbligatorio: **un campo obbligatorio che non si può soddisfare onestamente produce dati falsi.** Meglio un'assenza dichiarata che un `0000000000`.
+
+**Atto in produzione**: `gh57_calendar_customer_pet`. Rende `customers.phone` annullabile — l'unico atto con conseguenza permanente del giro — e aggiunge la funzione custodita. Postflight: 271 clienti e 292 pet invariati, zero clienti senza telefono, `anon` non può eseguirla. Verificato prima di applicare che `normalize_phone_it` esistesse già in produzione: senza, la migrazione sarebbe fallita a metà.
+
+---
 
 ### 1 settembre 2026 — Guardando la settimana di Roby: quattro correzioni, e una misura che quasi ci inganna
 
