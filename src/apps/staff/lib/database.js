@@ -824,7 +824,7 @@ export const getVisitFormContext = async (appointmentId = null) => {
 
   const [servicesResult, appointmentResult] = await Promise.all([
     supabase.from('services')
-      .select('id, name, price_cents, is_active, display_order')
+      .select('id, name, duration_minutes, price_cents, is_active, display_order')
       .eq('tenant_id', tenantId)
       .order('display_order')
       .order('name'),

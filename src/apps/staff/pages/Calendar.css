@@ -1128,6 +1128,11 @@
   font-size: 10.5px;
 }
 
+.gh-planning-chip__copy small.gh-planning-chip__service {
+  color: var(--color-text-primary);
+  font-weight: 650;
+}
+
 .gh-planning-chip--request .gh-planning-chip__copy small {
   color: var(--color-warning-text);
 }

@@ -23,7 +23,16 @@ function AppointmentChip({ item, onOpen }) {
       <span className="gh-planning-chip__time">{item.time}</span>
       <span className="gh-planning-chip__copy">
         <strong>{item.petName}</strong>
-        <small>{item.serviceLabel} · {item.duration_minutes}′</small>
+        <small>Appuntamento · {item.duration_minutes}′</small>
+        {item.serviceLabel ? (
+          <small
+            className="gh-planning-chip__service"
+            title={item.serviceLabel}
+            aria-label={`Servizio: ${item.serviceLabel}`}
+          >
+            {item.serviceLabel}
+          </small>
+        ) : null}
       </span>
       <span className="gh-planning-chip__tags"><ItemTags item={item} /></span>
     </button>

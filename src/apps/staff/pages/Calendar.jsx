@@ -41,6 +41,7 @@ import {
   deleteAppointment,
   getCalendarPetOptions,
   getCalendarWeekData,
+  getVisitFormContext,
   resolveAppointmentRequest,
   updateAppointmentApproval,
   updateAppointmentSchedule,
@@ -56,7 +57,14 @@ import {
 import './Calendar.css';
 
 const DEFAULT_DURATION = 60;
-const DEFAULT_FORM = { clientId: '', date: '', time: '09:00', durationMinutes: DEFAULT_DURATION, notes: '' };
+const DEFAULT_FORM = {
+  clientId: '',
+  date: '',
+  time: '09:00',
+  durationMinutes: DEFAULT_DURATION,
+  serviceId: '',
+  notes: '',
+};
 const DEFAULT_NEW_PET = { petName: '', ownerName: '', phone: '', phoneNotProvided: false, breed: '' };
 
 const toLocalDateString = (date) => {
@@ -195,6 +203,8 @@ export default function Calendar() {
   const [modal, setModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [manualForm, setManualForm] = useState(() => ({ ...DEFAULT_FORM, date: todayString() }));
+  const [manualServices, setManualServices] = useState([]);
+  const [manualServicesError, setManualServicesError] = useState('');
   const [manualPetCreation, setManualPetCreation] = useState(false);
   const [manualPetDraft, setManualPetDraft] = useState(DEFAULT_NEW_PET);
   const [manualPetError, setManualPetError] = useState('');
@@ -278,7 +288,7 @@ export default function Calendar() {
     const appointments = data.appointments.map((appointment) => ({
       ...appointment, kind: 'appointment', petName: appointment.client?.name || 'Pet', photo: appointment.client?.photo,
       time: formatTime(appointment.scheduled_at),
-      serviceLabel: appointment.service?.name || 'Appuntamento',
+      serviceLabel: appointment.service?.name || '',
       subtitle: [appointment.client?.owner, appointment.notes].filter(Boolean).join(' · ') || 'Appuntamento',
     }));
     const visits = data.visits.map((visit) => ({
@@ -331,7 +341,17 @@ export default function Calendar() {
   const openManual = useCallback(async (clientId = '', preset = null) => {
     setError('');
     try {
-      await ensurePets();
+      const [, serviceContext] = await Promise.all([
+        ensurePets(),
+        getVisitFormContext()
+          .then((context) => ({ ...context, error: '' }))
+          .catch((serviceError) => ({
+            services: [],
+            error: serviceError.message || 'Servizi non disponibili',
+          })),
+      ]);
+      setManualServices(serviceContext.services);
+      setManualServicesError(serviceContext.error);
       const date = preset?.date || (selectedDay >= weekStart && selectedDay <= weekEnd ? selectedDay : todayString());
       setSelectedDay(date);
       setManualForm((current) => ({
@@ -339,6 +359,13 @@ export default function Calendar() {
         clientId: clientId || current.clientId || '',
         date,
         time: preset?.time || current.time,
+        serviceId: serviceContext.services.some(({ id }) => id === current.serviceId)
+          ? current.serviceId
+          : '',
+        durationMinutes: current.serviceId
+          && !serviceContext.services.some(({ id }) => id === current.serviceId)
+          ? DEFAULT_DURATION
+          : current.durationMinutes,
       }));
       setManualPetCreation(false);
       setManualPetDraft(DEFAULT_NEW_PET);
@@ -503,13 +530,32 @@ export default function Calendar() {
     });
   };
 
+  const updateManualService = (serviceId) => {
+    const service = manualServices.find(({ id }) => id === serviceId);
+    const proposedDuration = Number(service?.duration_minutes);
+    setManualForm((current) => ({
+      ...current,
+      serviceId,
+      durationMinutes: serviceId && Number.isFinite(proposedDuration) && proposedDuration > 0
+        ? proposedDuration
+        : DEFAULT_DURATION,
+    }));
+  };
+
   const submitManual = async (event) => {
     event.preventDefault(); setError(''); setSuccess('');
     if (!manualForm.clientId || !manualCandidate) { setError('Pet, data e ora sono obbligatori.'); return; }
     if (manualConflict) { setError(APPOINTMENT_CAPACITY_MESSAGE); return; }
     setSaving(true);
     try {
-      await addAppointment({ pet_id: manualForm.clientId, scheduled_at: manualCandidate.scheduled_at, duration_minutes: manualCandidate.duration_minutes, status: 'scheduled', notes: manualForm.notes });
+      await addAppointment({
+        pet_id: manualForm.clientId,
+        scheduled_at: manualCandidate.scheduled_at,
+        duration_minutes: manualCandidate.duration_minutes,
+        status: 'scheduled',
+        notes: manualForm.notes,
+        service_id: manualForm.serviceId || null,
+      });
       const nextTime = findNextCapacityAvailableTime({ date: manualForm.date, time: manualForm.time, durationMinutes: manualForm.durationMinutes, appointments: [...data.appointments, { ...manualCandidate, status: 'scheduled', approval_status: 'approved' }], capacity: workstationCapacity });
       setManualForm((current) => ({ ...current, time: nextTime, notes: '' }));
       setSuccess('Appuntamento creato. Il prossimo orario libero è già pronto.');
@@ -760,6 +806,11 @@ export default function Calendar() {
               )}
             </section>
           )}
+          <Field label="Servizio" as="select" value={manualForm.serviceId} onChange={(event) => updateManualService(event.target.value)}>
+            <option value="">Nessun servizio</option>
+            {manualServices.map((service) => <option value={service.id} key={service.id}>{service.name}</option>)}
+          </Field>
+          {manualServicesError && <span className="gh-meta" role="status">{manualServicesError}</span>}
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
             <Field label="Data" type="date" value={manualForm.date} onChange={(event) => setManualForm((current) => ({ ...current, date: event.target.value }))} required />
             <Field label="Ora" type="time" value={manualForm.time} onChange={(event) => setManualForm((current) => ({ ...current, time: event.target.value }))} required />
@@ -804,7 +855,7 @@ export default function Calendar() {
 
       {modal === 'detail' && selectedItem && <Modal variant="side" title={`Appuntamento · ${selectedItem.petName}`} onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict) || selectedItem.status === 'no_show'} onClick={saveSchedule}>Salva orario</Button></>}>
         <form className="gh-calendar-form-stack" onSubmit={saveSchedule}>
-          <div className="gh-calendar-modal-context"><PetAvatar name={selectedItem.petName} photo={selectedItem.photo} size={42} tier="base" /><div><strong>{selectedItem.petName}</strong><span>{selectedItem.client?.owner || 'Proprietario non indicato'} · {statusLabel(selectedItem.status)}</span></div></div>
+          <div className="gh-calendar-modal-context"><PetAvatar name={selectedItem.petName} photo={selectedItem.photo} size={42} tier="base" /><div><strong>{selectedItem.petName}</strong><span>{selectedItem.client?.owner || 'Proprietario non indicato'} · {statusLabel(selectedItem.status)}</span>{selectedItem.service?.name ? <span>{selectedItem.service.name}</span> : null}</div></div>
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
             <Field label="Data" type="date" value={detailForm.date} disabled={selectedItem.status === 'no_show'} onChange={(event) => setDetailForm((current) => ({ ...current, date: event.target.value }))} />
             <Field label="Ora" type="time" value={detailForm.time} disabled={selectedItem.status === 'no_show'} onChange={(event) => setDetailForm((current) => ({ ...current, time: event.target.value }))} />

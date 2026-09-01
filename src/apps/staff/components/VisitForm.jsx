@@ -6,7 +6,6 @@ import { Button, DayChip, ErrorState, Field } from './StaffKit';
 export const createEmptyVisitForm = () => ({
   date: new Date().toISOString().split('T')[0],
   treatments: '',
-  issues: '',
   cost: '',
   service_id: '',
   photoFile: null,
@@ -167,22 +166,11 @@ export default function VisitForm({
         </div>
 
         <Field
-          label="Trattamenti eseguiti"
+          label="Note della lavorazione"
           area
           rows="4"
-          placeholder="Es. Bagno, taglio, asciugatura, spazzolatura..."
           value={value.treatments}
           onChange={(event) => updateField('treatments', event.target.value)}
-          disabled={submitting}
-        />
-
-        <Field
-          label="Problematiche riscontrate"
-          area
-          rows="4"
-          placeholder="Es. Pelle irritata, nodi, comportamento agitato..."
-          value={value.issues}
-          onChange={(event) => updateField('issues', event.target.value)}
           disabled={submitting}
         />
 

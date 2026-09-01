@@ -61,7 +61,6 @@ export default function AddVisit() {
       const visitInput = {
         date: formData.date,
         treatments: formData.treatments || null,
-        issues: formData.issues || null,
         cost,
         service_id: formData.service_id || null,
         photoFile: formData.photoFile || null,
