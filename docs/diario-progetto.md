@@ -26,7 +26,8 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 
 | # | Cosa | Chi |
 |---|---|---|
-| 1 | **`GH-58`: eliminare un appuntamento** — con la sua migrazione e la trappola sul punteggio delle assenze | da scrivere |
+| 1 | **`GH-60`: una sola funzione per creare cliente e pet** — oggi ce ne sono due, ognuna con quel che manca all'altra | da scrivere |
+| 1b | ~~`GH-58`: eliminare un appuntamento~~ | **chiuso e in produzione l'1/9** |
 | 2 | **Le quattro visite finte** da 1,00 € e 0,10 € ancora in produzione, che compaiono negli incassi | Cowork su autorizzazione |
 | 3 | **Riallineare `design_handoff_staff_app/`** — documenta rese superate due volte: prima di un nuovo brief a CD | Cowork |
 | 4 | Rimuovere le due foto orfane via Storage API (§4 di `GH-12`) | Luigi |
@@ -418,6 +419,22 @@ Nella funzione, il telefono si scrive **oppure** si dichiara esplicitamente che 
 > È l'applicazione diretta di quello che il 31 agosto ci ha insegnato un costo obbligatorio: **un campo obbligatorio che non si può soddisfare onestamente produce dati falsi.** Meglio un'assenza dichiarata che un `0000000000`.
 
 **Atto in produzione**: `gh57_calendar_customer_pet`. Rende `customers.phone` annullabile — l'unico atto con conseguenza permanente del giro — e aggiunge la funzione custodita. Postflight: 271 clienti e 292 pet invariati, zero clienti senza telefono, `anon` non può eseguirla. Verificato prima di applicare che `normalize_phone_it` esistesse già in produzione: senza, la migrazione sarebbe fallita a metà.
+
+#### Sesto errore, e ha prodotto una funzione di troppo in produzione
+
+Scoperto poche ore dopo, cercando dove portare un pulsante che Luigi voleva sul calendario: **`add_customer_with_pet` esisteva già**, in produzione da prima, ed è la funzione che **la dashboard usa da sempre** per registrare un cliente nuovo. Ha molti più campi della mia — email, consenso, note operative, microchip, peso, sterilizzazione, colore, preferenze di manto, foto.
+
+In `GH-57` avevo misurato `addPetToCustomer`, avevo visto inserimenti diretti dal browser con pulizia scritta a mano, e avevo concluso «la creazione non è atomica». **Era vero di quel percorso e falso di quello che il salone usa davvero.**
+
+> **Misurare un ramo e generalizzare all'albero.** È la stessa forma dei cinque errori precedenti: l'osservazione è esatta, l'estensione no. Il rimedio non è misurare di più, è **chiedersi ogni volta di quale percorso vale ciò che ho appena visto**.
+
+Ne restano due funzioni che fanno la stessa cosa, ognuna con quel che manca all'altra: la vecchia ha tutti i campi e **nessuna guardia sul telefono**, la nuova ha guardia e lock ma **sei campi soltanto**.
+
+**E c'è un secondo pezzo, peggiore.** `create_calendar_customer_pet` è `SECURITY DEFINER` **senza che ce ne fosse bisogno**: il controllo sui doppioni legge i clienti del proprio salone, cosa che lo staff può già fare sotto RLS — infatti la funzione preesistente è `SECURITY INVOKER`. L'Advisor di Supabase l'ha segnalata, e il registro l'ha liquidata come «l'architettura richiesta dal mandato». **Non era richiesta: l'avevo chiesta io senza motivo**, aggiungendo un privilegio elevato dove non serviva.
+
+Correzione in `GH-60`: la guardia sul telefono si sposta dentro `add_customer_with_pet`, il calendario passa a quella, **`create_calendar_customer_pet` si elimina**. Una funzione sola, tutti i campi, la guardia, nessun privilegio elevato.
+
+> **E la lezione sull'Advisor vale da sola**: un avviso di sicurezza spiegato con «è l'architettura richiesta» andrebbe letto come una domanda, non come una risposta. Questa volta l'architettura richiesta era sbagliata, e l'avviso aveva ragione.
 
 ---
 
