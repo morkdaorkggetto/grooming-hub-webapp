@@ -58,6 +58,7 @@ let marioCustomer = null;
 let lucaCustomer = null;
 let marioPet = null;
 let fixturePet = null;
+let appointmentFixturePet = null;
 let fixtureVisit = null;
 let originalOwnerNotes = null;
 let originalCoatPreferences = null;
@@ -243,8 +244,9 @@ async function cleanupStaleFixtures() {
     assertNoError(error, 'Pulizia richieste appuntamento pregresse');
   }
   if (staleAppointmentIds.length) {
-    const { error } = await staff.client.from('appointments').delete().in('id', staleAppointmentIds);
-    assertNoError(error, 'Pulizia appuntamenti GH-08 pregressi');
+    const { data, error } = await staff.client.from('appointments').select('id').in('id', staleAppointmentIds);
+    assertNoError(error, 'Verifica appuntamenti GH-08 pregressi');
+    assert(data.length === 0, `Pulizia richieste: ${data.length} appuntamenti collegati residui`);
   }
 
   const { data: staleAbsence, error: staleAbsenceReadError } = await staff.client
@@ -261,7 +263,9 @@ async function cleanupStaleFixtures() {
     assertNoError(error, 'Ripristino assenza GH-52 pregressa');
   }
   if (staleAbsence) {
-    const { error } = await staff.client.from('appointments').delete().eq('id', GH52_APPOINTMENT_ID);
+    const { error } = await staff.client.rpc('delete_staff_appointment', {
+      p_appointment_id: GH52_APPOINTMENT_ID,
+    });
     assertNoError(error, 'Pulizia appuntamento GH-52 pregresso');
   }
 
@@ -365,6 +369,22 @@ async function createLucaFixture() {
     .single();
   assertNoError(petError, 'Creazione pet Luca');
   fixturePet = pet;
+
+  const { data: bookingPet, error: bookingPetError } = await staff.client
+    .from('pets')
+    .insert({
+      tenant_id: tenantId,
+      customer_id: marioCustomer.id,
+      owner_user_id: mario.user.id,
+      name: `${MARKER} Pet booking Mario`,
+      species: 'dog',
+      breed: 'Test cleanup cascata',
+      birth_date: '2022-01-01',
+    })
+    .select('id, tenant_id, customer_id, name')
+    .single();
+  assertNoError(bookingPetError, 'Creazione pet booking Mario');
+  appointmentFixturePet = bookingPet;
 
   const { error: noteError } = await staff.client.from('pet_staff_notes').insert({
     pet_id: fixturePet.id,
@@ -475,33 +495,32 @@ async function cleanupCurrentRun() {
         .in('id', [...gh49PromotionIds]);
       if (error) cleanupErrors.push(`promozioni GH-49: ${error.message}`);
     }
-    if (appointmentIds.size) {
-      if (appointmentIds.has(GH52_APPOINTMENT_ID)) {
-        const { data: absence } = await staff.client
-          .from('appointments')
-          .select('status')
-          .eq('id', GH52_APPOINTMENT_ID)
-          .maybeSingle();
-        if (absence?.status === 'no_show') {
-          const { error } = await staff.client.rpc('set_staff_appointment_status', {
-            p_appointment_id: GH52_APPOINTMENT_ID,
-            p_status: 'scheduled',
-          });
-          if (error) cleanupErrors.push(`ripristino assenza GH-52: ${error.message}`);
-        }
-      }
-      const { error } = await staff.client
-        .from('appointments')
-        .delete()
-        .in('id', [...appointmentIds]);
-      if (error) cleanupErrors.push(`appointments GH-08: ${error.message}`);
-    }
     if (appointmentRequestIds.size) {
       const { error } = await staff.client
         .from('appointment_requests')
         .delete()
         .in('id', [...appointmentRequestIds]);
       if (error) cleanupErrors.push(`appointment requests: ${error.message}`);
+    }
+    if (appointmentIds.has(GH52_APPOINTMENT_ID)) {
+      const { data: absence } = await staff.client
+        .from('appointments')
+        .select('status')
+        .eq('id', GH52_APPOINTMENT_ID)
+        .maybeSingle();
+      if (absence?.status === 'no_show') {
+        const { error } = await staff.client.rpc('set_staff_appointment_status', {
+          p_appointment_id: GH52_APPOINTMENT_ID,
+          p_status: 'scheduled',
+        });
+        if (error) cleanupErrors.push(`ripristino assenza GH-52: ${error.message}`);
+      }
+      if (absence) {
+        const { error } = await staff.client.rpc('delete_staff_appointment', {
+          p_appointment_id: GH52_APPOINTMENT_ID,
+        });
+        if (error) cleanupErrors.push(`appuntamento GH-52: ${error.message}`);
+      }
     }
     if (gh44InvitationIds.size) {
       const { error } = await staff.client
@@ -578,6 +597,10 @@ async function cleanupCurrentRun() {
       const { error } = await staff.client.from('pets').delete().eq('id', fixturePet.id);
       if (error) cleanupErrors.push(`pet: ${error.message}`);
     }
+    if (appointmentFixturePet?.id) {
+      const { error } = await staff.client.from('pets').delete().eq('id', appointmentFixturePet.id);
+      if (error) cleanupErrors.push(`pet booking Mario: ${error.message}`);
+    }
     if (gh44PetIds.size) {
       const { error } = await staff.client.from('pets').delete().in('id', [...gh44PetIds]);
       if (error) cleanupErrors.push(`pet GH-44: ${error.message}`);
@@ -602,6 +625,14 @@ async function cleanupCurrentRun() {
           .eq('id', customer.id);
         if (customerError) cleanupErrors.push(`customer marker: ${customerError.message}`);
       }
+    }
+    if (appointmentIds.size) {
+      const { data, error } = await staff.client
+        .from('appointments')
+        .select('id')
+        .in('id', [...appointmentIds]);
+      if (error) cleanupErrors.push(`verifica appointments: ${error.message}`);
+      if (data?.length) cleanupErrors.push(`appointments residui: ${data.map(({ id }) => id).join(', ')}`);
     }
   }
 
@@ -1241,7 +1272,7 @@ async function main() {
     assertNoError(serviceError, 'Servizio booking');
     const { data, error } = await mario.client.rpc('submit_appointment_request', {
       p_tenant_id: tenantId,
-      p_pet_id: marioPet.id,
+      p_pet_id: appointmentFixturePet.id,
       p_service_id: service.id,
       p_desired_date: desiredDateValue,
       p_time_preference: 'morning',
@@ -1264,7 +1295,7 @@ async function main() {
       .eq('id', appointmentRequest.id)
       .single();
     assertNoError(error, 'Richiesta Mario via staff');
-    assert(data.pet_id === marioPet.id, 'Pet richiesta non corrisponde');
+    assert(data.pet_id === appointmentFixturePet.id, 'Pet richiesta non corrisponde');
     assert(data.desired_date === desiredDateValue, 'Data desiderata non corrisponde');
     assert(data.time_preference === 'morning', 'Preferenza oraria non corrisponde');
     assert(data.coat_condition_codes.includes('some_knots'), 'Condizione manto assente');
@@ -1310,7 +1341,7 @@ async function main() {
     assertNoError(serviceError, 'Servizio booking Luca');
     const { error } = await luca.client.rpc('submit_appointment_request', {
       p_tenant_id: tenantId,
-      p_pet_id: marioPet.id,
+      p_pet_id: appointmentFixturePet.id,
       p_service_id: service.id,
       p_desired_date: desiredDateValue,
       p_time_preference: 'flexible',
@@ -1340,7 +1371,7 @@ async function main() {
       .eq('id', data.appointment_id)
       .single();
     assertNoError(appointmentError, 'Appointment convertito');
-    assert(appointment.pet_id === marioPet.id, 'Pet appointment non corrisponde');
+    assert(appointment.pet_id === appointmentFixturePet.id, 'Pet appointment non corrisponde');
     assert(appointment.approval_status === 'approved', 'Appointment non approvato');
     assert(appointment.appointment_source === 'customer', 'Fonte appointment non customer');
     assert(appointment.requested_by_customer_id === mario.user.id, 'Richiedente appointment non corrisponde');

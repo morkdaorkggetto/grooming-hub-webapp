@@ -646,7 +646,7 @@ export default function Calendar() {
     : formatFullDayLabel(selectedDay);
 
   return (
-    <div className={`gh-page${modal === 'manual' ? ' gh-calendar-page--booking-open' : ''}`}>
+    <div className={`gh-page${modal === 'manual' || modal === 'detail' ? ' gh-calendar-page--grid-modal-open' : ''}`}>
       <Hero title="Dove lo metto" subtitle="La settimana a colpo d'occhio, per collocare chi arriva al banco" right={(
         <div className="gh-calendar-actions">
           <HeroButton onClick={() => navigate('/dashboard')}>Dashboard</HeroButton>
@@ -802,7 +802,7 @@ export default function Calendar() {
         </div>
       </Modal>}
 
-      {modal === 'detail' && selectedItem && <Modal title={`Appuntamento · ${selectedItem.petName}`} onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict) || selectedItem.status === 'no_show'} onClick={saveSchedule}>Salva orario</Button></>}>
+      {modal === 'detail' && selectedItem && <Modal variant="side" title={`Appuntamento · ${selectedItem.petName}`} onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict) || selectedItem.status === 'no_show'} onClick={saveSchedule}>Salva orario</Button></>}>
         <form className="gh-calendar-form-stack" onSubmit={saveSchedule}>
           <div className="gh-calendar-modal-context"><PetAvatar name={selectedItem.petName} photo={selectedItem.photo} size={42} tier="base" /><div><strong>{selectedItem.petName}</strong><span>{selectedItem.client?.owner || 'Proprietario non indicato'} · {statusLabel(selectedItem.status)}</span></div></div>
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">

@@ -805,17 +805,17 @@
 }
 
 @media (min-width: 641px) {
-  .gh-calendar-page--booking-open {
+  .gh-calendar-page--grid-modal-open {
     --gh-booking-modal-width: clamp(340px, 34vw, 420px);
   }
 
-  .gh-calendar-page--booking-open .gh-calendar-shell {
+  .gh-calendar-page--grid-modal-open .gh-calendar-shell {
     width: min(1180px, calc(100% - var(--gh-booking-modal-width) - 24px));
     margin-left: 0;
     margin-right: auto;
   }
 
-  .gh-calendar-page--booking-open .gh-planning-week {
+  .gh-calendar-page--grid-modal-open .gh-planning-week {
     overflow-x: hidden;
     grid-template-columns: repeat(7, minmax(0, 1fr));
   }
