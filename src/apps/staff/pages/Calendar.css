@@ -68,79 +68,6 @@
   padding: 0;
 }
 
-.gh-calendar-date-jump {
-  display: flex;
-  flex: 0 0 auto;
-  height: 44px;
-  align-items: center;
-  gap: 7px;
-  padding: 0 2px;
-  border: 1px solid var(--gh-border-60);
-  border-radius: var(--gh-r-button);
-  position: relative;
-  font-size: 11.5px;
-  font-weight: 650;
-  white-space: nowrap;
-}
-
-.gh-calendar-date-jump__button {
-  display: inline-flex;
-  width: 44px;
-  height: 44px;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-primary);
-  cursor: pointer;
-}
-
-.gh-calendar-date-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-  margin: 0;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--color-text-primary);
-  font: inherit;
-}
-
-.gh-calendar-date-jump input::-webkit-datetime-edit {
-  display: none;
-}
-
-.gh-calendar-date-jump--fallback {
-  flex-wrap: wrap;
-  height: auto;
-  max-width: 240px;
-}
-
-.gh-calendar-date-jump--fallback .gh-calendar-date-input {
-  position: static;
-  flex: 1;
-  width: 140px;
-  min-height: 44px;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.gh-calendar-date-jump--fallback input::-webkit-datetime-edit {
-  display: inline-block;
-}
-
-.gh-calendar-date-jump__warning {
-  flex-basis: 100%;
-  padding: 0 6px 6px;
-  color: var(--color-warning-text);
-  font-size: 10px;
-  font-weight: 600;
-  white-space: normal;
-}
-
 .gh-planning-search {
   display: inline-flex;
   align-items: center;
@@ -293,8 +220,7 @@
 }
 
 .gh-calendar-row__main:focus-visible,
-.gh-calendar-day-chip:focus-visible,
-.gh-calendar-date-jump:focus-within {
+.gh-calendar-day-chip:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
@@ -742,8 +668,7 @@
   }
 
   .gh-calendar-nav__stepper .gh-btn,
-  .gh-calendar-nav__tools .gh-btn,
-  .gh-calendar-date-jump {
+  .gh-calendar-nav__tools .gh-btn {
     min-width: 44px;
     height: 46px;
   }
@@ -752,15 +677,6 @@
     display: grid;
     flex-basis: auto;
     grid-template-columns: 1fr 1fr;
-  }
-
-  .gh-calendar-date-jump {
-    justify-content: center;
-  }
-
-  .gh-calendar-date-jump input {
-    width: 44px;
-    height: 44px;
   }
 
   .gh-calendar-day-strip {
@@ -1184,7 +1100,7 @@
 
 .gh-planning-chip--search-match {
   border-color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 45%, transparent);
 }
 
 .gh-planning-chip__time {
@@ -1236,6 +1152,11 @@
 
 .gh-planning-chip--request .gh-planning-chip__copy small {
   color: var(--color-warning-text);
+}
+
+.gh-planning-chip--search-match .gh-planning-chip__copy small,
+.gh-planning-chip--search-match .gh-planning-chip__band {
+  color: var(--color-text-primary);
 }
 
 .gh-planning-chip__tags {
@@ -1562,10 +1483,6 @@
     align-self: center;
     padding: 0 2px;
     font-size: 14px;
-  }
-
-  .gh-planning-navigation .gh-calendar-date-jump {
-    display: none;
   }
 
   .gh-planning-search {

@@ -1,0 +1,247 @@
+{
+  "stage": "after",
+  "checks": [
+    {
+      "action": "Click Fri 4 in week",
+      "date": "Venerdì 4 Settembre",
+      "clicks": 1
+    },
+    {
+      "action": "Next day",
+      "date": "Sabato 5 Settembre",
+      "clicks": 1
+    },
+    {
+      "action": "Previous day",
+      "date": "Venerdì 4 Settembre",
+      "clicks": 1
+    },
+    {
+      "action": "Return today",
+      "date": "Mercoledì 2 Settembre",
+      "clicks": 1
+    },
+    {
+      "action": "Next week + Sat 12: ten days from today",
+      "date": "Sabato 12 Settembre",
+      "clicks": 2
+    },
+    {
+      "action": "Week switch and return to current week",
+      "date": "31 Ago – 6 Set 2026"
+    }
+  ],
+  "toolbar": [
+    {
+      "viewport": 1365,
+      "search": {
+        "x": 613.765625,
+        "y": 149.296875,
+        "width": 201.03125,
+        "height": 44
+      },
+      "navigation": {
+        "x": 112.5,
+        "y": 148.296875,
+        "width": 809.90625,
+        "height": 46
+      },
+      "rows": 1,
+      "rowCenters": [
+        171.296875
+      ],
+      "gridTemplateRows": "none",
+      "searchGridRow": "auto",
+      "controls": [
+        {
+          "name": "Settimana",
+          "x": 113.5,
+          "y": 149.296875,
+          "width": 91.015625,
+          "height": 44
+        },
+        {
+          "name": "Giorno",
+          "x": 204.515625,
+          "y": 149.296875,
+          "width": 69.28125,
+          "height": 44
+        },
+        {
+          "name": "Settimana precedente",
+          "x": 283.796875,
+          "y": 149.296875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "name": "Torna a questa settimana",
+          "x": 336.796875,
+          "y": 149.296875,
+          "width": 176,
+          "height": 44
+        },
+        {
+          "name": "Settimana successiva",
+          "x": 521.796875,
+          "y": 149.296875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "name": "pet, proprietario, cell",
+          "x": 613.765625,
+          "y": 149.296875,
+          "width": 201.03125,
+          "height": 44
+        }
+      ],
+      "under44": [],
+      "overflow": 0
+    },
+    {
+      "viewport": 1024,
+      "search": {
+        "x": 521.265625,
+        "y": 149.296875,
+        "width": 201.03125,
+        "height": 44
+      },
+      "navigation": {
+        "x": 20,
+        "y": 148.296875,
+        "width": 984,
+        "height": 46
+      },
+      "rows": 1,
+      "rowCenters": [
+        171.296875
+      ],
+      "gridTemplateRows": "none",
+      "searchGridRow": "auto",
+      "controls": [
+        {
+          "name": "Settimana",
+          "x": 21,
+          "y": 149.296875,
+          "width": 91.015625,
+          "height": 44
+        },
+        {
+          "name": "Giorno",
+          "x": 112.015625,
+          "y": 149.296875,
+          "width": 69.28125,
+          "height": 44
+        },
+        {
+          "name": "Settimana precedente",
+          "x": 191.296875,
+          "y": 149.296875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "name": "Torna a questa settimana",
+          "x": 244.296875,
+          "y": 149.296875,
+          "width": 176,
+          "height": 44
+        },
+        {
+          "name": "Settimana successiva",
+          "x": 429.296875,
+          "y": 149.296875,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "name": "pet, proprietario, cell",
+          "x": 521.265625,
+          "y": 149.296875,
+          "width": 201.03125,
+          "height": 44
+        }
+      ],
+      "under44": [],
+      "overflow": 0
+    },
+    {
+      "viewport": 375,
+      "search": {
+        "x": 51.96875,
+        "y": 265.25,
+        "width": 310.03125,
+        "height": 44
+      },
+      "navigation": {
+        "x": 13,
+        "y": 159.25,
+        "width": 349,
+        "height": 150
+      },
+      "rows": 3,
+      "rowCenters": [
+        182.25,
+        235.25,
+        287.25
+      ],
+      "gridTemplateRows": "46px 44px 44px",
+      "searchGridRow": "3",
+      "controls": [
+        {
+          "name": "Settimana",
+          "x": 14,
+          "y": 160.25,
+          "width": 83.015625,
+          "height": 44
+        },
+        {
+          "name": "Giorno",
+          "x": 97.015625,
+          "y": 160.25,
+          "width": 61.28125,
+          "height": 44
+        },
+        {
+          "name": "Settimana precedente",
+          "x": 262,
+          "y": 159.25,
+          "width": 46,
+          "height": 46
+        },
+        {
+          "name": "Torna a questa settimana",
+          "x": 13,
+          "y": 213.25,
+          "width": 349,
+          "height": 44
+        },
+        {
+          "name": "Settimana successiva",
+          "x": 316,
+          "y": 159.25,
+          "width": 46,
+          "height": 46
+        },
+        {
+          "name": "pet, proprietario, cell",
+          "x": 51.96875,
+          "y": 265.25,
+          "width": 310.03125,
+          "height": 44
+        }
+      ],
+      "under44": [],
+      "overflow": 0
+    }
+  ],
+  "errors": [],
+  "blocked": [],
+  "removed": {
+    "buttons": 0,
+    "inputs": 0,
+    "wrappers": 0,
+    "warnings": 0
+  }
+}

@@ -767,12 +767,6 @@ export default function Calendar() {
           onPrevious={() => moveCalendar(-1)}
           onNext={() => moveCalendar(1)}
           onToday={goToToday}
-          dateValue={selectedDay}
-          onDate={(event) => {
-            if (!event.target.value) return;
-            setSelectedDay(event.target.value);
-            setWeekStart(startOfWeek(event.target.value));
-          }}
           summary={planningSummary}
         />
         {weekIsEmpty && calendarMode === 'week' && !loading ? (
