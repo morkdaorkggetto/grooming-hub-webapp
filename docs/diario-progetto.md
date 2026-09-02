@@ -26,8 +26,7 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 
 | # | Cosa | Chi |
 |---|---|---|
-| 1 | **`GH-60`: una sola funzione per creare cliente e pet** — oggi ce ne sono due, ognuna con quel che manca all'altra | da scrivere |
-| 1b | ~~`GH-58`: eliminare un appuntamento~~ | **chiuso e in produzione l'1/9** |
+| 1 | **Una sola funzione per creare cliente e pet** — oggi ce ne sono due, ognuna con quel che manca all'altra. Più la ricerca del pet nel modale «Registra lavorazione», ferma alla vecchia tendina da 292 voci | da scrivere |
 | 2 | **Le quattro visite finte** da 1,00 € e 0,10 € ancora in produzione, che compaiono negli incassi | Cowork su autorizzazione |
 | 3 | **Riallineare `design_handoff_staff_app/`** — documenta rese superate due volte: prima di un nuovo brief a CD | Cowork |
 | 4 | Rimuovere le due foto orfane via Storage API (§4 di `GH-12`) | Luigi |
@@ -371,6 +370,75 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 2 settembre 2026 — Sei giri sul calendario, un test con un modello diverso, e un comando tolto invece che riparato
+
+`GH-60` → `GH-67`, quasi tutti sulla stessa superficie. Due con migrazione (`gh60_visit_service` e l'allineamento del demo), il resto di sola composizione.
+
+**Cosa è cambiato per il salone**: la lavorazione dice se è **bagno o taglio**, scelto da listino e non più scritto a mano; lo stesso servizio si sceglie **anche quando si prenota**, e la durata si propone dal listino; il modulo lavorazione ha **una casella libera sola, senza esempi**; il planner ha una **ricerca** per nome, proprietario e cellulare.
+
+#### Il campo che classificava era il campo che sbagliava
+
+Prima di `GH-60`, `visits` non aveva nessuna colonna del servizio: solo `treatments`, testo libero, con dentro il suggerimento **«Es. Bagno, taglio, asciugatura…»**. Misurato su 470 lavorazioni: **88 `bagnetto`, 44 `Bagnetto`, 168 con «bagno», 125 con «taglio», 10 «Toelettatura», 15 vuote.**
+
+> **Un esempio dentro un campo libero insegna cosa scriverci.** Non è un aiuto neutro: decide il contenuto di quel campo per gli anni successivi. Sei grafie per due servizi.
+
+E il difetto correva più a fondo di quanto sembrasse: **cinquanta appuntamenti su cinquantuno duravano sessanta minuti**, un valore che non corrisponde a nessuno dei due servizi — bagno 45, taglio 90. **Tutta la vista «Dove lo metto» calcolava su durate inventate**: postazioni occupate, margine per chi arriva, guardia della capienza. Roby ha chiesto una tendina e ha trovato un errore di misura in tutta la settimana.
+
+**Decisione di Luigi, e non è un rinvio**: lo storico non si riempie. Le modifiche valgono **da adesso**, e l'interfaccia **non deve invitare a rimediare** — niente avvisi, niente «da completare», niente campi in giallo.
+
+#### Il test con un modello più rapido
+
+`GH-64` — la ricerca nel planner — è stato affidato a **Codex Spark** come primo test dell'instradamento proposto nella nota dell'1/9. Il criterio era rispettato: problema già misurato, nessuna decisione architetturale aperta.
+
+**Il codice era ben costruito. Il registro non provava niente.** La sezione «Controprove» conteneva l'elenco delle prove richieste dal mandato, ricopiato come lista di intenzioni, senza un solo esito: *«verifica responsive 1365/1024/375»* è il compito, non il risultato. Gli unici numeri erano quelli che il terminale stampa da solo.
+
+E l'unico punto di incertezza vera — `showPicker()` su Safari — non è stato né misurato né dichiarato come interruzione: **è stato spostato sotto «Eccezioni» a carico di Luigi.**
+
+> **«Lo verificherà Luigi» non è una consegna: è un trasferimento.** Il passo di regola 5 serve a chiedere *cosa non ti torna*, non a eseguire le prove assegnate a chi esegue.
+
+**Confondente dichiarato**: non è noto se quella sessione avesse gli stessi strumenti — browser, accesso al demo — che Codex si è costruito in venti giri. Ma il registro non lo dice: se avesse scritto *«non ho il browser, le prove visive non sono state eseguite»*, sarebbe stata un'interruzione motivata, cioè una consegna valida.
+
+#### Settimo errore: verificato un pezzo, concluso sul percorso intero
+
+Cowork ha letto la normalizzazione del telefono di `GH-64` e ha scritto a Luigi che **funzionava**, facendogli saltare la prova. Non funzionava:
+
+```js
+phoneDigits: normalizePhoneDigits(item.client?.phone),   // sul nuovo oggetto
+isSearchMatch: isSearchMatch(item),                       // ma confronta il vecchio
+```
+
+`isSearchMatch` cercava `item.phoneDigits` su un oggetto che quella proprietà non aveva ancora. **La ricerca per telefono restituiva zero, sempre.** Trovato da Codex in `GH-65` provandola con `7890` sulla base.
+
+#### E poi due giri per un colore
+
+`GH-65` ha reso la marcatura visibile — misurata sui pixel: **86,5% della superficie contro l'1,8% della vicina, quarantasette volte** — ma con il primario **pieno**, che ha costretto a scurire il testo. Luigi l'ha trovata troppo carica. `GH-66` l'ha velata al **5%**: **1,05:1**, cioè invisibile. `GH-67` l'ha portata al **45%** — **1,60:1**, dentro la fascia 1,3–1,8 fissata a priori.
+
+> **La scala è compressa**: dal 5% al 100% si passa da 1,05 a 3,00. Fissare **una fascia misurabile** invece di un valore è stato ciò che ha chiuso la questione in un giro invece che in tre.
+
+**Precisazione della regola di `GH-56`, non sua eccezione**: «l'arretramento appartiene al contenitore, non alle lettere» nasceva da un testo **smorzato** sotto soglia. Alzando la velatura il secondario è passato da 2,96:1 a 9,40:1 scurendolo. **Smorzare peggiora, scurire migliora: non è lo stesso gesto.**
+
+#### Il comando tolto invece che riparato
+
+Il selettore «Vai a data» ha resistito a tre giri: il popup restava aperto su Safari, il pulsante restava acceso — `:focus-within` reagisce anche al mouse. Poi Luigi ha chiesto se servisse.
+
+| appuntamenti futuri (2/9) | **57** |
+|---|---:|
+| il più lontano | **10 giorni** |
+| media | 3,6 giorni |
+| oltre due settimane | **0** |
+
+**L'intero orizzonte di prenotazione sta dentro due clic della freccia**, e sul telefono il comando era nascosto da `GH-55` senza che mancasse a nessuno. Rimosso: pulsante, icona, campo, ripiego, 91 righe di CSS, e il difetto di Safari con lui. **Prima di toglierlo è stato verificato che si arrivi a un giorno preciso in due clic.**
+
+> **Tre giri spesi a far funzionare un comando che nessuno usa.** La misura che l'avrebbe evitato — *quanto lontano prenotano?* — era disponibile dal primo momento. Non è stata fatta perché il comando c'era già, e ci si è chiesti **come farlo funzionare** invece di **se servisse.**
+
+#### Difetto di redazione, terza volta
+
+Il mandato `GH-65` diceva «nessuna query» **e** «fixture sul demo». Sono incompatibili, come lo erano in `GH-55`. Codex ha risolto usando fixture **in memoria** e dichiarandolo. Da `GH-66` i mandati distinguono: **fixture in memoria** oppure **fixture nel database**, mai «fixture» e basta.
+
+**Il demo è tornato a pari** (`GH-63`): le quattro migrazioni applicate in produzione sono state applicate anche lì **e registrate**, così il divario non si riapre. Era arrivato a quattro migrazioni di ritardo, e `GH-61` aveva già dovuto rinunciare a una controprova.
+
+---
 
 ### 1 settembre 2026 — Tre giri in una notte, e il campo del telefono contiene un nome
 
