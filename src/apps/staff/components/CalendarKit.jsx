@@ -298,11 +298,13 @@ export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate })
   );
 }
 
-function SearchResultMessage({ isSearchMode, count }) {
+function SearchResultMessage({ isSearchMode, count, elsewhereCount, loading, error }) {
   if (!isSearchMode) return null;
-  if (!count) return <span className="gh-planning-search-feedback">Nessun appuntamento in questa settimana.</span>;
+  if (error) return <span>{error}</span>;
+  if (loading) return <span>Ricerca degli appuntamenti aperti in corso.</span>;
+  if (!count && !elsewhereCount) return <span>Nessun appuntamento aperto trovato.</span>;
   const plural = count === 1 ? 'corrispondenza' : 'corrispondenze';
-  return <span className="gh-planning-search-feedback"><strong>{count}</strong> {plural} in questa settimana.</span>;
+  return <span>{count ? `${count} ${plural} in questa settimana.` : 'Nessun appuntamento in questa settimana.'}{elsewhereCount ? ` ${elsewhereCount} ${elsewhereCount === 1 ? 'corrispondenza' : 'corrispondenze'} nelle altre settimane.` : ''}</span>;
 }
 
 export function CalendarNavigation({
@@ -316,6 +318,10 @@ export function CalendarNavigation({
   onSearch,
   searchValue,
   searchCount,
+  searchLoading,
+  searchError,
+  elsewhereMatches = [],
+  onSearchResult,
   summary,
 }) {
   return (
@@ -352,7 +358,31 @@ export function CalendarNavigation({
           <span><b className="gh-num">{summary.walkIns}</b> {summary.walkIns === 1 ? 'lavorato' : 'lavorati'} sul momento</span>
         </div>
       )}
-      <SearchResultMessage isSearchMode={Boolean(searchValue)} count={searchCount || 0} />
+      {Boolean(searchValue?.trim()) && (
+        <div className="gh-planning-search-results">
+          <div className="gh-planning-search-feedback" role="status">
+            <SearchResultMessage isSearchMode count={searchCount || 0} elsewhereCount={elsewhereMatches.length} loading={searchLoading} error={searchError} />
+          </div>
+          {!searchLoading && elsewhereMatches.length > 0 && (
+            <>
+              <ul className="gh-planning-search-list" aria-label="Appuntamenti nelle altre settimane">
+                {elsewhereMatches.slice(0, 10).map((item) => (
+                  <li key={item.searchKey}>
+                    <button type="button" onClick={() => onSearchResult(item.date)}>
+                      <span className="gh-planning-search-result-date">
+                        {new Date(`${item.date}T12:00:00`).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })} · {item.timeLabel}
+                        {item.pending ? ' · Da confermare' : ''}
+                      </span>
+                      <span><strong>{item.petName}</strong> · {item.ownerName || 'Proprietario non indicato'}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {elsewhereMatches.length > 10 && <p className="gh-planning-search-feedback">Altre {elsewhereMatches.length - 10} corrispondenze non mostrate.</p>}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

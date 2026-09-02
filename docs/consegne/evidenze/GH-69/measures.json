@@ -1,0 +1,985 @@
+{
+  "calls": {
+    "before": {
+      "initial": 8,
+      "threeWeeks": 32,
+      "typing": 0,
+      "queries": [
+        {
+          "table": "tenant_memberships",
+          "query": {
+            "select": "tenant_id,role,created_at",
+            "user_id": "eq.fixture-staff",
+            "order": "created_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "desired_date": "lte.2026-09-06",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "scheduled_at": "lte.2026-09-06T21:59:59.999Z",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "visits",
+          "query": {
+            "select": "id,pet_id,tenant_id,appointment_id,date,treatments,issues,cost,created_at,updated_at,pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "appointment_id": "is.null",
+            "date": "lte.2026-09-06",
+            "order": "date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "gt.2026-09-02T08:00:00.000Z",
+            "status": "neq.cancelled",
+            "or": "(approval_status.is.null,approval_status.eq.approved)",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "order": "desired_date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "lte.2026-09-06T21:59:59.999Z",
+            "approval_status": "neq.rejected",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "tenant_memberships",
+          "query": {
+            "select": "tenant_id,role,created_at",
+            "user_id": "eq.fixture-staff",
+            "order": "created_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "desired_date": "lte.2026-09-13",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "scheduled_at": "lte.2026-09-13T21:59:59.999Z",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "visits",
+          "query": {
+            "select": "id,pet_id,tenant_id,appointment_id,date,treatments,issues,cost,created_at,updated_at,pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "appointment_id": "is.null",
+            "date": "lte.2026-09-13",
+            "order": "date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "gt.2026-09-02T08:00:00.000Z",
+            "status": "neq.cancelled",
+            "or": "(approval_status.is.null,approval_status.eq.approved)",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "order": "desired_date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "lte.2026-09-13T21:59:59.999Z",
+            "approval_status": "neq.rejected",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "tenant_memberships",
+          "query": {
+            "select": "tenant_id,role,created_at",
+            "user_id": "eq.fixture-staff",
+            "order": "created_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "desired_date": "lte.2026-09-20",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "scheduled_at": "lte.2026-09-20T21:59:59.999Z",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "visits",
+          "query": {
+            "select": "id,pet_id,tenant_id,appointment_id,date,treatments,issues,cost,created_at,updated_at,pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "appointment_id": "is.null",
+            "date": "lte.2026-09-20",
+            "order": "date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "gt.2026-09-02T08:00:00.000Z",
+            "status": "neq.cancelled",
+            "or": "(approval_status.is.null,approval_status.eq.approved)",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "order": "desired_date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "lte.2026-09-20T21:59:59.999Z",
+            "approval_status": "neq.rejected",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "tenant_memberships",
+          "query": {
+            "select": "tenant_id,role,created_at",
+            "user_id": "eq.fixture-staff",
+            "order": "created_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "desired_date": "lte.2026-09-27",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "scheduled_at": "lte.2026-09-27T21:59:59.999Z",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "visits",
+          "query": {
+            "select": "id,pet_id,tenant_id,appointment_id,date,treatments,issues,cost,created_at,updated_at,pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "appointment_id": "is.null",
+            "date": "lte.2026-09-27",
+            "order": "date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "gt.2026-09-02T08:00:00.000Z",
+            "status": "neq.cancelled",
+            "or": "(approval_status.is.null,approval_status.eq.approved)",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "order": "desired_date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "lte.2026-09-27T21:59:59.999Z",
+            "approval_status": "neq.rejected",
+            "order": "scheduled_at.asc"
+          }
+        }
+      ]
+    },
+    "after": {
+      "initial": 9,
+      "threeWeeks": 33,
+      "typing": 0,
+      "queries": [
+        {
+          "table": "tenant_memberships",
+          "query": {
+            "select": "tenant_id,role,created_at",
+            "user_id": "eq.fixture-staff",
+            "order": "created_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "desired_date": "lte.2026-09-06",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "scheduled_at": "lte.2026-09-06T21:59:59.999Z",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "visits",
+          "query": {
+            "select": "id,pet_id,tenant_id,appointment_id,date,treatments,issues,cost,created_at,updated_at,pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "appointment_id": "is.null",
+            "date": "lte.2026-09-06",
+            "order": "date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "gt.2026-09-02T08:00:00.000Z",
+            "status": "neq.cancelled",
+            "or": "(approval_status.is.null,approval_status.eq.approved)",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "order": "desired_date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.scheduled",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "lte.2026-09-06T21:59:59.999Z",
+            "or": "(status.eq.scheduled,and(approval_status.neq.pending,approval_status.neq.rejected))",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "tenant_memberships",
+          "query": {
+            "select": "tenant_id,role,created_at",
+            "user_id": "eq.fixture-staff",
+            "order": "created_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "desired_date": "lte.2026-09-13",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "scheduled_at": "lte.2026-09-13T21:59:59.999Z",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "visits",
+          "query": {
+            "select": "id,pet_id,tenant_id,appointment_id,date,treatments,issues,cost,created_at,updated_at,pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "appointment_id": "is.null",
+            "date": "lte.2026-09-13",
+            "order": "date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "gt.2026-09-02T08:00:00.000Z",
+            "status": "neq.cancelled",
+            "or": "(approval_status.is.null,approval_status.eq.approved)",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "order": "desired_date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "lte.2026-09-13T21:59:59.999Z",
+            "or": "(status.eq.scheduled,and(approval_status.neq.pending,approval_status.neq.rejected))",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "tenant_memberships",
+          "query": {
+            "select": "tenant_id,role,created_at",
+            "user_id": "eq.fixture-staff",
+            "order": "created_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "desired_date": "lte.2026-09-20",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "scheduled_at": "lte.2026-09-20T21:59:59.999Z",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "visits",
+          "query": {
+            "select": "id,pet_id,tenant_id,appointment_id,date,treatments,issues,cost,created_at,updated_at,pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "appointment_id": "is.null",
+            "date": "lte.2026-09-20",
+            "order": "date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "gt.2026-09-02T08:00:00.000Z",
+            "status": "neq.cancelled",
+            "or": "(approval_status.is.null,approval_status.eq.approved)",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "order": "desired_date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "lte.2026-09-20T21:59:59.999Z",
+            "or": "(status.eq.scheduled,and(approval_status.neq.pending,approval_status.neq.rejected))",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "tenant_memberships",
+          "query": {
+            "select": "tenant_id,role,created_at",
+            "user_id": "eq.fixture-staff",
+            "order": "created_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "desired_date": "lte.2026-09-27",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "scheduled_at": "lte.2026-09-27T21:59:59.999Z",
+            "order": "created_at.desc"
+          }
+        },
+        {
+          "table": "visits",
+          "query": {
+            "select": "id,pet_id,tenant_id,appointment_id,date,treatments,issues,cost,created_at,updated_at,pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "appointment_id": "is.null",
+            "date": "lte.2026-09-27",
+            "order": "date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "gt.2026-09-02T08:00:00.000Z",
+            "status": "neq.cancelled",
+            "or": "(approval_status.is.null,approval_status.eq.approved)",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointment_requests",
+          "query": {
+            "select": "id,tenant_id,customer_user_id,pet_id,service_id,desired_date,time_preference,coat_condition_codes,coat_condition_notes,declared_pet_age,status,appointment_id,staff_responded_at,proposed_alternatives,created_at,updated_at,service:services(id,name,duration_minutes),appointment:appointments(id,scheduled_at,duration_minutes,status,approval_status),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,birth_date,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "status": "eq.pending",
+            "order": "desired_date.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "approval_status": "eq.pending",
+            "appointment_source": "eq.customer",
+            "order": "scheduled_at.asc"
+          }
+        },
+        {
+          "table": "appointments",
+          "query": {
+            "select": "id,user_id,pet_id,tenant_id,scheduled_at,duration_minutes,status,approval_status,appointment_source,requested_by_customer_id,notes,external_calendar,service_id,created_at,updated_at,service:services(id,name,duration_minutes),pet:pets(id,tenant_id,customer_id,owner_user_id,name,breed,photo_url,no_show_score,is_blacklisted,customer:customers(id,user_id,first_name,last_name,email,phone))",
+            "tenant_id": "eq.fixture-tenant",
+            "scheduled_at": "lte.2026-09-27T21:59:59.999Z",
+            "or": "(status.eq.scheduled,and(approval_status.neq.pending,approval_status.neq.rejected))",
+            "order": "scheduled_at.asc"
+          }
+        }
+      ]
+    }
+  },
+  "checks": [
+    "8 -> 9 REST reads at opening; 32 -> 33 after three week steps; typing adds zero",
+    "RichiestaLegacy: 15 set 2026 · 09:00 · Da confermare / RichiestaLegacy · Proprietario RichiestaLegacy",
+    "RichiestaNuova: 2 ott 2026 · Mattina · Da confermare / RichiestaNuova · Proprietario RichiestaNuova",
+    "PassatoAperto: 24 ago 2026 · 09:00 / PassatoAperto · Proprietario PassatoAperto",
+    "ApertoRifiutato: 8 ott 2026 · 09:00 / ApertoRifiutato · Proprietario ApertoRifiutato",
+    "AttesaStaff: 9 ott 2026 · 09:00 · Da confermare / AttesaStaff · Proprietario AttesaStaff",
+    "Simultaneous here/elsewhere, distant jump, partial phone jump, pending legacy/structured, past scheduled, three excluded states, ordering and cap PASS",
+    "Counters, nonmatching styles, 45% tint, breed, seven days/feet preserved; index failure/truncation and early navigation guarded"
+  ],
+  "sizes": [
+    {
+      "width": 1365,
+      "resultBox": {
+        "top": 208.296875,
+        "bottom": 514.796875,
+        "height": 306.5
+      },
+      "listHeight": 264,
+      "gridTop": 528.796875,
+      "overlap": 0,
+      "overflow": 0,
+      "buttons": [
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 1140,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        }
+      ],
+      "foot": "1",
+      "shell": "0px"
+    },
+    {
+      "width": 1024,
+      "resultBox": {
+        "top": 208.296875,
+        "bottom": 514.796875,
+        "height": 306.5
+      },
+      "listHeight": 264,
+      "gridTop": 528.796875,
+      "overlap": 0,
+      "overflow": 0,
+      "buttons": [
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 984,
+          "height": 44,
+          "textLines": [
+            1,
+            1
+          ]
+        }
+      ],
+      "foot": "1",
+      "shell": "0px"
+    },
+    {
+      "width": 375,
+      "resultBox": {
+        "top": 353,
+        "bottom": 676.75,
+        "height": 323.75
+      },
+      "listHeight": 264,
+      "gridTop": 690.75,
+      "overlap": 0,
+      "overflow": 0,
+      "buttons": [
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        },
+        {
+          "width": 349,
+          "height": 61,
+          "textLines": [
+            1,
+            1
+          ]
+        }
+      ],
+      "foot": "0",
+      "shell": "0px"
+    }
+  ],
+  "errors": [],
+  "blocked": [],
+  "onlyElsewhere": "Nessun appuntamento in questa settimana. 1 corrispondenza nelle altre settimane.",
+  "jump": {
+    "summary": "5 prenotati\n0 lavorati sul momento",
+    "queryPreserved": true,
+    "newReads": 8
+  },
+  "hereAndElsewhere": "1 corrispondenza in questa settimana. 1 corrispondenza nelle altre settimane.",
+  "nowhere": "Nessun appuntamento aperto trovato.",
+  "tint": "color(srgb 0.435294 0.592157 0.572549 / 0.45)",
+  "order": [
+    "7 set 2026 · 09:00Serie 1 · Proprietario Serie 1",
+    "8 set 2026 · 09:00Serie 2 · Proprietario Serie 2",
+    "9 set 2026 · 09:00Serie 3 · Proprietario Serie 3",
+    "10 set 2026 · 09:00Serie 4 · Proprietario Serie 4",
+    "11 set 2026 · 09:00Serie 5 · Proprietario Serie 5",
+    "12 set 2026 · 09:00Serie 6 · Proprietario Serie 6",
+    "13 set 2026 · 09:00Serie 7 · Proprietario Serie 7",
+    "14 set 2026 · 09:00Serie 8 · Proprietario Serie 8",
+    "15 set 2026 · 09:00Serie 9 · Proprietario Serie 9",
+    "16 set 2026 · 09:00Serie 10 · Proprietario Serie 10"
+  ],
+  "fail": "Non riesco a cercare fuori settimana. Ricarica la pagina per riprovare.",
+  "truncate": "Ricerca fuori settimana incompleta: non posso escludere altre corrispondenze.",
+  "runtimeSeconds": 6.307832083999999
+}

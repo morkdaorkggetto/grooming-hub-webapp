@@ -958,7 +958,7 @@ export const getAppointments = async (filters = {}) => {
   return (data || []).map(mapAppointment);
 };
 
-export const getCalendarWeekData = async ({ from, to } = {}) => {
+export const getCalendarWeekData = async ({ from, to, includeSearchIndex = false } = {}) => {
   if (!from || !to) throw new Error('La settimana del calendario e obbligatoria');
 
   const { tenantId } = await requireStaff();
@@ -974,6 +974,7 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
     openAppointmentsResult,
     openStructuredResult,
     openLegacyResult,
+    searchResult,
   ] = await Promise.all([
     supabase
       .from('appointments')
@@ -981,8 +982,7 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
       .eq('tenant_id', tenantId)
       .gte('scheduled_at', fromIso)
       .lte('scheduled_at', toIso)
-      .neq('approval_status', 'pending')
-      .neq('approval_status', 'rejected')
+      .or('status.eq.scheduled,and(approval_status.neq.pending,approval_status.neq.rejected)')
       .order('scheduled_at'),
     supabase
       .from('appointment_requests')
@@ -1030,6 +1030,10 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
       .eq('approval_status', 'pending')
       .eq('appointment_source', 'customer')
       .order('scheduled_at'),
+    includeSearchIndex
+      ? supabase.from('appointments').select(APPOINTMENT_SELECT, { count: 'exact' })
+        .eq('tenant_id', tenantId).eq('status', 'scheduled').order('scheduled_at')
+      : Promise.resolve(null),
   ]);
 
   if (appointmentsResult.error) {
@@ -1049,7 +1053,9 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
   }
 
   return {
-    appointments: (appointmentsResult.data || []).map(mapAppointment),
+    appointments: (appointmentsResult.data || [])
+      .filter((row) => !(row.approval_status === 'pending' && row.appointment_source === 'customer'))
+      .map(mapAppointment),
     requests: [
       ...(structuredResult.data || []).map(mapAppointmentRequest),
       ...(legacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
@@ -1060,6 +1066,12 @@ export const getCalendarWeekData = async ({ from, to } = {}) => {
       ...(openStructuredResult.data || []).map(mapAppointmentRequest),
       ...(openLegacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
     ],
+    searchAppointments: searchResult ? (searchResult.data || []).map(mapAppointment) : undefined,
+    searchError: searchResult?.error
+      ? 'Non riesco a cercare fuori settimana. Ricarica la pagina per riprovare.'
+      : searchResult && searchResult.count > (searchResult.data || []).length
+        ? 'Ricerca fuori settimana incompleta: non posso escludere altre corrispondenze.'
+        : '',
   };
 };
 

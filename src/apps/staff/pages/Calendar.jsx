@@ -190,6 +190,8 @@ export default function Calendar() {
   const [searchParams] = useSearchParams();
   const openedQueryClientRef = useRef('');
   const latestWeekLoadRef = useRef(0);
+  const searchIndexRequestRef = useRef(null);
+  const [searchIndex, setSearchIndex] = useState({ appointments: [], error: '', ready: false });
   const [calendarMode, setCalendarMode] = useState('week');
   const [weekStart, setWeekStart] = useState(() => startOfWeek(todayString()));
   const weekEnd = addDays(weekStart, 6);
@@ -232,10 +234,31 @@ export default function Calendar() {
     latestWeekLoadRef.current = requestId;
     setLoading(true);
     setError('');
+    const includeSearchIndex = !searchIndexRequestRef.current;
+    const weekRequest = getCalendarWeekData({ from: weekStart, to: weekEnd, includeSearchIndex });
+    // Share the initial index even if navigation overtakes its week load.
+    if (includeSearchIndex) {
+      searchIndexRequestRef.current = weekRequest.then(
+        (result) => ({ appointments: result.searchAppointments || [], error: result.searchError, ready: true }),
+        () => ({ appointments: [], error: 'Non riesco a cercare fuori settimana. Ricarica la pagina per riprovare.', ready: true })
+      );
+    }
     try {
-      const nextData = await getCalendarWeekData({ from: weekStart, to: weekEnd });
+      const [nextData, initialIndex] = await Promise.all([weekRequest, searchIndexRequestRef.current]);
       if (requestId !== latestWeekLoadRef.current) return;
       setData(nextData);
+      setSearchIndex((current) => {
+        const index = current.ready ? current : initialIndex;
+        const outsideWeek = index.appointments.filter((item) => {
+          const date = requestDate(item);
+          return date < weekStart || date > weekEnd;
+        });
+        return {
+          ...index,
+          appointments: [...outsideWeek, ...nextData.appointments, ...nextData.requests.filter((item) => item.request_kind === 'legacy')]
+            .filter((item) => item.status === 'scheduled'),
+        };
+      });
     } catch (loadError) {
       if (requestId !== latestWeekLoadRef.current) return;
       setError(loadError.message || 'Non riesco a caricare il calendario');
@@ -379,6 +402,38 @@ export default function Calendar() {
     () => weekDays.reduce((count, day) => count + day.searchMatchedCount, 0),
     [weekDays]
   );
+  const elsewhereMatches = useMemo(() => {
+    const outsideWeek = (item) => requestDate(item) < weekStart || requestDate(item) > weekEnd;
+    const sources = [
+      ...searchIndex.appointments.filter(outsideWeek),
+      ...data.openBookings.filter((item) => item.request_kind === 'structured' && item.status === 'pending'),
+    ];
+    return sources.filter(outsideWeek).map((item) => {
+      const isRequest = item.request_kind === 'structured'
+        || (item.approval_status === 'pending' && item.appointment_source === 'customer');
+      const searchableItem = {
+        ...item,
+        petName: item.client?.name || 'Pet', ownerName: item.client?.owner || '', breed: item.client?.breed || '',
+        phoneDigits: normalizePhoneDigits(item.client?.phone),
+        serviceLabel: isRequest ? undefined : item.service?.name || '',
+        subtitle: isRequest
+          ? [item.service?.name || item.notes || 'Bisogno non specificato', item.client?.owner].filter(Boolean).join(' · ')
+          : [item.client?.owner, item.notes].filter(Boolean).join(' · ') || 'Appuntamento',
+      };
+      return {
+        ...searchableItem,
+        searchKey: `${item.request_kind === 'structured' ? 'request' : 'appointment'}-${item.id}`,
+        date: requestDate(item),
+        timeLabel: item.scheduled_at ? formatTime(item.scheduled_at)
+          : getBookingTimeWindowForPreference(item.time_preference)?.name || 'Senza ora fissata',
+        pending: item.approval_status === 'pending',
+      };
+    }).filter(isSearchMatch).sort((a, b) =>
+      a.date.localeCompare(b.date)
+      || String(a.scheduled_at || '').localeCompare(String(b.scheduled_at || ''))
+      || a.searchKey.localeCompare(b.searchKey)
+    );
+  }, [data.openBookings, isSearchMatch, searchIndex.appointments, weekEnd, weekStart]);
 
   const openManual = useCallback(async (clientId = '', preset = null) => {
     setError('');
@@ -763,6 +818,14 @@ export default function Calendar() {
           onSearch={setCalendarSearchValue}
           searchValue={calendarSearchValue}
           searchCount={calendarSearchMatchCount}
+          searchLoading={loading || !searchIndex.ready}
+          searchError={error || searchIndex.error}
+          elsewhereMatches={elsewhereMatches}
+          onSearchResult={(date) => {
+            setCalendarMode('week');
+            setSelectedDay(date);
+            setWeekStart(startOfWeek(date));
+          }}
           onMode={setCalendarMode}
           onPrevious={() => moveCalendar(-1)}
           onNext={() => moveCalendar(1)}

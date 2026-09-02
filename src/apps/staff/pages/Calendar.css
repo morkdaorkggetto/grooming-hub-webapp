@@ -102,7 +102,61 @@
 .gh-planning-search-feedback {
   color: var(--color-text-secondary);
   font-size: 11.5px;
-  white-space: nowrap;
+  white-space: normal;
+}
+
+.gh-planning-search-results {
+  flex-basis: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.gh-planning-search-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  max-height: 264px;
+  overflow-y: auto;
+  border-block: 1px solid var(--gh-border-60);
+}
+
+.gh-planning-search-list button {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr);
+  gap: 4px 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--gh-border-60);
+  border-radius: 0;
+  color: var(--color-text-primary);
+  background: var(--color-surface-main);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.gh-planning-search-list button:hover {
+  background: var(--color-surface);
+}
+
+.gh-planning-search-list button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.gh-planning-search-result-date {
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .gh-planning-search-list button {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .gh-planning-search-feedback strong {
