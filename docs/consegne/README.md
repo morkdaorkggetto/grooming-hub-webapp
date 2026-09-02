@@ -18,9 +18,29 @@ Questa cartella è la sede permanente delle consegne Codex per Grooming Hub.
   compromessi delle alternative, così il mandato successivo può essere scritto
   senza procedere per tentativi.
 
+## Standard dei report (2/9/2026, decisione Luigi)
+
+Luigi adotta le caratteristiche della consegna GH-65 come standard per tutti
+i modelli, compresi i tempi di esecuzione. Questa decisione supera la precedente
+limitazione della misura dei tempi alla sola prova con Spark.
+
+- Esito e perimetro subito leggibili; base Git e tabella esaustiva dei file.
+- Scelte motivate da misure pertinenti e confronti prima/dopo quando utili.
+- Prove eseguite, ambiente e limiti espliciti: distinguere fixture locali,
+  verifiche vive e controlli ancora affidati a Luigi.
+- Tempi misurati, indicando l'intervallo coperto e le eventuali pause escluse;
+  se un tempo non è stato rilevato, dichiararlo senza ricostruzioni arbitrarie.
+- Screenshot ed evidenze allegati quando aiutano a verificare il risultato;
+  eccezioni, pulizia e indicazioni concrete per Cowork quando pertinenti.
+
+**Proporzionato al lavoro:** preservare la qualità delle prove, non la lunghezza
+di GH-65. Per interventi piccoli basta un registro breve. Evitare contesto
+ripetuto, log integrali e allegati ridondanti; non ampliare le prove o ripetere
+test solo per riempire il report. Il costo in token resta un criterio di sintesi.
+
 ## Limite della convenzione
 
-Questa regola stabilisce soltanto **dove documentare le consegne**. Non concede
+Questa regola stabilisce **dove e come documentare le consegne**. Non concede
 a Codex autorizzazioni operative permanenti. Branch, ambienti, database,
 migration, seed, commit, push, merge e deploy restano soggetti al perimetro e
 alle conferme esplicite del singolo incarico.
