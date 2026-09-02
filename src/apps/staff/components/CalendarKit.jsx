@@ -19,6 +19,7 @@ function ItemTags({ item }) {
 
 function AppointmentChip({ item, onOpen }) {
   const isMatch = item?.isSearchMatch;
+  const description = `${item.breed || 'Appuntamento'} · ${item.duration_minutes}′`;
   return (
     <button
       className={`gh-planning-chip gh-planning-chip--appointment${isMatch ? ' gh-planning-chip--search-match' : ''}`}
@@ -28,7 +29,7 @@ function AppointmentChip({ item, onOpen }) {
       <span className="gh-planning-chip__time">{item.time}</span>
       <span className="gh-planning-chip__copy">
         <strong>{item.petName}</strong>
-        <small>Appuntamento · {item.duration_minutes}′</small>
+        <small title={description}>{description}</small>
         {item.serviceLabel ? (
           <small
             className="gh-planning-chip__service"

@@ -1,0 +1,2182 @@
+{
+  "checks": [
+    "Existing data only: one in-memory week load before and after; no additional read",
+    "Breed raw spelling preserved; null, empty and undefined fallback unchanged; request unchanged",
+    "Nine appointment heights, service offsets, row counts, tags, text styles and borders unchanged at 1365/1024/375; day heights/services unchanged",
+    "Full breed in title and accessibility tree; CSS ellipsis in narrow columns, complete in day view",
+    "Search name/owner/partial phone works; counters and nonmatches unchanged; tint remains 45%"
+  ],
+  "before": {
+    "loads": [
+      "week"
+    ],
+    "summary": "9 prenotati\n1 da confermare\n0 lavorati sul momento",
+    "request": "<button class=\"gh-planning-chip gh-planning-chip--request\" type=\"button\"><span class=\"gh-planning-chip__band\">mattina</span><span class=\"gh-planning-chip__copy\"><strong>Ada</strong><small>Da confermare</small></span></button>",
+    "week": {
+      "375": [
+        {
+          "name": "Leo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 243,
+          "scrollWidth": 243,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 306,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Leo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 243,
+          "scrollWidth": 243,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 306,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Poldo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Lola",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Arturo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Tobia",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Kira",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 92.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": "<span class=\"gh-state-tag gh-state-tag--warning\">A rischio</span>"
+        },
+        {
+          "name": "Olivia",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Bruno",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        }
+      ],
+      "1024": [
+        {
+          "name": "Leo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 61.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 124.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Leo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 61.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 124.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Poldo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Lola",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Arturo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Tobia",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.296875,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.296875,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Kira",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 92.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": "<span class=\"gh-state-tag gh-state-tag--warning\">A rischio</span>"
+        },
+        {
+          "name": "Olivia",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Bruno",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        }
+      ],
+      "1365": [
+        {
+          "name": "Leo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento…",
+          "available": 83.5625,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 146.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Leo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntamento…",
+          "available": 83.5625,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 146.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Poldo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.578125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.578125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Lola",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.5625,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Arturo",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.5625,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Tobia",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.578125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.578125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Kira",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.5625,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 92.25,
+          "width": 145.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": "<span class=\"gh-state-tag gh-state-tag--warning\">A rischio</span>"
+        },
+        {
+          "name": "Olivia",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.5625,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Bruno",
+          "text": "Appuntamento · 60′",
+          "title": "",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.578125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.578125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        }
+      ]
+    },
+    "day": [
+      {
+        "name": "Lola",
+        "text": "Appuntamento · 60′",
+        "title": "",
+        "visibleMeasured": "Appuntamento · 60′",
+        "available": 467,
+        "scrollWidth": 467,
+        "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+        "ellipsis": "ellipsis",
+        "whiteSpace": "nowrap",
+        "overflow": "hidden",
+        "color": "rgb(127, 111, 115)",
+        "weight": "400",
+        "background": "rgba(0, 0, 0, 0)",
+        "borders": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "outline": 0,
+        "height": 64.25,
+        "width": 530,
+        "lineCount": 3,
+        "lineOffset": {
+          "x": 54,
+          "y": 25.75
+        },
+        "service": {
+          "text": "Taglio",
+          "x": 54,
+          "y": 42.5,
+          "height": 15.75
+        },
+        "tags": ""
+      },
+      {
+        "name": "Arturo",
+        "text": "Appuntamento · 60′",
+        "title": "",
+        "visibleMeasured": "Appuntamento · 60′",
+        "available": 467,
+        "scrollWidth": 467,
+        "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+        "ellipsis": "ellipsis",
+        "whiteSpace": "nowrap",
+        "overflow": "hidden",
+        "color": "rgb(127, 111, 115)",
+        "weight": "400",
+        "background": "rgba(0, 0, 0, 0)",
+        "borders": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "outline": 0,
+        "height": 64.25,
+        "width": 530,
+        "lineCount": 3,
+        "lineOffset": {
+          "x": 54,
+          "y": 25.75
+        },
+        "service": {
+          "text": "Bagno",
+          "x": 54,
+          "y": 42.5,
+          "height": 15.75
+        },
+        "tags": ""
+      }
+    ]
+  },
+  "after": {
+    "loads": [
+      "week"
+    ],
+    "summary": "9 prenotati\n1 da confermare\n0 lavorati sul momento",
+    "request": "<button class=\"gh-planning-chip gh-planning-chip--request\" type=\"button\"><span class=\"gh-planning-chip__band\">mattina</span><span class=\"gh-planning-chip__copy\"><strong>Ada</strong><small>Da confermare</small></span></button>",
+    "week": {
+      "375": [
+        {
+          "name": "Leo",
+          "text": "barboncino · 60′",
+          "title": "barboncino · 60′",
+          "visibleMeasured": "barboncino · 60′",
+          "available": 243,
+          "scrollWidth": 243,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 306,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Leo",
+          "text": "maltese · 60′",
+          "title": "maltese · 60′",
+          "visibleMeasured": "maltese · 60′",
+          "available": 243,
+          "scrollWidth": 243,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 306,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Poldo",
+          "text": "Barboncino · 60′",
+          "title": "Barboncino · 60′",
+          "visibleMeasured": "Barboncino · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Lola",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Arturo",
+          "text": "Barboncina bianca e nera · 60′",
+          "title": "Barboncina bianca e nera · 60′",
+          "visibleMeasured": "Barboncina bianca e nera · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Tobia",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Kira",
+          "text": "Meticcio · 60′",
+          "title": "Meticcio · 60′",
+          "visibleMeasured": "Meticcio · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 92.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": "<span class=\"gh-state-tag gh-state-tag--warning\">A rischio</span>"
+        },
+        {
+          "name": "Olivia",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntamento · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Bruno",
+          "text": "Maltese · 60′",
+          "title": "Maltese · 60′",
+          "visibleMeasured": "Maltese · 60′",
+          "available": 242,
+          "scrollWidth": 242,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 305,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        }
+      ],
+      "1024": [
+        {
+          "name": "Leo",
+          "text": "barboncino · 60′",
+          "title": "barboncino · 60′",
+          "visibleMeasured": "barboncin…",
+          "available": 61.28125,
+          "scrollWidth": 83,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 124.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Leo",
+          "text": "maltese · 60′",
+          "title": "maltese · 60′",
+          "visibleMeasured": "maltese ·…",
+          "available": 61.28125,
+          "scrollWidth": 65,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 124.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Poldo",
+          "text": "Barboncino · 60′",
+          "title": "Barboncino · 60′",
+          "visibleMeasured": "Barboncin…",
+          "available": 60.28125,
+          "scrollWidth": 83,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Lola",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Arturo",
+          "text": "Barboncina bianca e nera · 60′",
+          "title": "Barboncina bianca e nera · 60′",
+          "visibleMeasured": "Barboncin…",
+          "available": 60.28125,
+          "scrollWidth": 153,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Tobia",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.296875,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.296875,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Kira",
+          "text": "Meticcio · 60′",
+          "title": "Meticcio · 60′",
+          "visibleMeasured": "Meticcio ·…",
+          "available": 60.28125,
+          "scrollWidth": 69,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 92.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": "<span class=\"gh-state-tag gh-state-tag--warning\">A rischio</span>"
+        },
+        {
+          "name": "Olivia",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntam…",
+          "available": 60.28125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Bruno",
+          "text": "Maltese · 60′",
+          "title": "Maltese · 60′",
+          "visibleMeasured": "Maltese ·…",
+          "available": 60.28125,
+          "scrollWidth": 65,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 123.28125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        }
+      ],
+      "1365": [
+        {
+          "name": "Leo",
+          "text": "barboncino · 60′",
+          "title": "barboncino · 60′",
+          "visibleMeasured": "barboncino · 60′",
+          "available": 83.5625,
+          "scrollWidth": 84,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 146.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Leo",
+          "text": "maltese · 60′",
+          "title": "maltese · 60′",
+          "visibleMeasured": "maltese · 60′",
+          "available": 83.5625,
+          "scrollWidth": 84,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 146.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Poldo",
+          "text": "Barboncino · 60′",
+          "title": "Barboncino · 60′",
+          "visibleMeasured": "Barboncino · 6…",
+          "available": 82.578125,
+          "scrollWidth": 83,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.578125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Lola",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.5625,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Arturo",
+          "text": "Barboncina bianca e nera · 60′",
+          "title": "Barboncina bianca e nera · 60′",
+          "visibleMeasured": "Barboncina bi…",
+          "available": 82.5625,
+          "scrollWidth": 153,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Tobia",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.578125,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.578125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Kira",
+          "text": "Meticcio · 60′",
+          "title": "Meticcio · 60′",
+          "visibleMeasured": "Meticcio · 60′",
+          "available": 82.5625,
+          "scrollWidth": 83,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 92.25,
+          "width": 145.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": "<span class=\"gh-state-tag gh-state-tag--warning\">A rischio</span>"
+        },
+        {
+          "name": "Olivia",
+          "text": "Appuntamento · 60′",
+          "title": "Appuntamento · 60′",
+          "visibleMeasured": "Appuntament…",
+          "available": 82.5625,
+          "scrollWidth": 100,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.5625,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Taglio",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        },
+        {
+          "name": "Bruno",
+          "text": "Maltese · 60′",
+          "title": "Maltese · 60′",
+          "visibleMeasured": "Maltese · 60′",
+          "available": 82.578125,
+          "scrollWidth": 83,
+          "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "ellipsis": "ellipsis",
+          "whiteSpace": "nowrap",
+          "overflow": "hidden",
+          "color": "rgb(127, 111, 115)",
+          "weight": "400",
+          "background": "rgba(0, 0, 0, 0)",
+          "borders": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "height": 64.25,
+          "width": 145.578125,
+          "lineCount": 3,
+          "lineOffset": {
+            "x": 54,
+            "y": 25.75
+          },
+          "service": {
+            "text": "Bagno",
+            "x": 54,
+            "y": 42.5,
+            "height": 15.75
+          },
+          "tags": ""
+        }
+      ]
+    },
+    "mobileFooter": {
+      "height": 45,
+      "display": "block",
+      "visibility": "visible",
+      "text": "0 lavorati sul momento",
+      "dayFlexShrink": "0",
+      "shellMinHeight": "0px"
+    },
+    "day": [
+      {
+        "name": "Lola",
+        "text": "Appuntamento · 60′",
+        "title": "Appuntamento · 60′",
+        "visibleMeasured": "Appuntamento · 60′",
+        "available": 467,
+        "scrollWidth": 467,
+        "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+        "ellipsis": "ellipsis",
+        "whiteSpace": "nowrap",
+        "overflow": "hidden",
+        "color": "rgb(127, 111, 115)",
+        "weight": "400",
+        "background": "rgba(0, 0, 0, 0)",
+        "borders": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "outline": 0,
+        "height": 64.25,
+        "width": 530,
+        "lineCount": 3,
+        "lineOffset": {
+          "x": 54,
+          "y": 25.75
+        },
+        "service": {
+          "text": "Taglio",
+          "x": 54,
+          "y": 42.5,
+          "height": 15.75
+        },
+        "tags": ""
+      },
+      {
+        "name": "Arturo",
+        "text": "Barboncina bianca e nera · 60′",
+        "title": "Barboncina bianca e nera · 60′",
+        "visibleMeasured": "Barboncina bianca e nera · 60′",
+        "available": 467,
+        "scrollWidth": 467,
+        "font": "10.5px / 15.75px -apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+        "ellipsis": "ellipsis",
+        "whiteSpace": "nowrap",
+        "overflow": "hidden",
+        "color": "rgb(127, 111, 115)",
+        "weight": "400",
+        "background": "rgba(0, 0, 0, 0)",
+        "borders": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "outline": 0,
+        "height": 64.25,
+        "width": 530,
+        "lineCount": 3,
+        "lineOffset": {
+          "x": 54,
+          "y": 25.75
+        },
+        "service": {
+          "text": "Bagno",
+          "x": 54,
+          "y": 42.5,
+          "height": 15.75
+        },
+        "tags": ""
+      }
+    ]
+  },
+  "errors": [],
+  "blocked": [],
+  "ariaLong": "- 'button \"11:00 Arturo Barboncina bianca e nera · 60′ Servizio: Bagno\"':\n  - text: 11:00\n  - strong: Arturo\n  - text: Barboncina bianca e nera · 60′ Bagno",
+  "search": [
+    {
+      "q": "Leo",
+      "count": 2,
+      "name": "Leo"
+    },
+    {
+      "q": "Carlo Test",
+      "count": 1,
+      "name": "Leo"
+    },
+    {
+      "q": "Proprietario Arturo",
+      "count": 1,
+      "name": "Arturo"
+    },
+    {
+      "q": "7890",
+      "count": 1,
+      "name": "Arturo"
+    },
+    {
+      "q": "333456",
+      "count": 1,
+      "name": "Arturo"
+    },
+    {
+      "q": "456-7890",
+      "count": 1,
+      "name": "Arturo"
+    }
+  ],
+  "mark": {
+    "background": "color(srgb 0.435294 0.592157 0.572549 / 0.45)",
+    "border": "rgb(43, 37, 37)",
+    "outline": "none",
+    "secondary": "rgb(43, 37, 37)"
+  },
+  "runtimeSeconds": 1.956273833,
+  "browser": "151.0.7922.34"
+}
