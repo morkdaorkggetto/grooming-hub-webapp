@@ -28,6 +28,7 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 |---|---|---|
 | 1 | **Una sola funzione per creare cliente e pet** — oggi ce ne sono due, ognuna con quel che manca all'altra. Più la ricerca del pet nel modale «Registra lavorazione», ferma alla vecchia tendina da 292 voci | da scrivere |
 | 2 | **Le quattro visite finte** da 1,00 € e 0,10 € ancora in produzione, che compaiono negli incassi | Cowork su autorizzazione |
+| 2b | **Far guardare le razze a Davide e Roby** dopo `GH-70`. Finché non l'hanno fatto, `pets_breed_backup_gh70` **resta**. Tre valori da correggere nel contenuto: `Da Strippare`, `Gatto`, `Lui lo Chiama Barboncino` | Luigi |
 | 3 | **Riallineare `design_handoff_staff_app/`** — documenta rese superate due volte: prima di un nuovo brief a CD | Cowork |
 | 4 | Rimuovere le due foto orfane via Storage API (§4 di `GH-12`) | Luigi |
 | 5 | Attivare «Leaked password protection» sul prod · smontare `grooming-prova-generale` | Luigi |
@@ -370,6 +371,56 @@ Complessivamente **2.255 → 1.256 righe e 176 → 0 stili inline**: il layout �
 **Mezz'ora di caccia a un guasto che non c'era** (25/8): login apparentemente in loop, «app vecchia» dopo l'accesso, sospetti su cache, sessioni e deployment. Esito reale: **funziona tutto.** La radice del sito rimanda a `/u/login` per una scelta del 13 maggio (consegnare la preview al salone su un indirizzo pulito), quindi Luigi bussava tre volte alla porta dei clienti; e il login staff «sembra vecchio» perché **lo è per contratto**, non essendo mai stato nel perimetro. Dopo l'accesso la Dashboard nuova c'era. Due lezioni: le ipotesi vanno ordinate dalla più banale (che indirizzo stai aprendo) alla più esotica (cache, sessioni, deployment), e io ho fatto il contrario; e un perimetro che esclude una schermata va detto **prima** che qualcuno la guardi, non dopo.
 
 **Decisione di prodotto (Luigi, 25/8): la radice del sito porterà al gestionale**, e i clienti raggiungeranno la loro app da inviti e QR, che è come la raggiungono davvero. Il redirect di maggio verso `/u/login` era nato per una preview e diventerebbe la porta d'ingresso sbagliata: se ci è inciampato tre volte chi l'ha costruita, il 1° settembre ci inciampano Davide e Roby. In coda alle cose da chiudere prima di G6.
+
+### 2 settembre 2026, sera — Il salone chiede, e le richieste costano sempre meno
+
+Tre giri di fila nati **dall'uso**, non dall'analisi: `GH-68`, `GH-69`, `GH-70`. E per la prima volta il salone ha rimandato indietro applausi invece di segnalazioni.
+
+#### La richiesta più apprezzata è costata due righe
+
+Il salone chiede **un elemento in più per distinguere il pet**: 128 su 320 condividono il nome. Cowork proponeva il **proprietario** — misurato, lascia **1** ambiguità contro le **19** della razza. Il salone ha risposto con un argomento diverso: **la razza serve anche a capire il tipo di lavorazione.**
+
+Aveva ragione il salone, e la misura lo conferma da un lato che Cowork non aveva pesato: il campo `breed` **non contiene cifre in nessuno dei 314 valori**, mentre il campo del proprietario ne ha **133 su 295** — `Anna che lavora al bar +39 389 215`, `vigilessa3387731252`. La razza è il campo scritto meglio.
+
+> **E c'era un argomento di contesto nato il giorno prima: adesso la ricerca c'è.** Per sapere *quale* Leo si scrive il proprietario e la scheda si accende. **Il colpo d'occhio non deve più portare l'identità — quella si cerca. Deve portare quello che la ricerca non dà: che cane è.**
+
+`GH-68` è stato **+2/−1 righe in un file solo**: la razza era già caricata, già mappata, e la troncatura CSS già esisteva. **Limite dichiarato**: a 1024px una razza lunga conserva solo `Barboncin…`, quindi taglia e colore — la ragione operativa — restano nel tooltip e in vista giorno.
+
+#### La misura che è invecchiata in sei ore
+
+`GH-67` aveva tolto il comando «vai a data» motivandolo così: *il più lontano è a dieci giorni, nessuno prenota oltre due settimane.* La sera stessa, contati: **130 appuntamenti, il più lontano al 6 ottobre.** Un mese.
+
+> **Regola 3 applicata a noi stessi**: un numero porta con sé il momento in cui vale. Quello valeva la mattina.
+
+**La motivazione non reggeva più, la rimozione sì** — perché `GH-69` fa quel lavoro meglio: **non devi sapere *quando*, ti basta sapere *chi***, che al banco è l'unica cosa che si sa davvero.
+
+#### Cercare fuori dalla settimana senza interrogare il database
+
+Gli appuntamenti **aperti sono 88**: si caricano **una volta all'apertura** e si cercano in memoria. Misurato: letture all'apertura **da 8 a 9**, e **zero nuove chiamate mentre si scrive**.
+
+Le corrispondenze nella settimana si accendono; quelle altrove compaiono in un elenco con data e identità, e toccandone una **si va a quella settimana con la scheda già accesa**. L'elenco compare **anche quando nella settimana una corrispondenza c'è** — un cane può averne uno oggi e uno fra tre settimane, e mostrarne uno solo farebbe rispondere male al telefono.
+
+**E Codex ha aggiunto tre stati che nessuno aveva chiesto**, che sono la parte migliore del giro:
+
+> caricamento: `Ricerca degli appuntamenti aperti in corso.`
+> errore: `Non riesco a cercare fuori settimana. Ricarica la pagina per riprovare.`
+> **risposta troncata dal limite dell'API**: `Ricerca fuori settimana incompleta: non posso escludere altre corrispondenze.`
+
+**In nessuno dei due errori compare il falso «nessun appuntamento».** È il principio che inseguiamo da dieci giri — *non dire che una cosa non c'è quando non lo sai* — applicato a un caso che il mandato non aveva previsto.
+
+**Conseguenza necessaria e dichiarata**: la lettura settimanale ora include anche gli `scheduled` con approvazione `rejected` o `pending`, altrimenti il salto atterrerebbe su una settimana senza la scheda cercata. Verificato in produzione prima di pubblicare: **tutti i 131 appuntamenti sono `approved` e di origine operatore**, quindi oggi non cambia nulla di visibile. Servirà quando i clienti cominceranno a prenotare.
+
+#### GH-70 — Le razze prendono l'iniziale maiuscola
+
+Scrittura su dati veri, autorizzata da Luigi: **207 righe su 314**, iniziale maiuscola per ogni parola, **congiunzioni brevi minuscole se non sono la prima** — `Barboncina Bianca e Nera`, `Chiuaua a Pelo Lungo`.
+
+**Le grafie distinte passano da 123 a 96**, ed è il beneficio nascosto: `barboncino` (39) e `Barboncino` (19) erano due cose diverse per il database, e nessuno avrebbe mai contato insieme i **58 barboncini** che il salone ha davvero.
+
+**I 207 valori originali restano in `pets_breed_backup_gh70`**, con l'identificativo del pet e la data. Il ritorno indietro è **una riga di SQL**, non una ricostruzione a memoria. **La tabella resta lì per decisione di Luigi**, finché Davide e Roby non hanno guardato.
+
+Tre valori che la maiuscola rende più ufficiali di quanto siano, e che vanno corretti nel contenuto e non nella forma: **`Da Strippare`** (è una lavorazione, non una razza), **`Gatto`**, e **`Lui lo Chiama Barboncino`**. Da chiedere a Davide, che sa di che animale si tratta.
+
+---
 
 ### 2 settembre 2026 — Sei giri sul calendario, un test con un modello diverso, e un comando tolto invece che riparato
 
