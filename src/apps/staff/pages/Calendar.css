@@ -70,19 +70,39 @@
 
 .gh-calendar-date-jump {
   display: flex;
-  height: 38px;
+  height: 44px;
   align-items: center;
   gap: 7px;
-  padding: 0 10px;
+  padding: 0 2px;
   border: 1px solid var(--gh-border-60);
   border-radius: var(--gh-r-button);
+  position: relative;
   font-size: 11.5px;
   font-weight: 650;
   white-space: nowrap;
 }
 
-.gh-calendar-date-jump input {
-  width: 22px;
+.gh-calendar-date-jump__button {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.gh-calendar-date-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0;
+  border: 0;
+  padding: 0;
   border: 0;
   background: transparent;
   color: var(--color-text-primary);
@@ -91,6 +111,55 @@
 
 .gh-calendar-date-jump input::-webkit-datetime-edit {
   display: none;
+}
+
+.gh-calendar-date-jump__warning {
+  position: absolute;
+  right: 4px;
+  bottom: -18px;
+  color: var(--color-warning-text);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gh-planning-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 1 240px;
+  min-width: 0;
+}
+
+.gh-planning-search span {
+  color: var(--color-text-secondary);
+  font-size: 11.5px;
+}
+
+.gh-planning-search__input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--gh-border-60);
+  border-radius: var(--gh-r-button);
+  background: var(--color-surface-main);
+  color: var(--color-text-primary);
+  font-size: 11.5px;
+}
+
+.gh-planning-search__input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.gh-planning-search-feedback {
+  color: var(--color-text-secondary);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.gh-planning-search-feedback strong {
+  color: var(--color-text-primary);
 }
 
 .gh-calendar-day-strip {
@@ -840,7 +909,7 @@
 .gh-planning-range {
   display: inline-flex;
   min-width: 176px;
-  min-height: 36px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   padding: 0 8px;
@@ -861,8 +930,8 @@
 }
 
 .gh-planning-navigation > .gh-btn {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   padding: 0;
 }
 
@@ -875,7 +944,7 @@
 }
 
 .gh-planning-switch button {
-  height: 34px;
+  min-height: 44px;
   padding: 0 14px;
   border: 0;
   background: transparent;
@@ -1084,6 +1153,10 @@
   border-style: dashed;
   border-color: var(--color-warning-border);
   background: var(--color-warning-bg);
+}
+
+.gh-planning-chip--search-match {
+  border-color: color-mix(in srgb, var(--color-primary) 64%, var(--gh-border-35));
 }
 
 .gh-planning-chip__time {
@@ -1466,6 +1539,15 @@
     display: none;
   }
 
+  .gh-planning-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .gh-planning-search__input {
+    min-height: 44px;
+  }
+
   .gh-planning-range__wide {
     display: none;
   }
@@ -1564,5 +1646,10 @@
   .gh-planning-range {
     grid-column: 1 / -1;
     grid-row: 2;
+  }
+
+  .gh-planning-search {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 }

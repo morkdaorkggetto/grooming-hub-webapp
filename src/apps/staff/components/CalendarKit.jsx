@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { getBookingTimePreferenceName } from '../../../shared/tenant/bookingSchedule';
 import Icon from '../../../shared/ui/Icon';
 import { Button, StateTag } from './StaffKit';
@@ -18,8 +18,13 @@ function ItemTags({ item }) {
 }
 
 function AppointmentChip({ item, onOpen }) {
+  const isMatch = item?.isSearchMatch;
   return (
-    <button className="gh-planning-chip gh-planning-chip--appointment" type="button" onClick={() => onOpen(item)}>
+    <button
+      className={`gh-planning-chip gh-planning-chip--appointment${isMatch ? ' gh-planning-chip--search-match' : ''}`}
+      type="button"
+      onClick={() => onOpen(item)}
+    >
       <span className="gh-planning-chip__time">{item.time}</span>
       <span className="gh-planning-chip__copy">
         <strong>{item.petName}</strong>
@@ -40,8 +45,13 @@ function AppointmentChip({ item, onOpen }) {
 }
 
 function RequestChip({ item, onOpen }) {
+  const isMatch = item?.isSearchMatch;
   return (
-    <button className="gh-planning-chip gh-planning-chip--request" type="button" onClick={() => onOpen(item)}>
+    <button
+      className={`gh-planning-chip gh-planning-chip--request${isMatch ? ' gh-planning-chip--search-match' : ''}`}
+      type="button"
+      onClick={() => onOpen(item)}
+    >
       <span className="gh-planning-chip__band">
         {getBookingTimePreferenceName(item.preference).toLowerCase() || 'a piacere'}
       </span>
@@ -287,7 +297,45 @@ export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate })
   );
 }
 
-export function CalendarNavigation({ mode, rangeLabel, compactRangeLabel, onMode, onPrevious, onNext, onToday, onDate, dateValue, summary }) {
+function SearchResultMessage({ isSearchMode, count }) {
+  if (!isSearchMode) return null;
+  if (!count) return <span className="gh-planning-search-feedback">Nessun appuntamento in questa settimana.</span>;
+  const plural = count === 1 ? 'corrispondenza' : 'corrispondenze';
+  return <span className="gh-planning-search-feedback"><strong>{count}</strong> {plural} in questa settimana.</span>;
+}
+
+export function CalendarNavigation({
+  mode,
+  rangeLabel,
+  compactRangeLabel,
+  onMode,
+  onPrevious,
+  onNext,
+  onToday,
+  onDate,
+  onSearch,
+  searchValue,
+  searchCount,
+  dateValue,
+  summary,
+}) {
+  const dateInputRef = useRef(null);
+  const [calendarPickerUnavailable, setCalendarPickerUnavailable] = useState(false);
+  const openDatePicker = () => {
+    const current = dateInputRef.current;
+    if (!current) return;
+    if (typeof current.showPicker === 'function') {
+      try {
+        current.showPicker();
+        return;
+      } catch (error) {
+        setCalendarPickerUnavailable(true);
+      }
+    }
+    setCalendarPickerUnavailable(true);
+    current.focus();
+  };
+
   return (
     <div className="gh-planning-toolbar">
       <div className="gh-planning-navigation">
@@ -303,10 +351,30 @@ export function CalendarNavigation({ mode, rangeLabel, compactRangeLabel, onMode
           <span className="gh-planning-range__wide">{rangeLabel}</span>
           <span className="gh-planning-range__compact">{compactRangeLabel || rangeLabel}</span>
         </button>
-        <Button staff className="gh-planning-next" variant="outline" icon="chevron" aria-label={mode === 'week' ? 'Settimana successiva' : 'Giorno successivo'} onClick={onNext} />
+          <Button staff className="gh-planning-next" variant="outline" icon="chevron" aria-label={mode === 'week' ? 'Settimana successiva' : 'Giorno successivo'} onClick={onNext} />
         <label className="gh-calendar-date-jump">
-          <span>Vai a data</span>
-          <input type="date" value={dateValue} onChange={onDate} />
+          <span className="gh-sr-only">Vai a data</span>
+          <input
+            ref={dateInputRef}
+            className="gh-calendar-date-input"
+            type="date"
+            value={dateValue}
+            onChange={onDate}
+          />
+          <button className="gh-calendar-date-jump__button" type="button" aria-label="Vai a data" title="Vai a data" onClick={openDatePicker}>
+            <Icon name="calendar" size={16} />
+          </button>
+          {calendarPickerUnavailable ? <span className="gh-calendar-date-jump__warning" role="status">Il browser non consente l'apertura rapida.</span> : null}
+        </label>
+        <label className="gh-planning-search">
+          <span>Cerca</span>
+          <input
+            type="search"
+            value={searchValue || ''}
+            placeholder="Cerca pet, proprietario, telefono"
+            onChange={(event) => onSearch(event.target.value)}
+            className="gh-planning-search__input"
+          />
         </label>
       </div>
       {summary && (
@@ -316,6 +384,7 @@ export function CalendarNavigation({ mode, rangeLabel, compactRangeLabel, onMode
           <span><b className="gh-num">{summary.walkIns}</b> {summary.walkIns === 1 ? 'lavorato' : 'lavorati'} sul momento</span>
         </div>
       )}
+      <SearchResultMessage isSearchMode={Boolean(searchValue)} count={searchCount || 0} />
     </div>
   );
 }

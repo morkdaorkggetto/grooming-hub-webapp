@@ -105,6 +105,8 @@ const formatCompactWeekLabel = (from, to) => {
     ? `${start.getDate()}–${end.getDate()} ${endMonth}`
     : `${start.getDate()} ${startMonth} – ${end.getDate()} ${endMonth}`;
 };
+const normalizeSearchText = (value = '') => String(value || '').toLocaleLowerCase('it').trim();
+const normalizePhoneDigits = (value = '') => String(value || '').replace(/\D/g, '');
 
 const getAppointmentEnd = (appointment) => {
   const start = new Date(appointment.scheduled_at);
@@ -214,6 +216,7 @@ export default function Calendar() {
   const [detailForm, setDetailForm] = useState({ date: '', time: '', durationMinutes: DEFAULT_DURATION });
   const [deleteError, setDeleteError] = useState('');
   const [workPetId, setWorkPetId] = useState('');
+  const [calendarSearchValue, setCalendarSearchValue] = useState('');
   const bookingSchedule = useMemo(
     () => getBookingSchedule(tenant?.settings),
     [tenant?.settings]
@@ -277,26 +280,54 @@ export default function Calendar() {
     }
     return tags;
   }, [conflictIds]);
+  const searchQuery = useMemo(() => {
+    const text = normalizeSearchText(calendarSearchValue);
+    return {
+      text,
+      hasQuery: Boolean(text),
+      digits: normalizePhoneDigits(text),
+    };
+  }, [calendarSearchValue]);
+  const isSearchMatch = useCallback((item) => {
+    if (!searchQuery.hasQuery) return false;
+    if (searchQuery.digits && item.phoneDigits && item.phoneDigits.includes(searchQuery.digits)) return true;
+    const text = searchQuery.text;
+    return [
+      item.petName,
+      item.ownerName,
+      item.breed,
+      item.serviceLabel,
+      item.subtitle,
+    ].some((value) => normalizeSearchText(value).includes(text));
+  }, [searchQuery]);
 
   const calendarItems = useMemo(() => {
     const requests = data.requests.map((request) => ({
-      ...request, kind: 'request', petName: request.client?.name || 'Pet', photo: request.client?.photo,
+      ...request, kind: 'request', petName: request.client?.name || 'Pet', ownerName: request.client?.owner || '', breed: request.client?.breed || '',
+      photo: request.client?.photo,
       preference: request.time_preference || (request.scheduled_at ? formatTime(request.scheduled_at) : 'flexible'),
       leadTimeLabel: requestLeadTimeLabel(request),
       subtitle: [request.service?.name || request.notes || 'Bisogno non specificato', request.client?.owner].filter(Boolean).join(' · '),
     }));
     const appointments = data.appointments.map((appointment) => ({
-      ...appointment, kind: 'appointment', petName: appointment.client?.name || 'Pet', photo: appointment.client?.photo,
+      ...appointment, kind: 'appointment', petName: appointment.client?.name || 'Pet', ownerName: appointment.client?.owner || '', breed: appointment.client?.breed || '',
+      photo: appointment.client?.photo,
       time: formatTime(appointment.scheduled_at),
       serviceLabel: appointment.service?.name || '',
       subtitle: [appointment.client?.owner, appointment.notes].filter(Boolean).join(' · ') || 'Appuntamento',
     }));
     const visits = data.visits.map((visit) => ({
-      ...visit, kind: 'visit', petName: visit.client?.name || 'Pet', photo: visit.client?.photo,
+      ...visit, kind: 'visit', petName: visit.client?.name || 'Pet', ownerName: visit.client?.owner || '', breed: visit.client?.breed || '',
+      photo: visit.client?.photo,
       subtitle: `«${visit.treatments || 'Nessun dettaglio registrato'}»`,
     }));
-    return [...requests, ...appointments, ...visits].map((item) => ({ ...item, tags: makeTags(item) }));
-  }, [data, makeTags]);
+    return [...requests, ...appointments, ...visits].map((item) => ({
+      ...item,
+      tags: makeTags(item),
+      phoneDigits: normalizePhoneDigits(item.client?.phone),
+      isSearchMatch: isSearchMatch(item),
+    }));
+  }, [data, isSearchMatch, makeTags]);
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, index) => {
     const date = addDays(weekStart, index);
     const parsed = new Date(`${date}T12:00:00`);
@@ -305,6 +336,7 @@ export default function Calendar() {
       const itemDate = item.kind === 'request' ? requestDate(item) : item.kind === 'visit' ? item.date : toLocalDateString(new Date(item.scheduled_at));
       return itemDate === date;
     });
+    const searchMatchedCount = searchQuery.hasQuery ? items.filter((item) => item.isSearchMatch).length : 0;
     const appointments = items.filter((item) => item.kind === 'appointment');
     const activeAppointments = appointments.filter((item) => item.status !== 'cancelled');
     const cancelledAppointments = appointments.filter((item) => item.status === 'cancelled');
@@ -335,8 +367,13 @@ export default function Calendar() {
       cancelledAppointments,
       unplacedItems: [...requests, ...activeAppointments].filter((item) => !placedIds.has(`${item.kind}-${item.id}`)),
       dayUnplacedItems: [...requests, ...appointments].filter((item) => !placedIds.has(`${item.kind}-${item.id}`)),
+      searchMatchedCount,
     };
-  }), [bookingSchedule, bookingTimeWindows, calendarItems, data.appointments, weekStart, workstationCapacity]);
+  }), [bookingSchedule, bookingTimeWindows, calendarItems, data.appointments, searchQuery, weekStart, workstationCapacity]);
+  const calendarSearchMatchCount = useMemo(
+    () => weekDays.reduce((count, day) => count + day.searchMatchedCount, 0),
+    [weekDays]
+  );
 
   const openManual = useCallback(async (clientId = '', preset = null) => {
     setError('');
@@ -718,6 +755,9 @@ export default function Calendar() {
           mode={calendarMode}
           rangeLabel={planningRangeLabel}
           compactRangeLabel={compactPlanningRangeLabel}
+          onSearch={setCalendarSearchValue}
+          searchValue={calendarSearchValue}
+          searchCount={calendarSearchMatchCount}
           onMode={setCalendarMode}
           onPrevious={() => moveCalendar(-1)}
           onNext={() => moveCalendar(1)}
