@@ -70,6 +70,7 @@
 
 .gh-calendar-date-jump {
   display: flex;
+  flex: 0 0 auto;
   height: 44px;
   align-items: center;
   gap: 7px;
@@ -103,7 +104,6 @@
   margin: 0;
   border: 0;
   padding: 0;
-  border: 0;
   background: transparent;
   color: var(--color-text-primary);
   font: inherit;
@@ -113,14 +113,32 @@
   display: none;
 }
 
+.gh-calendar-date-jump--fallback {
+  flex-wrap: wrap;
+  height: auto;
+  max-width: 240px;
+}
+
+.gh-calendar-date-jump--fallback .gh-calendar-date-input {
+  position: static;
+  flex: 1;
+  width: 140px;
+  min-height: 44px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gh-calendar-date-jump--fallback input::-webkit-datetime-edit {
+  display: inline-block;
+}
+
 .gh-calendar-date-jump__warning {
-  position: absolute;
-  right: 4px;
-  bottom: -18px;
+  flex-basis: 100%;
+  padding: 0 6px 6px;
   color: var(--color-warning-text);
   font-size: 10px;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .gh-planning-search {
@@ -138,6 +156,8 @@
 
 .gh-planning-search__input {
   width: 100%;
+  min-width: 0;
+  flex: 1;
   min-height: 44px;
   padding: 0 8px;
   border: 1px solid var(--gh-border-60);
@@ -906,6 +926,12 @@
   gap: 9px;
 }
 
+.gh-planning-navigation {
+  flex: 1 1 760px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
 .gh-planning-range {
   display: inline-flex;
   min-width: 176px;
@@ -937,6 +963,7 @@
 
 .gh-planning-switch {
   display: inline-flex;
+  flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--gh-border-60);
   border-radius: var(--gh-r-field);
@@ -1156,7 +1183,10 @@
 }
 
 .gh-planning-chip--search-match {
-  border-color: color-mix(in srgb, var(--color-primary) 64%, var(--gh-border-35));
+  border-color: var(--color-text-primary);
+  background: var(--color-primary);
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 1px;
 }
 
 .gh-planning-chip__time {
@@ -1208,6 +1238,12 @@
 
 .gh-planning-chip--request .gh-planning-chip__copy small {
   color: var(--color-warning-text);
+}
+
+.gh-planning-chip--search-match .gh-planning-chip__copy small,
+.gh-planning-chip--search-match .gh-planning-chip__band {
+  color: var(--color-text-primary);
+  border-color: currentColor;
 }
 
 .gh-planning-chip__tags {
@@ -1503,6 +1539,7 @@
 
   .gh-planning-toolbar {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     min-width: 0;
   }
 

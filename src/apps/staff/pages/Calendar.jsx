@@ -321,12 +321,17 @@ export default function Calendar() {
       photo: visit.client?.photo,
       subtitle: `«${visit.treatments || 'Nessun dettaglio registrato'}»`,
     }));
-    return [...requests, ...appointments, ...visits].map((item) => ({
-      ...item,
-      tags: makeTags(item),
-      phoneDigits: normalizePhoneDigits(item.client?.phone),
-      isSearchMatch: isSearchMatch(item),
-    }));
+    return [...requests, ...appointments, ...visits].map((item) => {
+      const searchableItem = {
+        ...item,
+        phoneDigits: normalizePhoneDigits(item.client?.phone),
+      };
+      return {
+        ...searchableItem,
+        tags: makeTags(item),
+        isSearchMatch: isSearchMatch(searchableItem),
+      };
+    });
   }, [data, isSearchMatch, makeTags]);
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, index) => {
     const date = addDays(weekStart, index);

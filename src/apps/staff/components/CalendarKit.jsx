@@ -320,16 +320,40 @@ export function CalendarNavigation({
   summary,
 }) {
   const dateInputRef = useRef(null);
+  const datePickerOpenRef = useRef(false);
+  const datePickerFrameRef = useRef(null);
   const [calendarPickerUnavailable, setCalendarPickerUnavailable] = useState(false);
+  const dateInputId = useId();
+  const dateWarningId = useId();
+
+  useEffect(() => () => cancelAnimationFrame(datePickerFrameRef.current), []);
+
   const openDatePicker = () => {
     const current = dateInputRef.current;
     if (!current) return;
-    if (typeof current.showPicker === 'function') {
+    if (datePickerOpenRef.current) {
+      cancelAnimationFrame(datePickerFrameRef.current);
+      datePickerOpenRef.current = false;
+      current.blur();
+      return;
+    }
+    if (typeof current.showPicker === 'function' && CSS.supports('selector(:open)')) {
       try {
+        current.focus();
         current.showPicker();
+        if (!current.matches(':open')) throw new Error('Date picker unavailable');
+        setCalendarPickerUnavailable(false);
+        // Native pickers close before pointerdown and consume Escape without a DOM event.
+        const trackPicker = () => {
+          datePickerOpenRef.current = current.matches(':open');
+          if (datePickerOpenRef.current) {
+            datePickerFrameRef.current = requestAnimationFrame(trackPicker);
+          }
+        };
+        trackPicker();
         return;
-      } catch (error) {
-        setCalendarPickerUnavailable(true);
+      } catch {
+        // The visible date field remains usable when rapid opening is unavailable.
       }
     }
     setCalendarPickerUnavailable(true);
@@ -352,20 +376,23 @@ export function CalendarNavigation({
           <span className="gh-planning-range__compact">{compactRangeLabel || rangeLabel}</span>
         </button>
           <Button staff className="gh-planning-next" variant="outline" icon="chevron" aria-label={mode === 'week' ? 'Settimana successiva' : 'Giorno successivo'} onClick={onNext} />
-        <label className="gh-calendar-date-jump">
-          <span className="gh-sr-only">Vai a data</span>
+        <div className={`gh-calendar-date-jump${calendarPickerUnavailable ? ' gh-calendar-date-jump--fallback' : ''}`}>
+          <label className="gh-sr-only" htmlFor={dateInputId}>Vai a data</label>
           <input
+            id={dateInputId}
             ref={dateInputRef}
             className="gh-calendar-date-input"
             type="date"
+            tabIndex={calendarPickerUnavailable ? 0 : -1}
+            aria-describedby={calendarPickerUnavailable ? dateWarningId : undefined}
             value={dateValue}
             onChange={onDate}
           />
           <button className="gh-calendar-date-jump__button" type="button" aria-label="Vai a data" title="Vai a data" onClick={openDatePicker}>
             <Icon name="calendar" size={16} />
           </button>
-          {calendarPickerUnavailable ? <span className="gh-calendar-date-jump__warning" role="status">Il browser non consente l'apertura rapida.</span> : null}
-        </label>
+          {calendarPickerUnavailable ? <span id={dateWarningId} className="gh-calendar-date-jump__warning" role="status">Il browser non consente l'apertura rapida.</span> : null}
+        </div>
         <label className="gh-planning-search">
           <span>Cerca</span>
           <input
