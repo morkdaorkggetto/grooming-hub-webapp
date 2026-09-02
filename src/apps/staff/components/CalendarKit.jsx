@@ -398,7 +398,7 @@ export function CalendarNavigation({
           <input
             type="search"
             value={searchValue || ''}
-            placeholder="Cerca pet, proprietario, telefono"
+            placeholder="pet, proprietario, cell"
             onChange={(event) => onSearch(event.target.value)}
             className="gh-planning-search__input"
           />

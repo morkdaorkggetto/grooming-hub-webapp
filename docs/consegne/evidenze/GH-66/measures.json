@@ -1,0 +1,1849 @@
+{
+  "checks": [
+    "9 non-matching cards: all computed styles identical; counters, days and margins unchanged",
+    "Matched appointment: same text colors/weights and border widths as unmarked",
+    "Name, owner and three differently formatted partial phone queries: PASS",
+    "Matched request: unchanged text colors and no added outline",
+    "Exact placeholder fits at 1365/1024/375; 10 cards and sole match within desktop viewport",
+    "Native date picker unchanged: three open/close cycles PASS"
+  ],
+  "viewports": [
+    {
+      "width": 1365,
+      "placeholder": {
+        "text": "pet, proprietario, cell",
+        "length": 23,
+        "textWidth": 113.921875,
+        "available": 183,
+        "width": 201.03125,
+        "height": 44,
+        "visibleLabel": "Cerca",
+        "pageWidth": 1365,
+        "scrollWidth": 1365
+      },
+      "visibleCards": 10,
+      "match": {
+        "x": 447.640625,
+        "y": 399.296875,
+        "width": 145.5625,
+        "height": 64.25
+      }
+    },
+    {
+      "width": 1024,
+      "placeholder": {
+        "text": "pet, proprietario, cell",
+        "length": 23,
+        "textWidth": 113.921875,
+        "available": 183,
+        "width": 201.03125,
+        "height": 44,
+        "visibleLabel": "Cerca",
+        "pageWidth": 1024,
+        "scrollWidth": 1024
+      },
+      "visibleCards": 10,
+      "match": {
+        "x": 310.5625,
+        "y": 400.046875,
+        "width": 123.28125,
+        "height": 64.25
+      }
+    },
+    {
+      "width": 375,
+      "placeholder": {
+        "text": "pet, proprietario, cell",
+        "length": 23,
+        "textWidth": 113.921875,
+        "available": 292,
+        "width": 310.03125,
+        "height": 44,
+        "visibleLabel": "Cerca",
+        "pageWidth": 375,
+        "scrollWidth": 375
+      },
+      "visibleCards": 2,
+      "match": {
+        "x": 35,
+        "y": 1344.75,
+        "width": 305,
+        "height": 64.25
+      }
+    }
+  ],
+  "before": {
+    "normal": {
+      "summary": "9 prenotati\n1 da confermare\n0 lavorati sul momento",
+      "cards": [
+        {
+          "name": "Milo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Milo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 121.5,
+            "y": 297.796875,
+            "width": 146.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Nina",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "14:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Nina",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 121.5,
+            "y": 509.234375,
+            "width": 146.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Poldo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Poldo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 285.0625,
+            "y": 297.796875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Lola",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Lola",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 447.640625,
+            "y": 297.796875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Arturo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "11:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Arturo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 447.640625,
+            "y": 368.046875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Tobia",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Tobia",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 610.203125,
+            "y": 297.796875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Kira",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Kira",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 772.78125,
+            "y": 297.796875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Olivia",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "14:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Olivia",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 772.78125,
+            "y": 509.234375,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Bruno",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Bruno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 935.34375,
+            "y": 297.796875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Ada",
+          "match": false,
+          "bg": "rgb(239, 227, 222)",
+          "borderColor": "rgb(200, 168, 159)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "1px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "mattina",
+              "color": "rgb(127, 93, 96)",
+              "weight": "700"
+            },
+            {
+              "text": "Ada",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Da confermare",
+              "color": "rgb(127, 93, 96)",
+              "weight": "400"
+            }
+          ],
+          "rect": {
+            "x": 1097.921875,
+            "y": 297.796875,
+            "width": 145.5625,
+            "height": 47.5
+          }
+        }
+      ],
+      "days": 7,
+      "margin": 14
+    },
+    "found": {
+      "summary": "9 prenotati\n1 da confermare\n0 lavorati sul momento",
+      "cards": [
+        {
+          "name": "Milo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Milo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 121.5,
+            "y": 329.046875,
+            "width": 146.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Nina",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "14:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Nina",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 121.5,
+            "y": 540.484375,
+            "width": 146.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Poldo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Poldo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 285.0625,
+            "y": 329.046875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Lola",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Lola",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 447.640625,
+            "y": 329.046875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Arturo",
+          "match": true,
+          "bg": "rgb(111, 151, 146)",
+          "borderColor": "rgb(43, 37, 37)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 2,
+          "outlineOffset": "1px",
+          "text": [
+            {
+              "text": "11:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Arturo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 447.640625,
+            "y": 399.296875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Tobia",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Tobia",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 610.203125,
+            "y": 329.046875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Kira",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Kira",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 772.78125,
+            "y": 329.046875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Olivia",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "14:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Olivia",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 772.78125,
+            "y": 540.484375,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Bruno",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Bruno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 935.34375,
+            "y": 329.046875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Ada",
+          "match": false,
+          "bg": "rgb(239, 227, 222)",
+          "borderColor": "rgb(200, 168, 159)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "1px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "mattina",
+              "color": "rgb(127, 93, 96)",
+              "weight": "700"
+            },
+            {
+              "text": "Ada",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Da confermare",
+              "color": "rgb(127, 93, 96)",
+              "weight": "400"
+            }
+          ],
+          "rect": {
+            "x": 1097.921875,
+            "y": 329.046875,
+            "width": 145.5625,
+            "height": 47.5
+          }
+        }
+      ],
+      "days": 7,
+      "margin": 14
+    }
+  },
+  "after": {
+    "normal": {
+      "summary": "9 prenotati\n1 da confermare\n0 lavorati sul momento",
+      "cards": [
+        {
+          "name": "Milo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Milo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 121.5,
+            "y": 297.796875,
+            "width": 146.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Nina",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "14:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Nina",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 121.5,
+            "y": 509.234375,
+            "width": 146.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Poldo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Poldo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 285.0625,
+            "y": 297.796875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Lola",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Lola",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 447.640625,
+            "y": 297.796875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Arturo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "11:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Arturo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 447.640625,
+            "y": 368.046875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Tobia",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Tobia",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 610.203125,
+            "y": 297.796875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Kira",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Kira",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 772.78125,
+            "y": 297.796875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Olivia",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "14:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Olivia",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 772.78125,
+            "y": 509.234375,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Bruno",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Bruno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 935.34375,
+            "y": 297.796875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Ada",
+          "match": false,
+          "bg": "rgb(239, 227, 222)",
+          "borderColor": "rgb(200, 168, 159)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "1px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "mattina",
+              "color": "rgb(127, 93, 96)",
+              "weight": "700"
+            },
+            {
+              "text": "Ada",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Da confermare",
+              "color": "rgb(127, 93, 96)",
+              "weight": "400"
+            }
+          ],
+          "rect": {
+            "x": 1097.921875,
+            "y": 297.796875,
+            "width": 145.5625,
+            "height": 47.5
+          }
+        }
+      ],
+      "days": 7,
+      "margin": 14
+    },
+    "found": {
+      "summary": "9 prenotati\n1 da confermare\n0 lavorati sul momento",
+      "cards": [
+        {
+          "name": "Milo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Milo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 121.5,
+            "y": 329.046875,
+            "width": 146.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Nina",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "14:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Nina",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 121.5,
+            "y": 540.484375,
+            "width": 146.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Poldo",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Poldo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 285.0625,
+            "y": 329.046875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Lola",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Lola",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 447.640625,
+            "y": 329.046875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Arturo",
+          "match": true,
+          "bg": "color(srgb 0.435294 0.592157 0.572549 / 0.05)",
+          "borderColor": "rgb(43, 37, 37)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "11:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Arturo",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 447.640625,
+            "y": 399.296875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Tobia",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Tobia",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 610.203125,
+            "y": 329.046875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Kira",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Kira",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 772.78125,
+            "y": 329.046875,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Olivia",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "14:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Olivia",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Taglio",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 772.78125,
+            "y": 540.484375,
+            "width": 145.5625,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Bruno",
+          "match": false,
+          "bg": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgba(207, 193, 196, 0.6) rgb(111, 151, 146)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "3px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "09:00",
+              "color": "rgb(43, 37, 37)",
+              "weight": "400"
+            },
+            {
+              "text": "Bruno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Appuntamento · 60′",
+              "color": "rgb(127, 111, 115)",
+              "weight": "400"
+            },
+            {
+              "text": "Bagno",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            }
+          ],
+          "rect": {
+            "x": 935.34375,
+            "y": 329.046875,
+            "width": 145.578125,
+            "height": 64.25
+          }
+        },
+        {
+          "name": "Ada",
+          "match": false,
+          "bg": "rgb(239, 227, 222)",
+          "borderColor": "rgb(200, 168, 159)",
+          "borderWidths": [
+            "1px",
+            "1px",
+            "1px",
+            "1px"
+          ],
+          "outline": 0,
+          "outlineOffset": "0px",
+          "text": [
+            {
+              "text": "mattina",
+              "color": "rgb(127, 93, 96)",
+              "weight": "700"
+            },
+            {
+              "text": "Ada",
+              "color": "rgb(43, 37, 37)",
+              "weight": "650"
+            },
+            {
+              "text": "Da confermare",
+              "color": "rgb(127, 93, 96)",
+              "weight": "400"
+            }
+          ],
+          "rect": {
+            "x": 1097.921875,
+            "y": 329.046875,
+            "width": 145.5625,
+            "height": 47.5
+          }
+        }
+      ],
+      "days": 7,
+      "margin": 14
+    }
+  },
+  "request": {
+    "name": "Ada",
+    "match": true,
+    "bg": "color(srgb 0.435294 0.592157 0.572549 / 0.05)",
+    "borderColor": "rgb(43, 37, 37)",
+    "borderWidths": [
+      "1px",
+      "1px",
+      "1px",
+      "1px"
+    ],
+    "outline": 0,
+    "outlineOffset": "0px",
+    "text": [
+      {
+        "text": "mattina",
+        "color": "rgb(127, 93, 96)",
+        "weight": "700"
+      },
+      {
+        "text": "Ada",
+        "color": "rgb(43, 37, 37)",
+        "weight": "650"
+      },
+      {
+        "text": "Da confermare",
+        "color": "rgb(127, 93, 96)",
+        "weight": "400"
+      }
+    ],
+    "rect": {
+      "x": 1097.921875,
+      "y": 329.046875,
+      "width": 145.5625,
+      "height": 47.5
+    }
+  },
+  "pixels": {
+    "samples": [
+      {
+        "name": "match",
+        "crop": {
+          "left": 448,
+          "top": 400,
+          "width": 144,
+          "height": 62
+        },
+        "total": 8928,
+        "dominantColor": "248,250,250",
+        "dominantPixels": 7708,
+        "primaryPixels": 0,
+        "tintPixels": 7708
+      },
+      {
+        "name": "neighbor",
+        "crop": {
+          "left": 448,
+          "top": 330,
+          "width": 144,
+          "height": 62
+        },
+        "total": 8928,
+        "dominantColor": "255,255,255",
+        "dominantPixels": 7774,
+        "primaryPixels": 162,
+        "tintPixels": 0
+      }
+    ],
+    "tintPercentage": 86.33512544802868,
+    "neighborAccentPercentage": 1.814516129032258,
+    "areaToAccentRatio": 47.58024691358025,
+    "sameTintOnNeighborPercentage": 0
+  },
+  "contrast": {
+    "borderToTint": 14.379556198587975,
+    "borderToWhite": 15.063917063556156,
+    "secondaryToTint": 4.531448821141541
+  },
+  "errors": [],
+  "blockedRequests": [],
+  "browser": "151.0.7922.34",
+  "runtimeSeconds": 2.96481125
+}

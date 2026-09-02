@@ -1184,9 +1184,7 @@
 
 .gh-planning-chip--search-match {
   border-color: var(--color-text-primary);
-  background: var(--color-primary);
-  outline: 2px solid var(--color-text-primary);
-  outline-offset: 1px;
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
 }
 
 .gh-planning-chip__time {
@@ -1238,12 +1236,6 @@
 
 .gh-planning-chip--request .gh-planning-chip__copy small {
   color: var(--color-warning-text);
-}
-
-.gh-planning-chip--search-match .gh-planning-chip__copy small,
-.gh-planning-chip--search-match .gh-planning-chip__band {
-  color: var(--color-text-primary);
-  border-color: currentColor;
 }
 
 .gh-planning-chip__tags {
