@@ -1,4 +1,4 @@
-# Incarico GH-67 — La velatura giusta, e il calendarietto che si chiude
+# Incarico GH-67 — La velatura giusta, e il calendarietto che se ne va
 
 **Progetto di appartenenza: Grooming Hub SaaS** — root `/Users/luigimaisto/Desktop/grooming-hub-web/`, worktree applicativo `webapp/`.
 **Per:** Codex (una sola sessione) · **Da:** Luigi · **Data:** 2 settembre 2026
@@ -34,40 +34,38 @@ Quindi: **se sulla velatura scelta il secondario scende sotto 4,5:1, può scurir
 
 **Il bordo scuro resta com'è**: funziona, supera i 3:1, e non va né ingrossato né aggiunto di contorni. **Nessun colore nuovo.**
 
-## 2 — Il calendarietto resta aperto su Safari
+## 2 — Il calendarietto si toglie
 
-`GH-66` ha **riprodotto e diagnosticato** il difetto su Safari 26.5 reale, e **non l'ha corretto**: il secondo clic lascia il mini calendario visibile, e nella sequenza osservata resta anche dopo Esc e dopo un clic esterno.
+Decisione di Luigi del 2/9, presa dopo tre giri di riparazioni: **il comando «vai a data» esce dal calendario.**
 
-**Causa misurata**: il contratto di chiusura basato su `blur()` e sul campionamento dello stato nativo **non è affidabile su Safari**.
+**Non è una resa davanti a un difetto: è una misura.** Contati in produzione il 2/9:
 
-**La raccomandazione è già scritta nel registro di `GH-66` §Safari, e vale come istruzione:** chiusura esplicita centralizzata, con rimozione temporanea del campo dal rendering, ripristino del valore e del fuoco sul comando, verificando l'ordine `pointerdown` / `focusout` / `click` **nei due browser**.
+| appuntamenti futuri | **57** |
+|---|---:|
+| il più lontano | **10 giorni** |
+| media | 3,6 giorni |
+| oltre due settimane | **0** |
+| oltre un mese | **0** |
 
-> **Due cose che il registro precedente ha dichiarato e che vanno rispettate**: **non basta sostituire un `blur()`**, e **non basta un ritardo arbitrario**. E la tecnica del `display:none` è stata verificata **solo in isolamento**: se nell'applicazione vera non regge, **fermati e dichiaralo** invece di adattarla finché passa.
+**L'intero orizzonte di prenotazione del salone sta dentro due clic della freccia.** Il selettore serve a saltare lontano, e nessuno va lontano. Sul telefono è già nascosto da `GH-55` e non è mancato a nessuno.
 
-**Il ripiego resta**: se `showPicker()` manca o fallisce, avviso più campo data visibile e modificabile. **Non si tocca.**
+> **La lezione, e vale oltre questo comando.** Tre giri spesi a far funzionare qualcosa che nessuno usa. La misura che l'avrebbe evitato — *quanto lontano prenotano?* — era disponibile dall'inizio: non è stata fatta perché il comando c'era già, e ci si è chiesti **come farlo funzionare** invece di **se servisse**.
 
-## 3 — Il pulsante resta acceso dopo il clic
+**Cosa se ne va con lui**: il popup che resta aperto su Safari, il pulsante che resta acceso, la regola `:focus-within`, l'icona, il campo nascosto, il ripiego con l'avviso, e le proprietà `dateValue` / `onDate` di `CalendarNavigation` — che diventano **codice morto e vanno rimosse, non lasciate inerti**.
 
-Misurato leggendo il foglio di stile:
+**Cosa resta e non si tocca**: le frecce, il ritorno a oggi sull'intervallo (`GH-55`), l'interruttore Settimana/Giorno, il campo di ricerca.
 
-```css
-.gh-calendar-date-jump:focus-within {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-```
+**In modo giorno si arriva a una data** toccando il giorno nella settimana, oppure con le frecce. **Verifica che quella strada esista e funzioni** prima di togliere il comando: se non ci fosse, **fermati e dichiaralo.**
 
-**`:focus-within` reagisce anche al mouse.** Dopo un clic il fuoco resta dentro il riquadro — e `openDatePicker` ce lo mette pure esplicitamente nel ramo di ripiego — quindi **il contorno verde resta acceso** e il comando sembra premuto.
-
-**Il contorno non si toglie**: è l'indicatore di fuoco per chi naviga da tastiera, e rimuoverlo sarebbe un peggioramento vero.
-
-**Deve comparire per la tastiera e non dopo un clic del mouse.** La strada è `:focus-visible` sui comandi interni, o `:has(:focus-visible)` sul contenitore — **verifica il supporto sul Safari del banco prima di sceglierla**, e dichiara quale hai usato.
+**E la riga guadagna spazio**: misura cosa succede alla barra a 1365, 1024 e 375px adesso che un comando da 44px non c'è più — in particolare **se il campo di ricerca risale di riga** sul telefono. Dichiara il risultato, non ottimizzarlo: è un effetto da osservare, non una nuova composizione.
 
 ## Invarianti
 
 **Nessuna migrazione, nessuna query, nessun dato toccato.**
 
-**Non si toccano**: la normalizzazione del telefono e l'oggetto passato al confronto (`GH-65`), il segnaposto `pet, proprietario, cell` (`GH-66`), il ripiego del selettore con avviso e campo visibile.
+**Non si toccano**: la normalizzazione del telefono e l'oggetto passato al confronto (`GH-65`), il segnaposto `pet, proprietario, cell` (`GH-66`), le frecce, il ritorno a oggi sull'intervallo, l'interruttore.
+
+**Nessun residuo del comando rimosso.** Né CSS orfano, né proprietà inerti, né stringhe: se resta qualcosa, il prossimo che legge crede sia in uso.
 
 **La ricerca continua a marcare e non filtrare**: non nasconde niente, **non smorza le schede non corrispondenti**, i conteggi in alto non cambiano.
 
@@ -85,8 +83,9 @@ Dichiara nel registro. **Numeri, non aggettivi.**
 - **bordi e contorni misurati**: nessuno spessore cambiato, nessun contorno nuovo;
 - **una settimana con dieci schede e una corrispondenza**: si individua senza scorrere a 1365 e 1024px;
 - **le schede non corrispondenti sono identiche** a prima della ricerca;
-- **Safari 26.5 reale**: tre cicli sullo stesso pulsante, clic esterno, Esc, selezione effettiva di una data, apertura successiva, uso da tastiera, cambio vista, smontaggio senza popup residuo. **Ripeti tutto su Chromium.** Se una sola sequenza non chiude, **è un FAIL dichiarato, non un dettaglio;**
-- **il pulsante non resta acceso dopo un clic del mouse**, e **resta visibile navigando da tastiera**: due prove distinte, in entrambi i browser;
+- **il comando data non esiste più**: nessun pulsante, nessuna icona, nessun campo nascosto, **nessun residuo** in JSX o CSS. Dimostralo con una ricerca su `date-jump`, `showPicker`, `dateValue`, `onDate`, `focus-within`;
+- **si arriva ancora a un giorno preciso**: dal modo settimana toccando il giorno, e con le frecce in modo giorno — due prove;
+- **la barra dopo la rimozione** a 1365, 1024 e 375px: posizione del campo di ricerca, righe occupate, bersagli sotto i 44px, sbordamento. **Dichiara se il campo è risalito di riga sul telefono**;
 - **non regressioni**: ricerca per nome, proprietario e telefono parziale in formato diverso (`7890`, `333456`);
 - build verde. **Suite RLS: da non rieseguire.** Dichiara l'ultima misura viva.
 
@@ -96,10 +95,12 @@ Dichiara nel registro. **Numeri, non aggettivi.**
 
 1. **cerca un cane in una settimana piena**: si trova a colpo d'occhio, senza sapere già dov'è?
 2. **guardala accanto alle vicine**: è una scheda marcata, o è diventata una scheda di un altro tipo?
-3. **apri e chiudi il calendarietto tre volte**, poi cambia settimana: resta qualcosa a schermo?
-4. **dopo aver cliccato l'icona**: il pulsante è tornato spento?
+3. **la barra senza il calendarietto**: è più leggibile, o manca qualcosa?
+4. **prova ad arrivare a un giorno preciso** senza di lui: quante mosse ci vogliono, e ti sembrano troppe?
 
-La prima è la decisione: **se devi sapere dov'è per vederla, la velatura è ancora troppo bassa.**
+La prima è la decisione sulla velatura: **se devi sapere dov'è per vederla, è ancora troppo bassa.**
+
+La quarta è la verifica della decisione di toglierlo: **se ti dà fastidio già al primo tentativo, l'abbiamo tolto a torto** — e la misura sui 10 giorni riguardava le prenotazioni, non tutto quello che si fa guardando un calendario.
 
 La domanda è **«cosa non ti torna?»**, non «funziona?».
 
