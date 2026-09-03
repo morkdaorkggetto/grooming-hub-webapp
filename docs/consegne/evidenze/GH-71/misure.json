@@ -1,0 +1,697 @@
+{
+  "base": "e5404b5486efc72cf51480b5faa8609019020770",
+  "measuredAt": "2026-09-03T05:11:24.827Z",
+  "environment": "Chromium isolated; real Contacts component and data adapter; getCurrentUser stub; localhost REST intercepted; 9 synthetic contacts; no live DB",
+  "sourceHashes": {
+    "src/apps/staff/pages/Contacts.jsx": "1eb2a0ea6ca24a5e7dd58e96b57b7b59b92c8494bf8d1a1f3e77368fd3e1ed39",
+    "src/apps/staff/lib/database.js": "754205329d8ecdcad2693de91bc604353f928958478182dbef6f0b7cd044f284",
+    "src/apps/staff/styles/gh15-staff.css": "90e6435f4e4eb50da93c9a61b25b4887b08b1b1a3a711c4cc42594605f875618"
+  },
+  "fixtures": [
+    {
+      "name": "Cliente Standard",
+      "status": "active",
+      "source": "manual",
+      "pets": [
+        {
+          "id": "one",
+          "name": "Alfa",
+          "breed": "Maltese",
+          "created_at": "2026-09-01T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Nuovo Lead",
+      "status": "lead",
+      "source": "manual",
+      "pets": []
+    },
+    {
+      "name": "Gia Contattato",
+      "status": "contacted",
+      "source": "manual",
+      "pets": []
+    },
+    {
+      "name": "Contatto Archiviato",
+      "status": "archived",
+      "source": "manual",
+      "pets": []
+    },
+    {
+      "name": "Cliente QR",
+      "status": "active",
+      "source": "qr",
+      "pets": [
+        {
+          "id": "none",
+          "name": "Beta",
+          "breed": null,
+          "created_at": "2026-09-01T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Cliente WhatsApp",
+      "status": "active",
+      "source": "whatsapp",
+      "pets": [
+        {
+          "id": "lower",
+          "name": "Delta",
+          "breed": "barboncino",
+          "created_at": "2026-09-01T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Lead QR",
+      "status": "lead",
+      "source": "qr",
+      "pets": []
+    },
+    {
+      "name": "Tre Pet",
+      "status": "active",
+      "source": "manual",
+      "pets": [
+        {
+          "id": "first",
+          "name": "Alfa",
+          "breed": "Barboncino",
+          "created_at": "2026-09-01T10:00:00Z"
+        },
+        {
+          "id": "second",
+          "name": "Beta",
+          "breed": "Barboncina bianca e nera",
+          "created_at": "2026-09-01T10:00:00Z"
+        },
+        {
+          "id": "third",
+          "name": "Gamma",
+          "breed": "",
+          "created_at": "2026-09-01T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Razza Vuota",
+      "status": "active",
+      "source": "manual",
+      "pets": [
+        {
+          "id": "whitespace",
+          "name": "Eta",
+          "breed": "   ",
+          "created_at": "2026-09-01T10:00:00Z"
+        }
+      ]
+    }
+  ],
+  "requests": {
+    "before": [
+      {
+        "table": "tenant_memberships",
+        "query": {
+          "select": "tenant_id,role,created_at",
+          "user_id": "eq.fixture-staff",
+          "order": "created_at.asc"
+        }
+      },
+      {
+        "table": "customers",
+        "query": {
+          "select": "id,tenant_id,user_id,first_name,last_name,email,phone,acquisition_source,relationship_status,created_at,updated_at,staff_notes:customer_staff_notes(notes),pets(id,name,breed,photo_url,created_at)",
+          "tenant_id": "eq.fixture-tenant",
+          "order": "created_at.desc"
+        }
+      }
+    ],
+    "after": [
+      {
+        "table": "tenant_memberships",
+        "query": {
+          "select": "tenant_id,role,created_at",
+          "user_id": "eq.fixture-staff",
+          "order": "created_at.asc"
+        }
+      },
+      {
+        "table": "customers",
+        "query": {
+          "select": "id,tenant_id,user_id,first_name,last_name,email,phone,acquisition_source,relationship_status,created_at,updated_at,staff_notes:customer_staff_notes(notes),pets(id,name,breed,photo_url,created_at)",
+          "tenant_id": "eq.fixture-tenant",
+          "order": "created_at.desc"
+        }
+      }
+    ]
+  },
+  "stats": {
+    "before": "DA GESTIRE\n2\nCONTATTATI\n1",
+    "after": "DA GESTIRE\n2\nCONTATTATI\n1"
+  },
+  "filters": {
+    "before": "Tutti\n9\nLead\n2\nContattati\n1\nClienti\n5\nArchiviati\n1",
+    "after": "Tutti\n9\nLead\n2\nContattati\n1\nClienti\n5\nArchiviati\n1"
+  },
+  "filterResults": {
+    "Lead": [
+      "Nuovo Lead",
+      "Lead QR"
+    ],
+    "Contattati": [
+      "Gia Contattato"
+    ],
+    "Clienti": [
+      "Cliente Standard",
+      "Cliente QR",
+      "Cliente WhatsApp",
+      "Tre Pet",
+      "Razza Vuota"
+    ],
+    "Archiviati": [
+      "Contatto Archiviato"
+    ],
+    "Tutti": [
+      "Cliente Standard",
+      "Nuovo Lead",
+      "Gia Contattato",
+      "Contatto Archiviato",
+      "Cliente QR",
+      "Cliente WhatsApp",
+      "Lead QR",
+      "Tre Pet",
+      "Razza Vuota"
+    ]
+  },
+  "searchResults": {
+    "333": [
+      "Cliente Standard",
+      "Nuovo Lead",
+      "Gia Contattato",
+      "Contatto Archiviato",
+      "Cliente QR",
+      "Cliente WhatsApp",
+      "Lead QR",
+      "Tre Pet",
+      "Razza Vuota"
+    ],
+    "Alfa": [
+      "Cliente Standard",
+      "Tre Pet"
+    ],
+    "Cliente Standard": [
+      "Cliente Standard"
+    ],
+    "appuntoinesistente": []
+  },
+  "tags": {
+    "before": {
+      "Cliente Standard": [
+        {
+          "text": "Cliente",
+          "class": "gh-state-tag gh-state-tag--success",
+          "bg": "rgb(227, 240, 231)",
+          "color": "rgb(79, 139, 103)"
+        },
+        {
+          "text": "Manuale",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Nuovo Lead": [
+        {
+          "text": "Lead",
+          "class": "gh-state-tag gh-state-tag--warning",
+          "bg": "rgb(239, 227, 222)",
+          "color": "rgb(127, 93, 96)"
+        },
+        {
+          "text": "Manuale",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Gia Contattato": [
+        {
+          "text": "Contattato",
+          "class": "gh-state-tag gh-state-tag--neutral",
+          "bg": "rgb(229, 215, 216)",
+          "color": "rgb(127, 111, 115)"
+        },
+        {
+          "text": "Manuale",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Contatto Archiviato": [
+        {
+          "text": "Archiviato",
+          "class": "gh-state-tag gh-state-tag--neutral",
+          "bg": "rgb(229, 215, 216)",
+          "color": "rgb(127, 111, 115)"
+        },
+        {
+          "text": "Manuale",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Cliente QR": [
+        {
+          "text": "Cliente",
+          "class": "gh-state-tag gh-state-tag--success",
+          "bg": "rgb(227, 240, 231)",
+          "color": "rgb(79, 139, 103)"
+        },
+        {
+          "text": "QR pubblico",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Cliente WhatsApp": [
+        {
+          "text": "Cliente",
+          "class": "gh-state-tag gh-state-tag--success",
+          "bg": "rgb(227, 240, 231)",
+          "color": "rgb(79, 139, 103)"
+        },
+        {
+          "text": "WhatsApp",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Lead QR": [
+        {
+          "text": "Lead",
+          "class": "gh-state-tag gh-state-tag--warning",
+          "bg": "rgb(239, 227, 222)",
+          "color": "rgb(127, 93, 96)"
+        },
+        {
+          "text": "QR pubblico",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Tre Pet": [
+        {
+          "text": "Cliente",
+          "class": "gh-state-tag gh-state-tag--success",
+          "bg": "rgb(227, 240, 231)",
+          "color": "rgb(79, 139, 103)"
+        },
+        {
+          "text": "Manuale",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Razza Vuota": [
+        {
+          "text": "Cliente",
+          "class": "gh-state-tag gh-state-tag--success",
+          "bg": "rgb(227, 240, 231)",
+          "color": "rgb(79, 139, 103)"
+        },
+        {
+          "text": "Manuale",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ]
+    },
+    "after": {
+      "Cliente Standard": [],
+      "Nuovo Lead": [
+        {
+          "text": "Lead",
+          "class": "gh-state-tag gh-state-tag--warning",
+          "bg": "rgb(239, 227, 222)",
+          "color": "rgb(127, 93, 96)"
+        }
+      ],
+      "Gia Contattato": [
+        {
+          "text": "Contattato",
+          "class": "gh-state-tag gh-state-tag--neutral",
+          "bg": "rgb(229, 215, 216)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Contatto Archiviato": [
+        {
+          "text": "Archiviato",
+          "class": "gh-state-tag gh-state-tag--neutral",
+          "bg": "rgb(229, 215, 216)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Cliente QR": [
+        {
+          "text": "QR pubblico",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Cliente WhatsApp": [
+        {
+          "text": "WhatsApp",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Lead QR": [
+        {
+          "text": "Lead",
+          "class": "gh-state-tag gh-state-tag--warning",
+          "bg": "rgb(239, 227, 222)",
+          "color": "rgb(127, 93, 96)"
+        },
+        {
+          "text": "QR pubblico",
+          "class": "gh-contact-source",
+          "bg": "rgb(243, 236, 232)",
+          "color": "rgb(127, 111, 115)"
+        }
+      ],
+      "Tre Pet": [],
+      "Razza Vuota": []
+    }
+  },
+  "petSelection": [
+    {
+      "id": "first",
+      "breed": "Barboncino",
+      "reads": 2
+    },
+    {
+      "id": "second",
+      "breed": "Barboncina bianca e nera",
+      "reads": 2
+    },
+    {
+      "id": "third",
+      "breed": null,
+      "reads": 2
+    }
+  ],
+  "unchanged": [
+    "stats",
+    "filters",
+    "filterResults",
+    "searchResults",
+    "actions",
+    "whatsapp",
+    "sourceOptions",
+    "sourceValue"
+  ],
+  "actionLabels": {
+    "Cliente Standard": "Apri WhatsApp\nApri scheda pet",
+    "Nuovo Lead": "Apri WhatsApp\nAggiungi pet\nSegna contattato\nArchivia",
+    "Contatto Archiviato": "Apri WhatsApp\nAggiungi pet\nSegna contattato\nRiporta a lead",
+    "Tre Pet": "Apri WhatsApp\nSCEGLI PET\nAlfa\nBeta\nGamma\nApri scheda pet"
+  },
+  "petLink": "/client/second",
+  "sourceOptions": [
+    "Manuale",
+    "WhatsApp",
+    "QR pubblico"
+  ],
+  "sourceValue": "whatsapp",
+  "sizes": [
+    {
+      "viewport": 1365,
+      "standard": {
+        "before": {
+          "count": 9,
+          "minimumHeight": 32,
+          "minimumWidth": 67.15625,
+          "under44": 9,
+          "overflow": 0
+        },
+        "after": {
+          "count": 9,
+          "minimumHeight": 44,
+          "minimumWidth": 67.15625,
+          "under44": 0,
+          "overflow": 0
+        }
+      },
+      "multi": {
+        "before": {
+          "count": 10,
+          "minimumHeight": 32,
+          "minimumWidth": 67.15625,
+          "under44": 10,
+          "overflow": 0
+        },
+        "after": {
+          "count": 10,
+          "minimumHeight": 44,
+          "minimumWidth": 67.15625,
+          "under44": 0,
+          "overflow": 0
+        }
+      },
+      "formAndAllCards": {
+        "count": 41,
+        "minimumHeight": 44,
+        "minimumWidth": 67.15625,
+        "under44": 0,
+        "overflow": 0
+      },
+      "facts": [
+        {
+          "label": "Pet",
+          "text": "Alfa, Beta, Gamma",
+          "x": 126.5,
+          "y": 389.640625,
+          "width": 284,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Razza",
+          "text": "Barboncina bianca e nera",
+          "x": 422.5,
+          "y": 389.640625,
+          "width": 284,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Telefono",
+          "text": "+39 333 000 0000",
+          "x": 718.5,
+          "y": 389.640625,
+          "width": 284,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Creato il",
+          "text": "01/09/2026",
+          "x": 126.5,
+          "y": 438.640625,
+          "width": 284,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        }
+      ]
+    },
+    {
+      "viewport": 1024,
+      "standard": {
+        "before": {
+          "count": 9,
+          "minimumHeight": 32,
+          "minimumWidth": 67.15625,
+          "under44": 9,
+          "overflow": 0
+        },
+        "after": {
+          "count": 9,
+          "minimumHeight": 44,
+          "minimumWidth": 67.15625,
+          "under44": 0,
+          "overflow": 0
+        }
+      },
+      "multi": {
+        "before": {
+          "count": 10,
+          "minimumHeight": 32,
+          "minimumWidth": 67.15625,
+          "under44": 10,
+          "overflow": 0
+        },
+        "after": {
+          "count": 10,
+          "minimumHeight": 44,
+          "minimumWidth": 67.15625,
+          "under44": 0,
+          "overflow": 0
+        }
+      },
+      "formAndAllCards": {
+        "count": 41,
+        "minimumHeight": 44,
+        "minimumWidth": 67.15625,
+        "under44": 0,
+        "overflow": 0
+      },
+      "facts": [
+        {
+          "label": "Pet",
+          "text": "Alfa, Beta, Gamma",
+          "x": 34,
+          "y": 389.640625,
+          "width": 232,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Razza",
+          "text": "Barboncina bianca e nera",
+          "x": 278,
+          "y": 389.640625,
+          "width": 232,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Telefono",
+          "text": "+39 333 000 0000",
+          "x": 522,
+          "y": 389.640625,
+          "width": 232,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Creato il",
+          "text": "01/09/2026",
+          "x": 34,
+          "y": 438.640625,
+          "width": 232,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        }
+      ]
+    },
+    {
+      "viewport": 375,
+      "standard": {
+        "before": {
+          "count": 9,
+          "minimumHeight": 44,
+          "minimumWidth": 67.15625,
+          "under44": 0,
+          "overflow": 0
+        },
+        "after": {
+          "count": 9,
+          "minimumHeight": 44,
+          "minimumWidth": 67.15625,
+          "under44": 0,
+          "overflow": 0
+        }
+      },
+      "multi": {
+        "before": {
+          "count": 10,
+          "minimumHeight": 44,
+          "minimumWidth": 67.15625,
+          "under44": 0,
+          "overflow": 0
+        },
+        "after": {
+          "count": 10,
+          "minimumHeight": 44,
+          "minimumWidth": 67.15625,
+          "under44": 0,
+          "overflow": 0
+        }
+      },
+      "formAndAllCards": {
+        "count": 41,
+        "minimumHeight": 44,
+        "minimumWidth": 67.15625,
+        "under44": 0,
+        "overflow": 0
+      },
+      "facts": [
+        {
+          "label": "Pet",
+          "text": "Alfa, Beta, Gamma",
+          "x": 27,
+          "y": 526.53125,
+          "width": 321,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Razza",
+          "text": "Barboncina bianca e nera",
+          "x": 27,
+          "y": 572.53125,
+          "width": 321,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Telefono",
+          "text": "+39 333 000 0000",
+          "x": 27,
+          "y": 618.53125,
+          "width": 321,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        },
+        {
+          "label": "Creato il",
+          "text": "01/09/2026",
+          "x": 27,
+          "y": 664.53125,
+          "width": 321,
+          "height": 37,
+          "clipped": false,
+          "ellipsis": "clip"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "unexpectedNetwork": [],
+  "runtimeSeconds": 1.770166709,
+  "limits": "No real login, persistence or RLS rerun; staff shell and pet detail not mounted; state commands compared without executing writes; no live WhatsApp send; Safari and Luigi acceptance pending"
+}

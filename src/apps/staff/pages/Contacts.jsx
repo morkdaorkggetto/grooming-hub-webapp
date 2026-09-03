@@ -182,7 +182,7 @@ export default function Contacts() {
     <div className="gh-page gh-directory-page">
       <Hero
         title="Contatti"
-        subtitle="Direttorio clienti e richieste WhatsApp, QR pubblico e lead da gestire."
+        subtitle="Tutti i contatti del salone, e come richiamarli."
         right={(
           <HeroButton onClick={() => setShowCreateForm((prev) => !prev)}>
             {showCreateForm ? 'Chiudi form' : 'Nuovo contatto'}
@@ -194,7 +194,7 @@ export default function Contacts() {
         {error && <ErrorState title="I dati inseriti restano nel form" body={error} />}
 
         {showCreateForm && (
-          <Panel eyebrow="Nuovo contatto" title="Inserisci una richiesta in rubrica">
+          <Panel eyebrow="Nuovo contatto" title="Aggiungi un contatto alla rubrica">
             <form onSubmit={handleSubmit} className="gh-directory-form">
               <Field label="Nome cane" value={form.pet_name} onChange={(e) => setForm((prev) => ({ ...prev, pet_name: e.target.value }))} placeholder="Es. Fido" />
               <Field label="Proprietario *" value={form.owner_name} onChange={(e) => setForm((prev) => ({ ...prev, owner_name: e.target.value }))} placeholder="Es. Luigi Rossi" required />
@@ -204,7 +204,7 @@ export default function Contacts() {
               </Field>
               <Field className="gh-directory-form__wide" label="Note" area value={form.notes} onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))} placeholder="Richiesta, appunto veloce o dettaglio utile" />
               <div className="gh-directory-form__wide gh-inline-actions">
-                <Button staff type="submit" loading={saving}>Salva lead</Button>
+                <Button staff type="submit" loading={saving}>Salva contatto</Button>
                 <Button staff type="button" variant="ghost" onClick={() => { setForm(INITIAL_FORM); setShowCreateForm(false); }}>Annulla</Button>
               </div>
             </form>
@@ -227,38 +227,47 @@ export default function Contacts() {
           <Panel><EmptyState title="Nessun contatto da mostrare" body="Aggiungi il primo contatto oppure cambia filtro per vedere richieste archiviate o già gestite." action={<Button staff onClick={() => setShowCreateForm(true)}>Nuovo contatto</Button>} /></Panel>
         ) : (
           <div className="gh-contact-list">
-            {filteredContacts.map((contact) => (
-              <Panel
-                className="gh-contact-card"
-                title={contact.owner_name || 'Cliente senza nome'}
-                right={<div className="gh-contact-card__tags"><StateTag tone={STATUS_TONES[contact.status] || 'warning'}>{STATUS_LABELS[contact.status]}</StateTag><span className="gh-contact-source">{SOURCE_LABELS[contact.source] || contact.source}</span></div>}
-                key={contact.id}
-              >
-                <div className="gh-contact-card__layout">
-                  <div className="gh-contact-card__copy">
-                    <dl className="gh-contact-facts">
-                      <div><dt>Pet</dt><dd>{contact.pet_name || 'Da associare'}</dd></div>
-                      <div><dt>Telefono</dt><dd className="gh-num">{contact.phone || 'Non indicato'}</dd></div>
-                      <div><dt>Creato il</dt><dd className="gh-num">{new Date(contact.created_at).toLocaleDateString('it-IT')}</dd></div>
-                    </dl>
-                    {contact.notes && <p className="gh-contact-notes gh-pre-wrap">{contact.notes}</p>}
+            {filteredContacts.map((contact) => {
+              const selectedPet = contact.pets.find((pet) => pet.id === selectedPetIds[contact.id]) || contact.pets[0];
+              return (
+                <Panel
+                  className="gh-contact-card"
+                  title={contact.owner_name || 'Cliente senza nome'}
+                  right={(contact.status !== 'active' || contact.source !== 'manual') && (
+                    <div className="gh-contact-card__tags">
+                      {contact.status !== 'active' && <StateTag tone={STATUS_TONES[contact.status] || 'warning'}>{STATUS_LABELS[contact.status]}</StateTag>}
+                      {contact.source !== 'manual' && <span className="gh-contact-source">{SOURCE_LABELS[contact.source] || contact.source}</span>}
+                    </div>
+                  )}
+                  key={contact.id}
+                >
+                  <div className="gh-contact-card__layout">
+                    <div className="gh-contact-card__copy">
+                      <dl className="gh-contact-facts">
+                        <div><dt>Pet</dt><dd>{contact.pet_name || 'Da associare'}</dd></div>
+                        {selectedPet?.breed?.trim() && <div><dt>Razza</dt><dd>{selectedPet.breed}</dd></div>}
+                        <div><dt>Telefono</dt><dd className="gh-num">{contact.phone || 'Non indicato'}</dd></div>
+                        <div><dt>Creato il</dt><dd className="gh-num">{new Date(contact.created_at).toLocaleDateString('it-IT')}</dd></div>
+                      </dl>
+                      {contact.notes && <p className="gh-contact-notes gh-pre-wrap">{contact.notes}</p>}
+                    </div>
+                    <div className="gh-contact-card__actions">
+                      <Button staff wide variant="whatsapp" onClick={() => handleOpenWhatsApp(contact)}>Apri WhatsApp</Button>
+                      {contact.pets.length === 0 && <Button staff wide onClick={() => handleConvertToClient(contact)}>Aggiungi pet</Button>}
+                      {contact.pets.length > 1 && (
+                        <Field label="Scegli pet" as="select" value={selectedPetIds[contact.id] || contact.pets[0].id} onChange={(event) => setSelectedPetIds((current) => ({ ...current, [contact.id]: event.target.value }))}>
+                          {contact.pets.map((pet) => <option key={pet.id} value={pet.id}>{pet.name}</option>)}
+                        </Field>
+                      )}
+                      {contact.pets.length > 0 && <Button staff wide variant="outline" onClick={() => handleOpenPet(contact)}>Apri scheda pet</Button>}
+                      {contact.pets.length === 0 && contact.status !== 'contacted' && <Button staff wide variant="outline" onClick={() => handleStatusChange(contact.id, 'contacted')}>Segna contattato</Button>}
+                      {contact.pets.length === 0 && contact.status !== 'lead' && <Button staff wide variant="ghost" onClick={() => handleStatusChange(contact.id, 'lead')}>Riporta a lead</Button>}
+                      {contact.pets.length === 0 && contact.status !== 'archived' && <Button staff wide variant="secondary" onClick={() => handleStatusChange(contact.id, 'archived')}>Archivia</Button>}
+                    </div>
                   </div>
-                  <div className="gh-contact-card__actions">
-                    <Button staff wide variant="whatsapp" onClick={() => handleOpenWhatsApp(contact)}>Apri WhatsApp</Button>
-                    {contact.pets.length === 0 && <Button staff wide onClick={() => handleConvertToClient(contact)}>Aggiungi pet</Button>}
-                    {contact.pets.length > 1 && (
-                      <Field label="Scegli pet" as="select" value={selectedPetIds[contact.id] || contact.pets[0].id} onChange={(event) => setSelectedPetIds((current) => ({ ...current, [contact.id]: event.target.value }))}>
-                        {contact.pets.map((pet) => <option key={pet.id} value={pet.id}>{pet.name}</option>)}
-                      </Field>
-                    )}
-                    {contact.pets.length > 0 && <Button staff wide variant="outline" onClick={() => handleOpenPet(contact)}>Apri scheda pet</Button>}
-                    {contact.pets.length === 0 && contact.status !== 'contacted' && <Button staff wide variant="outline" onClick={() => handleStatusChange(contact.id, 'contacted')}>Segna contattato</Button>}
-                    {contact.pets.length === 0 && contact.status !== 'lead' && <Button staff wide variant="ghost" onClick={() => handleStatusChange(contact.id, 'lead')}>Riporta a lead</Button>}
-                    {contact.pets.length === 0 && contact.status !== 'archived' && <Button staff wide variant="secondary" onClick={() => handleStatusChange(contact.id, 'archived')}>Archivia</Button>}
-                  </div>
-                </div>
-              </Panel>
-            ))}
+                </Panel>
+              );
+            })}
           </div>
         )}
       </main>

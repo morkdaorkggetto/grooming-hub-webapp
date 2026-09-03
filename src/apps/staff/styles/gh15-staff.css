@@ -1599,6 +1599,14 @@
   color: var(--color-primary);
 }
 
+.gh-directory-page :is(.gh-hero-button, .gh-btn, .gh-field:not(.gh-field--area), .gh-search) {
+  min-height: var(--gh-control-touch-height);
+}
+
+.gh-directory-page .gh-pill {
+  min-height: 44px;
+}
+
 .gh-directory-stack,
 .gh-daily-stack,
 .gh-requests-stack {

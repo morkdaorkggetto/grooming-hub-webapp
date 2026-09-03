@@ -517,7 +517,7 @@ export const getCustomerDirectory = async () => {
     `)
     .eq('tenant_id', tenantId)
     .order('created_at', { ascending: false });
-  if (error) throw new Error(`Non riesco a caricare il direttorio clienti: ${error.message}`);
+  if (error) throw new Error(`Non riesco a caricare la rubrica contatti: ${error.message}`);
 
   return (data || []).map((customer) => {
     const operatorNotes = relation(customer.staff_notes)?.notes || null;
