@@ -133,6 +133,33 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 
 ## Cronologia
 
+### 6 settembre 2026 — Il video si riordina sull'orologio (piano delle sequenze per CD)
+
+**Attori**: Luigi, Cowork
+
+**Contesto**: Claude Design ha consegnato il 5 settembre `GH Video Un Giorno In Negozio.html` — due minuti, sette sezioni dichiarate (la sua nota ne scrive «nove» nella prosa: discrepanza non risolta, il file non è su disco). Nella sua nota `Prototipo/GH-video-nota-cowork.md` §4 chiede a Cowork un piano ordinato di sequenze, una per sezione della timeline, con quattro campi: cosa si vede, cosa accade, cosa dice la didascalia, quanto dura.
+
+**Decisioni prese**:
+- **Il montaggio si riordina sull'orologio.** Diagnosi: l'ordine attuale è quello dei giri CD, non quello della giornata. La prova sta nella nota stessa — la sezione «Registra visita» è descritta da CD come «il gesto di fine serata» ma è collocata al minuto 1 di 2. È la ragione per cui Luigi lo ha letto come un prima/dopo pur non essendolo: un montaggio ordinato per flusso racconta la cronologia del progetto sotto quella del negozio.
+- **Il giorno del video è lunedì 31 agosto, 13→19.** Non scelto: già dichiarato da `W_TIPO` in `cd06-planning-viste.jsx` (`oggi: 0`). Spostarlo su un altro giorno renderebbe falso il marcatore «oggi» e obbligherebbe CD a toccare la composizione.
+- **Il lunedì mattina chiuso diventa la battuta d'apertura**, non un buco: per questo salone, di lunedì, «dall'apertura alla chiusura» significa 13→19, e la griglia lo sa già rendere.
+- **Il `senza: 3` del piede si guadagna invece di essere mostrato**: i tre entrati senza appuntamento arrivano durante il montaggio e il piede li conta alla fine.
+- **Il prima/dopo resta, ma solo dentro la sequenza della card pubblica** — è l'unico posto dove il confronto è il contenuto e non la struttura, perché la card vecchia esiste davvero in produzione.
+
+**Lavori completati**:
+- `_temp_updates/01-piano-sequenze-video-un-giorno-in-negozio.md` — undici sequenze, 2:34, con l'indicazione di quali due si spengono dal pannello per tornare a 2:12 senza ricomporre.
+
+**Aperto**:
+- **Domanda di posizionamento, da portare a Chat prima che CD monti.** La nota di CD dichiara «Pubblico: Luigi e voi. Non il salone»; Luigi ha chiesto il lavoro dicendo «per proporla». Se il pubblico cambia, cambiano i segni ⚠, la chiusura sulle tre cose aperte e il tono delle didascalie. Spegnere i segni tenendo una chiusura che elenca tre buchi è una via di mezzo che non è né l'una né l'altra cosa.
+- **Il modulo di prenotazione precompilato** (sequenza 4) potrebbe non esistere come composizione: `CD-06-handoff.md` §7.6 lo dà per «esistente», ma non è in `cd06-planning-viste.jsx` e `GH-57` lo ha cambiato nel prodotto dopo la consegna. Tre uscite proposte a CD; la più semplice è fermare la sequenza sul vuoto premuto.
+- **`ReqChip` porta «Preavviso 14 ore»** ma la richiesta di Miele è per mercoledì mattina: da lunedì sono ~40 ore. O l'etichetta si adatta, o la richiesta si sposta su martedì. Dentro la composizione di CD, non nel piano.
+- **`gh15-ed-scheda.jsx` e `cd01-cal-viste.jsx` non sono su disco**: `CD-01-consegna` e `GH-15-consegna` sono cartelle vuote. Il piano le nomina fidandosi della nota di CD.
+- Le tre modifiche retroattive dichiarate dalla nota di CD §6 (`gh15-ed-scheda.jsx`, `gh15-ed-kit.jsx`, `shared-ui.jsx`) **restano da propagare a Codex** se ha già gli zip.
+
+**Prossimo passo**:
+- Luigi porta a Chat la domanda sul pubblico; poi il piano va a CD.
+
+
 ### 18 agosto 2026 — Adozione del canone operativo BEA + stato dell'arte misurato (GH-01)
 
 **Attori**: Luigi (decisione di riorganizzazione), Cowork (misure + consegna).
