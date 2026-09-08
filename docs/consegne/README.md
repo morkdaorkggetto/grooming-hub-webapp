@@ -17,6 +17,9 @@ Questa cartella è la sede permanente delle consegne Codex per Grooming Hub.
 - Se esistono più strade, Codex indica quella raccomandata e spiega in breve i
   compromessi delle alternative, così il mandato successivo può essere scritto
   senza procedere per tentativi.
+- **Sonde RLS demo permanenti:** le sonde attese dalla suite RLS restano sul
+  demo e i mandati che le usano non le smontano più; le fixture di dato dei
+  singoli mandati continuano a smontarsi.
 
 ## Standard dei report (2/9/2026, decisione Luigi)
 

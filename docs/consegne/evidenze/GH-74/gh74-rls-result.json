@@ -1,0 +1,35 @@
+{
+  "projectRef": "qttpinkslhenxrsbhhhg",
+  "suite": {
+    "command": "node scripts/rls-tests/run.mjs",
+    "pass": 60,
+    "fail": 0,
+    "skip": 0,
+    "runtimeSeconds": 39.03
+  },
+  "afterSuite": {
+    "permanentProbes": {
+      "authUsers": 3,
+      "identities": 3,
+      "profiles": 3,
+      "memberships": 2,
+      "customers": 0,
+      "foreignTenant": 1
+    },
+    "nonTestAuthUsers": 1,
+    "data": { "customers": 7, "pets": 7, "visits": 90, "appointments": 8 },
+    "temporaryFixtureResidue": {
+      "pets": 0,
+      "visits": 0,
+      "requests": 0,
+      "promotions": 0,
+      "gh52Appointments": 0,
+      "storageObjects": 0
+    }
+  },
+  "sandboxAttempt": {
+    "result": "network_blocked",
+    "error": "ENOTFOUND qttpinkslhenxrsbhhhg.supabase.co",
+    "runtimeSeconds": 0.24
+  }
+}
