@@ -1,0 +1,28 @@
+{
+  "fixture": "Clover, Maltese, 3 recent visits, 0 points, bronze awarded",
+  "component": "src/apps/staff/pages/ClientDetail.jsx",
+  "runtimeSeconds": 1.67,
+  "retainedScreenshot": "gh75-clover-1365.png",
+  "viewports": {
+    "1365": {
+      "progress": [100, 25, 8.333333333333332],
+      "statusVisibility": [true, true, true],
+      "scrollWidth": 1365,
+      "clientWidth": 1365,
+      "runtimeErrors": 0
+    },
+    "375": {
+      "progress": [100, 25, 8.333333333333332],
+      "statusVisibility": [true, true, true],
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "runtimeErrors": 0
+    }
+  },
+  "rowTexts": [
+    "Bronzo | 3 / 6 visite in 12 mesi · 0 / 100 punti | Conferito dal salone",
+    "Argento | 3 / 12 visite in 24 mesi · 0 / 250 punti | 9 visite oppure 250 punti",
+    "Oro | 3 / 36 visite in 36 mesi · 0 / 500 punti | 33 visite oppure 500 punti"
+  ],
+  "screenshotSha256": "849689368b117f9599e0c6d1cde173576888429f78e70489e9c3860e55559e39"
+}

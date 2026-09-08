@@ -2510,7 +2510,8 @@
   }
 
   .gh-tier-row > .gh-meta:last-child {
-    display: none;
+    display: block;
+    grid-column: 2;
   }
 
   .gh-qr-layout,

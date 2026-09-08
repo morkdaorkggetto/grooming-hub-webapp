@@ -1,0 +1,39 @@
+{
+  "base": "91c2dc4405ec6747a3d04e04e1973543343f4351",
+  "cases": 7,
+  "clover": {
+    "currentTier": "bronze",
+    "nextTier": "silver",
+    "reason": "Bronzo · conferito dal salone",
+    "rows": [
+      {
+        "tier": "bronze",
+        "metric": "3 / 6 visite in 12 mesi · 0 / 100 punti",
+        "status": "Conferito dal salone",
+        "progressPercent": 100,
+        "remainingVisits": 0,
+        "remainingPoints": 0
+      },
+      {
+        "tier": "silver",
+        "metric": "3 / 12 visite in 24 mesi · 0 / 250 punti",
+        "status": "9 visite oppure 250 punti",
+        "progressPercent": 25
+      },
+      {
+        "tier": "gold",
+        "metric": "3 / 36 visite in 36 mesi · 0 / 500 punti",
+        "status": "33 visite oppure 500 punti",
+        "progressPercent": 8.333333333333332
+      }
+    ]
+  },
+  "awardedSilverReached": [true, true, false],
+  "awardedGoldReached": [true, true, true],
+  "awardedGoldNextTier": null,
+  "mixedSources": ["Raggiunto con visite", "Conferito dal salone"],
+  "noAwardMatchesBase": true,
+  "revocationMatchesBase": true,
+  "aggregateCalculationMatchesBase": true,
+  "runtimeSeconds": 0.30
+}

@@ -107,6 +107,19 @@ export const getFidelityTierSnapshot = (client, settings = client?.fidelitySetti
   const currentTierRank = tierRank(currentTier);
   const nextTier = tiers.find((tier) => tierRank(tier) > currentTierRank) || null;
   const mode = tierRank(pointsTier) > tierRank(visitTier) ? 'points' : 'visits';
+  const awardedTierRank = tierRank(awardedTier);
+  const scaleTiers = tiers.map((tier) => {
+    const reachedByAward = !tier.achieved && tierRank(tier) <= awardedTierRank;
+    const reached = tier.achieved || reachedByAward;
+
+    return {
+      ...tier,
+      scaleReached: reached,
+      scaleReachedByAward: reachedByAward,
+      scaleRemainingVisits: reached ? 0 : tier.remainingVisits,
+      scaleRemainingPoints: reached ? 0 : tier.remainingPoints,
+    };
+  });
 
   return {
     currentTier,
@@ -116,7 +129,7 @@ export const getFidelityTierSnapshot = (client, settings = client?.fidelitySetti
     currentTierSource: tierRank(awardedTier) > tierRank(calculatedTier) ? 'awarded' : mode,
     visitTier,
     pointsTier,
-    tiers,
+    tiers: scaleTiers,
     mode,
     hasRewardPoints,
     rewardPointsTotal,

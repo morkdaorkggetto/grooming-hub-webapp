@@ -603,7 +603,9 @@ export default function ClientDetail() {
             {fidelity.tiers.map((tier) => {
               const visitsProgress = Math.min(tier.visitsInWindow / tier.visitsRequired, 1);
               const pointsProgress = Math.min(fidelity.rewardPointsTotal / tier.pointsRequired, 1);
-              const bestProgress = Math.max(visitsProgress, pointsProgress) * 100;
+              const bestProgress = tier.scaleReached
+                ? 100
+                : Math.max(visitsProgress, pointsProgress) * 100;
               const achievedWith = [
                 tier.achievedByVisits ? 'visite' : '',
                 tier.achievedByPoints ? 'punti' : '',
@@ -619,9 +621,11 @@ export default function ClientDetail() {
                     </span>
                   </div>
                   <span className="gh-meta gh-num">
-                    {tier.achieved
-                      ? `Raggiunto con ${achievedWith}`
-                      : `${tier.remainingVisits} visite oppure ${tier.remainingPoints} punti`}
+                    {tier.scaleReached
+                      ? tier.scaleReachedByAward
+                        ? 'Conferito dal salone'
+                        : `Raggiunto con ${achievedWith}`
+                      : `${tier.scaleRemainingVisits} visite oppure ${tier.scaleRemainingPoints} punti`}
                   </span>
                 </div>
               );
