@@ -1,0 +1,33 @@
+{
+  "viewports": [
+    {
+      "width": 1365,
+      "overflow": 0,
+      "small": [],
+      "targets": 20
+    },
+    {
+      "width": 1024,
+      "overflow": 0,
+      "small": [],
+      "targets": 20
+    },
+    {
+      "width": 375,
+      "overflow": 0,
+      "small": [],
+      "targets": 20
+    }
+  ],
+  "errors": [],
+  "validationMessages": {
+    "large": "La modifica non e stata salvata\nL'immagine supera il limite di 5 MB.",
+    "type": "La modifica non e stata salvata\nSeleziona un'immagine JPEG, PNG, WebP o GIF."
+  },
+  "failedUploadNotice": "Promozione salvata, immagine non modificata\nLa promozione è stata salvata, ma non è stato possibile caricare l'immagine.",
+  "customer": {
+    "cards": 2,
+    "images": 1,
+    "plainPlaceholders": 0
+  }
+}

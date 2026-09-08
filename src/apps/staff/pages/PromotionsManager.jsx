@@ -14,6 +14,7 @@ import {
   getStaffPromotions,
   reorderStaffPromotions,
   updateStaffPromotion,
+  validatePromotionImageFile,
 } from '../lib/database';
 import './PromotionsManager.css';
 
@@ -21,6 +22,8 @@ const EMPTY_FORM = {
   title: '',
   body: '',
   image_url: '',
+  original_image_url: '',
+  remove_image: false,
   valid_from: '',
   valid_to: '',
   cta_label: '',
@@ -48,6 +51,8 @@ const toForm = (promotion) => ({
   title: promotion.title || '',
   body: promotion.body || '',
   image_url: promotion.image_url || '',
+  original_image_url: promotion.image_url || '',
+  remove_image: false,
   valid_from: toLocalInput(promotion.valid_from),
   valid_to: toLocalInput(promotion.valid_to),
   cta_label: promotion.cta_label || '',
@@ -79,6 +84,9 @@ export default function PromotionsManager() {
   const [editingId, setEditingId] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [imageNotice, setImageNotice] = useState('');
 
   const activeCount = useMemo(
     () => promotions.filter((promotion) => getPromotionState(promotion).label === 'Visibile').length,
@@ -101,24 +109,59 @@ export default function PromotionsManager() {
     loadPromotions();
   }, []);
 
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreview('');
+      return undefined;
+    }
+    const objectUrl = URL.createObjectURL(imageFile);
+    setImagePreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [imageFile]);
+
   const closeForm = () => {
     setFormOpen(false);
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setImageFile(null);
     setError('');
   };
 
   const openCreate = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setImageFile(null);
     setFormOpen(true);
     setError('');
+    setImageNotice('');
   };
 
   const openEdit = (promotion) => {
     setEditingId(promotion.id);
     setForm(toForm(promotion));
+    setImageFile(null);
     setFormOpen(true);
+    setError('');
+    setImageNotice('');
+  };
+
+  const handleImageSelect = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      validatePromotionImageFile(file);
+      setImageFile(file);
+      setForm((current) => ({ ...current, image_url: current.original_image_url, remove_image: false }));
+      setError('');
+    } catch (imageError) {
+      setError(imageError.message);
+    }
+  };
+
+  const handleImageRemove = () => {
+    setImageFile(null);
+    setForm((current) => ({ ...current, image_url: '', remove_image: true }));
     setError('');
   };
 
@@ -126,11 +169,15 @@ export default function PromotionsManager() {
     event.preventDefault();
     setSaving(true);
     setError('');
+    setImageNotice('');
     try {
-      if (editingId) await updateStaffPromotion(editingId, form);
-      else await createStaffPromotion(form);
+      const input = { ...form, imageFile };
+      const saved = editingId
+        ? await updateStaffPromotion(editingId, input)
+        : await createStaffPromotion(input);
       closeForm();
       await loadPromotions();
+      if (saved.imageUploadError) setImageNotice(saved.imageUploadError);
     } catch (saveError) {
       setError(saveError.message || 'Non riesco a salvare la promozione.');
     } finally {
@@ -184,12 +231,29 @@ export default function PromotionsManager() {
 
       <main className="gh-page-shell gh-promotions-stack">
         {error && <ErrorState title="La modifica non e stata salvata" body={error} />}
+        {imageNotice && <ErrorState title="Promozione salvata, immagine non modificata" body={imageNotice} />}
 
         {formOpen && (
           <Panel eyebrow={editingId ? 'Modifica' : 'Nuova promozione'} title={editingId ? 'Aggiorna la promozione' : 'Scrivi una promozione'}>
             <form className="gh-promotions-form" onSubmit={handleSubmit}>
               <Field label="Titolo *" value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required maxLength={120} />
               <Field label="Testo" area rows={5} value={form.body} onChange={(event) => setForm((current) => ({ ...current, body: event.target.value }))} className="gh-promotions-form__wide" />
+              <div className="gh-promotion-image-field gh-promotions-form__wide">
+                <span className="gh-eyebrow--staff gh-field-label">Immagine</span>
+                {(imagePreview || form.image_url) && (
+                  <div className="gh-promotion-image-preview">
+                    <img src={imagePreview || form.image_url} alt="Anteprima della promozione" />
+                    <Button staff type="button" variant="danger" icon="trash" onClick={handleImageRemove} aria-label="Rimuovi immagine" title="Rimuovi immagine" />
+                  </div>
+                )}
+                <div className="gh-photo-picker">
+                  <p className="gh-meta">JPEG, PNG, WebP o GIF, fino a 5 MB.</p>
+                  <label className="gh-btn gh-btn--outline gh-file-button">
+                    {imagePreview || form.image_url ? 'Sostituisci immagine' : 'Scegli immagine'}
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageSelect} disabled={saving} />
+                  </label>
+                </div>
+              </div>
               <Field label="Visibile dal" type="datetime-local" value={form.valid_from} onChange={(event) => setForm((current) => ({ ...current, valid_from: event.target.value }))} />
               <Field label="Visibile fino al" type="datetime-local" value={form.valid_to} onChange={(event) => setForm((current) => ({ ...current, valid_to: event.target.value }))} />
               <Field label="Testo pulsante" value={form.cta_label} onChange={(event) => setForm((current) => ({ ...current, cta_label: event.target.value }))} placeholder="Es. Prenota ora" />
@@ -222,14 +286,17 @@ export default function PromotionsManager() {
                 const state = getPromotionState(promotion);
                 return (
                   <article className="gh-promotion-row" key={promotion.id}>
-                    <div className="gh-promotion-row__main">
-                      <div className="gh-promotion-row__title-line">
-                        <h3>{promotion.title}</h3>
-                        <StateTag tone={state.tone}>{state.label}</StateTag>
+                    <div className={`gh-promotion-row__main${promotion.image_url ? ' gh-promotion-row__main--with-image' : ''}`}>
+                      {promotion.image_url && <img className="gh-promotion-row__image" src={promotion.image_url} alt="" />}
+                      <div className="gh-promotion-row__copy">
+                        <div className="gh-promotion-row__title-line">
+                          <h3>{promotion.title}</h3>
+                          <StateTag tone={state.tone}>{state.label}</StateTag>
+                        </div>
+                        {promotion.body && <p className="gh-promotion-row__body">{promotion.body}</p>}
+                        <div className="gh-promotion-row__meta gh-num">{formatWindow(promotion)}</div>
+                        {promotion.cta_label && promotion.cta_url && <div className="gh-promotion-row__cta">{promotion.cta_label} · {promotion.cta_url}</div>}
                       </div>
-                      {promotion.body && <p className="gh-promotion-row__body">{promotion.body}</p>}
-                      <div className="gh-promotion-row__meta gh-num">{formatWindow(promotion)}</div>
-                      {promotion.cta_label && promotion.cta_url && <div className="gh-promotion-row__cta">{promotion.cta_label} · {promotion.cta_url}</div>}
                     </div>
                     <div className="gh-promotion-row__actions">
                       <Button staff variant="ghost" icon="pencil" aria-label={`Modifica ${promotion.title}`} title="Modifica" onClick={() => openEdit(promotion)} disabled={saving} />

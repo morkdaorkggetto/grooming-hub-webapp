@@ -6,6 +6,13 @@ import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 
 const CLIENT_PHOTOS_BUCKET = 'client-photos';
 const PET_AVATARS_BUCKET = 'pet-avatars';
+const PROMOTION_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const PROMOTION_IMAGE_TYPES = new Map([
+  ['image/jpeg', 'jpg'],
+  ['image/png', 'png'],
+  ['image/webp', 'webp'],
+  ['image/gif', 'gif'],
+]);
 const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
 const ACQUISITION_SOURCES = ['manual', 'whatsapp', 'qr'];
 const CUSTOMER_RELATIONSHIP_STATUSES = ['lead', 'contacted', 'active', 'archived'];
@@ -207,15 +214,24 @@ const fileExtension = (file) => {
   return { 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/heic': 'heic', 'image/heif': 'heif' }[file?.type] || 'jpg';
 };
 
-const uploadPhoto = async (userId, petId, file) => {
-  const path = `${userId}/${petId}-${Date.now()}.${fileExtension(file)}`;
-  const { error } = await supabase.storage.from(CLIENT_PHOTOS_BUCKET).upload(path, file, {
+const uploadPhoto = async ({ bucket, path, file, replace = false, contentType = null }) => {
+  const storage = supabase.storage.from(bucket);
+  const options = {
     upsert: false,
-    contentType: getSafeImageMimeType(file),
-  });
+    contentType: contentType || getSafeImageMimeType(file),
+  };
+  const { error } = replace
+    ? await storage.update(path, file, options)
+    : await storage.upload(path, file, options);
   if (error) throw error;
-  return supabase.storage.from(CLIENT_PHOTOS_BUCKET).getPublicUrl(path).data.publicUrl;
+  return storage.getPublicUrl(path).data.publicUrl;
 };
+
+const uploadClientPhoto = (userId, petId, file) => uploadPhoto({
+  bucket: CLIENT_PHOTOS_BUCKET,
+  path: `${userId}/${petId}-${Date.now()}.${fileExtension(file)}`,
+  file,
+});
 
 const deletePhoto = async (url) => {
   const marker = `/storage/v1/object/public/${CLIENT_PHOTOS_BUCKET}/`;
@@ -230,7 +246,112 @@ const deletePhoto = async (url) => {
 const publicStoragePath = (url, bucket) => {
   const marker = `/storage/v1/object/public/${bucket}/`;
   const index = typeof url === 'string' ? url.indexOf(marker) : -1;
-  return index === -1 ? null : decodeURIComponent(url.slice(index + marker.length));
+  return index === -1
+    ? null
+    : decodeURIComponent(url.slice(index + marker.length).split(/[?#]/)[0]);
+};
+
+const promotionImageDetails = (file) => {
+  const defaultExtension = PROMOTION_IMAGE_TYPES.get(file?.type);
+  if (!defaultExtension) {
+    throw new Error("Seleziona un'immagine JPEG, PNG, WebP o GIF.");
+  }
+  if (file.size > PROMOTION_IMAGE_MAX_BYTES) {
+    throw new Error("L'immagine supera il limite di 5 MB.");
+  }
+  const namedExtension = getFileExtensionFromName(file.name || '');
+  const extension = file.type === 'image/jpeg' && namedExtension === 'jpeg'
+    ? 'jpeg'
+    : defaultExtension;
+  return { extension, contentType: file.type };
+};
+
+export const validatePromotionImageFile = (file) => {
+  promotionImageDetails(file);
+  return true;
+};
+
+const promotionImagePathFromUrl = (url, tenantId, promotionId) => {
+  const path = publicStoragePath(url, PET_AVATARS_BUCKET);
+  return path?.startsWith(`${tenantId}/promotions/${promotionId}.`) ? path : null;
+};
+
+const setPromotionImageUrl = async ({ promotionId, tenantId, imageUrl }) => {
+  const { data, error } = await supabase
+    .from('promotions')
+    .update({ image_url: imageUrl })
+    .eq('id', promotionId)
+    .eq('tenant_id', tenantId)
+    .select(PROMOTION_SELECT)
+    .maybeSingle();
+  if (error || !data) throw error || new Error('Promozione non trovata o accesso negato.');
+  return data;
+};
+
+const uploadPromotionImage = async ({ promotion, tenantId, file, previousImageUrl = null }) => {
+  const { extension, contentType } = promotionImageDetails(file);
+  const path = `${tenantId}/promotions/${promotion.id}.${extension}`;
+  const previousPath = promotionImagePathFromUrl(previousImageUrl, tenantId, promotion.id);
+  const bucket = supabase.storage.from(PET_AVATARS_BUCKET);
+  const publicUrl = bucket.getPublicUrl(path).data.publicUrl;
+  const imageUrl = `${publicUrl}?v=${encodeURIComponent(generateId())}`;
+
+  if (previousPath === path) {
+    const linked = await setPromotionImageUrl({ promotionId: promotion.id, tenantId, imageUrl });
+    try {
+      await uploadPhoto({
+        bucket: PET_AVATARS_BUCKET,
+        path,
+        file,
+        replace: true,
+        contentType,
+      });
+      return linked;
+    } catch (error) {
+      await setPromotionImageUrl({ promotionId: promotion.id, tenantId, imageUrl: previousImageUrl });
+      throw error;
+    }
+  }
+
+  await uploadPhoto({
+    bucket: PET_AVATARS_BUCKET,
+    path,
+    file,
+    contentType,
+  });
+  let linked;
+  try {
+    linked = await setPromotionImageUrl({ promotionId: promotion.id, tenantId, imageUrl });
+  } catch (error) {
+    if (previousPath !== path) await bucket.remove([path]).catch(() => {});
+    throw error;
+  }
+
+  if (previousPath && previousPath !== path) {
+    const { error: removeError } = await bucket.remove([previousPath]);
+    if (removeError) {
+      await setPromotionImageUrl({ promotionId: promotion.id, tenantId, imageUrl: previousImageUrl });
+      await bucket.remove([path]).catch(() => {});
+      throw removeError;
+    }
+  }
+  return linked;
+};
+
+const removePromotionImage = async ({ promotion, tenantId, previousImageUrl }) => {
+  const previousPath = promotionImagePathFromUrl(previousImageUrl, tenantId, promotion.id);
+  if (!previousPath) return promotion;
+  const { error } = await supabase.storage.from(PET_AVATARS_BUCKET).remove([previousPath]);
+  if (!error) return promotion;
+  return setPromotionImageUrl({
+    promotionId: promotion.id,
+    tenantId,
+    imageUrl: previousImageUrl,
+  }).then((restored) => {
+    const failure = new Error('Rimozione immagine non riuscita.');
+    failure.restoredPromotion = restored;
+    throw failure;
+  });
 };
 
 const uploadVisitPhoto = async ({ tenantId, petId, visitId, file }) => {
@@ -268,7 +389,7 @@ const attachOptionalVisitPhoto = async (context) => {
 const applyPhoto = async (userId, petId, file) => {
   if (!file) return { photoUrl: null, photoUploadError: null };
   try {
-    const photoUrl = await uploadPhoto(userId, petId, file);
+    const photoUrl = await uploadClientPhoto(userId, petId, file);
     const { error } = await supabase.from('pets').update({ photo_url: photoUrl }).eq('id', petId);
     if (error) throw error;
     return { photoUrl, photoUploadError: null };
@@ -715,7 +836,7 @@ export const updateClient = async (petId, input) => {
   if (customerError) throw customerError;
   let photoUrl = pet.photo_url;
   if (input.photoFile) {
-    const uploaded = await uploadPhoto(user.id, petId, input.photoFile);
+    const uploaded = await uploadClientPhoto(user.id, petId, input.photoFile);
     if (photoUrl) await deletePhoto(photoUrl);
     photoUrl = uploaded;
   } else if (input.removePhoto || input.photo === '') {
@@ -1304,7 +1425,7 @@ const normalizePromotionPayload = (input = {}) => {
     throw new Error('La fine della promozione deve essere successiva all inizio.');
   }
   if (Boolean(ctaLabel) !== Boolean(ctaUrl)) {
-    throw new Error('Etichetta e indirizzo del pulsante vanno compilati insieme.');
+    throw new Error('Testo e indirizzo del pulsante vanno compilati insieme.');
   }
   if (ctaUrl && !ctaUrl.startsWith('/') && !/^https?:\/\//i.test(ctaUrl)) {
     throw new Error('L indirizzo del pulsante deve iniziare con /, http:// oppure https://.');
@@ -1351,7 +1472,8 @@ export const getActivePromotionCount = async () => {
 export const createStaffPromotion = async (input) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
-  const payload = normalizePromotionPayload(input);
+  if (input.imageFile) validatePromotionImageFile(input.imageFile);
+  const payload = normalizePromotionPayload({ ...input, image_url: null });
   const { data: last, error: orderError } = await supabase
     .from('promotions')
     .select('display_order')
@@ -1367,13 +1489,27 @@ export const createStaffPromotion = async (input) => {
     .select(PROMOTION_SELECT)
     .single();
   if (error) throw new Error(`Non riesco a creare la promozione: ${error.message}`);
-  return data;
+  if (!input.imageFile) return data;
+  try {
+    return await uploadPromotionImage({ promotion: data, tenantId, file: input.imageFile });
+  } catch {
+    return {
+      ...data,
+      imageUploadError: "La promozione è stata salvata, ma non è stato possibile caricare l'immagine.",
+    };
+  }
 };
 
 export const updateStaffPromotion = async (promotionId, input) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
-  const payload = normalizePromotionPayload(input);
+  if (input.imageFile) validatePromotionImageFile(input.imageFile);
+  const previousImageUrl = String(input.original_image_url ?? input.image_url ?? '').trim() || null;
+  const removeImage = Boolean(input.remove_image);
+  const payload = normalizePromotionPayload({
+    ...input,
+    image_url: removeImage ? null : previousImageUrl,
+  });
   const { data, error } = await supabase
     .from('promotions')
     .update(payload)
@@ -1383,7 +1519,30 @@ export const updateStaffPromotion = async (promotionId, input) => {
     .maybeSingle();
   if (error) throw new Error(`Non riesco a modificare la promozione: ${error.message}`);
   if (!data) throw new Error('Promozione non trovata o accesso negato.');
-  return data;
+  if (removeImage && previousImageUrl) {
+    try {
+      return await removePromotionImage({ promotion: data, tenantId, previousImageUrl });
+    } catch (removeError) {
+      return {
+        ...(removeError.restoredPromotion || data),
+        imageUploadError: "La promozione è stata salvata, ma non è stato possibile rimuovere l'immagine.",
+      };
+    }
+  }
+  if (!input.imageFile) return data;
+  try {
+    return await uploadPromotionImage({
+      promotion: data,
+      tenantId,
+      file: input.imageFile,
+      previousImageUrl,
+    });
+  } catch {
+    return {
+      ...data,
+      imageUploadError: "La promozione è stata salvata, ma non è stato possibile caricare l'immagine.",
+    };
+  }
 };
 
 export const reorderStaffPromotions = async (orderedIds) => {

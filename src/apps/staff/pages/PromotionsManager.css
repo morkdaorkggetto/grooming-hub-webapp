@@ -13,6 +13,39 @@
   grid-column: 1 / -1;
 }
 
+.gh-promotions-page :is(.gh-btn, .gh-field, .gh-hero-button, .gh-file-button) {
+  min-height: 44px;
+}
+
+.gh-promotions-page .gh-btn[aria-label] {
+  min-width: 44px;
+}
+
+.gh-promotion-image-preview {
+  position: relative;
+  height: 220px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--gh-r-field);
+}
+
+.gh-promotion-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gh-promotion-image-preview .gh-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.gh-promotion-image-field .gh-file-button {
+  margin-top: 10px;
+}
+
 .gh-promotions-toggle {
   display: inline-flex;
   min-height: 44px;
@@ -55,6 +88,24 @@
 
 .gh-promotion-row__main {
   min-width: 0;
+}
+
+.gh-promotion-row__main--with-image {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+
+.gh-promotion-row__copy {
+  min-width: 0;
+}
+
+.gh-promotion-row__image {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--gh-r-field);
 }
 
 .gh-promotion-row__title-line {
@@ -109,6 +160,10 @@
   .gh-promotion-row {
     gap: 14px;
     padding: 16px 13px;
+  }
+
+  .gh-promotion-image-preview {
+    height: 180px;
   }
 
   .gh-promotion-row__actions {
