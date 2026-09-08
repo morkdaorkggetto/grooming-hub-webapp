@@ -1192,6 +1192,12 @@
   background: var(--color-surface-soft);
 }
 
+.gh-fidelity-reason {
+  margin: 0 0 11px;
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
 .gh-fidelity-summary .gh-meta {
   max-width: 430px;
 }

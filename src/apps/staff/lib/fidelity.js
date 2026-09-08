@@ -95,17 +95,25 @@ export const getFidelityTierSnapshot = (client, settings = client?.fidelitySetti
     };
   });
 
-  const currentTier =
+  const calculatedTier =
     [...tiers].reverse().find((tier) => tier.achieved) || null;
-  const nextTier = tiers.find((tier) => !tier.achieved) || null;
   const visitTier = [...tiers].reverse().find((tier) => tier.achievedByVisits) || null;
   const pointsTier = [...tiers].reverse().find((tier) => tier.achievedByPoints) || null;
   const tierRank = (tier) => tiers.findIndex((candidate) => candidate.key === tier?.key);
+  const awardedTier = tiers.find((tier) => tier.key === client?.awarded_fidelity_tier) || null;
+  const currentTier = tierRank(awardedTier) > tierRank(calculatedTier)
+    ? awardedTier
+    : calculatedTier;
+  const currentTierRank = tierRank(currentTier);
+  const nextTier = tiers.find((tier) => tierRank(tier) > currentTierRank) || null;
   const mode = tierRank(pointsTier) > tierRank(visitTier) ? 'points' : 'visits';
 
   return {
     currentTier,
     nextTier,
+    calculatedTier,
+    awardedTier,
+    currentTierSource: tierRank(awardedTier) > tierRank(calculatedTier) ? 'awarded' : mode,
     visitTier,
     pointsTier,
     tiers,
@@ -126,6 +134,18 @@ export const getFidelityBadgeStyle = (tierKey) => {
     return { backgroundColor: '#f6e3cf', color: '#7c4a21' };
   }
   return { backgroundColor: 'var(--color-bg-main)', color: 'var(--color-secondary)' };
+};
+
+export const getStaffFidelityTierReason = (snapshot) => {
+  const tier = snapshot?.currentTier;
+  if (!tier) return '';
+  if (snapshot.currentTierSource === 'awarded') {
+    return `${tier.label} · conferito dal salone`;
+  }
+  if (snapshot.currentTierSource === 'visits') {
+    return `${tier.label} · ${tier.visitsInWindow} visite negli ultimi ${tier.monthsWindow} mesi`;
+  }
+  return `${tier.label} · ${snapshot.rewardPointsTotal} punti`;
 };
 
 export const getFidelityLabel = (tierKey) => {

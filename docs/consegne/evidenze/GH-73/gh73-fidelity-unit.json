@@ -1,0 +1,24 @@
+{
+  "cases": 7,
+  "none": { "current": null, "next": "bronze", "staffReason": "" },
+  "awardedBronze": {
+    "current": "bronze",
+    "next": "silver",
+    "source": "awarded",
+    "staffReason": "Bronzo · conferito dal salone"
+  },
+  "calculatedWins": {
+    "current": "gold",
+    "source": "visits",
+    "staffReason": "Oro · 36 visite negli ultimi 36 mesi"
+  },
+  "calculatedAndAwardedGold": { "current": "gold", "tierRows": 3, "source": "visits" },
+  "revoked": {
+    "current": null,
+    "visitsFingerprintBefore": "3e46d041866ff8aa1abf5c1226f42b605e6869b42bbfa34baa2fd5f4a3764e85",
+    "visitsFingerprintAfter": "3e46d041866ff8aa1abf5c1226f42b605e6869b42bbfa34baa2fd5f4a3764e85"
+  },
+  "awardedGold": { "current": "gold", "next": null, "source": "awarded" },
+  "pointsStillWork": { "current": "silver", "source": "points", "next": "gold" },
+  "runtimeSeconds": 0.14
+}

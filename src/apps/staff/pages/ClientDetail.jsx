@@ -28,11 +28,12 @@ import {
   getClientById,
   getClientPromos,
   removeVisitPhoto,
+  setPetAwardedFidelityTier,
   setClientBlacklistStatus,
   unlinkCustomerAccount,
   updateClient,
 } from '../lib/database';
-import { getFidelityTierSnapshot } from '../lib/fidelity';
+import { getFidelityTierSnapshot, getStaffFidelityTierReason } from '../lib/fidelity';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import {
   getClientCardCode,
@@ -123,6 +124,8 @@ export default function ClientDetail() {
   const [showAddVisitModal, setShowAddVisitModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
+  const [showFidelityTierModal, setShowFidelityTierModal] = useState(false);
+  const [awardedTierDraft, setAwardedTierDraft] = useState('');
   const [customerInvite, setCustomerInvite] = useState(null);
   const [unlinkingCustomerAccount, setUnlinkingCustomerAccount] = useState(false);
   const [editPhotoPreview, setEditPhotoPreview] = useState('');
@@ -327,6 +330,24 @@ export default function ClientDetail() {
     }
   };
 
+  const handleOpenFidelityTierModal = () => {
+    setAwardedTierDraft(client?.awarded_fidelity_tier || '');
+    setError('');
+    setShowFidelityTierModal(true);
+  };
+
+  const handleAwardedTierChange = async (event) => {
+    event.preventDefault();
+    setError('');
+    try {
+      await setPetAwardedFidelityTier(clientId, awardedTierDraft);
+      setShowFidelityTierModal(false);
+      await loadClient();
+    } catch (err) {
+      setError(err.message || 'Errore aggiornamento qualifica fidelity');
+    }
+  };
+
   const handleOpenWhatsApp = () => {
     const whatsappUrl = getClientWhatsAppUrl(client);
     if (!whatsappUrl) {
@@ -439,6 +460,7 @@ export default function ClientDetail() {
   const promo = getClientPromos(client);
   const fidelity = getFidelityTierSnapshot(client, tenant?.settings);
   const currentTier = fidelity.currentTier?.key || 'base';
+  const fidelityReason = getStaffFidelityTierReason(fidelity);
   const visitsTotal = client.visits?.length || 0;
   const visitsValue = client.visits?.reduce((sum, visit) => sum + Number(visit.cost || 0), 0) || 0;
   const customerAccountLinked = Boolean(client.customer?.user_id);
@@ -554,11 +576,17 @@ export default function ClientDetail() {
           eyebrow="Fidelity cliente"
           title={`Livello ${fidelity.currentTier?.label || 'Base'}`}
           right={
-            <Button staff variant="outline" onClick={() => setShowRewardModal(true)}>
-              Aggiungi / rimuovi punti
-            </Button>
+            <div className="gh-inline-actions">
+              <Button staff variant="outline" onClick={handleOpenFidelityTierModal}>
+                Qualifica
+              </Button>
+              <Button staff variant="outline" onClick={() => setShowRewardModal(true)}>
+                Aggiungi / rimuovi punti
+              </Button>
+            </div>
           }
         >
+          {fidelityReason && <p className="gh-fidelity-reason">{fidelityReason}</p>}
           <div className="gh-fidelity-summary">
             <div>
               <span className="gh-eyebrow--staff">Punti premio</span>
@@ -955,6 +983,41 @@ export default function ClientDetail() {
               <div className="gh-modal__foot">
                 <Button staff variant="outline" onClick={() => setShowRewardModal(false)}>Annulla</Button>
                 <Button staff variant="primary" type="submit">Salva movimento</Button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {showFidelityTierModal && (
+        <div className="gh-modal-scrim" role="presentation">
+          <section className="gh-modal gh-modal--narrow" role="dialog" aria-modal="true" aria-labelledby="fidelity-tier-modal-title">
+            <div className="gh-modal__head">
+              <div>
+                <span className="gh-eyebrow--staff gh-eyebrow--accent">Fidelity</span>
+                <h2 className="gh-panel-title" id="fidelity-tier-modal-title">Qualifica del salone</h2>
+              </div>
+              <Button staff variant="ghost" onClick={() => setShowFidelityTierModal(false)}>Chiudi</Button>
+            </div>
+            <form onSubmit={handleAwardedTierChange}>
+              <div className="gh-modal__body gh-form-stack">
+                {error && <ErrorState body={error} />}
+                <p className="gh-meta">La qualifica scelta si aggiunge al livello raggiunto dal pet senza modificare visite, punti o soglie.</p>
+                <Field
+                  as="select"
+                  label="Qualifica"
+                  value={awardedTierDraft}
+                  onChange={(event) => setAwardedTierDraft(event.target.value)}
+                >
+                  <option value="">Nessuna qualifica conferita</option>
+                  <option value="bronze">Bronzo</option>
+                  <option value="silver">Argento</option>
+                  <option value="gold">Oro</option>
+                </Field>
+              </div>
+              <div className="gh-modal__foot">
+                <Button staff variant="outline" onClick={() => setShowFidelityTierModal(false)}>Annulla</Button>
+                <Button staff variant="primary" type="submit">Salva qualifica</Button>
               </div>
             </form>
           </section>

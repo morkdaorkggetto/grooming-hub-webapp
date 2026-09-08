@@ -1,0 +1,37 @@
+{
+  "projectRef": "qttpinkslhenxrsbhhhg",
+  "baseline": {
+    "pets": 7,
+    "visits": 90,
+    "rewardMovements": 0,
+    "rewardPointsSum": 0,
+    "awardedColumnCount": 0,
+    "thresholdsMd5": "d44368e26a42bf5fc45808498bb6b8ff",
+    "whitelistMd5": "3a098454689e2d8f94cf077aa4f5933f",
+    "publicCardMd5": "e3bc0f5c4b98a58fc39f29c8b1a1a6b2"
+  },
+  "migrationExactSyntax": "GH73_EXACT_MIGRATION_ROLLBACK_OK",
+  "transactionCases": {
+    "none": "base -> bronze",
+    "awardedBronzeZeroVisits": "bronze -> silver",
+    "calculatedGoldAwardedBronze": "gold",
+    "calculatedAndAwardedGold": "gold, visitsCount 36",
+    "revocation": "base, visits unchanged",
+    "invalidTier": "check_violation",
+    "customerWrite": "one owned row reached, awarded_fidelity_tier restored to null by whitelist",
+    "customerProjectionAwardSourceKeys": 0
+  },
+  "successMarker": "GH73_ROLLBACK_OK visits=90 points_count=0 points_sum=0 thresholds=d44368e26a42bf5fc45808498bb6b8ff whitelist=3a098454689e2d8f94cf077aa4f5933f",
+  "afterRollback": {
+    "awardedColumnCount": 0,
+    "fixtureCustomers": 0,
+    "fixturePets": 0,
+    "fixtureVisits": 0,
+    "visits": 90,
+    "rewardMovements": 0,
+    "rewardPointsSum": 0,
+    "thresholdsMd5": "d44368e26a42bf5fc45808498bb6b8ff",
+    "whitelistMd5": "3a098454689e2d8f94cf077aa4f5933f",
+    "publicCardMd5": "e3bc0f5c4b98a58fc39f29c8b1a1a6b2"
+  }
+}

@@ -17,6 +17,7 @@ const APPOINTMENT_STATUSES = ['scheduled', 'completed', 'cancelled', 'no_show'];
 const ACQUISITION_SOURCES = ['manual', 'whatsapp', 'qr'];
 const CUSTOMER_RELATIONSHIP_STATUSES = ['lead', 'contacted', 'active', 'archived'];
 const REWARD_POINT_REASONS = ['visit', 'manual', 'promotion', 'redeem', 'correction'];
+const AWARDED_FIDELITY_TIERS = ['bronze', 'silver', 'gold'];
 const PROFILE_ROLES = ['operator', 'customer'];
 const APPROVAL_STATUSES = ['pending', 'approved', 'rejected'];
 const APPOINTMENT_SOURCES = ['operator', 'customer'];
@@ -1023,6 +1024,25 @@ export const setClientBlacklistStatus = async (petId, isBlacklisted) => {
   await getPetById(petId, tenantId);
   const { data, error } = await supabase.from('pets').update({ is_blacklisted: Boolean(isBlacklisted) }).eq('id', petId).eq('tenant_id', tenantId).select('id, no_show_score, is_blacklisted').single();
   if (error) throw new Error(`Non riesco ad aggiornare la blacklist: ${error.message}`);
+  return data;
+};
+
+export const setPetAwardedFidelityTier = async (petId, tier) => {
+  assertDemoWriteAllowed();
+  const awardedTier = tier || null;
+  if (awardedTier && !AWARDED_FIDELITY_TIERS.includes(awardedTier)) {
+    throw new Error('Qualifica fidelity non valida');
+  }
+  const { tenantId } = await requireStaff();
+  const { data, error } = await supabase
+    .from('pets')
+    .update({ awarded_fidelity_tier: awardedTier })
+    .eq('id', petId)
+    .eq('tenant_id', tenantId)
+    .select('id, awarded_fidelity_tier')
+    .maybeSingle();
+  if (error) throw new Error(`Non riesco ad aggiornare la qualifica: ${error.message}`);
+  if (!data) throw new Error('Pet non trovato o accesso negato');
   return data;
 };
 

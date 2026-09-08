@@ -1,0 +1,23 @@
+{
+  "rlsSuite": {
+    "projectRef": "qttpinkslhenxrsbhhhg",
+    "result": { "pass": 0, "fail": 1, "skip": 0 },
+    "bootstrapError": "Login sonda staff: invalid_credentials Invalid login credentials",
+    "runtimeSeconds": 0.96
+  },
+  "browserFixture": {
+    "result": "not_executed",
+    "reason": "The isolated entry bundle compiled but ClientDetail did not mount before the 5 second selector timeout.",
+    "screenshotsProduced": 0,
+    "openServersAfterAttempts": 0
+  },
+  "customerSourceSearch": {
+    "paths": [
+      "src/apps/customer",
+      "src/apps/staff/pages/CustomerPortal.jsx",
+      "src/apps/staff/pages/PublicPetCard.jsx"
+    ],
+    "patterns": ["awarded_fidelity", "conferit", "qualifica"],
+    "matches": 0
+  }
+}
