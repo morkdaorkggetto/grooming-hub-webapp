@@ -1,0 +1,211 @@
+{
+  "fixture": "in-memory",
+  "databaseWrites": 0,
+  "viewports": {
+    "375": {
+      "pageOverflow": 0,
+      "summary": "4 prenotati\n0 lavorati sul momento",
+      "visibleAppointmentCards": 4,
+      "mondayMorning": {
+        "text": "MATTINA\n9–13\n1/2 postazioni occupate\n\nchiuso\n\n10:30\nCipino\nMeticcio · 90′\nBagno\nfuori orario",
+        "outsideCards": 1,
+        "occupied": "1/2 postazioni occupate",
+        "bookingActions": 0,
+        "margins": 0
+      },
+      "sundayFullDay": {
+        "text": "MATTINA\n9–13\n1/2 postazioni occupate\n\nchiuso\n\n10:30\nSole\nMeticcio · 60′\nBagno\nfuori orario",
+        "outsideCards": 1
+      },
+      "outsideCardStyles": {
+        "borderStyles": [
+          "solid",
+          "solid",
+          "solid",
+          "solid"
+        ],
+        "borderWidths": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "backgroundColor": "rgba(207, 193, 196, 0.12)",
+        "minHeight": "60px"
+      },
+      "regularCardStyles": {
+        "borderStyles": [
+          "solid",
+          "solid",
+          "solid",
+          "solid"
+        ],
+        "borderWidths": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "backgroundColor": "rgba(0, 0, 0, 0)"
+      },
+      "requestBorderStyle": "dashed",
+      "marginBorderStyle": "dashed",
+      "closedBandTargets": [
+        {
+          "text": "10:30\nCipino\nMeticcio · 90′\nBagno\nfuori orario",
+          "width": 306,
+          "height": 65
+        }
+      ],
+      "consoleErrors": []
+    },
+    "1024": {
+      "pageOverflow": 0,
+      "summary": "4 prenotati\n0 lavorati sul momento",
+      "visibleAppointmentCards": 4,
+      "mondayMorning": {
+        "text": "MATTINA\n9–13\n1/2 postazioni occupate\n\nchiuso\n\n10:30\nCipino\nMeticcio · 90′\nBagno\nfuori orario",
+        "outsideCards": 1,
+        "occupied": "1/2 postazioni occupate",
+        "bookingActions": 0,
+        "margins": 0
+      },
+      "sundayFullDay": {
+        "text": "MATTINA\n9–13\n1/2 postazioni occupate\n\nchiuso\n\n10:30\nSole\nMeticcio · 60′\nBagno\nfuori orario",
+        "outsideCards": 1
+      },
+      "outsideCardStyles": {
+        "borderStyles": [
+          "solid",
+          "solid",
+          "solid",
+          "solid"
+        ],
+        "borderWidths": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "backgroundColor": "rgba(207, 193, 196, 0.12)",
+        "minHeight": "44px"
+      },
+      "regularCardStyles": {
+        "borderStyles": [
+          "solid",
+          "solid",
+          "solid",
+          "solid"
+        ],
+        "borderWidths": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "backgroundColor": "rgba(0, 0, 0, 0)"
+      },
+      "requestBorderStyle": "dashed",
+      "marginBorderStyle": "dashed",
+      "closedBandTargets": [
+        {
+          "text": "10:30\nCipino\nMeticcio · 90′\nBagno\nfuori orario",
+          "width": 124.28125,
+          "height": 65
+        }
+      ],
+      "consoleErrors": []
+    },
+    "1365": {
+      "pageOverflow": 0,
+      "summary": "4 prenotati\n0 lavorati sul momento",
+      "visibleAppointmentCards": 4,
+      "mondayMorning": {
+        "text": "MATTINA\n9–13\n1/2 postazioni occupate\n\nchiuso\n\n10:30\nCipino\nMeticcio · 90′\nBagno\nfuori orario",
+        "outsideCards": 1,
+        "occupied": "1/2 postazioni occupate",
+        "bookingActions": 0,
+        "margins": 0
+      },
+      "sundayFullDay": {
+        "text": "MATTINA\n9–13\n1/2 postazioni occupate\n\nchiuso\n\n10:30\nSole\nMeticcio · 60′\nBagno\nfuori orario",
+        "outsideCards": 1
+      },
+      "outsideCardStyles": {
+        "borderStyles": [
+          "solid",
+          "solid",
+          "solid",
+          "solid"
+        ],
+        "borderWidths": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "backgroundColor": "rgba(207, 193, 196, 0.12)",
+        "minHeight": "44px"
+      },
+      "regularCardStyles": {
+        "borderStyles": [
+          "solid",
+          "solid",
+          "solid",
+          "solid"
+        ],
+        "borderWidths": [
+          "1px",
+          "1px",
+          "1px",
+          "3px"
+        ],
+        "backgroundColor": "rgba(0, 0, 0, 0)"
+      },
+      "requestBorderStyle": "dashed",
+      "marginBorderStyle": "dashed",
+      "closedBandTargets": [
+        {
+          "text": "10:30\nCipino\nMeticcio · 90′\nBagno\nfuori orario",
+          "width": 146.5625,
+          "height": 65
+        }
+      ],
+      "consoleErrors": []
+    }
+  },
+  "paths": {
+    "header": "Attenzione: mattina chiusa. Puoi confermare comunque se è un’eccezione voluta.",
+    "band": "Attenzione: mattina chiusa. Puoi confermare comunque se è un’eccezione voluta.",
+    "sameCustomer": "Attenzione: mattina chiusa. Puoi confermare comunque se è un’eccezione voluta."
+  },
+  "fullDayNotice": "Attenzione: il salone risulta chiuso in questo giorno. Puoi confermare comunque se è un’eccezione voluta.",
+  "openTimeNotice": "",
+  "save": {
+    "count": 1,
+    "scheduledAt": "2026-10-12T08:30:00.000Z",
+    "success": "Appuntamento creato. Il prossimo orario libero è già pronto."
+  },
+  "closedEmpty": {
+    "html": "<header class=\"gh-planning-band__head\"><div><strong>Mattina</strong><span>9–13</span></div></header><p class=\"gh-planning-closed\">chiuso</p>",
+    "text": "MATTINA\n9–13\n\nchiuso",
+    "occupied": 0,
+    "body": 0,
+    "bookingActions": 0,
+    "margins": 0
+  },
+  "assertions": {
+    "trueCase": true,
+    "fullDay": true,
+    "outsideStyle": true,
+    "closedControlsAbsent": true,
+    "stationCount": true,
+    "warningTexts": true,
+    "warningDoesNotBlock": true,
+    "openTimeNoWarning": true,
+    "noOverflow": true,
+    "targetSize": true,
+    "emptyBaselineShape": true,
+    "consoleClean": true
+  }
+}

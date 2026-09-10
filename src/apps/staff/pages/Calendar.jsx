@@ -108,6 +108,18 @@ const formatCompactWeekLabel = (from, to) => {
 const normalizeSearchText = (value = '') => String(value || '').toLocaleLowerCase('it').trim();
 const normalizePhoneDigits = (value = '') => String(value || '').replace(/\D/g, '');
 
+const getManualClosureNotice = (date, time, schedule) => {
+  const closure = getDateClosure(date, schedule);
+  const window = getBookingTimeWindowForTime(time);
+  const violatesClosure = closure.isClosed
+    || Boolean(window && closure.closedTimePreferences.includes(window.value));
+  if (!violatesClosure) return '';
+  const reason = closure.isClosed
+    ? 'il salone risulta chiuso in questo giorno'
+    : closure.label.toLowerCase();
+  return `Attenzione: ${reason}. Puoi confermare comunque se è un’eccezione voluta.`;
+};
+
 const getAppointmentEnd = (appointment) => {
   const start = new Date(appointment.scheduled_at);
   return new Date(start.getTime() + (Number(appointment.duration_minutes) || DEFAULT_DURATION) * 60000);
@@ -589,6 +601,7 @@ export default function Calendar() {
     excludedId,
   }), [data.appointments, workstationCapacity]);
   const manualLoadNotice = manualCandidate && !manualConflict ? getLoadNotice(manualCandidate) : null;
+  const manualClosureNotice = getManualClosureNotice(manualForm.date, manualForm.time, bookingSchedule);
   const requestLoadNotice = requestCandidate && !requestConflict
     ? getLoadNotice(requestCandidate, selectedItem?.request_kind === 'legacy' ? selectedItem.id : null)
     : null;
@@ -919,6 +932,11 @@ export default function Calendar() {
             <Field label="Durata (min)" type="number" min="15" step="15" value={manualForm.durationMinutes} onChange={(event) => setManualForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
           </div>
           <Field label="Note" area value={manualForm.notes} onChange={(event) => setManualForm((current) => ({ ...current, notes: event.target.value }))} />
+          {manualClosureNotice ? (
+            <p className="gh-calendar-notice gh-calendar-notice--error" role="status">
+              {manualClosureNotice}
+            </p>
+          ) : null}
           {manualConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <AppointmentLoadNote notice={manualLoadNotice} />
           <PetDuplicateNotice booking={manualDuplicateBooking} petName={manualPet?.name} />

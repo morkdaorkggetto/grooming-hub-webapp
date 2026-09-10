@@ -1152,6 +1152,10 @@
   background: var(--color-warning-bg);
 }
 
+.gh-planning-chip--outside-hours {
+  background: var(--gh-absent);
+}
+
 .gh-planning-chip--search-match {
   border-color: var(--color-text-primary);
   background: color-mix(in srgb, var(--color-primary) 45%, transparent);
@@ -1202,6 +1206,13 @@
 .gh-planning-chip__copy small.gh-planning-chip__service {
   color: var(--color-text-primary);
   font-weight: 650;
+}
+
+.gh-planning-chip__copy small.gh-planning-chip__outside-hours {
+  color: var(--color-text-primary);
+  font-size: 9.5px;
+  font-style: italic;
+  font-weight: 700;
 }
 
 .gh-planning-chip--request .gh-planning-chip__copy small {

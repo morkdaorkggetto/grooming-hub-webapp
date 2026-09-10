@@ -17,12 +17,12 @@ function ItemTags({ item }) {
   ));
 }
 
-function AppointmentChip({ item, onOpen }) {
+function AppointmentChip({ item, onOpen, outsideHours = false }) {
   const isMatch = item?.isSearchMatch;
   const description = `${item.breed || 'Appuntamento'} · ${item.duration_minutes}′`;
   return (
     <button
-      className={`gh-planning-chip gh-planning-chip--appointment${isMatch ? ' gh-planning-chip--search-match' : ''}`}
+      className={`gh-planning-chip gh-planning-chip--appointment${isMatch ? ' gh-planning-chip--search-match' : ''}${outsideHours ? ' gh-planning-chip--outside-hours' : ''}`}
       type="button"
       onClick={() => onOpen(item)}
     >
@@ -39,17 +39,18 @@ function AppointmentChip({ item, onOpen }) {
             {item.serviceLabel}
           </small>
         ) : null}
+        {outsideHours ? <small className="gh-planning-chip__outside-hours">fuori orario</small> : null}
       </span>
       <span className="gh-planning-chip__tags"><ItemTags item={item} /></span>
     </button>
   );
 }
 
-function RequestChip({ item, onOpen }) {
+function RequestChip({ item, onOpen, outsideHours = false }) {
   const isMatch = item?.isSearchMatch;
   return (
     <button
-      className={`gh-planning-chip gh-planning-chip--request${isMatch ? ' gh-planning-chip--search-match' : ''}`}
+      className={`gh-planning-chip gh-planning-chip--request${isMatch ? ' gh-planning-chip--search-match' : ''}${outsideHours ? ' gh-planning-chip--outside-hours' : ''}`}
       type="button"
       onClick={() => onOpen(item)}
     >
@@ -59,6 +60,7 @@ function RequestChip({ item, onOpen }) {
       <span className="gh-planning-chip__copy">
         <strong>{item.petName}</strong>
         <small>{item.leadTimeLabel || 'Da confermare'}</small>
+        {outsideHours ? <small className="gh-planning-chip__outside-hours">fuori orario</small> : null}
       </span>
     </button>
   );
@@ -122,14 +124,23 @@ function CancelledFooter({ appointments, onOpen }) {
 
 function PlanningBand({ band, onOpen, onBook, showCancelled = false }) {
   const appointments = showCancelled ? band.dayAppointments : band.appointments;
+  const hasContent = band.requests.length > 0 || appointments.length > 0;
   return (
     <section className={`gh-planning-band${band.isClosed ? ' gh-planning-band--closed' : ''}`}>
       <header className="gh-planning-band__head">
         <div><strong>{band.window.name}</strong><span>{formatWindowRange(band.window)}</span></div>
-        {!band.isClosed && <small><b className="gh-num">{band.load.occupied}/{band.load.capacity}</b> postazioni occupate</small>}
+        {(!band.isClosed || hasContent) && <small><b className="gh-num">{band.load.occupied}/{band.load.capacity}</b> postazioni occupate</small>}
       </header>
       {band.isClosed ? (
-        <p className="gh-planning-closed">chiuso</p>
+        <>
+          <p className="gh-planning-closed">chiuso</p>
+          {hasContent ? (
+            <div className="gh-planning-band__body">
+              {band.requests.map((item) => <RequestChip item={item} onOpen={onOpen} outsideHours key={`request-${item.id}`} />)}
+              {appointments.map((item) => <AppointmentChip item={item} onOpen={onOpen} outsideHours key={`appointment-${item.id}`} />)}
+            </div>
+          ) : null}
+        </>
       ) : (
         <div className="gh-planning-band__body">
           {band.requests.map((item) => <RequestChip item={item} onOpen={onOpen} key={`request-${item.id}`} />)}
@@ -390,35 +401,41 @@ export function CalendarNavigation({
 export function CalendarPlanningWeek({ days, onOpen, onBook, onSelectDay }) {
   return (
     <div className="gh-planning-week">
-      {days.map((day) => (
-        <article className={`gh-planning-day${day.isToday ? ' gh-planning-day--today' : ''}${day.closure.isClosed ? ' gh-planning-day--closed' : ''}`} key={day.date}>
-          <button className="gh-planning-day__head" type="button" onClick={() => onSelectDay(day.date)}>
-            <span>{day.weekday}</span><strong>{day.dayNumber}</strong>
-            {day.isToday && <small>Oggi</small>}
-          </button>
-          {day.closure.isClosed ? (
-            <div className="gh-planning-day__closed"><span>chiuso</span></div>
-          ) : (
-            <>
-              {day.bands.map((band) => <PlanningBand band={band} onOpen={onOpen} onBook={onBook} key={band.window.value} />)}
-              <UnplacedItems items={day.unplacedItems} onOpen={onOpen} />
-            </>
-          )}
-          <footer className="gh-planning-day__foot">
-            <WalkInFooter visits={day.visits} onOpen={onOpen} />
-            <CancelledFooter appointments={day.cancelledAppointments} onOpen={onOpen} />
-          </footer>
-        </article>
-      ))}
+      {days.map((day) => {
+        const closedDayHasContent = day.closure.isClosed
+          && day.bands.some((band) => band.requests.length > 0 || band.appointments.length > 0);
+        return (
+          <article className={`gh-planning-day${day.isToday ? ' gh-planning-day--today' : ''}${day.closure.isClosed ? ' gh-planning-day--closed' : ''}`} key={day.date}>
+            <button className="gh-planning-day__head" type="button" onClick={() => onSelectDay(day.date)}>
+              <span>{day.weekday}</span><strong>{day.dayNumber}</strong>
+              {day.isToday && <small>Oggi</small>}
+            </button>
+            {day.closure.isClosed && !closedDayHasContent ? (
+              <div className="gh-planning-day__closed"><span>chiuso</span></div>
+            ) : (
+              <>
+                {day.bands.map((band) => <PlanningBand band={band} onOpen={onOpen} onBook={onBook} key={band.window.value} />)}
+                <UnplacedItems items={day.unplacedItems} onOpen={onOpen} />
+              </>
+            )}
+            <footer className="gh-planning-day__foot">
+              <WalkInFooter visits={day.visits} onOpen={onOpen} />
+              <CancelledFooter appointments={day.cancelledAppointments} onOpen={onOpen} />
+            </footer>
+          </article>
+        );
+      })}
     </div>
   );
 }
 
 export function CalendarPlanningDay({ day, onOpen, onBook }) {
   if (!day) return null;
+  const closedDayHasContent = day.closure.isClosed
+    && day.bands.some((band) => band.requests.length > 0 || band.dayAppointments.length > 0);
   return (
     <div className="gh-planning-day-view">
-      {day.closure.isClosed ? (
+      {day.closure.isClosed && !closedDayHasContent ? (
         <section className="gh-planning-day-view__closed"><span>chiuso</span></section>
       ) : (
         <div className="gh-planning-day-view__bands">
