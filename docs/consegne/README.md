@@ -243,3 +243,17 @@ Non fa immaginare il caso: **lo scopre.** E vale per tutti i fratelli non ancora
 **Regola**: prima di lanciare `salva.sh`, se esiste un mandato con migrazione **consegnato e non ancora applicato**, la migrazione si applica **prima** — oppure si aspetta a salvare.
 
 La riga **«Commit locali non ancora pubblicati»** che lo script stampa prima di chiedere conferma **è lì per questo**: se non è vuota, si sta pubblicando del codice, e bisogna sapere quale.
+
+#### Se un invariante dice «da nessuna parte», la controprova è una ricerca
+
+Due volte in tre giorni un invariante corretto è sopravvissuto a controprove corrette, ed è finito in produzione.
+
+**`GH-73`**: il livello effettivo teneva conto della qualifica conferita — provato, verde. Ma **le tre righe della scala** continuavano a calcolarsi da sole, e sulla scheda di Clover si leggeva `Livello Bronzo` sopra e *«mancano 3 visite per il bronzo»* sotto. Il mandato aveva chiesto *«il prossimo livello mostrato è l'argento»*: **il dato aggregato, non la resa.**
+
+**`GH-77`**: la foto di riconoscimento doveva sparire dall'area del proprietario *«in nessuna forma»* — e le controprove parlavano tutte della **scheda del pet**. È rimasta nella **Home** e nella **prenotazione**, perché l'elenco dei pet non caricava nemmeno il ritratto. L'ha trovata Luigi usando l'app come cliente.
+
+In entrambi i casi Codex ha provato **con precisione quello che gli era stato chiesto**, e l'ha dichiarato nell'elenco dei file. Il difetto è vissuto **nello spazio fra l'invariante generale e la prova puntuale**.
+
+**Regola**: quando un invariante dice **«da nessuna parte», «in nessuna forma», «mai»**, la controprova non è un caso a schermo — è una **ricerca esaustiva nel codice**, con il comando riportato e i file elencati.
+
+Un esempio dimostra che funziona **dove hai guardato**. Una ricerca dimostra che **non c'è altrove.**
