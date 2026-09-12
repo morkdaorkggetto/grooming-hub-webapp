@@ -1,0 +1,566 @@
+{
+  "projectRef": "qttpinkslhenxrsbhhhg",
+  "base": "bd5dd7c1f9eb03befbb5412db5be40276eeedac5",
+  "authorization": "Existing RLS suite only, temporary demo fixtures and verified restoration; no new accounts or password changes.",
+  "command": "env GH_RLS_EXPECTED_PROJECT_REF=qttpinkslhenxrsbhhhg GH_RLS_EXPECTED_PET_COUNT=7 GH_RLS_SUITE_LABEL='GH-86 - Suite RLS demo' node scripts/rls-tests/run.mjs",
+  "suiteSha256": "e0d6bfe12333148486fe6494414c78d03224d29fd0950db2913d73c5510ca7bc",
+  "result": {
+    "exitCode": 0,
+    "pass": 60,
+    "fail": 0,
+    "skip": 0,
+    "realSeconds": 30,
+    "userSeconds": 1.27,
+    "systemSeconds": 0.25
+  },
+  "tests": [
+    {
+      "status": "PASS",
+      "test": "Login sonda staff",
+      "expected": "sessione API disponibile",
+      "measured": "user 0b33da67-01cd-43f5-8f6b-301084c0c001"
+    },
+    {
+      "status": "PASS",
+      "test": "Login Mario",
+      "expected": "sessione API disponibile",
+      "measured": "user 578ab8db-6388-4cab-aa1d-58c5b0fb6bb0"
+    },
+    {
+      "status": "PASS",
+      "test": "Login Luca",
+      "expected": "sessione API disponibile",
+      "measured": "user f55684e5-6d1d-48b9-acc7-7c0e4b3aaf15"
+    },
+    {
+      "status": "PASS",
+      "test": "Login sonda customer GH-44",
+      "expected": "sessione API disponibile",
+      "measured": "user 0b33da67-01cd-43f5-8f6b-301084c0c044"
+    },
+    {
+      "status": "PASS",
+      "test": "Login staff tenant estraneo GH-49",
+      "expected": "sessione API disponibile",
+      "measured": "user 0b33da67-01cd-43f5-8f6b-301084c0c049"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff legge baseline pet",
+      "expected": "7 pet nel tenant",
+      "measured": "7 pet"
+    },
+    {
+      "status": "PASS",
+      "test": "Promozioni staff crea, modifica, disattiva e riordina GH-49",
+      "expected": "3 promozioni nel tenant con ordine 10/20/30 e una sola visibile ora",
+      "measured": "3 create, 1 modifica, 1 disattivazione, ordine 10/20/30"
+    },
+    {
+      "status": "PASS",
+      "test": "Promozioni customer rispettano stato e finestra GH-49",
+      "expected": "solo la promozione attiva e in finestra e visibile",
+      "measured": "1 visibile: [DEMO GH-49] Attiva modificata"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff fuori tenant non vede ne modifica promozioni GH-49",
+      "expected": "0 righe visibili, 0 righe modificate e riordino rifiutato",
+      "measured": "0 lette, 0 modificate, RPC 42501"
+    },
+    {
+      "status": "PASS",
+      "test": "Portale customer legge il proprio nucleo",
+      "expected": "1 customer e 2 pet di Mario",
+      "measured": "1 customer, 2 pet"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff legge e scrive note riservate",
+      "expected": "marker presenti in entrambe le tabelle",
+      "measured": "2 marker scritti e riletti"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non legge note riservate",
+      "expected": "0 note pet e 0 note customer",
+      "measured": "0 note pet, 0 note customer"
+    },
+    {
+      "status": "PASS",
+      "test": "Portale customer non incorpora note riservate",
+      "expected": "2 pet con relazioni note vuote",
+      "measured": "2 pet, 0 relazioni note"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non scrive note riservate",
+      "expected": "due rifiuti RLS",
+      "measured": "2 rifiuti 42501/RLS"
+    },
+    {
+      "status": "PASS",
+      "test": "Colonne note legacy rimosse",
+      "expected": "operator_notes e internal_notes assenti",
+      "measured": "2 errori 42703"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage staff e lettura pubblica GH-45",
+      "expected": "staff crea e sostituisce in entrambi i bucket; URL pubblici leggibili senza sessione",
+      "measured": "2 upload, 2 update, 2 letture pubbliche HTTP 200"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage utente senza legami GH-45",
+      "expected": "nessuna scrittura o cancellazione in client-photos e pet-avatars",
+      "measured": "4 scritture rifiutate; 2 delete senza effetto; oggetti ancora pubblici"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage customer non proprietario GH-45",
+      "expected": "Mario non sostituisce o cancella oggetti staff in nessuno dei due bucket",
+      "measured": "2 update rifiutati; 2 delete senza effetto; oggetti invariati"
+    },
+    {
+      "status": "PASS",
+      "test": "Invito con durata tenant GH-45",
+      "expected": "expires_at memorizzato a 3 giorni anche se il chiamante propone 30 giorni",
+      "measured": "259200.006 secondi (3 giorni)"
+    },
+    {
+      "status": "PASS",
+      "test": "Inviti scaduto e gia usato GH-45",
+      "expected": "GH_INVITE_EXPIRED e GH_INVITE_ALREADY_USED restano distinti",
+      "measured": "GH_INVITE_EXPIRED / GH_INVITE_ALREADY_USED"
+    },
+    {
+      "status": "PASS",
+      "test": "Fixture customer GH-44 collegata",
+      "expected": "customer usa-e-getta, 4 pet, 1 visita e membership customer",
+      "measured": "customer collegato, 4 pet e 1 visita"
+    },
+    {
+      "status": "PASS",
+      "test": "Isolamento Mario -> Luca",
+      "expected": "0 customer, 0 pet e 0 visite di Luca",
+      "measured": "0 customer, 0 pet, 0 visite"
+    },
+    {
+      "status": "PASS",
+      "test": "Isolamento Luca -> Mario",
+      "expected": "0 customer, 0 pet e 0 visite di Mario",
+      "measured": "0 customer, 0 pet, 0 visite"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non vede la sonda",
+      "expected": "0 membership e 0 profili staff",
+      "measured": "0 membership, 0 profili"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non legge campi direttorio altrui",
+      "expected": "0 customer altrui con status o source",
+      "measured": "0 customer altrui"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non modifica campi direttorio propri",
+      "expected": "relationship_status e acquisition_source invariati",
+      "measured": "invariati (active, manual)"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non chiama RPC staff",
+      "expected": "SQLSTATE 42501 e 0 scritture",
+      "measured": "42501, 0 customer"
+    },
+    {
+      "status": "PASS",
+      "test": "Mario invia richiesta appuntamento",
+      "expected": "richiesta pending sul proprio pet",
+      "measured": "24c1bd09-4200-40fe-bfef-570997f7fc48, pending"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff legge richiesta Mario",
+      "expected": "1 richiesta con campi strutturati",
+      "measured": "1 richiesta strutturata"
+    },
+    {
+      "status": "PASS",
+      "test": "Luca non vede richiesta Mario",
+      "expected": "0 richieste",
+      "measured": "0 richieste"
+    },
+    {
+      "status": "PASS",
+      "test": "Mario non cambia stato richiesta",
+      "expected": "0 righe aggiornate, stato pending",
+      "measured": "0 righe, pending"
+    },
+    {
+      "status": "PASS",
+      "test": "Luca non invia richiesta per pet Mario",
+      "expected": "SQLSTATE 42501",
+      "measured": "42501"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff converte richiesta atomicamente",
+      "expected": "request approved e appointment collegato",
+      "measured": "7668bdd9-7911-4e47-abfe-9e36c8a92069, approved"
+    },
+    {
+      "status": "PASS",
+      "test": "Tetto richieste aperte per customer",
+      "expected": "3 pending su pet distinti; quarta rifiutata dal database",
+      "measured": "3 pending su 3 pet, quarta 23514/GH44_OPEN_REQUEST_LIMIT"
+    },
+    {
+      "status": "PASS",
+      "test": "Chiusura richiesta libera il tetto",
+      "expected": "una rejected, richiesta successiva accettata",
+      "measured": "1 rejected, nuova pending accettata"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non scollega account",
+      "expected": "sonda GH-44 non scollega se stessa ne Mario",
+      "measured": "2 rifiuti 42501, audit invisibile, legame fixture invariato"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff scollega e nuovo invito ricollega",
+      "expected": "account e dati preservati, invisibilita immediata, nuovo riscatto riuscito",
+      "measured": "0 dati visibili dopo unlink; 4 pet e 1 visite preservati; audit staff; nuovo invito ok"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer protegge microchip",
+      "expected": "valore invariato",
+      "measured": "invariato (null)"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer protegge name",
+      "expected": "valore invariato",
+      "measured": "invariato (Luna)"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer protegge photo_url",
+      "expected": "valore invariato",
+      "measured": "invariato (null)"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer consente owner_notes",
+      "expected": "marker scritto e ripristinabile",
+      "measured": "marker scritto"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer consente coat_preferences",
+      "expected": "preferenze scritte e ripristinabili",
+      "measured": "preferenze scritte"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff continua a sostituire photo_url GH-49",
+      "expected": "foto staff aggiornata, leggibile e ripristinata",
+      "measured": "update staff, HTTP 200, ripristino originale"
+    },
+    {
+      "status": "PASS",
+      "test": "Ritratto owner non sovrascrive foto salone GH-50",
+      "expected": "owner_photo_url scritto; photo_url invariato",
+      "measured": "ritratto owner presente; URL salone identico al valore pre-update customer"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non scrive visits.photo_url GH-50",
+      "expected": "valore visita invariato",
+      "measured": "invariato (null)"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff allega e rimuove foto visita GH-50",
+      "expected": "foto persistita, leggibile e rimossa",
+      "measured": "persistita, HTTP 200, colonna null, oggetto rimosso"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non vede foto di pet altrui GH-50",
+      "expected": "0 pet e 0 visite",
+      "measured": "0 pet e 0 visite"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non scrive nello spazio visite GH-50",
+      "expected": "HTTP 403",
+      "measured": "HTTP 403"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage customer sul pet proprio",
+      "expected": "upload, update e delete riusciti",
+      "measured": "upload, update e delete riusciti"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage customer sul pet altrui",
+      "expected": "HTTP 403",
+      "measured": "HTTP 403"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage customer su tenant estraneo",
+      "expected": "HTTP 403",
+      "measured": "HTTP 403"
+    },
+    {
+      "status": "PASS",
+      "test": "Fixture appuntamento assenza GH-52",
+      "expected": "programmato nella settimana corrente; report misurati",
+      "measured": "0 visite / EUR 0.00 settimana; 0 visite / EUR 0.00 mese"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non segna assenza GH-52",
+      "expected": "RPC 42501 e stato invariato",
+      "measured": "42501, 0 righe dirette, scheduled"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff segna assenza datata GH-52",
+      "expected": "no_show, -1, zero visite e incassi invariati",
+      "measured": "2026-09-12T01:00:00+00:00; score -1; 0 visite; EUR 0.00 invariati"
+    },
+    {
+      "status": "PASS",
+      "test": "Doppio segna assenza GH-52",
+      "expected": "stato no_show e punteggio ancora -1",
+      "measured": "score -1"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non annulla assenza GH-52",
+      "expected": "RPC 42501 e assenza invariata",
+      "measured": "42501, no_show"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff annulla assenza GH-52",
+      "expected": "scheduled, punteggio e report ripristinati",
+      "measured": "scheduled; score 0; settimana e mese invariati"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff aggiorna campo staff-only",
+      "expected": "nota pet modificata",
+      "measured": "marker scritto"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff fuori tenant",
+      "expected": "0 righe da un secondo tenant reale",
+      "measured": "0 pet"
+    },
+    {
+      "status": "PASS",
+      "test": "Pulizia fixture",
+      "expected": "0 residui marker",
+      "measured": "0 pet, 0 visite, 0 customer, 0 richieste, 0 note pet, 0 note customer, 0 promozioni, 0 appuntamenti GH-52"
+    }
+  ],
+  "verification": {
+    "snapshotQuery": "select 'pets' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.pets t union all select 'visits' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.visits t union all select 'customers' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.customers t union all select 'appointments' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.appointments t union all select 'appointment_requests' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.appointment_requests t union all select 'pet_staff_notes' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.pet_staff_notes t union all select 'customer_staff_notes' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.customer_staff_notes t union all select 'promotions' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.promotions t union all select 'customer_invitations' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.customer_invitations t union all select 'tenant_memberships' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.tenant_memberships t union all select 'profiles' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.profiles t union all select 'tenants' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.tenants t union all select 'storage.objects',count(*)::int,md5(coalesce(string_agg((to_jsonb(t)-'updated_at'-'last_accessed_at')::text,E'\\n' order by (to_jsonb(t)-'updated_at'-'last_accessed_at')::text),'')) from storage.objects t union all select 'auth.users (ids only)',count(*)::int,md5(coalesce(string_agg(id::text,',' order by id),'')) from auth.users",
+    "before": [
+      {
+        "object": "pets",
+        "rows": 7,
+        "fingerprint": "2221591a978d6255263097f42fec20b5"
+      },
+      {
+        "object": "visits",
+        "rows": 90,
+        "fingerprint": "56c7aa5922dd43aad2339eeb126f55cc"
+      },
+      {
+        "object": "customers",
+        "rows": 7,
+        "fingerprint": "3fbac0f2850ed3c49053863f5e48951a"
+      },
+      {
+        "object": "appointments",
+        "rows": 8,
+        "fingerprint": "99ef0262ec58d4880a4f159c2a96ad57"
+      },
+      {
+        "object": "appointment_requests",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "pet_staff_notes",
+        "rows": 5,
+        "fingerprint": "b7dd213a94a3a4ec2d6000ef2fcf5c37"
+      },
+      {
+        "object": "customer_staff_notes",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "promotions",
+        "rows": 3,
+        "fingerprint": "32234437533245217a075f7dc3a61e88"
+      },
+      {
+        "object": "customer_invitations",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "tenant_memberships",
+        "rows": 5,
+        "fingerprint": "8aabe83320c5f3853d52c082d96a4aaf"
+      },
+      {
+        "object": "profiles",
+        "rows": 6,
+        "fingerprint": "3ef064d7323742131d5b16690632c859"
+      },
+      {
+        "object": "tenants",
+        "rows": 2,
+        "fingerprint": "873efadd4f2c888be26bc54c561ba414"
+      },
+      {
+        "object": "storage.objects",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "auth.users (ids only)",
+        "rows": 6,
+        "fingerprint": "80f9c0103ddb7d8b61c11b9972f427e8"
+      }
+    ],
+    "after": [
+      {
+        "object": "pets",
+        "rows": 7,
+        "fingerprint": "2221591a978d6255263097f42fec20b5"
+      },
+      {
+        "object": "visits",
+        "rows": 90,
+        "fingerprint": "56c7aa5922dd43aad2339eeb126f55cc"
+      },
+      {
+        "object": "customers",
+        "rows": 7,
+        "fingerprint": "3fbac0f2850ed3c49053863f5e48951a"
+      },
+      {
+        "object": "appointments",
+        "rows": 8,
+        "fingerprint": "99ef0262ec58d4880a4f159c2a96ad57"
+      },
+      {
+        "object": "appointment_requests",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "pet_staff_notes",
+        "rows": 5,
+        "fingerprint": "b7dd213a94a3a4ec2d6000ef2fcf5c37"
+      },
+      {
+        "object": "customer_staff_notes",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "promotions",
+        "rows": 3,
+        "fingerprint": "32234437533245217a075f7dc3a61e88"
+      },
+      {
+        "object": "customer_invitations",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "tenant_memberships",
+        "rows": 5,
+        "fingerprint": "8aabe83320c5f3853d52c082d96a4aaf"
+      },
+      {
+        "object": "profiles",
+        "rows": 6,
+        "fingerprint": "3ef064d7323742131d5b16690632c859"
+      },
+      {
+        "object": "tenants",
+        "rows": 2,
+        "fingerprint": "873efadd4f2c888be26bc54c561ba414"
+      },
+      {
+        "object": "storage.objects",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "auth.users (ids only)",
+        "rows": 6,
+        "fingerprint": "80f9c0103ddb7d8b61c11b9972f427e8"
+      }
+    ],
+    "all14FingerprintsEqual": true,
+    "excludedMetadata": [
+      "updated_at",
+      "storage.objects.last_accessed_at"
+    ],
+    "authUsersCompared": "Count and IDs only; no password fields read.",
+    "cleanup": {
+      "pets": 0,
+      "visits": 0,
+      "customers": 0,
+      "appointmentRequests": 0,
+      "petNotes": 0,
+      "customerNotes": 0,
+      "promotions": 0,
+      "appointmentsGh52": 0,
+      "customerInvitations": 0,
+      "storageObjects": 0
+    },
+    "retainedAudit": {
+      "table": "customer_account_unlink_audit",
+      "windowStart": "2026-09-12T10:08:20Z",
+      "events": 2,
+      "eventsMatchingSuiteProbeAndPhone": 2,
+      "remainingReferencedCustomers": 0,
+      "deleted": false
+    },
+    "authAuditRead": {
+      "windowStart": "2026-09-12T10:08:20Z",
+      "rows": 0,
+      "limitation": "Not used as evidence of password immutability; suite Auth call sites contain only login, getUser and signOut."
+    }
+  },
+  "timedWindow": {
+    "start": "2026-09-12T10:08:20Z",
+    "end": "2026-09-12T10:11:21Z",
+    "seconds": 181,
+    "scope": "Read preflight, suite, postflight; excludes subsequent register and commit."
+  },
+  "limits": [
+    "Business state restored, not a byte-for-byte database restore: audit traces and automatic timestamps are retained.",
+    "SMTP configuration and real recovery email delivery remain unverified."
+  ]
+}

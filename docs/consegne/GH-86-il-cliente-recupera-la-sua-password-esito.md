@@ -2,15 +2,16 @@
 
 ## Esito e perimetro
 
-**Implementato e verificato in memoria. Mandato non ancora chiuso:** suite
-RLS sospesa in attesa dell'autorizzazione alle sue scritture temporanee;
-consegna effettiva dell'email e prova finale di Luigi ancora da verificare.
-Non considerare sbloccato il lancio.
+**Consegna tecnica completata dopo la ripresa autorizzata:** implementazione
+verificata in memoria e suite RLS viva **60 PASS, 0 FAIL, 0 SKIP** sul demo.
+Dati operativi ripristinati; conservati due eventi di audit della suite,
+come dettagliato nella sezione finale. Consegna effettiva dell'email e prova
+finale di Luigi ancora da verificare: non considerare sbloccato il lancio.
 
 - Root `/Users/luigimaisto/Desktop/grooming-hub-web`, worktree `webapp/`.
 - Branch `main`; base `a3e1bbb4c99034906a23a7cac825d63f5a0e5279`.
 - Mandato: versione locale non versionata di GH-86, nominata da Luigi.
-- Demo ammesso `qttpinkslhenxrsbhhhg`: `get_project` lo ha restituito
+- Nella prima fase, demo ammesso `qttpinkslhenxrsbhhhg`: `get_project` lo ha restituito
   `ACTIVE_HEALTHY`. Nessuna query sui dati, nessuna scrittura reale, nessuna
   modifica Auth/SMTP. Produzione e altri progetti non consultati.
 - Nessuna migration, schema, policy, funzione database o dipendenza nuova.
@@ -164,13 +165,14 @@ L'indice changelog .md non e' stato recuperato (content-type non supportato dal
 browser di ricerca, DNS non disponibile nella shell sandbox); API confrontate
 con documentazione e SDK locale, nessun aggiornamento dipendenze.
 
-**RLS non eseguita.** `scripts/rls-tests/run.mjs` non e' read-only: crea pet,
+**Sospensione iniziale RLS, superata dalla ripresa autorizzata sotto.**
+`scripts/rls-tests/run.mjs` non e' read-only: crea pet,
 visite, richieste e oggetti Storage, aggiorna marker e poi ripristina. Il
 mandato richiede la suite ma vieta qualsiasi scrittura e ammette solo fixture
 in memoria. Ho chiesto a Luigi un'eccezione circoscritta; nessuna risposta
-ricevuta al momento di questo registro. Non ho interpretato le scritture come
-implicitamente consentite. I 60 PASS di GH-78 restano una misura storica,
-non una prova GH-86.
+ricevuta al momento della prima consegna. Non ho interpretato le scritture come
+implicitamente consentite. La nuova misura GH-86 e' ora riportata sotto e
+non riusa i PASS storici di GH-78.
 
 Soluzione consigliata: autorizzare soltanto l'esecuzione della suite esistente
 sul demo con ripristino verificato, senza creare nuovi account o toccare le
@@ -224,3 +226,95 @@ richiedere il recupero dall'area proprietario, controllare l'arrivo della mail,
 seguire il link, cambiare password e rientrare nell'area proprietario.
 L'account indicato dal mandato va usato solo nell'ambiente a cui appartiene;
 non e' stato cercato o ricreato nel demo. Domanda finale: **cosa non ti torna?**
+
+## Ripresa RLS autorizzata - 12 settembre 2026
+
+Luigi ha autorizzato esplicitamente la suite esistente, le sole scritture
+temporanee sul demo e il ripristino verificato, senza nuovi account o cambio
+password. Base della ripresa: `bd5dd7c1f9eb03befbb5412db5be40276eeedac5`,
+il commit di implementazione GH-86. Nessuna modifica al codice in questa
+ripresa, nessuna modifica alla suite e nessuna migrazione.
+
+Comando eseguito una sola volta, con accesso rete autorizzato:
+
+```sh
+/usr/bin/time -p env GH_RLS_EXPECTED_PROJECT_REF=qttpinkslhenxrsbhhhg GH_RLS_EXPECTED_PET_COUNT=7 GH_RLS_SUITE_LABEL='GH-86 - Suite RLS demo' node scripts/rls-tests/run.mjs
+```
+
+Guard aggiuntivo prima dell'avvio: hostname delle env esattamente
+`qttpinkslhenxrsbhhhg.supabase.co`; presenza delle tre password verificata
+senza stamparle. Progetto `ACTIVE_HEALTHY`, marker pregressi tutti a zero.
+Il valore 7 e' stato misurato prima della suite, non derivato da un report.
+
+**Esito: 60 PASS, 0 FAIL, 0 SKIP, exit code 0.** Cinque accessi delle sonde
+gia' esistenti riusciti; isolamento Mario/Luca e cross-tenant, whitelist,
+note riservate, inviti, richieste, promozioni, Storage e assenze verificati.
+Durata `/usr/bin/time`: **30,00 s real / 1,27 s user / 0,25 s sys**.
+Suite SHA-256 invariata:
+`e0d6bfe12333148486fe6494414c78d03224d29fd0950db2913d73c5510ca7bc`.
+
+### Ripristino indipendente dalla suite
+
+Due SELECT aggregate, prima e dopo, confrontano cardinalita' e impronte di
+tutte le righe delle seguenti tabelle del demo. **14/14 impronte identiche.**
+
+| Oggetto | Prima | Dopo |
+|---|---:|---:|
+| pets | 7 | 7 |
+| visits | 90 | 90 |
+| customers | 7 | 7 |
+| appointments | 8 | 8 |
+| appointment_requests | 0 | 0 |
+| pet_staff_notes | 5 | 5 |
+| customer_staff_notes | 0 | 0 |
+| promotions | 3 | 3 |
+| customer_invitations | 0 | 0 |
+| tenant_memberships | 5 | 5 |
+| profiles | 6 | 6 |
+| tenants | 2 | 2 |
+| storage.objects | 0 | 0 |
+| auth.users, soli ID | 6 | 6 |
+
+Le impronte sono MD5 della concatenazione ordinata delle righe JSONB, escluso
+`updated_at` e, per Storage, anche `last_accessed_at`. Misurano il ripristino
+del contenuto, non l'assenza di aggiornamenti dei timestamp automatici.
+Per Auth sono stati letti soltanto conteggio e impronta degli ID: **nessuna
+password o hash password letto**. La ricerca `rg -n '\.auth\.'
+scripts/rls-tests/run.mjs` trova solo signInWithPassword, getUser e signOut;
+nessuna creazione account o updateUser. Gli ID Auth restano gli stessi sei.
+
+Controllo marker indipendente dopo la suite: **0 pet, 0 visite, 0 customer,
+0 richieste, 0 note pet, 0 note customer, 0 promozioni, 0 appuntamenti GH-52**.
+Anche **inviti e oggetti Storage: 0**. Valori originali dei dati operativi e
+dei legami ripristinati, confermati dalle impronte, non solo dai conteggi.
+
+**Limite dichiarato del ripristino:** la suite genera anche due righe in
+`customer_account_unlink_audit`. Entrambe, nella finestra di questa esecuzione,
+corrispondono al telefono fixture GH-44, alla sonda customer GH-44 e alla
+sonda staff; i customer temporanei referenziati non esistono piu' (0).
+Questi audit non hanno una cascata sul customer e la suite non li cancella.
+Li ho conservati come traccia dell'esecuzione, senza aggiungere cancellazioni
+fuori dalla suite. Quindi **zero fixture operative residue non significa
+zero righe di audit** o ripristino byte-per-byte dell'intero database.
+Una lettura aggregata di `auth.audit_log_entries` nella stessa finestra ha
+restituito 0 righe: non viene usata come prova dell'immutabilita' delle password.
+
+### File e consegna della ripresa
+
+| File | Intervento |
+|---|---|
+| `docs/consegne/GH-86-il-cliente-recupera-la-sua-password-esito.md` | Aggiornamento stato e questa integrazione. |
+| `docs/consegne/evidenze/GH-86/gh86-rls-result.json` | Tutti i 60 esiti, comando, query di confronto, impronte prima/dopo, pulizia e audit conservati. |
+
+Intervallo strumentato della ripresa: **10:08:20-10:11:21 UTC**, **3 min 1 s**,
+comprende preflight, suite e postflight, esclude stesura e commit successivi.
+Il commit della ripresa e' solo documentale; hash comunicato alla chiusura.
+I quattro incarichi non versionati restano esclusi. Nessun push/merge/deploy.
+Build non ripetuta: nessun codice cambiato, resta la misura verde del commit
+di implementazione. Il diff rispetto a quella base su `src` e sulla suite e'
+vuoto. Nessun account nuovo, nessuna password reimpostata, produzione intatta.
+
+Per Cowork: la verifica RLS richiesta e' conclusa; tenere separato il passo
+email reale, che questa suite non esercita. Nei prossimi mandati distinguere
+esplicitamente ripristino dei dati operativi da conservazione dei log di
+audit, evitando una promessa di "zero residui" estesa impropriamente ai log.
