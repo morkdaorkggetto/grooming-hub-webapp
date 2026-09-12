@@ -29,7 +29,7 @@ const UNSAVED_MESSAGE = 'Hai modifiche non salvate. Vuoi davvero lasciare la sch
 
 function formatSpecies(species) {
   const labels = { dog: 'Cane', cat: 'Gatto' };
-  return labels[species] || species || 'Specie non indicata';
+  return labels[species] || species || '';
 }
 
 function formatSex(sex) {
@@ -77,37 +77,20 @@ function draftFromPet(pet) {
   };
 }
 
-function DualPetMedallion({ pet, swapped, onSwap }) {
+function PetMedallion({ pet }) {
   const ownerPhoto = pet.owner_photo_url || null;
-  const salonPhoto = pet.photo_url || null;
-  const hasBoth = Boolean(ownerPhoto && salonPhoto);
-  const defaultMain = ownerPhoto || salonPhoto;
-  const defaultSide = hasBoth ? salonPhoto : null;
-  const main = swapped && hasBoth ? defaultSide : defaultMain;
-  const side = swapped && hasBoth ? defaultMain : defaultSide;
 
   return (
     <div className="gh-pet-medallion">
       <div className="gh-pet-medallion__main">
-        {main ? (
-          <img src={main} alt={`Foto di ${pet.name}`} />
+        {ownerPhoto ? (
+          <img src={ownerPhoto} alt={`Ritratto di ${pet.name}`} />
         ) : (
           <span aria-label={`Nessuna foto per ${pet.name}`}>
             {(pet.name || '?').charAt(0).toUpperCase()}
           </span>
         )}
       </div>
-      {side && (
-        <button
-          type="button"
-          className="gh-pet-medallion__side"
-          onClick={onSwap}
-          aria-label="Scambia le due foto"
-          title="Scambia le due foto"
-        >
-          <img src={side} alt="" />
-        </button>
-      )}
     </div>
   );
 }
@@ -338,7 +321,6 @@ export default function Pet() {
   const [draft, setDraft] = useState(draftFromPet(null));
   const [saveError, setSaveError] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(false);
-  const [photosSwapped, setPhotosSwapped] = useState(false);
   const [albumOpen, setAlbumOpen] = useState(false);
   const [selectedAlbumPhoto, setSelectedAlbumPhoto] = useState(null);
   const photoInputRef = useRef(null);
@@ -416,11 +398,32 @@ export default function Pet() {
       await updatePet({ owner_photo_url: uploaded.publicUrl });
       photoSaved = true;
       if (previousPath) await removePetPhoto(previousPath).catch(() => {});
-      setPhotosSwapped(false);
       setMode('saved');
     } catch (photoError) {
       if (uploadedPath && !photoSaved) await removePetPhoto(uploadedPath).catch(() => {});
       setSaveError(photoError.message || 'Non e stato possibile salvare la foto.');
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
+  const handleRemoveOwnerPhoto = async () => {
+    if (!pet?.owner_photo_url) return;
+
+    setPhotoUploading(true);
+    setSaveError(null);
+    const previousPath = ownerPetPhotoPathFromUrl(
+      pet.owner_photo_url,
+      pet.tenant_id,
+      pet.id
+    );
+
+    try {
+      await updatePet({ owner_photo_url: null });
+      if (previousPath) await removePetPhoto(previousPath).catch(() => {});
+      setMode('saved');
+    } catch (photoError) {
+      setSaveError(photoError.message || 'Non e stato possibile togliere la foto.');
     } finally {
       setPhotoUploading(false);
     }
@@ -437,8 +440,7 @@ export default function Pet() {
   const age = calculateAge(pet.birth_date);
   const heroMeta = [formatSpecies(pet.species), pet.breed, age].filter(Boolean).join(' · ');
   const albumPhotos = visits.filter((visit) => visit.photo_url).slice(0, 4);
-  const hasBothPortraits = Boolean(pet.owner_photo_url && pet.photo_url);
-  const showOwnerPhotoInvite = Boolean(pet.photo_url && !pet.owner_photo_url);
+  const showOwnerPhotoInvite = !pet.owner_photo_url;
 
   return (
     <main className="gh-pet-page">
@@ -458,33 +460,35 @@ export default function Pet() {
         <header className="gh-pet-hero">
           <div className="gh-pet-photo-column">
             <div className="gh-pet-avatar-wrap">
-              <DualPetMedallion
-                pet={pet}
-                swapped={photosSwapped}
-                onSwap={() => setPhotosSwapped((current) => !current)}
-              />
+              <PetMedallion pet={pet} />
             </div>
-            {hasBothPortraits && (
-              <p className="gh-pet-photo-explainer">
-                La foto piccola è quella che usiamo noi al banco per riconoscerlo. <strong>Toccala per scambiarle.</strong>
-              </p>
-            )}
           </div>
 
           <div className="gh-pet-hero-copy">
             <Eyebrow>Scheda pet</Eyebrow>
             <h1>{pet.name}</h1>
-            <p>{heroMeta}</p>
-            {pet.owner_photo_url && pet.photo_url && (
-              <button
-                type="button"
-                className="gh-pet-text-action gh-pet-photo-replace"
-                onClick={() => photoInputRef.current?.click()}
-                disabled={photoUploading}
-              >
-                <Icon name="camera" size={15} />
-                {photoUploading ? 'Caricamento...' : 'Cambia la tua foto'}
-              </button>
+            {heroMeta && <p>{heroMeta}</p>}
+            {pet.owner_photo_url && (
+              <div className="gh-pet-photo-actions">
+                <button
+                  type="button"
+                  className="gh-pet-text-action"
+                  onClick={() => photoInputRef.current?.click()}
+                  disabled={photoUploading}
+                >
+                  <Icon name="camera" size={15} />
+                  {photoUploading ? 'Caricamento...' : 'Cambia la tua foto'}
+                </button>
+                <button
+                  type="button"
+                  className="gh-pet-text-action"
+                  onClick={handleRemoveOwnerPhoto}
+                  disabled={photoUploading}
+                >
+                  <Icon name="trash" size={15} />
+                  Togli la tua foto
+                </button>
+              </div>
             )}
           </div>
         </header>
@@ -500,8 +504,8 @@ export default function Pet() {
 
         {showOwnerPhotoInvite && (
           <section className="gh-pet-photo-invite">
-            <strong>Questa è la foto che facciamo noi, per riconoscerlo.</strong>
-            <p>Se ne hai una che ti piace di più, mettila tu: la nostra resta qui sotto.</p>
+            <strong>Metti qui il ritratto di {pet.name}.</strong>
+            <p>Scegli una foto che ti piace: apparirà nella tua area e sulla sua card.</p>
             <button
               type="button"
               className="gh-pet-album-gesture"

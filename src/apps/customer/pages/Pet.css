@@ -72,40 +72,10 @@
   font-size: 58px;
 }
 
-.gh-pet-medallion__main img,
-.gh-pet-medallion__side img {
+.gh-pet-medallion__main img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.gh-pet-medallion__side {
-  width: 48px;
-  height: 48px;
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  overflow: hidden;
-  padding: 0;
-  border: 3px solid var(--color-bg-main);
-  border-radius: 50%;
-  background: var(--color-surface-soft);
-  box-shadow: var(--shadow-md);
-  cursor: pointer;
-}
-
-.gh-pet-medallion__side:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
-  outline-offset: 2px;
-}
-
-.gh-pet-photo-explainer {
-  width: 220px;
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: 11.5px;
-  line-height: 1.5;
-  text-align: center;
 }
 
 .gh-pet-photo-input {
@@ -118,7 +88,14 @@
   white-space: nowrap;
 }
 
-.gh-pet-photo-replace { margin-top: 9px; padding-inline: 0; }
+.gh-pet-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  margin-top: 5px;
+}
+
+.gh-pet-photo-actions .gh-pet-text-action { padding-inline: 0; }
 
 .gh-pet-photo-invite {
   width: min(100%, 540px);
@@ -586,8 +563,6 @@
   .gh-pet-medallion { width: 88px; height: 88px; }
   .gh-pet-medallion { flex-basis: 88px; }
   .gh-pet-medallion__main { font-size: 36px; }
-  .gh-pet-medallion__side { width: 34px; height: 34px; }
-  .gh-pet-photo-explainer { width: 108px; font-size: 10px; }
   .gh-pet-avatar { border-radius: 18px; }
   .gh-pet-avatar--empty { font-size: 36px; }
   .gh-pet-hero h1 { font-size: var(--font-size-pet-hero-mobile); }
@@ -631,8 +606,6 @@
   .gh-pet-avatar,
   .gh-pet-medallion { width: 76px; height: 76px; }
   .gh-pet-medallion { flex-basis: 76px; }
-  .gh-pet-medallion__side { width: 30px; height: 30px; }
-  .gh-pet-photo-explainer { width: 92px; }
   .gh-pet-avatar--empty { font-size: 32px; }
   .gh-pet-data-grid { grid-template-columns: 1fr; }
   .gh-pet-booking-sidebar { left: 14px; right: 14px; }

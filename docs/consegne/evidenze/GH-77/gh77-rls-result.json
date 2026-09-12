@@ -1,0 +1,25 @@
+{
+  "command": "node scripts/rls-tests/run.mjs",
+  "projectRef": "qttpinkslhenxrsbhhhg",
+  "pass": 60,
+  "fail": 0,
+  "skip": 0,
+  "runtimeSeconds": 27.56,
+  "relevantChecks": {
+    "customerCannotWriteSalonPhoto": true,
+    "ownerPortraitDoesNotOverwriteSalonPhoto": true,
+    "customerCannotWriteVisitPhoto": true,
+    "customerOwnStorageLifecycle": true,
+    "permanentProbeLogin": true
+  },
+  "cleanup": {
+    "petResidue": 0,
+    "visitResidue": 0,
+    "customerResidue": 0,
+    "requestResidue": 0,
+    "petNoteResidue": 0,
+    "customerNoteResidue": 0,
+    "promotionResidue": 0,
+    "appointmentResidue": 0
+  }
+}

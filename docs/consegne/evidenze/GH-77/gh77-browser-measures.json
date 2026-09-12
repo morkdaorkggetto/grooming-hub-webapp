@@ -1,0 +1,260 @@
+{
+  "runtimeSeconds": 10.99,
+  "cases": {
+    "none": {
+      "meta": "Shi-tzu",
+      "inviteTitle": "Metti qui il ritratto di Elliot.",
+      "inviteBody": "Scegli una foto che ti piace: apparirà nella tua area e sulla sua card.",
+      "medallionImages": [],
+      "allImages": [],
+      "htmlHasSalonPhoto": false,
+      "albumGestureCount": 0,
+      "albumEmptyText": "Dopo il prossimo bagno troverai qui la sua foto",
+      "bodyText": "I tuoi pet\nE\nSCHEDA PET\nElliot\n\nShi-tzu\n\nMetti qui il ritratto di Elliot.\n\nScegli una foto che ti piace: apparirà nella tua area e sulla sua card.\n\nMetti la tua foto\nAnagrafica\nDATA DI NASCITA\nNon indicato\nSESSO\nNon indicato\nMICROCHIP\nNon indicato\nPESO\nNon indicato\nCOLORE\nNon indicato\nSTERILIZZATO\nNon indicato\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessuna preferenza indicata.\n\nNote del proprietario\nModifica\n\nNessuna nota del proprietario.\n\nLe sue visite\n0 visite\n\nNessuna visita registrata.\n\nDopo il prossimo bagno troverai qui la sua foto\n\nPrenota per Elliot"
+    },
+    "salonOnly": {
+      "meta": "Shi-tzu",
+      "inviteTitle": "Metti qui il ritratto di Elliot.",
+      "inviteBody": "Scegli una foto che ti piace: apparirà nella tua area e sulla sua card.",
+      "medallionImages": [],
+      "allImages": [],
+      "htmlHasSalonPhoto": false,
+      "albumGestureCount": 0,
+      "albumEmptyText": "Dopo il prossimo bagno troverai qui la sua foto",
+      "bodyText": "I tuoi pet\nE\nSCHEDA PET\nElliot\n\nShi-tzu\n\nMetti qui il ritratto di Elliot.\n\nScegli una foto che ti piace: apparirà nella tua area e sulla sua card.\n\nMetti la tua foto\nAnagrafica\nDATA DI NASCITA\nNon indicato\nSESSO\nNon indicato\nMICROCHIP\nNon indicato\nPESO\nNon indicato\nCOLORE\nNon indicato\nSTERILIZZATO\nNon indicato\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessuna preferenza indicata.\n\nNote del proprietario\nModifica\n\nNessuna nota del proprietario.\n\nLe sue visite\n0 visite\n\nNessuna visita registrata.\n\nDopo il prossimo bagno troverai qui la sua foto\n\nPrenota per Elliot"
+    },
+    "ownerOnly": {
+      "meta": "Shi-tzu",
+      "inviteTitle": "",
+      "inviteBody": "",
+      "medallionImages": [
+        "https://gh77.test/owner-portrait.jpg"
+      ],
+      "allImages": [
+        "https://gh77.test/owner-portrait.jpg"
+      ],
+      "htmlHasSalonPhoto": false,
+      "albumGestureCount": 0,
+      "albumEmptyText": "Dopo il prossimo bagno troverai qui la sua foto",
+      "bodyText": "I tuoi pet\nSCHEDA PET\nElliot\n\nShi-tzu\n\nCambia la tua foto\nTogli la tua foto\nAnagrafica\nDATA DI NASCITA\nNon indicato\nSESSO\nNon indicato\nMICROCHIP\nNon indicato\nPESO\nNon indicato\nCOLORE\nNon indicato\nSTERILIZZATO\nNon indicato\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessuna preferenza indicata.\n\nNote del proprietario\nModifica\n\nNessuna nota del proprietario.\n\nLe sue visite\n0 visite\n\nNessuna visita registrata.\n\nDopo il prossimo bagno troverai qui la sua foto\n\nPrenota per Elliot"
+    },
+    "both": {
+      "meta": "Shi-tzu",
+      "inviteTitle": "",
+      "inviteBody": "",
+      "medallionImages": [
+        "https://gh77.test/owner-portrait.jpg"
+      ],
+      "allImages": [
+        "https://gh77.test/owner-portrait.jpg"
+      ],
+      "htmlHasSalonPhoto": false,
+      "albumGestureCount": 0,
+      "albumEmptyText": "Dopo il prossimo bagno troverai qui la sua foto",
+      "bodyText": "I tuoi pet\nSCHEDA PET\nElliot\n\nShi-tzu\n\nCambia la tua foto\nTogli la tua foto\nAnagrafica\nDATA DI NASCITA\nNon indicato\nSESSO\nNon indicato\nMICROCHIP\nNon indicato\nPESO\nNon indicato\nCOLORE\nNon indicato\nSTERILIZZATO\nNon indicato\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessuna preferenza indicata.\n\nNote del proprietario\nModifica\n\nNessuna nota del proprietario.\n\nLe sue visite\n0 visite\n\nNessuna visita registrata.\n\nDopo il prossimo bagno troverai qui la sua foto\n\nPrenota per Elliot"
+    },
+    "speciesPresent": {
+      "meta": "Cane · Shi-tzu",
+      "inviteTitle": "Metti qui il ritratto di Elliot.",
+      "inviteBody": "Scegli una foto che ti piace: apparirà nella tua area e sulla sua card.",
+      "medallionImages": [],
+      "allImages": [],
+      "htmlHasSalonPhoto": false,
+      "albumGestureCount": 0,
+      "albumEmptyText": "Dopo il prossimo bagno troverai qui la sua foto",
+      "bodyText": "I tuoi pet\nE\nSCHEDA PET\nElliot\n\nCane · Shi-tzu\n\nMetti qui il ritratto di Elliot.\n\nScegli una foto che ti piace: apparirà nella tua area e sulla sua card.\n\nMetti la tua foto\nAnagrafica\nDATA DI NASCITA\nNon indicato\nSESSO\nNon indicato\nMICROCHIP\nNon indicato\nPESO\nNon indicato\nCOLORE\nNon indicato\nSTERILIZZATO\nNon indicato\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessuna preferenza indicata.\n\nNote del proprietario\nModifica\n\nNessuna nota del proprietario.\n\nLe sue visite\n0 visite\n\nNessuna visita registrata.\n\nDopo il prossimo bagno troverai qui la sua foto\n\nPrenota per Elliot"
+    },
+    "albumWithVisitBeforeOpen": {
+      "meta": "Shi-tzu",
+      "inviteTitle": "Metti qui il ritratto di Elliot.",
+      "inviteBody": "Scegli una foto che ti piace: apparirà nella tua area e sulla sua card.",
+      "medallionImages": [],
+      "allImages": [],
+      "htmlHasSalonPhoto": false,
+      "albumGestureCount": 1,
+      "albumEmptyText": "",
+      "bodyText": "I tuoi pet\nE\nSCHEDA PET\nElliot\n\nShi-tzu\n\nMetti qui il ritratto di Elliot.\n\nScegli una foto che ti piace: apparirà nella tua area e sulla sua card.\n\nMetti la tua foto\nAnagrafica\nDATA DI NASCITA\nNon indicato\nSESSO\nNon indicato\nMICROCHIP\nNon indicato\nPESO\nNon indicato\nCOLORE\nNon indicato\nSTERILIZZATO\nNon indicato\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessuna preferenza indicata.\n\nNote del proprietario\nModifica\n\nNessuna nota del proprietario.\n\nLe sue visite\n1 visita\n10\nSET 26\nBagno e taglio\nLa foto di Elliot\ndall’ultima lavorazione\nPrenota per Elliot"
+    },
+    "albumWithVisitOpen": {
+      "images": [
+        "https://gh77.test/visit-album.jpg"
+      ],
+      "htmlHasSalonPhoto": false
+    },
+    "upload": {
+      "updates": [
+        {
+          "updates": {
+            "owner_photo_url": "https://gh77.test/uploaded-owner-portrait.jpg"
+          },
+          "salonPhotoBefore": "https://gh77.test/salon-recognition.jpg",
+          "salonPhotoAfter": "https://gh77.test/salon-recognition.jpg"
+        }
+      ],
+      "medallionImages": [
+        "https://gh77.test/uploaded-owner-portrait.jpg"
+      ],
+      "htmlHasSalonPhoto": false
+    },
+    "remove": {
+      "updates": [
+        {
+          "updates": {
+            "owner_photo_url": null
+          },
+          "salonPhotoBefore": "https://gh77.test/salon-recognition.jpg",
+          "salonPhotoAfter": "https://gh77.test/salon-recognition.jpg"
+        }
+      ],
+      "medallionImages": [],
+      "inviteVisible": true,
+      "emptyMedallionVisible": true,
+      "htmlHasSalonPhoto": false
+    }
+  },
+  "responsive": {
+    "375": {
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": 0,
+      "minTargetHeight": 44,
+      "minTargetWidth": 76.75,
+      "targets": [
+        {
+          "text": "I tuoi pet",
+          "width": 76.75,
+          "height": 44
+        },
+        {
+          "text": "Metti la tua foto",
+          "width": 311,
+          "height": 56
+        },
+        {
+          "text": "Modifica",
+          "width": 89.78125,
+          "height": 44
+        },
+        {
+          "text": "Modifica",
+          "width": 89.78125,
+          "height": 44
+        },
+        {
+          "text": "Prenota per Elliot",
+          "width": 329,
+          "height": 48
+        }
+      ]
+    },
+    "1365": {
+      "clientWidth": 1365,
+      "scrollWidth": 1365,
+      "overflow": 0,
+      "minTargetHeight": 44,
+      "minTargetWidth": 76.75,
+      "targets": [
+        {
+          "text": "I tuoi pet",
+          "width": 76.75,
+          "height": 44
+        },
+        {
+          "text": "Metti la tua foto",
+          "width": 508,
+          "height": 56
+        },
+        {
+          "text": "Modifica",
+          "width": 89.78125,
+          "height": 44
+        },
+        {
+          "text": "Modifica",
+          "width": 89.78125,
+          "height": 44
+        },
+        {
+          "text": "Prenota per Elliot",
+          "width": 230,
+          "height": 50
+        }
+      ]
+    }
+  },
+  "responsiveOwnerActions": {
+    "375": {
+      "count": 2,
+      "minHeight": 44,
+      "minWidth": 120.34375,
+      "targets": [
+        {
+          "text": "Cambia la tua foto",
+          "width": 138.171875,
+          "height": 44
+        },
+        {
+          "text": "Togli la tua foto",
+          "width": 120.34375,
+          "height": 44
+        }
+      ]
+    },
+    "1365": {
+      "count": 2,
+      "minHeight": 44,
+      "minWidth": 120.34375,
+      "targets": [
+        {
+          "text": "Cambia la tua foto",
+          "width": 138.171875,
+          "height": 44
+        },
+        {
+          "text": "Togli la tua foto",
+          "width": 120.34375,
+          "height": 44
+        }
+      ]
+    }
+  },
+  "publicCard": {
+    "medallion": {
+      "portraitImageCount": 0,
+      "pawIconCount": 1
+    },
+    "portrait": {
+      "images": [
+        "https://gh77.test/owner-portrait.jpg"
+      ]
+    }
+  },
+  "inviteText": {
+    "title": "Metti qui il ritratto di Elliot.",
+    "body": "Scegli una foto che ti piace: apparirà nella tua area e sulla sua card."
+  },
+  "assertions": {
+    "elliotMissingSpeciesHidden": true,
+    "inviteAlwaysWithoutPortrait": true,
+    "salonOnlyHiddenFromDom": true,
+    "ownerOnlyShowsOwner": true,
+    "bothShowsOnlyOwner": true,
+    "uploadKeepsSalonColumn": true,
+    "uploadSetsOwnerPortrait": true,
+    "removeKeepsSalonColumn": true,
+    "removeReturnsMedallion": true,
+    "albumEmptyUnchanged": true,
+    "albumVisitOnly": true,
+    "speciesPresent": true,
+    "publicCardSalonOnlyUsesMedallion": true,
+    "publicCardOwnerUsesPortrait": true,
+    "noHorizontalOverflow": true,
+    "noTargetBelow44": true,
+    "noRuntimeErrors": true
+  },
+  "assertionCounts": {
+    "pass": 17,
+    "total": 17
+  },
+  "runtimeErrors": []
+}

@@ -1,0 +1,83 @@
+{
+  "project": {
+    "name": "grooming-hub-demo",
+    "ref": "qttpinkslhenxrsbhhhg",
+    "status": "ACTIVE_HEALTHY"
+  },
+  "baseline": {
+    "petCount": 7,
+    "qrTokenCount": 7,
+    "salonPhotoCount": 0,
+    "ownerPortraitCount": 0,
+    "albumPhotoCount": 0,
+    "publicCardFunctionMd5": "e3bc0f5c4b98a58fc39f29c8b1a1a6b2",
+    "whitelistFunctionMd5": "3a098454689e2d8f94cf077aa4f5933f",
+    "awardedFidelityTierColumnExists": false
+  },
+  "firstAttempt": {
+    "outcome": "EXPECTED_ROLLBACK_BEFORE_ASSERTIONS",
+    "reason": "The demo intentionally does not have the unapplied GH-73 awarded_fidelity_tier column.",
+    "fixtureResidueAfterRollback": 0
+  },
+  "successfulAttempt": {
+    "marker": "GH77_EXPECTED_ROLLBACK",
+    "temporaryPrerequisite": "GH-73 awarded_fidelity_tier column inside the same rollback-only statement",
+    "publicCardFunctionMd5Before": "e3bc0f5c4b98a58fc39f29c8b1a1a6b2",
+    "publicCardFunctionMd5DuringTest": "70e28d87d90e92494814862f8fde11b4",
+    "whitelistFunctionMd5Before": "3a098454689e2d8f94cf077aa4f5933f",
+    "whitelistFunctionMd5DuringTest": "3a098454689e2d8f94cf077aa4f5933f",
+    "securityDefinerUnchanged": true,
+    "searchPathUnchanged": true,
+    "aclUnchanged": true,
+    "ownerPortraitOnlySource": true,
+    "salonOnlyReturnsNullPhoto": true,
+    "bothReturnsOwnerPortrait": true,
+    "tokenTotal": 7,
+    "tokenNullResults": 0,
+    "distinctKeySets": 1,
+    "keyCountMin": 18,
+    "keyCountMax": 18,
+    "keys": [
+      "breed",
+      "businessName",
+      "fidelityMode",
+      "fidelityTier",
+      "firstVisitDate",
+      "id",
+      "name",
+      "nextTier",
+      "photo",
+      "qrToken",
+      "remainingPoints",
+      "remainingVisits",
+      "rewardPointsTotal",
+      "salonPhone",
+      "visits12Months",
+      "visits24Months",
+      "visits36Months",
+      "visitsCount"
+    ],
+    "albumNamedKeys": []
+  },
+  "afterRollback": {
+    "petCount": 7,
+    "visitCount": 90,
+    "appointmentCount": 8,
+    "salonPhotoCount": 0,
+    "ownerPortraitCount": 0,
+    "albumPhotoCount": 0,
+    "gh77FixtureResidue": 0,
+    "awardedFidelityTierColumnExists": false,
+    "gh77MigrationHistoryRows": 0,
+    "publicCardFunctionMd5": "e3bc0f5c4b98a58fc39f29c8b1a1a6b2",
+    "whitelistFunctionMd5": "3a098454689e2d8f94cf077aa4f5933f",
+    "tokenTotal": 7,
+    "tokenNullResults": 0,
+    "permanentProbeAuthCount": 3
+  },
+  "timingsSeconds": {
+    "successfulRollbackStatement": 8.1,
+    "finalIndependentSnapshot": 6.5,
+    "whitelistFieldSnapshot": 4.7
+  }
+}
