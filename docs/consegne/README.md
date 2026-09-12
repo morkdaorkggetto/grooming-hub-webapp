@@ -210,3 +210,36 @@ dichiara, e considera corrente il primo `GH-NN` precedente ancora privo di
 registro.
 
 *Nato da GH-14 (atto G6): scritto il 24/8 con i cancelli ancora aperti.*
+
+---
+
+### Affinamento del 10/9 — due regole nate da due incidenti veri
+
+#### Il conteggio e ciò che si vede devono coincidere
+
+Il 10 settembre il salone ha prenotato per errore in una fascia che il tenant dichiara chiusa, e l'applicazione ha accettato in silenzio. Ma il difetto grave era un altro: **quella prenotazione veniva contata e non disegnata.** L'intestazione diceva `4 prenotati`, la griglia ne mostrava `3`, e il quarto cane sarebbe rimasto invisibile fino al giorno dell'appuntamento.
+
+Nessuna delle nostre controprove poteva intercettarlo, e non per come erano scritte: **per la loro forma.** Tutte chiedono *«cosa appare?»*. Questa era una cosa **che non appariva**, e per sospettarla bisognava aver già immaginato che si potesse prenotare in una fascia chiusa.
+
+L'ha trovata Roby per caso, aprendo il dettaglio di un altro appuntamento.
+
+> **Le nostre prove verificano quello che abbiamo pensato. Il salone verifica quello che succede.** Sono due coperture diverse, e nessuna sostituisce l'altra.
+
+**Ma il difetto aveva una firma numerica**, e quella si può cercare sempre:
+
+**Regola**: quando una vista mostra **un conteggio** e **degli elementi**, il conteggio e gli elementi visibili **devono coincidere** — ed è una controprova da scrivere, non un'ovvietà da dare per scontata.
+
+Non fa immaginare il caso: **lo scopre.** E vale per tutti i fratelli non ancora incontrati — qualcosa che viene contato e non disegnato, per qualunque ragione.
+
+#### Se c'è una migrazione in attesa, si applica prima di salvare
+
+`salva.sh` committa i documenti **e fa `git push`**. Il push pubblica **tutti i commit locali in attesa**, codice di Codex compreso. Quindi *«salvo un documento»* e *«pubblico il codice»* **sono lo stesso pulsante**, e la separazione vive solo nel momento in cui lo si preme.
+
+È successo due volte:
+
+- **`GH-52`**, il 31/8: salvando dei documenti è stato pubblicato codice che aspettava;
+- **`GH-73`**, l'8/9: pubblicando `GH-74` è partito anche il commit di `GH-73`, **e il frontend nuovo è andato online prima che la sua migrazione fosse applicata.** Non ha rotto niente solo perché la lettura dei pet usa `select *`: una colonna assente arriva vuota invece di far fallire la query. Con i campi elencati uno per uno, la scheda cliente sarebbe andata in errore per tutti.
+
+**Regola**: prima di lanciare `salva.sh`, se esiste un mandato con migrazione **consegnato e non ancora applicato**, la migrazione si applica **prima** — oppure si aspetta a salvare.
+
+La riga **«Commit locali non ancora pubblicati»** che lo script stampa prima di chiedere conferma **è lì per questo**: se non è vuota, si sta pubblicando del codice, e bisogna sapere quale.
