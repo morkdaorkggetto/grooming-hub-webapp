@@ -29,7 +29,7 @@ export function usePets() {
     setError(null);
     const { data: rows, error: fetchError } = await supabase
       .from('pets')
-      .select('id, name, species, breed, sex, birth_date, weight_kg, color, photo_url')
+      .select('id, name, species, breed, sex, birth_date, weight_kg, color, owner_photo_url')
       .eq('tenant_id', tenantId)
       .order('name', { ascending: true });
 

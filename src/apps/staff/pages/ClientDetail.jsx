@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
-import ImageCropModal from '../components/ImageCropModal';
+import ImageCropModal from '../../../shared/ui/ImageCropModal';
 import ClientQrImage from '../components/ClientQrImage';
 import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {

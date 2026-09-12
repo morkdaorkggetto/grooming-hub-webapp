@@ -1,11 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { cropImageSquare } from '../lib/imageCrop';
+import { cropImageSquare } from '../media/imageCrop';
 
 const FRAME_SIZE = 280;
+const DEFAULT_DESCRIPTION = "Trascina l'immagine e regola lo zoom per centrare il muso del cane.";
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
+export default function ImageCropModal({
+  file,
+  open,
+  onCancel,
+  onConfirm,
+  round = false,
+  description = DEFAULT_DESCRIPTION,
+}) {
   const [previewUrl, setPreviewUrl] = useState('');
   const [naturalSize, setNaturalSize] = useState({ width: 1, height: 1 });
   const [zoom, setZoom] = useState(1);
@@ -126,14 +134,17 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
               Ritaglia foto
             </h2>
             <p style={{ color: 'var(--color-secondary)' }} className="text-sm mt-1">
-              Trascina l'immagine e regola lo zoom per centrare il muso del cane.
+              {description}
             </p>
           </div>
           <button
             type="button"
             onClick={onCancel}
             className="px-3 py-2 rounded-lg text-white font-medium"
-            style={{ backgroundColor: 'var(--color-secondary)' }}
+            style={{
+              backgroundColor: 'var(--color-secondary)',
+              minHeight: round ? 44 : undefined,
+            }}
           >
             Chiudi
           </button>
@@ -149,7 +160,7 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
 
         <div className="flex justify-center mb-5">
           <div
-            className="relative overflow-hidden rounded-3xl border-4 shadow-inner touch-none select-none"
+            className={`relative overflow-hidden border-4 shadow-inner touch-none select-none ${round ? 'rounded-full' : 'rounded-3xl'}`}
             style={{
               width: `${FRAME_SIZE}px`,
               height: `${FRAME_SIZE}px`,
@@ -201,6 +212,7 @@ export default function ImageCropModal({ file, open, onCancel, onConfirm }) {
               value={zoom}
               onChange={(event) => setZoom(Number(event.target.value))}
               className="w-full"
+              style={{ minHeight: round ? 44 : undefined }}
             />
           </div>
 

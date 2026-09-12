@@ -4,6 +4,7 @@ import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useUnsavedChanges } from '../../../shared/navigation/UnsavedChangesProvider';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
 import Eyebrow from '../../../shared/ui/Eyebrow';
+import ImageCropModal from '../../../shared/ui/ImageCropModal';
 import Icon from '../../../shared/ui/Icon';
 import Skeleton from '../../../shared/ui/Skeleton';
 import { usePet } from '../hooks/usePet';
@@ -11,7 +12,6 @@ import { usePetVisits } from '../hooks/usePetVisits';
 import {
   ownerPetPhotoPathFromUrl,
   removePetPhoto,
-  resizePetPhoto,
   uploadOwnerPetPhoto,
 } from '../lib/petPhoto';
 import './Pet.css';
@@ -323,6 +323,7 @@ export default function Pet() {
   const [photoUploading, setPhotoUploading] = useState(false);
   const [albumOpen, setAlbumOpen] = useState(false);
   const [selectedAlbumPhoto, setSelectedAlbumPhoto] = useState(null);
+  const [pendingOwnerCropFile, setPendingOwnerCropFile] = useState(null);
   const photoInputRef = useRef(null);
 
   useEffect(() => {
@@ -373,19 +374,26 @@ export default function Pet() {
     }
   };
 
-  const handleOwnerPhoto = async (event) => {
+  const handleOwnerPhoto = (event) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file || !pet) return;
+
+    setSaveError(null);
+    setPendingOwnerCropFile(file);
+  };
+
+  const handleOwnerCropConfirm = async ({ file, previewUrl }) => {
+    setPendingOwnerCropFile(null);
+    URL.revokeObjectURL(previewUrl);
 
     setPhotoUploading(true);
     setSaveError(null);
     let uploadedPath = null;
     let photoSaved = false;
     try {
-      const prepared = await resizePetPhoto(file);
       const uploaded = await uploadOwnerPetPhoto({
-        file: prepared,
+        file,
         tenantId: pet.tenant_id,
         petId: pet.id,
       });
@@ -645,6 +653,14 @@ export default function Pet() {
           }}
         />
       )}
+      <ImageCropModal
+        open={Boolean(pendingOwnerCropFile)}
+        file={pendingOwnerCropFile}
+        round
+        description={`Trascina l'immagine e regola lo zoom per centrare ${pet.name}.`}
+        onCancel={() => setPendingOwnerCropFile(null)}
+        onConfirm={handleOwnerCropConfirm}
+      />
     </main>
   );
 }

@@ -66,11 +66,11 @@ function getPetInitial(name) {
   return (name || '?').trim().charAt(0).toUpperCase();
 }
 
-function PetAvatar({ name, photo_url, size = 56 }) {
-  if (photo_url) {
+function PetAvatar({ name, photoUrl, size = 56 }) {
+  if (photoUrl) {
     return (
       <img
-        src={photo_url}
+        src={photoUrl}
         alt={name}
         style={{
           width: size,
@@ -249,7 +249,7 @@ export default function Home() {
                       color: 'inherit',
                     }}
                   >
-                    <PetAvatar name={p.name} photo_url={p.photo_url} size={48} />
+                    <PetAvatar name={p.name} photoUrl={p.owner_photo_url} size={48} />
                     <div style={{ minWidth: 0 }}>
                       <div
                         style={{

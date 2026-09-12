@@ -1,0 +1,237 @@
+{
+  "cases": [
+    {
+      "route": "/u/home",
+      "fixture": "salon",
+      "avatarCount": 0,
+      "avatarSrc": null,
+      "portraitMatched": false,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "BENTORNATO, PAOLA\nBentornato, Paola.\n\nSalone: Grooming Hub Demo. Non hai appuntamenti in programma. Prenota la prossima visita quando vuoi.\n\nPrenota un nuovo appuntamento\nVedi la scheda di Rumba\nIL TUO PET\nR\nRumba\nBarboncino\nPROSSIMO APPUNTAMENTO\n\nNessun appuntamento in programma.\n\nPrenota ora\nPUNTI"
+    },
+    {
+      "route": "/u/home",
+      "fixture": "owner",
+      "avatarCount": 1,
+      "avatarSrc": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "portraitMatched": true,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "BENTORNATO, PAOLA\nBentornato, Paola.\n\nSalone: Grooming Hub Demo. Non hai appuntamenti in programma. Prenota la prossima visita quando vuoi.\n\nPrenota un nuovo appuntamento\nVedi la scheda di Rumba\nIL TUO PET\nRumba\nBarboncino\nPROSSIMO APPUNTAMENTO\n\nNessun appuntamento in programma.\n\nPrenota ora\nPUNTI\n0"
+    },
+    {
+      "route": "/u/home",
+      "fixture": "both",
+      "avatarCount": 1,
+      "avatarSrc": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "portraitMatched": true,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "BENTORNATO, PAOLA\nBentornato, Paola.\n\nSalone: Grooming Hub Demo. Non hai appuntamenti in programma. Prenota la prossima visita quando vuoi.\n\nPrenota un nuovo appuntamento\nVedi la scheda di Rumba\nIL TUO PET\nRumba\nBarboncino\nPROSSIMO APPUNTAMENTO\n\nNessun appuntamento in programma.\n\nPrenota ora\nPUNTI\n0"
+    },
+    {
+      "route": "/u/book?petId=pet-1",
+      "fixture": "salon",
+      "avatarCount": 0,
+      "avatarSrc": null,
+      "portraitMatched": false,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "RICHIESTA DI APPUNTAMENTO\nQuando ce lo porti?\n\nDicci cosa serve e quando preferiresti passare. Poi ci pensiamo noi: ti confermiamo giorno e ora su WhatsApp.\n\n1\nPer chi?\nR\nRumba\nBarboncino\n2\nCosa serve?\n\nIn negozio decidiamo insieme i dettagli.\n\nBagno\n\nIl cane resta con noi qualche ora. Ti scriviamo "
+    },
+    {
+      "route": "/u/book?petId=pet-1",
+      "fixture": "owner",
+      "avatarCount": 1,
+      "avatarSrc": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "portraitMatched": true,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "RICHIESTA DI APPUNTAMENTO\nQuando ce lo porti?\n\nDicci cosa serve e quando preferiresti passare. Poi ci pensiamo noi: ti confermiamo giorno e ora su WhatsApp.\n\n1\nPer chi?\nRumba\nBarboncino\n2\nCosa serve?\n\nIn negozio decidiamo insieme i dettagli.\n\nBagno\n\nIl cane resta con noi qualche ora. Ti scriviamo ap"
+    },
+    {
+      "route": "/u/book?petId=pet-1",
+      "fixture": "both",
+      "avatarCount": 1,
+      "avatarSrc": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "portraitMatched": true,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "RICHIESTA DI APPUNTAMENTO\nQuando ce lo porti?\n\nDicci cosa serve e quando preferiresti passare. Poi ci pensiamo noi: ti confermiamo giorno e ora su WhatsApp.\n\n1\nPer chi?\nRumba\nBarboncino\n2\nCosa serve?\n\nIn negozio decidiamo insieme i dettagli.\n\nBagno\n\nIl cane resta con noi qualche ora. Ti scriviamo ap"
+    },
+    {
+      "route": "/u/pet/pet-1",
+      "fixture": "salon",
+      "avatarCount": 0,
+      "avatarSrc": null,
+      "portraitMatched": false,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "I tuoi pet\nR\nSCHEDA PET\nRumba\n\nCane · Barboncino · 5 anni\n\nMetti qui il ritratto di Rumba.\n\nScegli una foto che ti piace: apparirà nella tua area e sulla sua card.\n\nMetti la tua foto\nAnagrafica\nDATA DI NASCITA\n12 aprile 2021\nSESSO\nFemmina\nMICROCHIP\nNon indicato\nPESO\n7,4 kg\nCOLORE\nAlbicocca\nSTERILIZZ"
+    },
+    {
+      "route": "/u/pet/pet-1",
+      "fixture": "owner",
+      "avatarCount": 1,
+      "avatarSrc": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "portraitMatched": true,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "I tuoi pet\nSCHEDA PET\nRumba\n\nCane · Barboncino · 5 anni\n\nCambia la tua foto\nTogli la tua foto\nAnagrafica\nDATA DI NASCITA\n12 aprile 2021\nSESSO\nFemmina\nMICROCHIP\nNon indicato\nPESO\n7,4 kg\nCOLORE\nAlbicocca\nSTERILIZZATO\nSì\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessun"
+    },
+    {
+      "route": "/u/pet/pet-1",
+      "fixture": "both",
+      "avatarCount": 1,
+      "avatarSrc": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "portraitMatched": true,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "I tuoi pet\nSCHEDA PET\nRumba\n\nCane · Barboncino · 5 anni\n\nCambia la tua foto\nTogli la tua foto\nAnagrafica\nDATA DI NASCITA\n12 aprile 2021\nSESSO\nFemmina\nMICROCHIP\nNon indicato\nPESO\n7,4 kg\nCOLORE\nAlbicocca\nSTERILIZZATO\nSì\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessun"
+    },
+    {
+      "route": "/u/home",
+      "fixture": "both",
+      "avatarCount": 1,
+      "avatarSrc": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "portraitMatched": true,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "BENTORNATO, PAOLA\nBentornato, Paola.\n\nSalone: Grooming Hub Demo. Non hai appuntamenti in programma. Prenota la prossima visita quando vuoi.\n\nPrenota un nuovo appuntamento\nVedi la scheda di Rumba\nIL TUO PET\nRumba\nBarboncino\nPROSSIMO APPUNTAMENTO\n\nNessun appuntamento in programma.\n\nPrenota ora\nPUNTI\n0"
+    },
+    {
+      "route": "/u/pet/pet-1",
+      "fixture": "both",
+      "avatarCount": 1,
+      "avatarSrc": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "portraitMatched": true,
+      "salonUrlInDom": false,
+      "overflowPx": 0,
+      "pageTextStart": "I tuoi pet\nSCHEDA PET\nRumba\n\nCane · Barboncino · 5 anni\n\nCambia la tua foto\nTogli la tua foto\nAnagrafica\nDATA DI NASCITA\n12 aprile 2021\nSESSO\nFemmina\nMICROCHIP\nNon indicato\nPESO\n7,4 kg\nCOLORE\nAlbicocca\nSTERILIZZATO\nSì\n\nQuesti dati sono gestiti dal salone.\n\nPreferenze di toelettatura\nModifica\n\nNessun"
+    }
+  ],
+  "crop": {
+    "cancelState": {
+      "uploads": 0,
+      "writes": 0,
+      "ownerPhotoUrl": null,
+      "salonPhotoUrl": "https://salon.invalid/rumba-recognition.jpg"
+    },
+    "beforePosition": {
+      "left": "calc(50% - 210px)",
+      "top": "calc(50% - 210px)"
+    },
+    "afterPosition": {
+      "left": "calc(50% - 176px)",
+      "top": "calc(50% - 188px)"
+    },
+    "touchMoved": true,
+    "targetMeasures": [
+      {
+        "label": "Metti la tua foto",
+        "width": 311,
+        "height": 56
+      },
+      {
+        "label": "Modifica",
+        "width": 89.78125,
+        "height": 44
+      },
+      {
+        "label": "Modifica",
+        "width": 89.78125,
+        "height": 44
+      },
+      {
+        "label": "Chiudi",
+        "width": 71.28125,
+        "height": 44
+      },
+      {
+        "label": "range",
+        "width": 295,
+        "height": 44
+      },
+      {
+        "label": "Annulla",
+        "width": 295,
+        "height": 52
+      },
+      {
+        "label": "Usa questa foto",
+        "width": 295,
+        "height": 48
+      }
+    ],
+    "minTargetHeight": 44,
+    "overflowPx": 0,
+    "confirmState": {
+      "uploads": [
+        {
+          "type": "image/jpeg",
+          "size": 20890,
+          "name": "cropped-1789191784139.jpg"
+        }
+      ],
+      "writes": [
+        {
+          "patch": {
+            "owner_photo_url": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png"
+          },
+          "beforePhotoUrl": "https://salon.invalid/rumba-recognition.jpg",
+          "afterPhotoUrl": "https://salon.invalid/rumba-recognition.jpg",
+          "beforeOwnerPhotoUrl": null,
+          "afterOwnerPhotoUrl": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png"
+        }
+      ],
+      "ownerPhotoUrl": "/@fs/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/staff/assets/public-pet-card-illustration.png",
+      "salonPhotoUrl": "https://salon.invalid/rumba-recognition.jpg",
+      "objectUrls": [
+        {
+          "url": "blob:http://127.0.0.1:4199/689fa0c1-a50b-4655-ac8d-ff5e7b3d12f4",
+          "name": "public-pet-card-illustration.png",
+          "type": "image/png",
+          "size": 327712
+        },
+        {
+          "url": "blob:http://127.0.0.1:4199/cd8bba62-179e-4402-8512-00aa4ef15044",
+          "name": "public-pet-card-illustration.png",
+          "type": "image/png",
+          "size": 327712
+        },
+        {
+          "url": "blob:http://127.0.0.1:4199/4def6193-b670-44a9-b5f5-af5b65ba0195",
+          "name": "public-pet-card-illustration.png",
+          "type": "image/png",
+          "size": 327712
+        },
+        {
+          "url": "blob:http://127.0.0.1:4199/92cc56b6-dc74-4ed1-ae1e-e901c8485fc6",
+          "name": "cropped-1789191784139.jpg",
+          "type": "image/jpeg",
+          "size": 20890
+        }
+      ]
+    }
+  },
+  "staffDefault": {
+    "description": "Trascina l'immagine e regola lo zoom per centrare il muso del cane.",
+    "rounded3xlFrames": 1,
+    "roundedFullFrames": 0,
+    "frameSize": {
+      "width": 280,
+      "height": 280
+    },
+    "buttons": [
+      "",
+      "Chiudi",
+      "Annulla",
+      "Usa questa foto"
+    ]
+  },
+  "consoleErrors": [],
+  "expectedConsoleNoise": [
+    "crop:Failed to load resource: net::ERR_FILE_NOT_FOUND:blob:http://127.0.0.1:4199/689fa0c1-a50b-4655-ac8d-ff5e7b3d12f4"
+  ]
+}

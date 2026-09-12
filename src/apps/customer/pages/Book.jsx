@@ -93,8 +93,8 @@ function SelectChip({ selected, disabled = false, onClick, children }) {
 function PetChoice({ pet, selected, onClick }) {
   return (
     <button type="button" className="gh-book-choice gh-book-pet-choice" aria-pressed={selected} onClick={onClick}>
-      {pet.photo_url ? (
-        <img src={pet.photo_url} alt="" className="gh-book-pet-avatar" />
+      {pet.owner_photo_url ? (
+        <img src={pet.owner_photo_url} alt="" className="gh-book-pet-avatar" />
       ) : (
         <span className="gh-book-pet-avatar gh-book-pet-initial" aria-hidden="true">
           {(pet.name || '?').charAt(0).toUpperCase()}

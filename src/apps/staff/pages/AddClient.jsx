@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ImageCropModal from '../../../shared/ui/ImageCropModal';
 import { addCustomerWithPet, addPetToCustomer } from '../lib/database';
-import ImageCropModal from '../components/ImageCropModal';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import { Button, ErrorState, Field, Hero, HeroButton, Panel } from '../components/StaffKit';
 
