@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Pet from './pages/Pet';
 import Promotions from './pages/Promotions';
 import Redeem from './pages/Redeem';
+import ResetPassword from './pages/ResetPassword';
 
 /**
  * CustomerApp — router interno di /u/*.
@@ -43,6 +44,7 @@ export default function CustomerApp() {
       {/* Pre-auth: nessun nav */}
       <Route path="/login" element={<Login />} />
       <Route path="/forgot" element={<Forgot />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/redeem" element={<Redeem />} />
       <Route path="/redeem/:token" element={<Redeem />} />
 

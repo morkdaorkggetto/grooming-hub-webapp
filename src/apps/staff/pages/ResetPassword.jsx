@@ -1,79 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../../shared/supabase/client';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import usePasswordReset from '../../../shared/auth/usePasswordReset';
 
 export default function ResetPassword() {
-  const navigate = useNavigate();
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  useEffect(() => {
-    let mounted = true;
-
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (mounted) {
-        if (!session) {
-          setError('Link non valido o scaduto. Richiedi un nuovo reset password.');
-        }
-        setCheckingSession(false);
-      }
-    };
-
-    checkSession();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!password || !confirmPassword) {
-      setError('Inserisci e conferma la nuova password.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('La password deve avere almeno 6 caratteri.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Le due password non coincidono.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { error: updateError } = await supabase.auth.updateUser({ password });
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      setSuccess('Password aggiornata con successo. Ora puoi accedere.');
-      setPassword('');
-      setConfirmPassword('');
-
-      await supabase.auth.signOut();
-      setTimeout(() => navigate('/login', { replace: true }), 1200);
-    } catch (err) {
-      setError(`Errore aggiornamento password: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    password, setPassword, confirmPassword, setConfirmPassword,
+    loading, checkingSession, error, success, handleSubmit,
+  } = usePasswordReset();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 px-4">

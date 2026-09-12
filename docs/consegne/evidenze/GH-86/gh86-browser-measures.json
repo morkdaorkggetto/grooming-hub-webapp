@@ -1,0 +1,783 @@
+{
+  "base": "a3e1bbb4c99034906a23a7cac825d63f5a0e5279",
+  "startedAt": "2026-09-12T09:53:25.237Z",
+  "environment": "Chromium; real App and SDK; memory HTTP fixtures",
+  "cases": [
+    {
+      "name": "Existing vs absent email",
+      "knownText": "Se questo indirizzo è associato al tuo account, riceverai un link per scegliere una nuova password. Controlla anche la posta indesiderata.",
+      "absentText": "Se questo indirizzo è associato al tuo account, riceverai un link per scegliere una nuova password. Controlla anche la posta indesiderata.",
+      "redirectTo": "http://127.0.0.1:5173/u/reset-password",
+      "pass": true
+    },
+    {
+      "name": "Customer recovery and re-entry",
+      "urls": [
+        "http://127.0.0.1:5173/u/login",
+        "http://127.0.0.1:5173/u/login",
+        "http://127.0.0.1:5173/u/forgot",
+        "http://127.0.0.1:5173/u/reset-password",
+        "http://127.0.0.1:5173/u/reset-password",
+        "http://127.0.0.1:5173/u/reset-password",
+        "http://127.0.0.1:5173/u/reset-password",
+        "http://127.0.0.1:5173/u/reset-password",
+        "http://127.0.0.1:5173/u/login",
+        "http://127.0.0.1:5173/u/home"
+      ],
+      "pass": true
+    },
+    {
+      "name": "Expired and missing recovery session",
+      "pass": true
+    },
+    {
+      "name": "Expired link cannot use an existing session",
+      "pass": true
+    },
+    {
+      "name": "Old staff recovery link still returns to /login",
+      "pass": true,
+      "markupSha256": "0ec4807788c2fbc5108ff4950a9aaa40d6b2ec4151cc2b17d05cbb55db50c2cf"
+    }
+  ],
+  "layouts": [
+    {
+      "name": "forgot-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Invia il link",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "forgot-response-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Invia il link",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "forgot-service-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Invia il link",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "forgot-rate-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Invia il link",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "forgot-network-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Invia il link",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "reset-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Salva la nuova password",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Richiedi un nuovo link",
+          "width": 146.109375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "reset-validation-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Salva la nuova password",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Richiedi un nuovo link",
+          "width": 146.109375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "reset-validation-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Salva la nuova password",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Richiedi un nuovo link",
+          "width": 146.109375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "reset-validation-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 213,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Salva la nuova password",
+          "width": 213,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Richiedi un nuovo link",
+          "width": 146.109375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "expired-375",
+      "width": 375,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Richiedi un nuovo link",
+          "width": 146.109375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "forgot-1365",
+      "width": 1365,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 358,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Invia il link",
+          "width": 358,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "reset-1365",
+      "width": 1365,
+      "overflow": 0,
+      "controls": [
+        {
+          "tag": "A",
+          "text": "Grooming Hub",
+          "width": 175.796875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 358,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "INPUT",
+          "text": "",
+          "width": 358,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Salva la nuova password",
+          "width": 358,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Richiedi un nuovo link",
+          "width": 146.109375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "tag": "A",
+          "text": "Torna ad accedere",
+          "width": 124.53125,
+          "height": 44,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "hashes": {
+    "src/apps/staff/components/Auth/LoginForm.jsx": {
+      "before": "3df5cacca45ec1a35710ad4fa90ea073e4d0aa468f476814534fd57a44c63a50",
+      "after": "3df5cacca45ec1a35710ad4fa90ea073e4d0aa468f476814534fd57a44c63a50"
+    },
+    "src/apps/staff/pages/ResetPassword.jsx": {
+      "before": "660df614e27e0478f03b88ba5e240c5936fe3103e43d6248a7c9e99d911280c2",
+      "after": "2faf42a3931c2a3447dac8e9ad73e801de33b6b319eb70f138917a55f61bc938"
+    },
+    "src/shared/supabase/client.js": {
+      "before": "b7beec0348b3555cb2684588e9dd0afbc364b050048d9e717f74e74fe722019f",
+      "after": "b7beec0348b3555cb2684588e9dd0afbc364b050048d9e717f74e74fe722019f"
+    },
+    "src/shared/ui/ImageCropModal.jsx": {
+      "before": "1d560c085f5904f744ba11446bae2c5334d90856af8d950de81f1cc09d73daf9",
+      "after": "1d560c085f5904f744ba11446bae2c5334d90856af8d950de81f1cc09d73daf9"
+    },
+    "src/shared/media/imageCrop.js": {
+      "before": "9964c735f7ee5fd7cfbd3e5f9f641611cca18d3f7bd9780b8c80c5c03a7743a6",
+      "after": "9964c735f7ee5fd7cfbd3e5f9f641611cca18d3f7bd9780b8c80c5c03a7743a6"
+    }
+  },
+  "origin": "http://127.0.0.1:5173",
+  "staffGH79Fingerprint": {
+    "description": "Trascina l'immagine e regola lo zoom per centrare il muso del cane.",
+    "width": 280,
+    "height": 280,
+    "round": false,
+    "rounded3xl": true,
+    "buttons": [
+      "Chiudi",
+      "Annulla",
+      "Usa questa foto"
+    ]
+  },
+  "staffRenderSourceSha256": "abeca55610225a9498df8cef25a25319b6c4f05fdb86b14803f768ac65a688ed",
+  "requests": [
+    {
+      "path": "/auth/v1/recover",
+      "method": "POST",
+      "redirectTo": "http://127.0.0.1:5173/u/reset-password"
+    },
+    {
+      "path": "/auth/v1/recover",
+      "method": "POST",
+      "redirectTo": "http://127.0.0.1:5173/u/reset-password"
+    },
+    {
+      "path": "/auth/v1/recover",
+      "method": "POST",
+      "redirectTo": "http://127.0.0.1:5173/u/reset-password"
+    },
+    {
+      "path": "/auth/v1/recover",
+      "method": "POST",
+      "redirectTo": "http://127.0.0.1:5173/u/reset-password"
+    },
+    {
+      "path": "/auth/v1/recover",
+      "method": "POST",
+      "redirectTo": "http://127.0.0.1:5173/u/reset-password"
+    },
+    {
+      "path": "/auth/v1/user",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenants",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenants",
+      "method": "GET"
+    },
+    {
+      "path": "/auth/v1/user",
+      "method": "PUT"
+    },
+    {
+      "path": "/auth/v1/user",
+      "method": "PUT"
+    },
+    {
+      "path": "/auth/v1/logout",
+      "method": "POST"
+    },
+    {
+      "path": "/rest/v1/tenants",
+      "method": "GET"
+    },
+    {
+      "path": "/auth/v1/token",
+      "method": "POST"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenants",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/customers",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/pets",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/customers",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/promotions",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/appointment_requests",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/reward_points",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/customers",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/pets",
+      "method": "GET"
+    },
+    {
+      "path": "/auth/v1/user",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenants",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenants",
+      "method": "GET"
+    },
+    {
+      "path": "/auth/v1/user",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/profiles",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/profiles",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/profiles",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/profiles",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/auth/v1/user",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenants",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/appointment_requests",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/appointments",
+      "method": "GET"
+    },
+    {
+      "path": "/auth/v1/user",
+      "method": "PUT"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/profiles",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/tenant_memberships",
+      "method": "GET"
+    },
+    {
+      "path": "/rest/v1/profiles",
+      "method": "GET"
+    },
+    {
+      "path": "/auth/v1/logout",
+      "method": "POST"
+    },
+    {
+      "path": "/rest/v1/tenants",
+      "method": "GET"
+    }
+  ],
+  "unexpectedNetwork": [],
+  "pageErrors": [],
+  "finishedAt": "2026-09-12T09:53:30.820Z",
+  "durationSeconds": 5.583
+}

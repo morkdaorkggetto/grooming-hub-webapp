@@ -1,87 +1,48 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
-import Brandmark from '../../../shared/ui/Brandmark';
-import Card from '../../../shared/ui/Card';
+import React, { useState } from 'react';
+import { supabase } from '../../../shared/supabase/client';
+import RecoveryLayout, { recoveryStyles as styles } from '../components/RecoveryLayout';
 
-/**
- * /u/forgot — placeholder Step 5.
- *
- * Il flusso real reset password (Supabase resetPasswordForEmail) arriva in
- * uno step successivo. Per ora basta una pagina che non rompe il link
- * "Password dimenticata?" sul login.
- */
+const RESPONSE = 'Se questo indirizzo è associato al tuo account, riceverai un link per scegliere una nuova password. Controlla anche la posta indesiderata.';
+
 export default function Forgot() {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setMessage('');
+    setError('');
+    try {
+      const { error: sendError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/u/reset-password`,
+      });
+      if (sendError && (sendError.status >= 500 || sendError.status === 429 || sendError.name === 'AuthRetryableFetchError')) throw sendError;
+      setMessage(RESPONSE);
+    } catch {
+      setError('Non riusciamo a inviare la richiesta in questo momento. Attendi un po’ e riprova.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: 'var(--color-bg-main)',
-        position: 'relative',
-        padding: 40,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxSizing: 'border-box',
-      }}
-    >
-      <BackgroundDecor />
-      <Link
-        to="/u/home"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          minHeight: 44,
-          textDecoration: 'none',
-          color: 'inherit',
-          cursor: 'pointer',
-          marginBottom: 24,
-          zIndex: 1,
-        }}
-        aria-label="Vai alla home"
-      >
-        <Brandmark />
-      </Link>
-      <Card radius="xl" padding="36px 40px" style={{ maxWidth: 440, zIndex: 1 }}>
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 26,
-            fontWeight: 500,
-            lineHeight: 1.15,
-            letterSpacing: '-0.015em',
-            margin: '0 0 12px',
-          }}
-        >
-          Recupero password
-        </h1>
-        <p
-          style={{
-            margin: '0 0 20px',
-            fontSize: 14,
-            color: 'var(--color-text-secondary)',
-            lineHeight: 1.55,
-          }}
-        >
-          Il flusso di recupero password arriverà presto. Per il momento, contatta
-          direttamente il salone per assistenza.
-        </p>
-        <Link
-          to="/u/login"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            minHeight: 44,
-            color: 'var(--color-link)',
-            fontWeight: 600,
-            textDecoration: 'none',
-            fontSize: 14,
-          }}
-        >
-          ← Torna al login
-        </Link>
-      </Card>
-    </main>
+    <RecoveryLayout title="Recupera la tua password" description="Inserisci l'indirizzo che usi per accedere alla tua area.">
+      {message && <p role="status" style={styles.feedback}>{message}</p>}
+      {error && <p role="alert" style={{ ...styles.feedback, color: 'var(--color-danger-text)' }}>{error}</p>}
+      <form onSubmit={handleSubmit} style={styles.form} aria-busy={loading}>
+        <label style={styles.label}>
+          Il tuo indirizzo email
+          <input type="email" required autoComplete="email" value={email}
+            onChange={(event) => setEmail(event.target.value)} disabled={loading} style={styles.input} />
+        </label>
+        <button type="submit" disabled={loading} style={styles.button}>
+          {loading ? 'Invio in corso...' : 'Invia il link'}
+        </button>
+      </form>
+    </RecoveryLayout>
   );
 }
