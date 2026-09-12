@@ -1,0 +1,94 @@
+{
+  "project": {
+    "name": "grooming-hub-demo",
+    "ref": "qttpinkslhenxrsbhhhg",
+    "status": "ACTIVE_HEALTHY"
+  },
+  "baseline": {
+    "customers": 7,
+    "pets": 7,
+    "visits": 90,
+    "appointments": 8,
+    "calendarFunctionMd5": "250c408be153951e71a30457ad979f78",
+    "whitelistFunctionMd5": "3a098454689e2d8f94cf077aa4f5933f"
+  },
+  "firstAttempt": {
+    "outcome": "ROLLED_BACK_BEFORE_ASSERTIONS",
+    "reason": "The preliminary introspection named a non-existent update_my_pet signature.",
+    "fixtureResidueAfterRollback": 0
+  },
+  "successfulAttempt": {
+    "marker": "GH78_EXPECTED_ROLLBACK",
+    "dataBefore": {
+      "customers": 56,
+      "pets": 7,
+      "already12DigitItalian": 7,
+      "recoverable10DigitMobile": 21,
+      "otherNonNull": 28,
+      "collisionCount": 0,
+      "manualRowsMd5": "19cce1cda8339b954ad363926569fe15"
+    },
+    "dataAfterBackfill": {
+      "customers": 56,
+      "pets": 7,
+      "already12DigitItalian": 28,
+      "recoverable10DigitMobile": 0,
+      "otherNonNull": 28,
+      "backupRows": 21,
+      "manualRowsMd5": "19cce1cda8339b954ad363926569fe15"
+    },
+    "function": {
+      "md5Before": "250c408be153951e71a30457ad979f78",
+      "md5DuringTest": "87a247fc8d91b03ee5eb543c6ed2cef9",
+      "securityDefinerUnchanged": true,
+      "searchPathUnchanged": true,
+      "aclUnchanged": true,
+      "signatureUnchanged": true,
+      "resultShapeUnchanged": true
+    },
+    "probes": {
+      "3386191901": "+393386191901",
+      "+393334567890": "+393334567890",
+      "+39 333 456 7891": "+393334567891",
+      "alfredo": "alfredo",
+      "notProvided": null,
+      "duplicateOutcome": "phone_conflict",
+      "duplicateReturnedExistingCustomer": true,
+      "duplicateCreatedCustomerRows": 0,
+      "duplicateCreatedPetRows": 0
+    },
+    "rollbackSqlTest": {
+      "restoredRows": 21,
+      "supportTableExists": false,
+      "whitelistUnchanged": true
+    }
+  },
+  "exactLiteralProbe": {
+    "marker": "GH78_EXACT_EXPECTED_ROLLBACK",
+    "alreadyPrefixedInput": "+393334567899",
+    "alreadyPrefixedStored": "+393334567899",
+    "spacedInput": "+39 333 456 7890",
+    "spacedStored": "+393334567890",
+    "elapsedSeconds": 5.9,
+    "customerFixtureResidueAfterRollback": 0,
+    "petFixtureResidueAfterRollback": 0,
+    "calendarFunctionMd5AfterRollback": "250c408be153951e71a30457ad979f78"
+  },
+  "afterRollback": {
+    "customers": 7,
+    "pets": 7,
+    "visits": 90,
+    "appointments": 8,
+    "customerFixtureResidue": 0,
+    "petFixtureResidue": 0,
+    "supportTableExists": false,
+    "migrationHistoryRows": 0,
+    "calendarFunctionMd5": "250c408be153951e71a30457ad979f78",
+    "whitelistFunctionMd5": "3a098454689e2d8f94cf077aa4f5933f",
+    "permanentProbeAuthCount": 3
+  },
+  "timingsSeconds": {
+    "successfulRollbackStatement": 4.0,
+    "finalIndependentSnapshot": 5.3
+  }
+}

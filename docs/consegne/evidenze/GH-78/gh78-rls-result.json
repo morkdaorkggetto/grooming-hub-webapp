@@ -1,0 +1,26 @@
+{
+  "projectRef": "qttpinkslhenxrsbhhhg",
+  "command": "node scripts/rls-tests/run.mjs",
+  "successfulRun": {
+    "pass": 60,
+    "fail": 0,
+    "skip": 0,
+    "realSeconds": 25.85,
+    "cleanup": {
+      "pets": 0,
+      "visits": 0,
+      "customers": 0,
+      "appointmentRequests": 0,
+      "petNotes": 0,
+      "customerNotes": 0,
+      "promotions": 0,
+      "appointmentsGh52": 0
+    }
+  },
+  "preliminarySandboxRun": {
+    "pass": 0,
+    "fail": 1,
+    "skip": 0,
+    "reason": "Sandbox DNS could not resolve qttpinkslhenxrsbhhhg.supabase.co; the identical suite passed after network authorization."
+  }
+}
