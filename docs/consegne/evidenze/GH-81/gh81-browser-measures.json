@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-09-12T07:16:28.452Z",
+  "fixture": "memory-only",
+  "pollingIntervalMs": 60000,
+  "threshold": 99,
+  "zeroRoutes": [
+    {
+      "route": "/dashboard",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/requests",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/client/fixture",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/add-client",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/client/fixture/add-visit",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/calendar",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/appointments/today",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/reports/weekly",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/contacts",
+      "indicatorCount": 0
+    },
+    {
+      "route": "/promotions",
+      "indicatorCount": 0
+    }
+  ],
+  "counts": {
+    "one": "1",
+    "three": "3",
+    "many": {
+      "visible": "99+",
+      "accessible": "120 richieste in attesa. Apri richieste"
+    }
+  },
+  "navigation": [
+    {
+      "from": "/dashboard",
+      "destination": "/requests"
+    },
+    {
+      "from": "/calendar",
+      "destination": "/requests"
+    },
+    {
+      "from": "/contacts",
+      "destination": "/requests"
+    }
+  ],
+  "polling": {
+    "pollersAfterRoutes": {
+      "active": 1,
+      "started": 1,
+      "maxActive": 1
+    },
+    "maxConcurrent": 1,
+    "callsAtHide": 15,
+    "callsWhileHidden": 15,
+    "callsAfterReturn": 16,
+    "countAfterHiddenCompletion": "120 richieste in attesa. Apri richieste",
+    "countAfterFailure": "3"
+  },
+  "sound": {
+    "initialToneStarts": 0,
+    "tonesAfterArrival": 2,
+    "tonesAfterReplacement": 4,
+    "storedMuted": "false",
+    "tonesWhileMuted": 4,
+    "muteSurvivedReload": 1,
+    "tonesAfterMutedReload": 0,
+    "tonesAfterMutedNewRequest": 0,
+    "tonesAfterReenable": 2
+  },
+  "responsive": [
+    {
+      "viewport": {
+        "width": 1365,
+        "height": 850
+      },
+      "documentWidth": 1365,
+      "horizontalOverflow": 0,
+      "alertTargets": [
+        {
+          "label": "7 richieste in attesa. Apri richieste",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Disattiva suono nuove richieste",
+          "width": 44,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 850
+      },
+      "documentWidth": 1024,
+      "horizontalOverflow": 0,
+      "alertTargets": [
+        {
+          "label": "7 richieste in attesa. Apri richieste",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Disattiva suono nuove richieste",
+          "width": 44,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "alertTargets": [
+        {
+          "label": "7 richieste in attesa. Apri richieste",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Disattiva suono nuove richieste",
+          "width": 44,
+          "height": 44
+        }
+      ]
+    }
+  ],
+  "zeroScreenshotIndicatorCount": 0,
+  "consoleErrors": [],
+  "passed": true
+}

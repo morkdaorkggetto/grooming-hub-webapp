@@ -20,6 +20,7 @@ import CustomerPortal from './pages/CustomerPortal';
 import CustomerRequests from './pages/CustomerRequests';
 import PromotionsManager from './pages/PromotionsManager';
 import { DEMO_MODE } from './lib/demoMode';
+import { StaffRequestAlertsProvider } from './components/StaffRequestAlerts';
 
 /**
  * ProtectedRoute — Componente wrapper per route protette
@@ -122,7 +123,8 @@ export default function App() {
 
   return (
     <div className={DEMO_MODE ? 'demo-theme' : ''}>
-      <Routes>
+      <StaffRequestAlertsProvider enabled={profile?.role === 'operator'}>
+        <Routes>
           {/* Route pubblica: Login */}
           <Route
             path="/login"
@@ -326,7 +328,8 @@ export default function App() {
               </div>
             }
           />
-      </Routes>
+        </Routes>
+      </StaffRequestAlertsProvider>
     </div>
   );
 }

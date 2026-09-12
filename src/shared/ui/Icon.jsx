@@ -32,6 +32,18 @@ const PATHS = {
       <path d="M10 19h4" />
     </g>
   ),
+  volume: (
+    <g>
+      <path d="M5 10h4l5-4v12l-5-4H5z" />
+      <path d="M17 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12" />
+    </g>
+  ),
+  'volume-off': (
+    <g>
+      <path d="M5 10h4l5-4v12l-5-4H5z" />
+      <path d="M18 10l4 4M22 10l-4 4" />
+    </g>
+  ),
   drop: <path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11z" />,
   scissors: (
     <g>

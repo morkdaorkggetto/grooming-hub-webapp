@@ -156,6 +156,50 @@
   gap: 8px;
 }
 
+.gh-request-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gh-request-alert__count,
+.gh-request-alert__sound {
+  display: inline-flex;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-warning-border);
+  border-radius: 50%;
+  color: var(--color-warning-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.gh-request-alert__count {
+  background: var(--color-warning-bg);
+}
+
+.gh-request-alert__sound {
+  background: transparent;
+}
+
+.gh-request-alert__count:hover,
+.gh-request-alert__sound:hover {
+  background: var(--color-surface-soft);
+}
+
+.gh-request-alert__count:focus-visible,
+.gh-request-alert__sound:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .gh-hero__account {
   max-width: 250px;
   overflow: hidden;

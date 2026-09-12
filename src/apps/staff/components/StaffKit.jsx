@@ -6,11 +6,52 @@ import FidelityBadge from '../../../shared/ui/FidelityBadge';
 import Icon from '../../../shared/ui/Icon';
 import PetAvatar from '../../../shared/ui/PetAvatar';
 import Skeleton from '../../../shared/ui/Skeleton';
+import {
+  STAFF_REQUEST_COUNT_LIMIT,
+  useStaffRequestAlerts,
+} from './StaffRequestAlerts';
 
 const joinClasses = (...classes) => classes.filter(Boolean).join(' ');
 
+function StaffRequestIndicator() {
+  const { pendingCount, soundEnabled, setSoundEnabled } = useStaffRequestAlerts();
+  if (pendingCount <= 0) return null;
+
+  const requestLabel = pendingCount === 1 ? 'richiesta' : 'richieste';
+  const displayedCount = pendingCount > STAFF_REQUEST_COUNT_LIMIT
+    ? `${STAFF_REQUEST_COUNT_LIMIT}+`
+    : pendingCount;
+  const soundLabel = soundEnabled
+    ? 'Disattiva suono nuove richieste'
+    : 'Attiva suono nuove richieste';
+
+  return (
+    <div className="gh-request-alert" aria-label={`${pendingCount} ${requestLabel} in attesa`}>
+      <Link
+        className="gh-request-alert__count gh-num"
+        to="/requests"
+        aria-label={`${pendingCount} ${requestLabel} in attesa. Apri richieste`}
+        title={`${pendingCount} ${requestLabel} in attesa`}
+      >
+        {displayedCount}
+      </Link>
+      <button
+        className="gh-request-alert__sound"
+        type="button"
+        aria-pressed={!soundEnabled}
+        aria-label={soundLabel}
+        title={soundLabel}
+        onClick={() => setSoundEnabled(!soundEnabled)}
+      >
+        <Icon name={soundEnabled ? 'volume' : 'volume-off'} size={17} />
+      </button>
+    </div>
+  );
+}
+
 export function Hero({ title, subtitle, right, className = '' }) {
   const { pathname } = useLocation();
+  const { pendingCount } = useStaffRequestAlerts();
   const brand = <Eyebrow staff accent>Grooming Hub</Eyebrow>;
 
   return (
@@ -28,7 +69,12 @@ export function Hero({ title, subtitle, right, className = '' }) {
         <h1 className="gh-h1">{title}</h1>
         {subtitle && <p className="gh-hero__subtitle">{subtitle}</p>}
       </div>
-      {right && <div className="gh-hero__right">{right}</div>}
+      {(right || pendingCount > 0) && (
+        <div className="gh-hero__right">
+          <StaffRequestIndicator />
+          {right}
+        </div>
+      )}
     </header>
   );
 }
