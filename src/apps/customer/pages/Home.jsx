@@ -192,7 +192,7 @@ export default function Home() {
         ) : (
           <>
             <h1 style={heroH1Style(isMobile)}>
-              Bentornato, <em style={emStyle}>{greeting || 'cliente'}</em>.
+              {greeting ? <>Bentornato, <em style={emStyle}>{greeting}</em>.</> : 'Bentornato.'}
             </h1>
             <p style={subStyle(isMobile)}>
               {tenant?.name ? `Salone: ${tenant.name}. ` : ''}
@@ -282,8 +282,8 @@ export default function Home() {
             <Card padding={24}>
               <Eyebrow style={{ marginBottom: 12 }}>Nessun pet</Eyebrow>
               <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
-                Non hai ancora un pet registrato. Per aggiungerlo, contatta il
-                salone direttamente.
+                Non vediamo ancora un pet nella tua area. Per aggiungerlo,
+                contattaci direttamente.
               </p>
               {salonWhatsAppUrl ? (
                 <a href={salonWhatsAppUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
@@ -395,7 +395,7 @@ export default function Home() {
               <Eyebrow style={{ marginBottom: 12 }}>Punti</Eyebrow>
               <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 500 }}>{rewardPoints} punti</div>
               <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
-                Si accumulano con le visite e con gli eventuali movimenti registrati dal salone.
+                Si accumulano con le visite e con gli eventuali movimenti che annotiamo per te.
               </p>
             </Card>
           )}

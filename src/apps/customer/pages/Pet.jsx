@@ -309,7 +309,7 @@ function MessagePage({ title, body, onRetry }) {
     <main className="gh-pet-page gh-pet-page--message">
       <BackgroundDecor />
       <section className="gh-pet-message-card">
-        <Eyebrow>Scheda pet</Eyebrow>
+        <Eyebrow>Il tuo pet</Eyebrow>
         <h1>{title}</h1>
         <p>{body}</p>
         <div className="gh-pet-message-actions">
@@ -505,7 +505,7 @@ export default function Pet() {
           </div>
 
           <div className="gh-pet-hero-copy">
-            <Eyebrow>Scheda pet</Eyebrow>
+            <Eyebrow>Il tuo pet</Eyebrow>
             <h1>{pet.name}</h1>
             {heroMeta && <p>{heroMeta}</p>}
             {pet.owner_photo_url && (
@@ -571,7 +571,7 @@ export default function Pet() {
         <div className="gh-pet-layout">
           <div className="gh-pet-content">
             <section className="gh-pet-section gh-pet-section--first">
-              <SectionHeading title="Anagrafica" editingLocked />
+              <SectionHeading title="Quello che sappiamo del tuo pet" editingLocked />
               <div className="gh-pet-data-grid">
                 <DataField label="Data di nascita" value={pet.birth_date ? DATE_FORMAT.format(new Date(`${pet.birth_date}T00:00:00`)) : null} />
                 <DataField label="Sesso" value={formatSex(pet.sex)} />
@@ -598,9 +598,9 @@ export default function Pet() {
             />
 
             <EditableTextSection
-              title="Note del proprietario"
+              title="Le note che ci hai lasciato"
               value={draft.ownerNotes}
-              emptyText="Nessuna nota del proprietario."
+              emptyText="Non ci hai ancora lasciato note."
               active={activeSection === 'notes'}
               editingLocked={editing}
               saving={saving}
@@ -632,7 +632,7 @@ export default function Pet() {
                   <button type="button" className="gh-pet-action gh-pet-action--ghost" onClick={refetchVisits}>Riprova</button>
                 </div>
               ) : visits.length === 0 ? (
-                <p className="gh-pet-section-copy gh-pet-section-copy--empty">Nessuna visita registrata.</p>
+                <p className="gh-pet-section-copy gh-pet-section-copy--empty">Non abbiamo ancora annotato visite.</p>
               ) : (
                 <div className="gh-pet-visits">
                   {visits.map((visit, index) => (

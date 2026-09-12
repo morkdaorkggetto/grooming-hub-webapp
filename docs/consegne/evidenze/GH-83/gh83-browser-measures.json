@@ -1,0 +1,348 @@
+{
+  "generatedAt": "2026-09-12T07:04:18.028Z",
+  "fixture": "memory-only",
+  "viewport": "375x812",
+  "consoleErrors": [],
+  "results": [
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "Bentornato.",
+          "present": true
+        },
+        {
+          "value": "Non vediamo ancora un pet nella tua area. Per aggiungerlo, contattaci direttamente.",
+          "present": true
+        },
+        {
+          "value": "Si accumulano con le visite e con gli eventuali movimenti che annotiamo per te.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "BENTORNATO",
+        "Bentornato.",
+        "Salone: Il salone di prova. Non hai appuntamenti in programma. Prenota la prossima visita quando vuoi.",
+        "NESSUN PET",
+        "Non vediamo ancora un pet nella tua area. Per aggiungerlo, contattaci direttamente.",
+        "PROSSIMO APPUNTAMENTO",
+        "Nessun appuntamento in programma.",
+        "Prenota ora",
+        "PUNTI",
+        "28 punti",
+        "Si accumulano con le visite e con gli eventuali movimenti che annotiamo per te."
+      ],
+      "id": "home-no-name",
+      "path": "/u/home"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "Il tuo pet",
+          "present": true
+        },
+        {
+          "value": "Quello che sappiamo del tuo pet",
+          "present": true
+        },
+        {
+          "value": "Le note che ci hai lasciato",
+          "present": true
+        },
+        {
+          "value": "Non ci hai ancora lasciato note.",
+          "present": true
+        },
+        {
+          "value": "Non abbiamo ancora annotato visite.",
+          "present": true
+        },
+        {
+          "value": "Metti qui il ritratto di Rumba.",
+          "present": true
+        },
+        {
+          "value": "Dopo il prossimo bagno troverai qui la sua foto",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "I tuoi pet",
+        "R",
+        "IL TUO PET",
+        "Rumba",
+        "Cane · Meticcio a pelo lungo · 5 anni",
+        "Metti qui il ritratto di Rumba.",
+        "Scegli una foto che ti piace: apparirà nella tua area e sulla sua card.",
+        "Metti la tua foto",
+        "Quello che sappiamo del tuo pet",
+        "DATA DI NASCITA",
+        "12 aprile 2021",
+        "SESSO",
+        "Femmina",
+        "MICROCHIP",
+        "380260000000000",
+        "PESO",
+        "18,4 kg",
+        "COLORE",
+        "Nero e bianco",
+        "STERILIZZATO",
+        "Sì",
+        "Questi dati sono gestiti dal salone.",
+        "Preferenze di toelettatura",
+        "Modifica",
+        "Nessuna preferenza indicata.",
+        "Le note che ci hai lasciato",
+        "Modifica",
+        "Non ci hai ancora lasciato note.",
+        "Le sue visite",
+        "0 visite",
+        "Non abbiamo ancora annotato visite.",
+        "Dopo il prossimo bagno troverai qui la sua foto",
+        "Prenota per Rumba"
+      ],
+      "id": "pet-empty",
+      "path": "/u/pet/rumba-fixture"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "Apri il link completo che ti abbiamo inviato. Se non lo trovi più, chiedici un nuovo invito.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "Grooming Hub",
+        "INVITO NON DISPONIBILE",
+        "Manca il codice invito",
+        "Apri il link completo che ti abbiamo inviato. Se non lo trovi più, chiedici un nuovo invito.",
+        "Vai all’accesso"
+      ],
+      "id": "redeem-missing",
+      "path": "/u/redeem"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "Crea il tuo accesso oppure usa un account personale che hai già. Il collegamento avverrà automaticamente.",
+          "present": true
+        },
+        {
+          "value": "Questo link collega esclusivamente la scheda che abbiamo preparato per te.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "Grooming Hub",
+        "INVITO PERSONALE",
+        "Entra nell’area del tuo pet",
+        "Crea il tuo accesso oppure usa un account personale che hai già. Il collegamento avverrà automaticamente.",
+        "Crea account",
+        "Ho già un account",
+        "Email",
+        "Password",
+        "Crea e collega",
+        "Questo link collega esclusivamente la scheda che abbiamo preparato per te."
+      ],
+      "id": "redeem-form",
+      "path": "/u/redeem/form"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "Il codice non corrisponde a uno dei nostri inviti. Controlla di aver aperto il link completo.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "Grooming Hub",
+        "INVITO NON RICONOSCIUTO",
+        "Questo link non è valido",
+        "Il codice non corrisponde a uno dei nostri inviti. Controlla di aver aperto il link completo.",
+        "Usa un altro account"
+      ],
+      "id": "redeem-not-found",
+      "path": "/u/redeem/not_found"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "Per proteggere la tua scheda, i nostri inviti hanno una durata limitata. Chiedicine uno nuovo.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "Grooming Hub",
+        "INVITO SCADUTO",
+        "Serve un nuovo link",
+        "Per proteggere la tua scheda, i nostri inviti hanno una durata limitata. Chiedicine uno nuovo.",
+        "Usa un altro account"
+      ],
+      "id": "redeem-expired",
+      "path": "/u/redeem/expired"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "L’invito appartiene a un account già in uso. Accedi con quell’account oppure contattaci.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "Grooming Hub",
+        "INVITO GIÀ UTILIZZATO",
+        "Questo link è già stato collegato",
+        "L’invito appartiene a un account già in uso. Accedi con quell’account oppure contattaci.",
+        "Usa un altro account"
+      ],
+      "id": "redeem-used",
+      "path": "/u/redeem/used"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "Questo invito era già associato al tuo account. Puoi continuare nella tua area.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "Grooming Hub",
+        "SCHEDA GIÀ COLLEGATA",
+        "È tutto a posto",
+        "Questo invito era già associato al tuo account. Puoi continuare nella tua area.",
+        "Apri la mia area"
+      ],
+      "id": "redeem-already",
+      "path": "/u/redeem/already"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "Account del salone riconosciuto",
+          "present": true
+        },
+        {
+          "value": "La scheda non è stata modificata. Esci e accedi con l’account personale che usi per il tuo pet.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "Grooming Hub",
+        "ACCOUNT DEL SALONE RICONOSCIUTO",
+        "Usa un account personale separato",
+        "La scheda non è stata modificata. Esci e accedi con l’account personale che usi per il tuo pet.",
+        "Usa un altro account"
+      ],
+      "id": "redeem-staff",
+      "path": "/u/redeem/staff"
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "documentWidth": 375,
+      "horizontalOverflow": 0,
+      "outsideViewport": [],
+      "truncated": [],
+      "forbiddenVisible": [],
+      "expected": [
+        {
+          "value": "La scheda del tuo pet è ora collegata. Ti portiamo nella tua area.",
+          "present": true
+        }
+      ],
+      "visibleText": [
+        "Grooming Hub",
+        "COLLEGAMENTO COMPLETATO",
+        "Benvenuto nella tua area",
+        "La scheda del tuo pet è ora collegata. Ti portiamo nella tua area.",
+        "Apri la mia area"
+      ],
+      "id": "redeem-success",
+      "path": "/u/redeem/success"
+    }
+  ],
+  "passed": true
+}

@@ -11,43 +11,43 @@ const VIEW_COPY = {
   missing: {
     eyebrow: 'Invito non disponibile',
     title: 'Manca il codice invito',
-    body: 'Apri il link completo ricevuto dal salone. Se non lo trovi più, chiedi un nuovo invito.',
+    body: 'Apri il link completo che ti abbiamo inviato. Se non lo trovi più, chiedici un nuovo invito.',
     tone: 'warning',
   },
   not_found: {
     eyebrow: 'Invito non riconosciuto',
     title: 'Questo link non è valido',
-    body: 'Il codice non corrisponde a un invito del salone. Controlla di aver aperto il link completo.',
+    body: 'Il codice non corrisponde a uno dei nostri inviti. Controlla di aver aperto il link completo.',
     tone: 'danger',
   },
   expired: {
     eyebrow: 'Invito scaduto',
     title: 'Serve un nuovo link',
-    body: 'Per proteggere la tua scheda, gli inviti hanno una durata limitata. Chiedine uno nuovo al salone.',
+    body: 'Per proteggere la tua scheda, i nostri inviti hanno una durata limitata. Chiedicine uno nuovo.',
     tone: 'warning',
   },
   used: {
     eyebrow: 'Invito già utilizzato',
     title: 'Questo link è già stato collegato',
-    body: 'L’invito appartiene a un account già registrato. Accedi con quell’account oppure contatta il salone.',
+    body: 'L’invito appartiene a un account già in uso. Accedi con quell’account oppure contattaci.',
     tone: 'warning',
   },
   already: {
     eyebrow: 'Scheda già collegata',
     title: 'È tutto a posto',
-    body: 'Questo invito era già associato al tuo account. Puoi continuare nella tua area cliente.',
+    body: 'Questo invito era già associato al tuo account. Puoi continuare nella tua area.',
     tone: 'success',
   },
   staff: {
-    eyebrow: 'Account staff riconosciuto',
-    title: 'Usa un account cliente separato',
-    body: 'La scheda non è stata modificata. Esci e accedi con l’account personale destinato all’area cliente.',
+    eyebrow: 'Account del salone riconosciuto',
+    title: 'Usa un account personale separato',
+    body: 'La scheda non è stata modificata. Esci e accedi con l’account personale che usi per il tuo pet.',
     tone: 'danger',
   },
   success: {
     eyebrow: 'Collegamento completato',
     title: 'Benvenuto nella tua area',
-    body: 'La scheda del tuo pet è ora collegata. Ti portiamo alla home cliente.',
+    body: 'La scheda del tuo pet è ora collegata. Ti portiamo nella tua area.',
     tone: 'success',
   },
 };
@@ -65,7 +65,7 @@ function InviteMessage({ view, error, user, onUseAnotherAccount }) {
   const copy = VIEW_COPY[view] || {
     eyebrow: 'Collegamento non riuscito',
     title: 'Non siamo riusciti a completare l’invito',
-    body: error || 'Riprova tra poco o contatta il salone.',
+    body: error || 'Riprova tra poco o contattaci.',
     tone: 'danger',
   };
 
@@ -193,7 +193,7 @@ export default function Redeem() {
       if (result.error) throw result.error;
       const activeUser = result.data?.user;
       if (!result.data?.session || !activeUser?.id) {
-        throw new Error('L’account richiede una conferma non prevista. Contatta il salone.');
+        throw new Error('L’account richiede una conferma non prevista. Contattaci.');
       }
 
       attemptedFor.current = `${activeUser.id}:${token}`;
@@ -221,7 +221,7 @@ export default function Redeem() {
         {view === 'loading' && (
           <section className="gh-redeem-message" aria-live="polite">
             <span className="gh-redeem-spinner" aria-hidden="true" />
-            <p className="gh-redeem-eyebrow">Invito cliente</p>
+            <p className="gh-redeem-eyebrow">Il tuo invito</p>
             <h1>Colleghiamo la tua scheda</h1>
             <p className="gh-redeem-copy">La verifica richiede solo un momento.</p>
           </section>
@@ -232,7 +232,7 @@ export default function Redeem() {
             <p className="gh-redeem-eyebrow">Invito personale</p>
             <h1>Entra nell’area del tuo pet</h1>
             <p className="gh-redeem-copy">
-              Crea il tuo accesso oppure usa un account cliente già esistente. Il collegamento avverrà automaticamente.
+              Crea il tuo accesso oppure usa un account personale che hai già. Il collegamento avverrà automaticamente.
             </p>
 
             <div className="gh-redeem-segments" aria-label="Tipo di accesso">
@@ -290,7 +290,7 @@ export default function Redeem() {
             </form>
 
             <p className="gh-redeem-footnote">
-              Questo link collega esclusivamente la scheda preparata dal salone.
+              Questo link collega esclusivamente la scheda che abbiamo preparato per te.
             </p>
           </section>
         )}
