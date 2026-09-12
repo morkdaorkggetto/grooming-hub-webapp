@@ -11,6 +11,7 @@ import { usePet } from '../hooks/usePet';
 import { usePetVisits } from '../hooks/usePetVisits';
 import {
   ownerPetPhotoPathFromUrl,
+  loadOwnerPetPhoto,
   removePetPhoto,
   uploadOwnerPetPhoto,
 } from '../lib/petPhoto';
@@ -77,20 +78,29 @@ function draftFromPet(pet) {
   };
 }
 
-function PetMedallion({ pet }) {
+function PetMedallion({ pet, disabled, onActivate }) {
   const ownerPhoto = pet.owner_photo_url || null;
+  const accessibleName = ownerPhoto
+    ? `Modifica inquadratura del ritratto di ${pet.name}`
+    : `Scegli un ritratto per ${pet.name}`;
 
   return (
     <div className="gh-pet-medallion">
-      <div className="gh-pet-medallion__main">
+      <button
+        type="button"
+        className="gh-pet-medallion__main"
+        onClick={onActivate}
+        disabled={disabled}
+        aria-label={accessibleName}
+      >
         {ownerPhoto ? (
-          <img src={ownerPhoto} alt={`Ritratto di ${pet.name}`} />
+          <img src={ownerPhoto} alt="" />
         ) : (
-          <span aria-label={`Nessuna foto per ${pet.name}`}>
+          <span aria-hidden="true">
             {(pet.name || '?').charAt(0).toUpperCase()}
           </span>
         )}
-      </div>
+      </button>
     </div>
   );
 }
@@ -383,6 +393,24 @@ export default function Pet() {
     setPendingOwnerCropFile(file);
   };
 
+  const handleMedallionActivate = async () => {
+    if (!pet?.owner_photo_url) {
+      photoInputRef.current?.click();
+      return;
+    }
+
+    setPhotoUploading(true);
+    setSaveError(null);
+    try {
+      const currentPortrait = await loadOwnerPetPhoto(pet.owner_photo_url, pet.name);
+      setPendingOwnerCropFile(currentPortrait);
+    } catch (photoError) {
+      setSaveError(photoError.message || 'Non e stato possibile riaprire il ritratto.');
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
   const handleOwnerCropConfirm = async ({ file, previewUrl }) => {
     setPendingOwnerCropFile(null);
     URL.revokeObjectURL(previewUrl);
@@ -468,7 +496,11 @@ export default function Pet() {
         <header className="gh-pet-hero">
           <div className="gh-pet-photo-column">
             <div className="gh-pet-avatar-wrap">
-              <PetMedallion pet={pet} />
+              <PetMedallion
+                pet={pet}
+                disabled={photoUploading}
+                onActivate={handleMedallionActivate}
+              />
             </div>
           </div>
 

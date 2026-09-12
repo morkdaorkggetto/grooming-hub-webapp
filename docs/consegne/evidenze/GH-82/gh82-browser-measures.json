@@ -1,0 +1,303 @@
+{
+  "source": {
+    "page": "https://commons.wikimedia.org/wiki/File:Small_dog_in_a_field_(5993847709).jpg",
+    "author": "waferboard",
+    "license": "CC BY 2.0",
+    "width": 1000,
+    "height": 709
+  },
+  "controls": {
+    "emptyMedallion": {
+      "fileChooserOpened": true,
+      "fileInputClicks": 1,
+      "accessibleName": "Scegli un ritratto per Rumba",
+      "tagName": "BUTTON"
+    },
+    "ownerMedallion": {
+      "cropOpened": true,
+      "fileChooserOpened": false,
+      "accessibleName": "Modifica inquadratura del ritratto di Rumba",
+      "tagName": "BUTTON"
+    },
+    "cancelRetouch": {
+      "before": {
+        "ownerPhotoUrl": "/@fs/private/tmp/gh82-small-dog-field.jpg",
+        "photoUrl": "https://salon.invalid/rumba-recognition.jpg",
+        "uploads": 0,
+        "writes": 0,
+        "fileInputClicks": 0
+      },
+      "after": {
+        "ownerPhotoUrl": "/@fs/private/tmp/gh82-small-dog-field.jpg",
+        "photoUrl": "https://salon.invalid/rumba-recognition.jpg",
+        "uploads": 0,
+        "writes": 0,
+        "fileInputClicks": 0
+      },
+      "unchanged": true
+    },
+    "textChange": {
+      "fileChooserOpened": true,
+      "fileInputClicks": 1
+    },
+    "keyboard": {
+      "activeBeforeOpen": "medallion",
+      "cropOpenedWithEnter": true,
+      "fileInputClicks": 0
+    },
+    "textRemove": {
+      "writes": [
+        {
+          "patch": {
+            "owner_photo_url": null
+          },
+          "beforePhotoUrl": "https://salon.invalid/rumba-recognition.jpg",
+          "afterPhotoUrl": "https://salon.invalid/rumba-recognition.jpg",
+          "beforeOwnerPhotoUrl": "/@fs/private/tmp/gh82-small-dog-field.jpg",
+          "afterOwnerPhotoUrl": null
+        }
+      ],
+      "ownerPhotoUrl": null,
+      "photoUrl": "https://salon.invalid/rumba-recognition.jpg"
+    }
+  },
+  "gestures": {
+    "pinchOut": {
+      "zoomBefore": 1,
+      "zoomAfter": 3
+    },
+    "pinchIn": {
+      "zoomBefore": 3,
+      "zoomAfter": 1.5
+    },
+    "pinchOffsets": {
+      "before": {
+        "x": 0.0078125,
+        "y": 0
+      },
+      "afterOut": {
+        "x": 0.0078125,
+        "y": 0
+      },
+      "afterIn": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "oneFinger": {
+      "before": {
+        "x": 0,
+        "y": 0
+      },
+      "after": {
+        "x": 34,
+        "y": 22
+      },
+      "delta": {
+        "x": 34,
+        "y": 22
+      }
+    },
+    "maxPinchOffsetDriftPx": 0.0078125
+  },
+  "maxZoom": {
+    "value": 8,
+    "sourceWidth": 1000,
+    "sourceHeight": 709,
+    "sourceCropSideAtMaxPx": 88.625,
+    "centerOffset": {
+      "x": 460,
+      "y": -40
+    },
+    "overflowPx": 0,
+    "minTargetHeight": 44,
+    "targets": [
+      {
+        "label": "Scegli un ritratto per Rumba",
+        "width": 88,
+        "height": 88
+      },
+      {
+        "label": "Metti la tua foto",
+        "width": 311,
+        "height": 56
+      },
+      {
+        "label": "Modifica",
+        "width": 89.78125,
+        "height": 44
+      },
+      {
+        "label": "Modifica",
+        "width": 89.78125,
+        "height": 44
+      },
+      {
+        "label": "Chiudi",
+        "width": 71.28125,
+        "height": 44
+      },
+      {
+        "label": "range",
+        "width": 295,
+        "height": 44
+      },
+      {
+        "label": "Annulla",
+        "width": 295,
+        "height": 52
+      },
+      {
+        "label": "Usa questa foto",
+        "width": 295,
+        "height": 48
+      }
+    ],
+    "firstCrop": {
+      "path": "tenant-demo/pet-1/owner/1789193969854-1af532b7-dd89-4c95-8124-64bcbc44a9ec.jpg",
+      "url": "blob:http://127.0.0.1:4202/e0b9b771-1cb5-4999-bd7d-6149007b9c13",
+      "name": "cropped-1789193969853.jpg",
+      "type": "image/jpeg",
+      "size": 12649,
+      "width": 320,
+      "height": 320
+    }
+  },
+  "retouches": {
+    "uploads": [
+      {
+        "size": 12637,
+        "width": 320,
+        "height": 320,
+        "type": "image/jpeg"
+      },
+      {
+        "size": 12637,
+        "width": 320,
+        "height": 320,
+        "type": "image/jpeg"
+      },
+      {
+        "size": 12654,
+        "width": 320,
+        "height": 320,
+        "type": "image/jpeg"
+      }
+    ],
+    "differenceFirstToThird": {
+      "width": 320,
+      "height": 320,
+      "meanAbsoluteChannelDelta": 0.009684244791666666,
+      "mse": 0.026324869791666667,
+      "psnrDb": 63.927141291167686
+    },
+    "ownerPhotoUrlAfter": "blob:http://127.0.0.1:4202/47f20bfe-60cd-479b-b883-c16b3a1e8bad",
+    "salonPhotoUrlAfter": "https://salon.invalid/rumba-recognition.jpg",
+    "totalWrites": 4
+  },
+  "responsive": {
+    "mobile": {
+      "width": 375,
+      "overflowPx": 0,
+      "minTargetHeight": 44,
+      "targets": [
+        {
+          "label": "Modifica inquadratura del ritratto di Rumba",
+          "width": 88,
+          "height": 88
+        },
+        {
+          "label": "Cambia la tua foto",
+          "width": 138.171875,
+          "height": 44
+        },
+        {
+          "label": "Togli la tua foto",
+          "width": 120.34375,
+          "height": 44
+        },
+        {
+          "label": "Modifica",
+          "width": 89.78125,
+          "height": 44
+        },
+        {
+          "label": "Modifica",
+          "width": 89.78125,
+          "height": 44
+        }
+      ]
+    },
+    "desktop": {
+      "width": 1365,
+      "overflowPx": 0,
+      "minTargetHeight": 44,
+      "targets": [
+        {
+          "label": "Modifica inquadratura del ritratto di Rumba",
+          "width": 140,
+          "height": 140
+        },
+        {
+          "label": "Cambia la tua foto",
+          "width": 138.171875,
+          "height": 44
+        },
+        {
+          "label": "Togli la tua foto",
+          "width": 120.34375,
+          "height": 44
+        },
+        {
+          "label": "Modifica",
+          "width": 89.78125,
+          "height": 44
+        },
+        {
+          "label": "Modifica",
+          "width": 89.78125,
+          "height": 44
+        },
+        {
+          "label": "Chiudi",
+          "width": 71.28125,
+          "height": 44
+        },
+        {
+          "label": "range",
+          "width": 528,
+          "height": 44
+        },
+        {
+          "label": "Annulla",
+          "width": 94.53125,
+          "height": 52
+        },
+        {
+          "label": "Usa questa foto",
+          "width": 153.921875,
+          "height": 52
+        }
+      ]
+    }
+  },
+  "staffDefault": {
+    "description": "Trascina l'immagine e regola lo zoom per centrare il muso del cane.",
+    "rounded3xlFrames": 1,
+    "roundedFullFrames": 0,
+    "maxZoom": 8,
+    "frameSize": {
+      "width": 280,
+      "height": 280
+    },
+    "buttons": [
+      "",
+      "Chiudi",
+      "Annulla",
+      "Usa questa foto"
+    ]
+  },
+  "consoleErrors": [],
+  "expectedConsoleNoise": [],
+  "durationMs": 10721
+}

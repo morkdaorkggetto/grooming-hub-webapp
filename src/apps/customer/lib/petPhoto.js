@@ -70,6 +70,35 @@ export async function uploadOwnerPetPhoto({ file, tenantId, petId }) {
   return { path, publicUrl: data.publicUrl };
 }
 
+export async function loadOwnerPetPhoto(url, petName = 'pet') {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Non e stato possibile riaprire il ritratto.');
+  }
+
+  const blob = await response.blob();
+  if (!blob.type.startsWith('image/')) {
+    throw new Error('Il ritratto salvato non e un file immagine valido.');
+  }
+
+  const extensionByType = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  };
+  const extension = extensionByType[blob.type] || 'jpg';
+  const safeName = String(petName || 'pet')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '') || 'pet';
+
+  return new File([blob], `${safeName}-ritratto.${extension}`, {
+    type: blob.type,
+    lastModified: Date.now(),
+  });
+}
+
 export async function removePetPhoto(path) {
   if (!path) return;
   const { error } = await supabase.storage.from('pet-avatars').remove([path]);

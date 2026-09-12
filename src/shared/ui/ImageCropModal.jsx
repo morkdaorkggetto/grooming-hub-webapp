@@ -2,9 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { cropImageSquare } from '../media/imageCrop';
 
 const FRAME_SIZE = 280;
+const MAX_ZOOM = 8;
 const DEFAULT_DESCRIPTION = "Trascina l'immagine e regola lo zoom per centrare il muso del cane.";
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+const distanceBetween = (first, second) =>
+  Math.hypot(second.x - first.x, second.y - first.y);
 
 export default function ImageCropModal({
   file,
@@ -21,6 +24,10 @@ export default function ImageCropModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const dragStateRef = useRef(null);
+  const pinchStateRef = useRef(null);
+  const pointersRef = useRef(new Map());
+  const offsetRef = useRef(offset);
+  const zoomRef = useRef(zoom);
 
   useEffect(() => {
     if (!file || !open) return undefined;
@@ -28,7 +35,12 @@ export default function ImageCropModal({
     const nextPreviewUrl = URL.createObjectURL(file);
     setPreviewUrl(nextPreviewUrl);
     setZoom(1);
+    zoomRef.current = 1;
     setOffset({ x: 0, y: 0 });
+    offsetRef.current = { x: 0, y: 0 };
+    pointersRef.current.clear();
+    dragStateRef.current = null;
+    pinchStateRef.current = null;
     setSaving(false);
     setError('');
 
@@ -59,22 +71,15 @@ export default function ImageCropModal({
   );
 
   useEffect(() => {
-    setOffset((current) => ({
-      x: clamp(current.x, -maxOffset.x, maxOffset.x),
-      y: clamp(current.y, -maxOffset.y, maxOffset.y),
-    }));
+    setOffset((current) => {
+      const next = {
+        x: clamp(current.x, -maxOffset.x, maxOffset.x),
+        y: clamp(current.y, -maxOffset.y, maxOffset.y),
+      };
+      offsetRef.current = next;
+      return next;
+    });
   }, [maxOffset.x, maxOffset.y]);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const handlePointerUp = () => {
-      dragStateRef.current = null;
-    };
-
-    window.addEventListener('pointerup', handlePointerUp);
-    return () => window.removeEventListener('pointerup', handlePointerUp);
-  }, [open]);
 
   if (!open || !file) return null;
 
@@ -88,24 +93,79 @@ export default function ImageCropModal({
 
   const handlePointerDown = (event) => {
     event.preventDefault();
-    dragStateRef.current = {
-      startX: event.clientX,
-      startY: event.clientY,
-      originX: offset.x,
-      originY: offset.y,
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    const pointers = [...pointersRef.current.entries()];
+    if (pointers.length === 1) {
+      dragStateRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        originX: offsetRef.current.x,
+        originY: offsetRef.current.y,
+      };
+      pinchStateRef.current = null;
+      return;
+    }
+
+    const [[, first], [, second]] = pointers;
+    dragStateRef.current = null;
+    pinchStateRef.current = {
+      startDistance: Math.max(1, distanceBetween(first, second)),
+      startZoom: zoomRef.current,
     };
   };
 
   const handlePointerMove = (event) => {
-    if (!dragStateRef.current) return;
+    if (!pointersRef.current.has(event.pointerId)) return;
+    event.preventDefault();
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    const pointers = [...pointersRef.current.values()];
+    if (pointers.length >= 2 && pinchStateRef.current) {
+      const nextDistance = distanceBetween(pointers[0], pointers[1]);
+      const nextZoom = clamp(
+        pinchStateRef.current.startZoom * (nextDistance / pinchStateRef.current.startDistance),
+        1,
+        MAX_ZOOM
+      );
+      zoomRef.current = nextZoom;
+      setZoom(nextZoom);
+      return;
+    }
+
+    if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
 
     const nextX = dragStateRef.current.originX + (event.clientX - dragStateRef.current.startX);
     const nextY = dragStateRef.current.originY + (event.clientY - dragStateRef.current.startY);
 
-    setOffset({
+    const nextOffset = {
       x: clamp(nextX, -maxOffset.x, maxOffset.x),
       y: clamp(nextY, -maxOffset.y, maxOffset.y),
-    });
+    };
+    offsetRef.current = nextOffset;
+    setOffset(nextOffset);
+  };
+
+  const handlePointerEnd = (event) => {
+    pointersRef.current.delete(event.pointerId);
+    pinchStateRef.current = null;
+
+    const remaining = [...pointersRef.current.entries()];
+    if (remaining.length === 1) {
+      const [[pointerId, pointer]] = remaining;
+      dragStateRef.current = {
+        pointerId,
+        startX: pointer.x,
+        startY: pointer.y,
+        originX: offsetRef.current.x,
+        originY: offsetRef.current.y,
+      };
+      return;
+    }
+
+    dragStateRef.current = null;
   };
 
   const handleConfirm = async () => {
@@ -115,8 +175,8 @@ export default function ImageCropModal({
     try {
       const cropped = await cropImageSquare(file, {
         zoom,
-        offsetX: offset.x,
-        offsetY: offset.y,
+        offsetX: offset.x / FRAME_SIZE,
+        offsetY: offset.y / FRAME_SIZE,
       });
       onConfirm(cropped);
     } catch (err) {
@@ -168,19 +228,15 @@ export default function ImageCropModal({
               background:
                 'linear-gradient(135deg, rgba(250,243,240,1) 0%, rgba(245,234,223,1) 100%)',
             }}
+            onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
-            onPointerUp={() => {
-              dragStateRef.current = null;
-            }}
-            onPointerLeave={() => {
-              dragStateRef.current = null;
-            }}
+            onPointerUp={handlePointerEnd}
+            onPointerCancel={handlePointerEnd}
           >
             <img
               src={previewUrl}
               alt="Anteprima ritaglio"
               onLoad={handleImageLoad}
-              onPointerDown={handlePointerDown}
               draggable={false}
               className="absolute max-w-none cursor-grab active:cursor-grabbing"
               style={{
@@ -207,10 +263,14 @@ export default function ImageCropModal({
             <input
               type="range"
               min="1"
-              max="3"
+              max={MAX_ZOOM}
               step="0.05"
               value={zoom}
-              onChange={(event) => setZoom(Number(event.target.value))}
+              onChange={(event) => {
+                const nextZoom = Number(event.target.value);
+                zoomRef.current = nextZoom;
+                setZoom(nextZoom);
+              }}
               className="w-full"
               style={{ minHeight: round ? 44 : undefined }}
             />

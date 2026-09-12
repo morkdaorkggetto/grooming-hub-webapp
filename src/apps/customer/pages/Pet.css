@@ -64,13 +64,22 @@
   overflow: hidden;
   place-items: center;
   border: 2px solid color-mix(in srgb, var(--color-primary) 34%, transparent);
+  padding: 0;
   border-radius: 50%;
   background: var(--color-surface-soft);
   color: var(--color-primary);
+  cursor: pointer;
   box-shadow: var(--shadow-lg);
   font-family: var(--font-serif);
   font-size: 58px;
 }
+
+.gh-pet-medallion__main:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+  outline-offset: 4px;
+}
+
+.gh-pet-medallion__main:disabled { cursor: wait; opacity: 0.62; }
 
 .gh-pet-medallion__main img {
   width: 100%;
