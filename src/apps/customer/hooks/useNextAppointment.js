@@ -17,9 +17,10 @@ import { useTenant } from '../../../shared/tenant/TenantProvider';
  *
  * Filtro: status='scheduled' (l'unico valore funzionale, vista la macchina
  * a stati storica: scheduled / completed / cancelled / no_show), e
- * scheduled_at >= now(). Order ASC su scheduled_at, limit 1.
+ * scheduled_at >= now(). Order ASC; il primo alimenta la scheda, gli altri
+ * permettono alla Home di segnalare anche una conferma successiva recente.
  *
- * Espone: { data: appointmentOrNull, loading, error, refetch }.
+ * Espone: { data: appointmentOrNull, appointments, loading, error, refetch }.
  */
 export function useNextAppointment() {
   const { user, loading: authLoading } = useAuth();
@@ -76,12 +77,12 @@ export function useNextAppointment() {
       return;
     }
 
-    // 2. Prossimo appointment
+    // 2. Appuntamenti futuri, con il prossimo in prima posizione
     const nowIso = new Date().toISOString();
     const { data: apptRows, error: apptErr } = await supabase
       .from('appointments')
       .select(
-        `id, scheduled_at, duration_minutes, status, approval_status, notes,
+        `id, scheduled_at, duration_minutes, status, approval_status, notes, appointment_source, created_at,
          pet_id, service_id,
          service:services(id, name),
          pet:pets(id, name, breed)`
@@ -90,14 +91,13 @@ export function useNextAppointment() {
       .in('pet_id', petIds)
       .eq('status', 'scheduled')
       .gte('scheduled_at', nowIso)
-      .order('scheduled_at', { ascending: true })
-      .limit(1);
+      .order('scheduled_at', { ascending: true });
 
     if (apptErr) {
       setError(apptErr);
       setData(null);
     } else {
-      setData(apptRows && apptRows.length > 0 ? apptRows[0] : null);
+      setData(apptRows || []);
     }
     setLoading(false);
   }, [user, tenantId]);
@@ -108,7 +108,8 @@ export function useNextAppointment() {
   }, [authLoading, tenantLoading, fetchNext]);
 
   return {
-    data,
+    data: data?.[0] || null,
+    appointments: data || [],
     error,
     loading: loading || authLoading || tenantLoading,
     refetch: fetchNext,

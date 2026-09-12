@@ -1,0 +1,853 @@
+{
+  "environment": "Real App and SDK, memory HTTP only, Chromium 375x812",
+  "cases": [
+    {
+      "name": "Double tap -> one RPC; accepted pending, no appointment",
+      "pass": true
+    },
+    {
+      "name": "Explicit change -> declined pending",
+      "pass": true
+    },
+    {
+      "name": "RPC rejection -> gentle error, retry requires refresh",
+      "text": "Questa alternativa non è più disponibile. Aggiorna le proposte e riprova.",
+      "pass": true
+    },
+    {
+      "name": "Staff reads response; modal uses chosen date and preference",
+      "date": "2026-10-13",
+      "time": "13:00",
+      "pass": true
+    },
+    {
+      "name": "Staff declined, GH81 count unchanged",
+      "badge": "1 richiesta in attesa. Apri richieste",
+      "pass": true
+    },
+    {
+      "name": "Badge before/after alternatives",
+      "before": 1,
+      "after": 1,
+      "pass": true
+    },
+    {
+      "name": "Confirmed customer appointment plus two actionable requests",
+      "pass": true
+    },
+    {
+      "name": "Staff-created appointment has no customer confirmation label",
+      "pass": true
+    },
+    {
+      "name": "Later customer confirmation remains visible behind an earlier staff-created appointment",
+      "pass": true
+    },
+    {
+      "name": "Commit succeeds but readback fails; refresh restores response without duplicate RPC",
+      "pass": true
+    },
+    {
+      "name": "72h boundaries and new proposal freshness",
+      "recent": true,
+      "expired": false,
+      "future": false,
+      "legacy": false,
+      "reproposal": null,
+      "pass": true
+    }
+  ],
+  "layouts": [
+    {
+      "name": "choices-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Lacky",
+          "width": 198.796875,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "LLackyBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "lunedì 12 ottobre, Mattina (9–13)",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "martedì 13 ottobre, Pomeriggio (13–19)",
+          "width": 285,
+          "height": 67,
+          "truncated": false
+        },
+        {
+          "text": "Nessuna di queste mi va bene",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "accepted-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Lacky",
+          "width": 198.796875,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "LLackyBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Cambia risposta",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "declined-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Lacky",
+          "width": 198.796875,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "LLackyBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Cambia risposta",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "rejected-pair-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Lacky",
+          "width": 198.796875,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "LLackyBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "lunedì 12 ottobre, Mattina (9–13)",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "martedì 13 ottobre, Pomeriggio (13–19)",
+          "width": 285,
+          "height": 67,
+          "truncated": false
+        },
+        {
+          "text": "Nessuna di queste mi va bene",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Aggiorna le proposte",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "staff-accepted-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Grooming Hub",
+          "width": 102.015625,
+          "height": 12.34375,
+          "truncated": false
+        },
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Dashboard",
+          "width": 95.296875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Aggiorna",
+          "width": 78,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "approval-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Annulla",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma e prepara WhatsApp",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Grooming Hub",
+          "width": 102.015625,
+          "height": 12.34375,
+          "truncated": false
+        },
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Dashboard",
+          "width": 95.296875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Aggiorna",
+          "width": 78,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "confirmed-multiple-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Lacky",
+          "width": 198.796875,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "LLackyBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "lunedì 12 ottobre, Mattina (9–13)",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "martedì 13 ottobre, Pomeriggio (13–19)",
+          "width": 285,
+          "height": 67,
+          "truncated": false
+        },
+        {
+          "text": "Nessuna di queste mi va bene",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "lunedì 12 ottobre, Mattina (9–13)",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "martedì 13 ottobre, Pomeriggio (13–19)",
+          "width": 285,
+          "height": 67,
+          "truncated": false
+        },
+        {
+          "text": "Nessuna di queste mi va bene",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "confirmed-later-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Lacky",
+          "width": 198.796875,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "LLackyBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "lunedì 12 ottobre, Mattina (9–13)",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "martedì 13 ottobre, Pomeriggio (13–19)",
+          "width": 285,
+          "height": 67,
+          "truncated": false
+        },
+        {
+          "text": "Nessuna di queste mi va bene",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "lunedì 12 ottobre, Mattina (9–13)",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "martedì 13 ottobre, Pomeriggio (13–19)",
+          "width": 285,
+          "height": 67,
+          "truncated": false
+        },
+        {
+          "text": "Nessuna di queste mi va bene",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "choices-1365",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Grooming Hub",
+          "width": 157.4375,
+          "height": 32,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 76.515625,
+          "height": 43,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 109.796875,
+          "height": 43,
+          "truncated": false
+        },
+        {
+          "text": "A",
+          "width": 40,
+          "height": 40,
+          "truncated": false
+        },
+        {
+          "text": "Vedi la scheda di Lacky",
+          "width": 198.796875,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "LLackyBarboncino",
+          "width": 274,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "lunedì 12 ottobre, Mattina (9–13)",
+          "width": 274,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "martedì 13 ottobre, Pomeriggio (13–19)",
+          "width": 274,
+          "height": 67,
+          "truncated": false
+        },
+        {
+          "text": "Nessuna di queste mi va bene",
+          "width": 274,
+          "height": 44.5,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "whatsapp": [
+    {
+      "name": "contact numeric",
+      "input": {
+        "owner": "3339509149",
+        "phone": "+393330000087",
+        "name": "Lacky",
+        "breed": "Barboncino"
+      },
+      "text": "Ciao, ti scriviamo per Lacky."
+    },
+    {
+      "name": "calendar numeric",
+      "input": {
+        "client": {
+          "owner": "3339509149",
+          "phone": "+393330000087",
+          "name": "Lacky",
+          "breed": "Barboncino"
+        },
+        "scheduled_at": "2026-10-10T15:00:00+02:00",
+        "duration_minutes": 60,
+        "desired_date": "2026-10-10"
+      },
+      "text": "Ciao, ti aspettiamo sabato 10 ottobre alle 15:00 con Lacky."
+    },
+    {
+      "name": "calendar named",
+      "input": {
+        "client": {
+          "owner": "Mario Rossi",
+          "phone": "+393330000087",
+          "name": "Lacky",
+          "breed": "Barboncino"
+        },
+        "scheduled_at": "2026-10-10T15:00:00+02:00",
+        "duration_minutes": 60,
+        "desired_date": "2026-10-10"
+      },
+      "text": "Ciao Mario Rossi, ti aspettiamo sabato 10 ottobre alle 15:00 con Lacky."
+    },
+    {
+      "name": "approved",
+      "input": {
+        "client": {
+          "owner": "3339509149",
+          "phone": "+393330000087",
+          "name": "Lacky",
+          "breed": "Barboncino"
+        },
+        "scheduled_at": "2026-10-10T15:00:00+02:00",
+        "duration_minutes": 60,
+        "desired_date": "2026-10-10"
+      },
+      "text": "Ciao, abbiamo confermato l'appuntamento per Lacky: sabato 10 ottobre dalle 15:00 alle 16:00. A presto!"
+    },
+    {
+      "name": "approved undated",
+      "input": {
+        "client": {
+          "owner": "3339509149",
+          "phone": "+393330000087",
+          "name": "Lacky",
+          "breed": "Barboncino"
+        }
+      },
+      "text": "Ciao, abbiamo confermato l'appuntamento per Lacky. A presto!"
+    },
+    {
+      "name": "rejected",
+      "input": {
+        "client": {
+          "owner": "3339509149",
+          "phone": "+393330000087",
+          "name": "Lacky",
+          "breed": "Barboncino"
+        },
+        "scheduled_at": "2026-10-10T15:00:00+02:00",
+        "duration_minutes": 60,
+        "desired_date": "2026-10-10"
+      },
+      "text": "Ciao, purtroppo sabato 10 ottobre dalle 15:00 alle 16:00 siamo pieni. Per Lacky scegli un'altra fascia nella tua area e riproviamo."
+    },
+    {
+      "name": "rejected undated",
+      "input": {
+        "client": {
+          "owner": "3339509149",
+          "phone": "+393330000087",
+          "name": "Lacky",
+          "breed": "Barboncino"
+        }
+      },
+      "text": "Ciao, per Lacky in quella fascia siamo pieni. Scegli un'altra fascia nella tua area e riproviamo."
+    },
+    {
+      "name": "alternatives",
+      "input": {
+        "appointment": {
+          "client": {
+            "owner": "3339509149",
+            "phone": "+393330000087",
+            "name": "Lacky",
+            "breed": "Barboncino"
+          },
+          "scheduled_at": "2026-10-10T15:00:00+02:00",
+          "duration_minutes": 60,
+          "desired_date": "2026-10-10"
+        },
+        "alternatives": [
+          {
+            "date": "2026-10-12",
+            "time_preference": "morning"
+          },
+          {
+            "date": "2026-10-13",
+            "time_preference": "afternoon"
+          }
+        ]
+      },
+      "text": "Ciao, purtroppo sabato 10 ottobre siamo pieni. Per Lacky avremmo lunedì 12 ottobre di mattina oppure martedì 13 ottobre nel pomeriggio. Scegli nella tua area la fascia che preferisci: poi ti confermiamo l'ora."
+    },
+    {
+      "name": "request",
+      "input": {
+        "salonPhone": "+393330000087",
+        "desiredDate": "2026-10-10",
+        "timeWindowLabel": "di mattina",
+        "serviceName": "Bagno"
+      },
+      "text": "Ciao, abbiamo appena inviato una richiesta per il mio pet. Ci andrebbe bene sabato 10 ottobre. Preferenza oraria: di mattina. Indicazione: Bagno."
+    },
+    {
+      "name": "directory",
+      "input": {
+        "owner_name": "3339509149",
+        "phone": "+393330000087",
+        "pet_name": "Lacky"
+      },
+      "text": "Ciao, ti scriviamo per Lacky."
+    },
+    {
+      "name": "next year",
+      "input": {
+        "client": {
+          "owner": "3339509149",
+          "phone": "+393330000087",
+          "name": "Lacky",
+          "breed": "Barboncino"
+        },
+        "scheduled_at": "2027-01-10T15:00:00+01:00",
+        "duration_minutes": 60,
+        "desired_date": "2026-10-10"
+      },
+      "text": "Ciao, ti aspettiamo domenica 10 gennaio 2027 alle 15:00 con Lacky."
+    },
+    {
+      "name": "midnight",
+      "input": {
+        "client": {
+          "owner": "3339509149",
+          "phone": "+393330000087",
+          "name": "Lacky",
+          "breed": "Barboncino"
+        },
+        "scheduled_at": "2026-10-10T23:30:00+02:00",
+        "duration_minutes": 60,
+        "desired_date": "2026-10-10"
+      },
+      "text": "Ciao, abbiamo confermato l'appuntamento per Lacky: da sabato 10 ottobre alle 23:30 a domenica 11 ottobre alle 00:30. A presto!"
+    },
+    {
+      "name": "boutique",
+      "input": {
+        "salonPhone": "+393330000087"
+      },
+      "text": "Ciao, per il nostro pet vorremmo informazioni sulla boutique."
+    },
+    {
+      "name": "boutique order",
+      "input": {
+        "salonPhone": "+393330000087",
+        "items": [
+          {
+            "quantity": 1,
+            "name": "Shampoo"
+          }
+        ]
+      },
+      "text": "Ciao, per il nostro pet vorremmo mettere da parte questi prodotti: 1x Shampoo."
+    },
+    {
+      "name": "timed request",
+      "input": {
+        "salonPhone": "+393330000087",
+        "date": "2026-10-10",
+        "time": "15:00",
+        "durationMinutes": 60,
+        "notes": "Pelo lungo"
+      },
+      "text": "Ciao, abbiamo appena inviato una richiesta per il mio pet. Preferenza oraria: sabato 10 ottobre dalle 15:00 alle 16:00. Note: Pelo lungo."
+    },
+    {
+      "name": "name boundaries",
+      "values": [
+        {
+          "input": "+39 333 950 9149",
+          "output": ""
+        },
+        {
+          "input": "  Anna-Maria D’Angelo  ",
+          "output": "Anna-Maria D’Angelo"
+        },
+        {
+          "input": "J.",
+          "output": ""
+        },
+        {
+          "input": "李明",
+          "output": "李明"
+        },
+        {
+          "input": "mario@example.com",
+          "output": ""
+        },
+        {
+          "input": "cliente",
+          "output": ""
+        },
+        {
+          "input": "Anna 2",
+          "output": ""
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 7251
+}

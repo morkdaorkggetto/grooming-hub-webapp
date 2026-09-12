@@ -4,13 +4,14 @@ import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useAuth } from '../../../shared/auth/AuthProvider';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { getTenantWhatsAppPhone } from '../../../shared/tenant/contact';
-import { getBookingTimePreferenceLabel } from '../../../shared/tenant/bookingSchedule';
 import { usePets } from '../hooks/usePets';
 import { useNextAppointment } from '../hooks/useNextAppointment';
 import { usePromotions } from '../hooks/usePromotions';
 import { useCurrentCustomer } from '../hooks/useCurrentCustomer';
 import { useAppointmentRequests } from '../hooks/useAppointmentRequests';
 import { useRewardPoints } from '../hooks/useRewardPoints';
+import PendingRequest from '../components/PendingRequest';
+import { currentAlternativeResponse, isRecentlyConfirmed } from '../lib/appointmentResponses';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
 import Card from '../../../shared/ui/Card';
 import Eyebrow from '../../../shared/ui/Eyebrow';
@@ -41,7 +42,6 @@ import { buildWhatsAppUrl } from '../../staff/lib/whatsapp';
 const DAY_FMT = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 const TIME_FMT = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' });
 const RELATIVE_DAY_FMT = new Intl.RelativeTimeFormat('it-IT', { numeric: 'auto' });
-const REQUEST_DATE_FMT = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 function pickGreetingName(customer, user) {
   if (customer?.first_name) return customer.first_name;
   const local = (user?.email || '').split('@')[0] || '';
@@ -112,9 +112,9 @@ export default function Home() {
   const { customer } = useCurrentCustomer();
 
   const { data: pets, loading: petsLoading } = usePets();
-  const { data: nextAppt, loading: apptLoading } = useNextAppointment();
+  const { data: nextAppt, appointments: upcomingAppointments, loading: apptLoading } = useNextAppointment();
   const { data: promos, loading: promosLoading } = usePromotions();
-  const { data: requests, loading: requestsLoading } = useAppointmentRequests();
+  const { data: requests, loading: requestsLoading, error: requestsError, refetch: refetchRequests } = useAppointmentRequests();
   const { total: rewardPoints, loading: pointsLoading } = useRewardPoints();
 
   const [isMobile, setIsMobile] = useState(
@@ -184,8 +184,10 @@ export default function Home() {
               La richiesta per <em style={emStyle}>{requestPetName}</em> è con noi.
             </h1>
             <p style={subStyle(isMobile)}>
-              {pendingRequest.staff_responded_at
-                ? 'Ti abbiamo proposto delle alternative: controlla il messaggio WhatsApp.'
+              {currentAlternativeResponse(pendingRequest)
+                ? 'Abbiamo ricevuto la tua risposta. Ora tocca al salone.'
+                : pendingRequest.proposed_alternatives?.length
+                ? 'Ti abbiamo proposto delle alternative: scegli qui la fascia che ti va bene.'
                 : 'È in attesa di risposta. Qui resta visibile finché non definiamo insieme l’appuntamento.'}
             </p>
           </>
@@ -211,7 +213,7 @@ export default function Home() {
             marginBottom: isMobile ? 32 : 40,
           }}
         >
-          {bookingPet ? (
+          {bookingPet && !requestsError ? (
             <Link to={`/u/book?petId=${bookingPet.id}`} style={{ textDecoration: 'none' }}>
               <span style={primaryBtnStyle}>
                 <Icon name="sparkle" size={16} />
@@ -226,7 +228,19 @@ export default function Home() {
           )}
         </div>
 
+        {requestsError ? (
+          <div style={{ marginBottom: 16 }}>
+            <p role="alert" style={subStyle(isMobile)}>Non riusciamo a rileggere le richieste. Aggiorna prima di rispondere.</p>
+            <button type="button" style={{ ...secondaryBtnStyle, minHeight: 44 }} disabled={requestsLoading} onClick={refetchRequests}>Aggiorna le richieste</button>
+          </div>
+        ) : null}
+
         {/* Card row */}
+        {upcomingAppointments.filter((appointment) => appointment.id !== nextAppt?.id && isRecentlyConfirmed(appointment)).map((appointment) => (
+          <p key={appointment.id} role="status" style={{ ...subStyle(isMobile), color: 'var(--color-primary)' }}>
+            Confermato dal salone: {appointment.pet?.name || 'il tuo pet'}, {DAY_FMT.format(new Date(appointment.scheduled_at))} alle {TIME_FMT.format(new Date(appointment.scheduled_at))}.
+          </p>
+        ))}
         <div style={gridStyle(isMobile)}>
           {/* PETS card / empty */}
           {petsLoading ? (
@@ -297,7 +311,7 @@ export default function Home() {
           )}
 
           {/* NEXT APPOINTMENT card / empty */}
-          {apptLoading || requestsLoading ? (
+          {(apptLoading || requestsLoading) && !nextAppt && !pendingRequest ? (
             <SkeletonCard />
           ) : nextAppt ? (
             <Card padding={20}>
@@ -344,28 +358,14 @@ export default function Home() {
                   per {nextAppt.pet.name}
                 </div>
               )}
-            </Card>
-          ) : pendingRequest ? (
-            <Card padding={20}>
-              <Eyebrow style={{ marginBottom: 12 }}>Richiesta appuntamento</Eyebrow>
-              <div style={{ marginBottom: 12 }}>
-                <StatusBadge status="scheduled" approvalStatus="pending" compact />
-              </div>
-              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 500, textTransform: 'capitalize' }}>
-                {REQUEST_DATE_FMT.format(new Date(`${pendingRequest.desired_date}T12:00:00`))}
-              </div>
-              <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
-                {pendingRequest.pet?.name || 'Pet'} · {pendingRequest.service?.name || 'Indicazione non disponibile'} · {getBookingTimePreferenceLabel(pendingRequest.time_preference, 'Nessuna preferenza') || 'Nessuna preferenza'}
-              </p>
-              <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--color-text-secondary)' }}>
-                Inviata il {new Date(pendingRequest.created_at).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-              </p>
-              {pendingRequest.proposed_alternatives?.length ? (
-                <p style={{ margin: '12px 0 0', fontSize: 14, lineHeight: 1.5 }}>
-                  Alternative proposte: {pendingRequest.proposed_alternatives.map((item) => `${REQUEST_DATE_FMT.format(new Date(`${item.date}T12:00:00`))}, ${item.time_preference === 'morning' ? 'mattina' : 'pomeriggio'}`).join(' · ')}.
+              {isRecentlyConfirmed(nextAppt) ? (
+                <p role="status" style={{ margin: '12px 0 0', fontSize: 14, color: 'var(--color-primary)', lineHeight: 1.5 }}>
+                  Confermato dal salone
                 </p>
               ) : null}
             </Card>
+          ) : pendingRequest ? (
+            <PendingRequest key={pendingRequest.id} request={pendingRequest} onResponded={refetchRequests} />
           ) : rejectedRequest ? (
             <Card padding={20}>
               <Eyebrow style={{ marginBottom: 12 }}>Richiesta da riprogrammare</Eyebrow>
@@ -387,6 +387,10 @@ export default function Home() {
               </Link>
             </Card>
           )}
+
+          {requests.filter((request) => request.status === 'pending' && (nextAppt || request.id !== pendingRequest?.id)).map((request) => (
+            <PendingRequest key={request.id} request={request} onResponded={refetchRequests} />
+          ))}
 
           {pointsLoading ? (
             <SkeletonCard />

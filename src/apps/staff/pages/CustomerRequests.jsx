@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
+import { supabase } from '../../../shared/supabase/client';
+import { currentAlternativeResponse } from '../../customer/lib/appointmentResponses';
 import {
   getBookingSchedule,
   getBookingTimePreferenceDefaultTime,
@@ -19,6 +21,7 @@ import {
   buildWhatsAppUrl,
   getAppointmentAlternativesWhatsAppMessage,
   getAppointmentApprovalWhatsAppMessage,
+  getWhatsAppOwnerName,
 } from '../lib/whatsapp';
 import {
   Button,
@@ -69,7 +72,7 @@ const COAT_CONDITION_LABELS = {
 
 const getRequestService = (notes = '') => {
   const match = String(notes).match(/Servizio richiesto:\s*([^.]*)/i);
-  return match?.[1]?.trim() || 'Appuntamento cliente';
+  return match?.[1]?.trim() || 'Appuntamento';
 };
 
 const getRequestWindow = (notes = '') => {
@@ -87,6 +90,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
     .map((value) => COAT_CONDITION_LABELS[value] || value)
     .join(', ');
   const isUpdating = updatingId === request.id;
+  const response = currentAlternativeResponse(request);
 
   return (
     <Panel className="gh-request-card">
@@ -96,6 +100,9 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
             <StateTag tone={request.staff_responded_at ? 'success' : 'warning'}>
               {request.staff_responded_at ? 'Risposto' : 'Da leggere'}
             </StateTag>
+            {response ? <StateTag tone={response === 'accepted' ? 'success' : 'warning'}>
+              {response === 'accepted' ? 'Fascia scelta' : 'Nessuna fascia va bene'}
+            </StateTag> : request.proposed_alternatives?.length ? <StateTag tone="warning">In attesa della scelta</StateTag> : null}
             {request.client?.is_blacklisted ? <StateTag tone="danger">Blacklist</StateTag> : null}
             <span className="gh-meta gh-num">
               {request.staff_responded_at
@@ -104,7 +111,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
             </span>
           </div>
 
-          <h2 className="gh-row-title">{request.client?.name || 'Cliente'}</h2>
+          <h2 className="gh-row-title">{request.client?.name || 'Pet'}</h2>
           <p className="gh-body">
             {request.client?.owner || 'Proprietario non indicato'}
             {request.client?.phone ? ` · ${request.client.phone}` : ''}
@@ -143,6 +150,17 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
               <p className="gh-body gh-pre-wrap">{request.notes}</p>
             </div>
           ) : null}
+          {response ? (
+            <div className="gh-request-notes">
+              <p className="gh-eyebrow--staff">Risposta ricevuta</p>
+              <p className="gh-body">
+                {response === 'accepted'
+                  ? `Ha scelto ${formatDesiredDate(request.chosen_date)} · ${getBookingTimePreferenceLabel(request.chosen_time_preference)}. L’ora resta da confermare.`
+                  : 'Nessuna delle fasce proposte va bene. Serve una nuova proposta.'}
+              </p>
+              <p className="gh-meta">Risposta del {formatCreatedAt(request.customer_responded_at)}</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="gh-request-actions">
@@ -174,8 +192,10 @@ function InfoTile({ label, value }) {
 }
 
 function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
-  const defaultTime = getBookingTimePreferenceDefaultTime(request.time_preference);
-  const [date, setDate] = useState(request.desired_date || '');
+  const hasChoice = currentAlternativeResponse(request) === 'accepted';
+  const preference = hasChoice ? request.chosen_time_preference : request.time_preference;
+  const defaultTime = getBookingTimePreferenceDefaultTime(preference);
+  const [date, setDate] = useState((hasChoice ? request.chosen_date : request.desired_date) || '');
   const [time, setTime] = useState(defaultTime);
   const [durationMinutes, setDurationMinutes] = useState(request.duration_minutes || 60);
   const today = new Date();
@@ -195,7 +215,7 @@ function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
         <p className="gh-eyebrow--staff">Conferma appuntamento</p>
         <h2 className="gh-panel-title" id="gh-approval-title">Scegli giorno e ora precisi</h2>
         <p className="gh-body">
-          {request.client?.name || 'Pet'} · preferenza cliente: {getBookingTimePreferenceLabel(request.time_preference, 'nessuna') || 'nessuna'}.
+          {request.client?.name || 'Pet'} · {hasChoice ? 'fascia scelta' : 'preferenza ricevuta'}: {getBookingTimePreferenceLabel(preference, 'nessuna') || 'nessuna'}.
         </p>
 
         <div className="gh-dialog-fields gh-dialog-fields--three">
@@ -252,9 +272,9 @@ function AlternativesDialog({ request, busy, schedule, onClose, onConfirm }) {
   return (
     <div className="gh-dialog-backdrop">
       <form onSubmit={submit} className="gh-dialog" role="dialog" aria-modal="true" aria-labelledby="gh-alternatives-title">
-        <p className="gh-eyebrow--staff">Risposta al cliente</p>
+        <p className="gh-eyebrow--staff">Proposta del salone</p>
         <h2 className="gh-panel-title" id="gh-alternatives-title">Proponi due o tre alternative</h2>
-        <p className="gh-body">La richiesta resta in attesa finché il cliente non sceglie su WhatsApp.</p>
+        <p className="gh-body">La scelta arriva dall’app. Poi il salone conferma l’ora: fino ad allora la richiesta resta in attesa.</p>
         <div className="gh-calendar-form-stack">
           {rows.map((row, index) => {
             const closure = getDateClosure(row.date, schedule);
@@ -313,9 +333,21 @@ export default function CustomerRequests() {
 
     try {
       const data = await getPendingAppointmentRequests();
-      setRequests(data);
+      const tenantIds = [...new Set(data.filter((item) => item.request_kind === 'structured').map((item) => item.tenant_id))];
+      // Enrich only this page; the shared pending list and GH-81 count stay unchanged.
+      if (tenantIds.length) {
+        const { data: responses, error: responseError } = await supabase.from('appointment_requests')
+          .select('id, chosen_date, chosen_time_preference, customer_response, customer_responded_at')
+          .in('tenant_id', tenantIds).eq('status', 'pending');
+        if (responseError) throw new Error('Non riesco a leggere le risposte alle alternative. Aggiorna prima di confermare.');
+        const byId = new Map((responses || []).map((row) => [row.id, row]));
+        setRequests(data.map((request) => request.request_kind === 'structured' ? { ...request, ...byId.get(request.id) } : request));
+      } else {
+        setRequests(data);
+      }
     } catch (err) {
-      setError(err.message || 'Non riesco a caricare le richieste clienti.');
+      setRequests([]);
+      setError(err.message || 'Non riesco a caricare le richieste.');
     } finally {
       setLoading(false);
     }
@@ -354,12 +386,12 @@ export default function CustomerRequests() {
         : await updateAppointmentApproval(request.id, approvalStatus);
       const message = getAppointmentApprovalWhatsAppMessage(updatedRequest, approvalStatus);
       const whatsappUrl = buildWhatsAppUrl(updatedRequest.client?.phone, message);
-      setWhatsappDraft({ message, url: whatsappUrl, recipient: updatedRequest.client?.owner || 'cliente' });
+      setWhatsappDraft({ message, url: whatsappUrl, recipient: getWhatsAppOwnerName(updatedRequest.client?.owner) || 'il proprietario' });
 
       setSuccess(
         approvalStatus === 'approved'
-          ? 'Richiesta approvata e appuntamento creato. Ora puoi avvisare il cliente.'
-          : 'Richiesta rifiutata. Ora puoi avvisare il cliente.'
+          ? 'Richiesta approvata e appuntamento creato. Ora puoi avvisare il proprietario.'
+          : 'Richiesta rifiutata. Ora puoi avvisare il proprietario.'
       );
       setApprovalRequest(null);
       await loadRequests();
@@ -378,9 +410,9 @@ export default function CustomerRequests() {
       setWhatsappDraft({
         message,
         url: buildWhatsAppUrl(updatedRequest.client?.phone, message),
-        recipient: updatedRequest.client?.owner || 'cliente',
+        recipient: getWhatsAppOwnerName(updatedRequest.client?.owner) || 'il proprietario',
       });
-      setSuccess('Alternative registrate. La richiesta resta in attesa della risposta del cliente.');
+      setSuccess('Alternative registrate. La richiesta resta in attesa della scelta nell’app.');
       setAlternativesRequest(null);
       await loadRequests();
     } catch (err) {
@@ -425,8 +457,8 @@ export default function CustomerRequests() {
         />
       ) : null}
       <Hero
-        title="Richieste clienti"
-        subtitle="Un unico punto per gestire richieste arrivate dall'area cliente."
+        title="Richieste"
+        subtitle="Le richieste arrivate dall’area dei proprietari."
         right={<HeroButton onClick={() => navigate('/dashboard')}>Dashboard</HeroButton>}
       />
 
@@ -446,13 +478,13 @@ export default function CustomerRequests() {
 
         <Panel
           bridge
-          eyebrow="Pipeline cliente"
+          eyebrow="Richieste in arrivo"
           title="Richieste da confermare"
           right={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>}
         >
           <div className="gh-request-pipeline">
               <p className="gh-body">
-                Qui arrivano le richieste appuntamento inviate dai clienti, da confermare o rifiutare con una risposta operativa.
+                Qui arrivano le richieste di appuntamento: puoi confermarle, proporre alternative o rifiutarle.
               </p>
           </div>
         </Panel>
@@ -460,7 +492,7 @@ export default function CustomerRequests() {
         {loading ? (
           <Panel flush>{Array.from({ length: 4 }, (_, index) => <SkeletonRow key={index} />)}</Panel>
         ) : requests.length === 0 ? (
-          <Panel><EmptyState title="Nessuna richiesta in attesa" body="Quando un cliente invia una richiesta appuntamento dall'area cliente, comparira' qui per approvazione o rifiuto." action={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>} /></Panel>
+          <Panel><EmptyState title="Nessuna richiesta in attesa" body="Quando arriva una richiesta dall’area dei proprietari, la trovi qui." action={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>} /></Panel>
         ) : (
           <div className="gh-request-list">
             {requests.map((request) => (

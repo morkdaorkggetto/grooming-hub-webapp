@@ -1,0 +1,135 @@
+{
+  "base": "b4f77c4",
+  "files": [
+    {
+      "file": "src/apps/staff/pages/AddClient.jsx",
+      "before": "34968b6a4728f4297df562641c5a341fa828afeb536f93910ebcc8c0e5802ac2",
+      "after": "34968b6a4728f4297df562641c5a341fa828afeb536f93910ebcc8c0e5802ac2"
+    },
+    {
+      "file": "src/apps/staff/pages/AddVisit.jsx",
+      "before": "075e58e4f33504156ba39aff3dd3a774cbd34c69532dbfec742143003ab0732a",
+      "after": "075e58e4f33504156ba39aff3dd3a774cbd34c69532dbfec742143003ab0732a"
+    },
+    {
+      "file": "src/apps/staff/pages/Calendar.css",
+      "before": "66a131ff772842453df8ad3427ad5dbb56cc660290a268e678cd65b58b528780",
+      "after": "66a131ff772842453df8ad3427ad5dbb56cc660290a268e678cd65b58b528780"
+    },
+    {
+      "file": "src/apps/staff/pages/Calendar.jsx",
+      "before": "a11796d61136af77fa6467f042ac3af78b94f2c8e7c3032eb41c680e6a0ccbd0",
+      "after": "a11796d61136af77fa6467f042ac3af78b94f2c8e7c3032eb41c680e6a0ccbd0"
+    },
+    {
+      "file": "src/apps/staff/pages/ClientCard.jsx",
+      "before": "b70c2922239c2533a35ac6a416b049cd78e9e85fb46a7bd5a7f30203d93aac8e",
+      "after": "b70c2922239c2533a35ac6a416b049cd78e9e85fb46a7bd5a7f30203d93aac8e"
+    },
+    {
+      "file": "src/apps/staff/pages/ClientDetail.jsx",
+      "before": "570954add9bcdce96e31bd4ce067195660febb4e2490f052d64cafeef0bca89f",
+      "after": "570954add9bcdce96e31bd4ce067195660febb4e2490f052d64cafeef0bca89f"
+    },
+    {
+      "file": "src/apps/staff/pages/Contacts.jsx",
+      "before": "1eb2a0ea6ca24a5e7dd58e96b57b7b59b92c8494bf8d1a1f3e77368fd3e1ed39",
+      "after": "1eb2a0ea6ca24a5e7dd58e96b57b7b59b92c8494bf8d1a1f3e77368fd3e1ed39"
+    },
+    {
+      "file": "src/apps/staff/pages/CustomerInvite.jsx",
+      "before": "c9ae47833df6b130d213b979d61c6c3c477f7009e674720cb21763b96cece149",
+      "after": "c9ae47833df6b130d213b979d61c6c3c477f7009e674720cb21763b96cece149"
+    },
+    {
+      "file": "src/apps/staff/pages/CustomerLogin.jsx",
+      "before": "9f61e73c0aca46768808b743e3974bf58c8bc82fa0b541921a5dff3dd0a020bc",
+      "after": "9f61e73c0aca46768808b743e3974bf58c8bc82fa0b541921a5dff3dd0a020bc"
+    },
+    {
+      "file": "src/apps/staff/pages/CustomerPortal.jsx",
+      "before": "5a891f22acdab51bae91cbc56537a5f29b63fc11d101cb8a0c2732ff8d1ef913",
+      "after": "5a891f22acdab51bae91cbc56537a5f29b63fc11d101cb8a0c2732ff8d1ef913"
+    },
+    {
+      "file": "src/apps/staff/pages/DailyAppointments.jsx",
+      "before": "1e25a8e5b15b701fa975392329029973cb46918d9e27636c4e955650dbbfed29",
+      "after": "1e25a8e5b15b701fa975392329029973cb46918d9e27636c4e955650dbbfed29"
+    },
+    {
+      "file": "src/apps/staff/pages/Dashboard.jsx",
+      "before": "df8a2c8083cd6398d34d04cb87f0499acde490284ce81333a2f72bef567541bf",
+      "after": "df8a2c8083cd6398d34d04cb87f0499acde490284ce81333a2f72bef567541bf"
+    },
+    {
+      "file": "src/apps/staff/pages/PromotionsManager.css",
+      "before": "94200da480adb49bd800cfc6ea01fd8f99545afeb6ac03578fa5c41734fa3311",
+      "after": "94200da480adb49bd800cfc6ea01fd8f99545afeb6ac03578fa5c41734fa3311"
+    },
+    {
+      "file": "src/apps/staff/pages/PromotionsManager.jsx",
+      "before": "03213954f3c8cc4c722fa969245f5d5128ccefd5ff03e4470f231ff67c1ff8a3",
+      "after": "03213954f3c8cc4c722fa969245f5d5128ccefd5ff03e4470f231ff67c1ff8a3"
+    },
+    {
+      "file": "src/apps/staff/pages/PublicPetCard.css",
+      "before": "ee791b61be216d2ccc4f742b110417b5f6b01cfea4a87421a47bfde830ce99ed",
+      "after": "ee791b61be216d2ccc4f742b110417b5f6b01cfea4a87421a47bfde830ce99ed"
+    },
+    {
+      "file": "src/apps/staff/pages/PublicPetCard.jsx",
+      "before": "d220ba50c381c04f2f014fb1a996e22041e796af27242d444d51590097c524a9",
+      "after": "d220ba50c381c04f2f014fb1a996e22041e796af27242d444d51590097c524a9"
+    },
+    {
+      "file": "src/apps/staff/pages/ResetPassword.jsx",
+      "before": "2faf42a3931c2a3447dac8e9ad73e801de33b6b319eb70f138917a55f61bc938",
+      "after": "2faf42a3931c2a3447dac8e9ad73e801de33b6b319eb70f138917a55f61bc938"
+    },
+    {
+      "file": "src/apps/staff/pages/WeeklyRevenue.css",
+      "before": "dab9bd244dde0f2094a07c4457af250b9d1e987edcc844349966bcbab35e835a",
+      "after": "dab9bd244dde0f2094a07c4457af250b9d1e987edcc844349966bcbab35e835a"
+    },
+    {
+      "file": "src/apps/staff/pages/WeeklyRevenue.jsx",
+      "before": "9ed93bacf322c8bbbeeb87ecc05e12321725dd4baf76ad94428c1876123e2c49",
+      "after": "9ed93bacf322c8bbbeeb87ecc05e12321725dd4baf76ad94428c1876123e2c49"
+    },
+    {
+      "file": "src/shared/supabase/client.js",
+      "before": "b7beec0348b3555cb2684588e9dd0afbc364b050048d9e717f74e74fe722019f",
+      "after": "b7beec0348b3555cb2684588e9dd0afbc364b050048d9e717f74e74fe722019f"
+    },
+    {
+      "file": "src/apps/staff/lib/database.js",
+      "before": "3f5fa166fb3ad771e829cecb8e6887b4bc10a36ba2574df69ae4d3764c199506",
+      "after": "3f5fa166fb3ad771e829cecb8e6887b4bc10a36ba2574df69ae4d3764c199506"
+    },
+    {
+      "file": "src/apps/staff/components/StaffKit.jsx",
+      "before": "ac463e48ed92f2732532416a909013ee343d478864a677dbbcbbcf5b35ab335f",
+      "after": "ac463e48ed92f2732532416a909013ee343d478864a677dbbcbbcf5b35ab335f"
+    },
+    {
+      "file": "src/apps/staff/components/StaffRequestAlerts.jsx",
+      "before": "09d44fced6bcd6a122bfe6f5ff5b58dc1dbffba51f7d9db7c51d087d2d8f85f4",
+      "after": "09d44fced6bcd6a122bfe6f5ff5b58dc1dbffba51f7d9db7c51d087d2d8f85f4"
+    },
+    {
+      "file": "src/apps/staff/styles/gh15-staff.css",
+      "before": "a56d793307d173e0018348d98105eebd3143f6b78e006ee71ee2541b23e5c5df",
+      "after": "a56d793307d173e0018348d98105eebd3143f6b78e006ee71ee2541b23e5c5df"
+    },
+    {
+      "file": "package.json",
+      "before": "54133106e1e730357c5e0b9edac23da1ea7c5d6342870c7b7b70930c383f6ca0",
+      "after": "54133106e1e730357c5e0b9edac23da1ea7c5d6342870c7b7b70930c383f6ca0"
+    },
+    {
+      "file": "package-lock.json",
+      "before": "f1651200b54a914bd78788fede971761401c9ae4d897a44b5f0db5bf1383e4ff",
+      "after": "f1651200b54a914bd78788fede971761401c9ae4d897a44b5f0db5bf1383e4ff"
+    }
+  ]
+}

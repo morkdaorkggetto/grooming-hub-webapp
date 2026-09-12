@@ -1,0 +1,232 @@
+{
+  "project": "qttpinkslhenxrsbhhhg",
+  "method": "Live demo functions and table SELECT with authenticated DB role and claims for existing test accounts; transactional fixture rollback. Separate suite uses actual Auth API login.",
+  "live": {
+    "before": {
+      "status": "pending",
+      "chosen_date": null,
+      "customer_response": null,
+      "customer_responded_at": null,
+      "chosen_time_preference": null
+    },
+    "request_id": "85cbbccb-48f6-48f7-88f9-b42a704071dc",
+    "alternatives": [
+      {
+        "date": "2026-09-14",
+        "time_preference": "afternoon"
+      },
+      {
+        "date": "2026-09-15",
+        "time_preference": "afternoon"
+      }
+    ],
+    "invoker_role": "authenticated",
+    "fixture_residue": 0,
+    "requests_before": 0,
+    "unproposed_pair": {
+      "code": "22023",
+      "message": "Chosen slot was not proposed"
+    },
+    "foreign_customer": {
+      "code": "42501",
+      "message": "Appointment request not available to current customer"
+    },
+    "resolved_request": {
+      "code": "23514",
+      "message": "Appointment request already resolved"
+    },
+    "accepted_readback": {
+      "status": "pending",
+      "chosen_date": "2026-09-14",
+      "appointment_id": null,
+      "customer_response": "accepted",
+      "customer_responded_at": "2026-09-12T17:47:35.580847+00:00",
+      "chosen_time_preference": "afternoon"
+    },
+    "declined_readback": {
+      "status": "pending",
+      "chosen_date": null,
+      "appointment_id": null,
+      "customer_response": "declined",
+      "customer_responded_at": "2026-09-12T17:47:35.580847+00:00",
+      "chosen_time_preference": null
+    },
+    "direct_update_rows": 0,
+    "appointments_before": 8,
+    "requests_after_rollback": 0,
+    "appointments_after_rollback": 8,
+    "customer_appointments_after": 1,
+    "customer_appointments_before": 1,
+    "staff_pending_after_proposal": 1,
+    "staff_pending_before_proposal": 1
+  },
+  "query": "DO $test$\nDECLARE\n  mario uuid; luca uuid; staff uuid; tenant uuid; pet uuid; service uuid;\n  alternatives jsonb; first_day date; first_preference text;\n  request public.appointment_requests; result jsonb := '{}'::jsonb;\n  baseline_requests integer; baseline_appointments integer; visible_appointments integer;\n  changed integer; msg text;\nBEGIN\n  SELECT id INTO STRICT mario FROM auth.users WHERE email='mario.rossi@test.example';\n  SELECT id INTO STRICT luca FROM auth.users WHERE email='luca.bianchi@test.example';\n  SELECT id INTO STRICT staff FROM auth.users WHERE email='staff.sonda@test.example';\n  SELECT p.id,p.tenant_id INTO STRICT pet,tenant FROM public.pets p\n    JOIN public.customers c ON c.id=p.customer_id WHERE c.user_id=mario ORDER BY p.id LIMIT 1;\n  SELECT id INTO STRICT service FROM public.services WHERE tenant_id=tenant AND is_active ORDER BY display_order,id LIMIT 1;\n  SELECT jsonb_agg(jsonb_build_object('date',slot_day::text,'time_preference',preference) ORDER BY slot_day,preference) INTO alternatives\n  FROM (\n    SELECT current_date + g AS slot_day, preference FROM generate_series(1,30) g\n    CROSS JOIN (VALUES ('morning'),('afternoon')) bands(preference)\n    JOIN public.tenants t ON t.id=tenant\n    WHERE NOT coalesce(t.settings #> '{booking_schedule,closed_weekdays}','[]'::jsonb) ? (ARRAY['sunday','monday','tuesday','wednesday','thursday','friday','saturday'])[extract(dow FROM current_date+g)::int+1]\n      AND NOT coalesce(t.settings #> ARRAY['booking_schedule','closed_time_preferences',(ARRAY['sunday','monday','tuesday','wednesday','thursday','friday','saturday'])[extract(dow FROM current_date+g)::int+1]],'[]'::jsonb) ? preference\n    ORDER BY slot_day,preference LIMIT 2\n  ) slots;\n  IF jsonb_array_length(alternatives)<>2 THEN RAISE EXCEPTION 'Two open slots required'; END IF;\n  first_day := (alternatives->0->>'date')::date; first_preference := alternatives->0->>'time_preference';\n  SELECT count(*) INTO baseline_requests FROM public.appointment_requests;\n  SELECT count(*) INTO baseline_appointments FROM public.appointments;\n  BEGIN\n    EXECUTE 'SET LOCAL ROLE authenticated';\n    PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',mario,'role','authenticated')::text,true);\n    SELECT count(*) INTO visible_appointments FROM public.appointments;\n    SELECT * INTO request FROM public.submit_appointment_request(tenant,pet,service,first_day,first_preference,ARRAY['some_knots'],'[DEMO GH-87] alternative-response probe',NULL);\n    result := result || jsonb_build_object('request_id',request.id,'alternatives',alternatives,'before',jsonb_build_object('status',request.status,'chosen_date',request.chosen_date,'chosen_time_preference',request.chosen_time_preference,'customer_response',request.customer_response,'customer_responded_at',request.customer_responded_at));\n    PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',staff,'role','authenticated')::text,true);\n    result := result || jsonb_build_object('staff_pending_before_proposal',(SELECT count(*) FROM public.appointment_requests WHERE status='pending' AND tenant_id=tenant));\n    PERFORM public.propose_appointment_request_alternatives(request.id,alternatives);\n    result := result || jsonb_build_object('staff_pending_after_proposal',(SELECT count(*) FROM public.appointment_requests WHERE status='pending' AND tenant_id=tenant));\n    PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',luca,'role','authenticated')::text,true);\n    BEGIN\n      PERFORM public.respond_appointment_request_alternatives(request.id,'accepted',first_day,first_preference);\n      RAISE EXCEPTION 'Foreign customer unexpectedly allowed';\n    EXCEPTION WHEN SQLSTATE '42501' THEN\n      GET STACKED DIAGNOSTICS msg = MESSAGE_TEXT;\n      result := result || jsonb_build_object('foreign_customer',jsonb_build_object('code',SQLSTATE,'message',msg));\n    END;\n    PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',mario,'role','authenticated')::text,true);\n    UPDATE public.appointment_requests SET customer_response='declined' WHERE id=request.id;\n    GET DIAGNOSTICS changed = ROW_COUNT;\n    IF changed<>0 THEN RAISE EXCEPTION 'Direct customer write unexpectedly allowed'; END IF;\n    result := result || jsonb_build_object('direct_update_rows',changed,'invoker_role',current_user);\n    BEGIN\n      PERFORM public.respond_appointment_request_alternatives(request.id,'accepted',first_day+365,first_preference);\n      RAISE EXCEPTION 'Unproposed pair unexpectedly allowed';\n    EXCEPTION WHEN SQLSTATE '22023' THEN\n      GET STACKED DIAGNOSTICS msg = MESSAGE_TEXT;\n      result := result || jsonb_build_object('unproposed_pair',jsonb_build_object('code',SQLSTATE,'message',msg));\n    END;\n    PERFORM public.respond_appointment_request_alternatives(request.id,'accepted',first_day,first_preference);\n    SELECT * INTO request FROM public.appointment_requests WHERE id=request.id;\n    IF request.status<>'pending' OR request.customer_response<>'accepted' OR request.appointment_id IS NOT NULL THEN RAISE EXCEPTION 'Accepted invariant failed'; END IF;\n    result := result || jsonb_build_object('accepted_readback',jsonb_build_object('status',request.status,'chosen_date',request.chosen_date,'chosen_time_preference',request.chosen_time_preference,'customer_response',request.customer_response,'customer_responded_at',request.customer_responded_at,'appointment_id',request.appointment_id));\n    PERFORM public.respond_appointment_request_alternatives(request.id,'declined',NULL,NULL);\n    SELECT * INTO request FROM public.appointment_requests WHERE id=request.id;\n    IF request.status<>'pending' OR request.customer_response<>'declined' OR request.chosen_date IS NOT NULL OR request.chosen_time_preference IS NOT NULL THEN RAISE EXCEPTION 'Declined invariant failed'; END IF;\n    result := result || jsonb_build_object('declined_readback',jsonb_build_object('status',request.status,'chosen_date',request.chosen_date,'chosen_time_preference',request.chosen_time_preference,'customer_response',request.customer_response,'customer_responded_at',request.customer_responded_at,'appointment_id',request.appointment_id),'customer_appointments_before',visible_appointments,'customer_appointments_after',(SELECT count(*) FROM public.appointments));\n    PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',staff,'role','authenticated')::text,true);\n    UPDATE public.appointment_requests SET status='rejected' WHERE id=request.id;\n    PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',mario,'role','authenticated')::text,true);\n    BEGIN\n      PERFORM public.respond_appointment_request_alternatives(request.id,'accepted',first_day,first_preference);\n      RAISE EXCEPTION 'Resolved request unexpectedly allowed';\n    EXCEPTION WHEN SQLSTATE '23514' THEN\n      GET STACKED DIAGNOSTICS msg = MESSAGE_TEXT;\n      result := result || jsonb_build_object('resolved_request',jsonb_build_object('code',SQLSTATE,'message',msg));\n    END;\n    RAISE EXCEPTION 'Rollback all fixture writes' USING ERRCODE='P0087';\n  EXCEPTION WHEN SQLSTATE 'P0087' THEN NULL;\n  END;\n  IF (SELECT count(*) FROM public.appointment_requests)<>baseline_requests OR (SELECT count(*) FROM public.appointments)<>baseline_appointments THEN RAISE EXCEPTION 'Rollback count mismatch'; END IF;\n  result := result || jsonb_build_object('requests_before',baseline_requests,'requests_after_rollback',(SELECT count(*) FROM public.appointment_requests),'appointments_before',baseline_appointments,'appointments_after_rollback',(SELECT count(*) FROM public.appointments),'fixture_residue',(SELECT count(*) FROM public.appointment_requests WHERE coat_condition_notes LIKE '[DEMO GH-87]%'));\n  PERFORM set_config('gh87.test_result',result::text,false);\nEND\n$test$;\nSELECT current_setting('gh87.test_result')::jsonb AS evidence;",
+  "snapshots": {
+    "before": [
+      {
+        "object": "pets",
+        "rows": 7,
+        "fingerprint": "2221591a978d6255263097f42fec20b5"
+      },
+      {
+        "object": "visits",
+        "rows": 90,
+        "fingerprint": "56c7aa5922dd43aad2339eeb126f55cc"
+      },
+      {
+        "object": "customers",
+        "rows": 7,
+        "fingerprint": "3fbac0f2850ed3c49053863f5e48951a"
+      },
+      {
+        "object": "appointments",
+        "rows": 8,
+        "fingerprint": "99ef0262ec58d4880a4f159c2a96ad57"
+      },
+      {
+        "object": "appointment_requests",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "pet_staff_notes",
+        "rows": 5,
+        "fingerprint": "b7dd213a94a3a4ec2d6000ef2fcf5c37"
+      },
+      {
+        "object": "customer_staff_notes",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "promotions",
+        "rows": 3,
+        "fingerprint": "32234437533245217a075f7dc3a61e88"
+      },
+      {
+        "object": "customer_invitations",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "tenant_memberships",
+        "rows": 5,
+        "fingerprint": "8aabe83320c5f3853d52c082d96a4aaf"
+      },
+      {
+        "object": "profiles",
+        "rows": 6,
+        "fingerprint": "3ef064d7323742131d5b16690632c859"
+      },
+      {
+        "object": "tenants",
+        "rows": 2,
+        "fingerprint": "873efadd4f2c888be26bc54c561ba414"
+      },
+      {
+        "object": "storage.objects",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "auth.users (ids only)",
+        "rows": 6,
+        "fingerprint": "80f9c0103ddb7d8b61c11b9972f427e8"
+      }
+    ],
+    "after": [
+      {
+        "object": "pets",
+        "rows": 7,
+        "fingerprint": "2221591a978d6255263097f42fec20b5"
+      },
+      {
+        "object": "visits",
+        "rows": 90,
+        "fingerprint": "56c7aa5922dd43aad2339eeb126f55cc"
+      },
+      {
+        "object": "customers",
+        "rows": 7,
+        "fingerprint": "3fbac0f2850ed3c49053863f5e48951a"
+      },
+      {
+        "object": "appointments",
+        "rows": 8,
+        "fingerprint": "99ef0262ec58d4880a4f159c2a96ad57"
+      },
+      {
+        "object": "appointment_requests",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "pet_staff_notes",
+        "rows": 5,
+        "fingerprint": "b7dd213a94a3a4ec2d6000ef2fcf5c37"
+      },
+      {
+        "object": "customer_staff_notes",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "promotions",
+        "rows": 3,
+        "fingerprint": "32234437533245217a075f7dc3a61e88"
+      },
+      {
+        "object": "customer_invitations",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "tenant_memberships",
+        "rows": 5,
+        "fingerprint": "8aabe83320c5f3853d52c082d96a4aaf"
+      },
+      {
+        "object": "profiles",
+        "rows": 6,
+        "fingerprint": "3ef064d7323742131d5b16690632c859"
+      },
+      {
+        "object": "tenants",
+        "rows": 2,
+        "fingerprint": "873efadd4f2c888be26bc54c561ba414"
+      },
+      {
+        "object": "storage.objects",
+        "rows": 0,
+        "fingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "object": "auth.users (ids only)",
+        "rows": 6,
+        "fingerprint": "80f9c0103ddb7d8b61c11b9972f427e8"
+      }
+    ]
+  },
+  "snapshotQuery": "select 'pets' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.pets t union all select 'visits' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.visits t union all select 'customers' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.customers t union all select 'appointments' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.appointments t union all select 'appointment_requests' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.appointment_requests t union all select 'pet_staff_notes' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.pet_staff_notes t union all select 'customer_staff_notes' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.customer_staff_notes t union all select 'promotions' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.promotions t union all select 'customer_invitations' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.customer_invitations t union all select 'tenant_memberships' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.tenant_memberships t union all select 'profiles' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.profiles t union all select 'tenants' as object, count(*)::int as rows, md5(coalesce(string_agg((to_jsonb(t)-'updated_at')::text, E'\\n' order by (to_jsonb(t)-'updated_at')::text),'')) as fingerprint from public.tenants t union all select 'storage.objects',count(*)::int,md5(coalesce(string_agg((to_jsonb(t)-'updated_at'-'last_accessed_at')::text,E'\\n' order by (to_jsonb(t)-'updated_at'-'last_accessed_at')::text),'')) from storage.objects t union all select 'auth.users (ids only)',count(*)::int,md5(coalesce(string_agg(id::text,',' order by id),'')) from auth.users",
+  "rls": {
+    "pass": 60,
+    "fail": 0,
+    "skip": 0,
+    "wallSeconds": 32.18,
+    "unchangedScript": true
+  },
+  "cleanup": {
+    "gh87Requests": 0,
+    "suitePets": 0,
+    "suiteCustomers": 0,
+    "suiteVisits": 0,
+    "suitePromotions": 0,
+    "suiteAppointments": 0,
+    "storageObjects": 0
+  },
+  "audit": {
+    "unlinkRowsBefore": 8,
+    "unlinkRowsAfter": 10,
+    "note": "Two retained suite audit records; no audit deletion. Volatile updated_at/auth sign-in timestamps are not claimed restored."
+  }
+}
