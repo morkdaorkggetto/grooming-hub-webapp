@@ -330,7 +330,7 @@ function ApprovalDialog({ request, busy, schedule, capacity, actionError, onClea
         <div className="gh-dialog-fields gh-dialog-fields--three">
           <Field label="Giorno" type="date" min={minDate} value={date} onChange={(event) => changeDate(event.target.value)} required />
           <Field label="Ora" type="time" step="900" value={time} onChange={(event) => changeTime(event.target.value)} required />
-          <Field label="Durata prevista (min)" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => changeDuration(event.target.value)} required />
+          <Field label="Durata (min)" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => changeDuration(event.target.value)} required />
         </div>
         <p className="gh-dialog-helper">Il servizio propone il valore iniziale: adattalo al cane che stai valutando.</p>
         <CapacityNotice appointments={appointments} capacity={capacity} date={date} time={time} durationMinutes={durationMinutes} onUseTime={changeTime} />

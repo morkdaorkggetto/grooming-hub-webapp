@@ -1,0 +1,454 @@
+{
+  "environment": "Real app and SDK, memory HTTP only, Chromium Europe/Rome",
+  "base": "147875586819f057d394c2ada9f9142a74f442c8",
+  "approval": {
+    "before1365": {
+      "normal": {
+        "columns": "132.656px 132.672px 132.672px",
+        "alignItems": "normal",
+        "inputTop": [
+          412.375,
+          412.375,
+          424.719
+        ],
+        "inputBottom": [
+          450.375,
+          450.375,
+          462.719
+        ],
+        "labelText": [
+          "Giorno",
+          "Ora",
+          "Durata prevista (min)"
+        ],
+        "labelLines": [
+          1,
+          1,
+          2
+        ],
+        "overflow": 0,
+        "controls": [
+          {
+            "name": "date",
+            "width": 132.656,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "time",
+            "width": 132.672,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "number",
+            "width": 132.672,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "Annulla",
+            "width": 74.531,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "Conferma e prepara WhatsApp",
+            "width": 218.313,
+            "height": 38,
+            "truncated": false
+          }
+        ]
+      },
+      "forced": {
+        "columns": "132.656px 132.672px 132.672px",
+        "alignItems": "normal",
+        "inputTop": [
+          443.234,
+          393.859,
+          406.203
+        ],
+        "inputBottom": [
+          481.234,
+          431.859,
+          444.203
+        ],
+        "labelText": [
+          "Giorno richiesto con una etichetta volutamente molto lunga",
+          "Ora",
+          "Durata prevista (min)"
+        ],
+        "labelLines": [
+          5,
+          1,
+          2
+        ],
+        "overflow": 0,
+        "controls": [
+          {
+            "name": "date",
+            "width": 132.656,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "time",
+            "width": 132.672,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "number",
+            "width": 132.672,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "Annulla",
+            "width": 74.531,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "Conferma e prepara WhatsApp",
+            "width": 218.313,
+            "height": 38,
+            "truncated": false
+          }
+        ]
+      },
+      "alternatives": {
+        "rows": [
+          {
+            "columns": "204px 204px",
+            "inputTop": [
+              400.516,
+              400.516
+            ]
+          },
+          {
+            "columns": "204px 204px",
+            "inputTop": [
+              485.859,
+              485.859
+            ]
+          }
+        ],
+        "overflow": 0
+      }
+    },
+    "after1365": {
+      "normal": {
+        "columns": "132.656px 132.672px 132.672px",
+        "alignItems": "end",
+        "inputTop": [
+          418.547,
+          418.547,
+          418.547
+        ],
+        "inputBottom": [
+          456.547,
+          456.547,
+          456.547
+        ],
+        "labelText": [
+          "Giorno",
+          "Ora",
+          "Durata (min)"
+        ],
+        "labelLines": [
+          1,
+          1,
+          1
+        ],
+        "overflow": 0,
+        "controls": [
+          {
+            "name": "date",
+            "width": 132.656,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "time",
+            "width": 132.672,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "number",
+            "width": 132.672,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "Annulla",
+            "width": 74.531,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "Conferma e prepara WhatsApp",
+            "width": 218.313,
+            "height": 38,
+            "truncated": false
+          }
+        ]
+      },
+      "forced": {
+        "columns": "132.656px 132.672px 132.672px",
+        "alignItems": "end",
+        "inputTop": [
+          443.234,
+          443.234,
+          443.234
+        ],
+        "inputBottom": [
+          481.234,
+          481.234,
+          481.234
+        ],
+        "labelText": [
+          "Giorno richiesto con una etichetta volutamente molto lunga",
+          "Ora",
+          "Durata (min)"
+        ],
+        "labelLines": [
+          5,
+          1,
+          1
+        ],
+        "overflow": 0,
+        "controls": [
+          {
+            "name": "date",
+            "width": 132.656,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "time",
+            "width": 132.672,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "number",
+            "width": 132.672,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "Annulla",
+            "width": 74.531,
+            "height": 38,
+            "truncated": false
+          },
+          {
+            "name": "Conferma e prepara WhatsApp",
+            "width": 218.313,
+            "height": 38,
+            "truncated": false
+          }
+        ]
+      },
+      "alternatives": {
+        "rows": [
+          {
+            "columns": "204px 204px",
+            "inputTop": [
+              400.516,
+              400.516
+            ]
+          },
+          {
+            "columns": "204px 204px",
+            "inputTop": [
+              485.859,
+              485.859
+            ]
+          }
+        ],
+        "overflow": 0
+      }
+    },
+    "after375": {
+      "normal": {
+        "columns": "335px",
+        "alignItems": "end",
+        "inputTop": [
+          397.219,
+          470.563,
+          543.906
+        ],
+        "inputBottom": [
+          443.219,
+          516.563,
+          589.906
+        ],
+        "labelText": [
+          "Giorno",
+          "Ora",
+          "Durata (min)"
+        ],
+        "labelLines": [
+          1,
+          1,
+          1
+        ],
+        "overflow": 0,
+        "controls": [
+          {
+            "name": "date",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          },
+          {
+            "name": "time",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          },
+          {
+            "name": "number",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          },
+          {
+            "name": "Annulla",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          },
+          {
+            "name": "Conferma e prepara WhatsApp",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          }
+        ]
+      },
+      "forced": {
+        "columns": "335px",
+        "alignItems": "end",
+        "inputTop": [
+          397.219,
+          470.563,
+          543.906
+        ],
+        "inputBottom": [
+          443.219,
+          516.563,
+          589.906
+        ],
+        "labelText": [
+          "Giorno richiesto con una etichetta volutamente molto lunga",
+          "Ora",
+          "Durata (min)"
+        ],
+        "labelLines": [
+          2,
+          1,
+          1
+        ],
+        "overflow": 0,
+        "controls": [
+          {
+            "name": "date",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          },
+          {
+            "name": "time",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          },
+          {
+            "name": "number",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          },
+          {
+            "name": "Annulla",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          },
+          {
+            "name": "Conferma e prepara WhatsApp",
+            "width": 335,
+            "height": 46,
+            "truncated": false
+          }
+        ]
+      },
+      "alternatives": {
+        "rows": [
+          {
+            "columns": "335px",
+            "inputTop": [
+              342.969,
+              416.313
+            ]
+          },
+          {
+            "columns": "335px",
+            "inputTop": [
+              509.656,
+              583
+            ]
+          }
+        ],
+        "overflow": 0
+      }
+    }
+  },
+  "alternatives": {
+    "after1365": {
+      "rows": [
+        {
+          "columns": "204px 204px",
+          "inputTop": [
+            400.516,
+            400.516
+          ]
+        },
+        {
+          "columns": "204px 204px",
+          "inputTop": [
+            485.859,
+            485.859
+          ]
+        }
+      ],
+      "overflow": 0
+    },
+    "after375": {
+      "rows": [
+        {
+          "columns": "335px",
+          "inputTop": [
+            342.969,
+            416.313
+          ]
+        },
+        {
+          "columns": "335px",
+          "inputTop": [
+            509.656,
+            583
+          ]
+        }
+      ],
+      "overflow": 0
+    }
+  },
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 3525
+}
