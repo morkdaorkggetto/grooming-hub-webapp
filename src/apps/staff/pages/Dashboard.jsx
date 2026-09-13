@@ -18,19 +18,33 @@ import {
   StatStrip,
 } from '../components/StaffKit';
 import {
+  APPOINTMENT_REQUEST_STAFF_ACTION,
   getActivePromotionCount,
   getAllPets,
   getPendingAppointmentRequests,
+  summarizePendingAppointmentRequests,
 } from '../lib/database';
 import { getFidelityTierSnapshot } from '../lib/fidelity';
 
 const formatRequestTiming = (request) => {
+  if (request.staff_action === APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING) {
+    const chosenDate = new Date(`${request.chosen_date}T12:00:00`).toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+    });
+    return `${chosenDate} alle ${String(request.chosen_time || '').slice(0, 5)} · da prenotare`;
+  }
+
+  if (request.customer_response === 'declined') return 'proposte rifiutate · da rispondere';
+  if (request.staff_action === APPOINTMENT_REQUEST_STAFF_ACTION.WAITING_CUSTOMER) {
+    return 'in attesa della persona';
+  }
   if (request.desired_date) {
     const desiredDate = new Date(`${request.desired_date}T12:00:00`).toLocaleDateString('it-IT', {
       day: '2-digit',
       month: '2-digit',
     });
-    return `${desiredDate} · data desiderata`;
+    return `${desiredDate} · da rispondere`;
   }
 
   return new Date(request.scheduled_at).toLocaleString('it-IT', {
@@ -38,7 +52,17 @@ const formatRequestTiming = (request) => {
     month: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
-  });
+  }) + ' · da rispondere';
+};
+
+const getRequestActionTitle = ({ counts }) => {
+  if (counts.needsResponse && counts.needsBooking) {
+    return `${counts.needsBooking} da prenotare · ${counts.needsResponse} a cui rispondere`;
+  }
+  if (counts.needsBooking === 1) return '1 richiesta da prenotare';
+  if (counts.needsBooking > 1) return `${counts.needsBooking} richieste da prenotare`;
+  if (counts.needsResponse === 1) return '1 richiesta a cui rispondere';
+  return `${counts.needsResponse} richieste a cui rispondere`;
 };
 
 const formatLastVisit = (dateString) => {
@@ -130,6 +154,16 @@ export default function Dashboard() {
   const fidelityClients = clients.filter((client) =>
     Boolean(getFidelityTierSnapshot(client, tenant?.settings).currentTier)
   ).length;
+  const requestSummary = useMemo(
+    () => summarizePendingAppointmentRequests(pendingRequests),
+    [pendingRequests]
+  );
+  const waitingMetric = requestSummary.counts.waitingCustomer === 1
+    ? '1 in attesa della persona'
+    : `${requestSummary.counts.waitingCustomer} in attesa di risposta`;
+  const requestMetric = requestSummary.counts.waitingCustomer
+    ? `${requestSummary.counts.actionable} da gestire · ${waitingMetric}`
+    : `${requestSummary.counts.actionable} da gestire`;
 
   const statItems = [
     {
@@ -191,7 +225,7 @@ export default function Dashboard() {
       eyebrow: 'Area cliente',
       title: 'Richieste clienti',
       description: 'Appuntamenti richiesti dal portale e prossimi flussi cliente',
-      metric: `${pendingRequests.length} da gestire`,
+      metric: requestMetric,
       icon: 'paw',
       accent: 'var(--color-warning-text)',
       onClick: () => navigate('/requests'),
@@ -274,15 +308,11 @@ export default function Dashboard() {
           />
         )}
 
-        {pendingRequests.length > 0 && (
+        {requestSummary.counts.actionable > 0 && (
           <Panel
             className="gh-dashboard-pending"
             eyebrow="Richieste appuntamento"
-            title={
-              pendingRequests.length === 1
-                ? '1 richiesta cliente da confermare'
-                : `${pendingRequests.length} richieste cliente da confermare`
-            }
+            title={getRequestActionTitle(requestSummary)}
             right={
               <div className="gh-dashboard-pending__actions">
                 <Button staff variant="secondary" onClick={() => navigate('/requests')}>
@@ -295,9 +325,9 @@ export default function Dashboard() {
             }
           >
             <div className="gh-dashboard-pending__items">
-              {pendingRequests.slice(0, 3).map((request) => (
+              {requestSummary.actionable.slice(0, 3).map((request) => (
                 <span className="gh-dashboard-pending__item gh-num" key={request.id}>
-                  {request.client?.name || 'Cliente'} · {formatRequestTiming(request)}
+                  {request.client?.name || 'Pet'} · {formatRequestTiming(request)}
                 </span>
               ))}
             </div>

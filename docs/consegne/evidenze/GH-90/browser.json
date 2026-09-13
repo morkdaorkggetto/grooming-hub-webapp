@@ -1,0 +1,710 @@
+{
+  "environment": "Real app and SDK, memory HTTP only, Chromium Europe/Rome",
+  "states": {
+    "newRequest": "needs_response",
+    "waiting": "waiting_customer",
+    "chosen": "needs_booking",
+    "declined": "needs_response",
+    "secondRound": "waiting_customer",
+    "legacy": "needs_response"
+  },
+  "dashboard": {
+    "new": {
+      "metric": "1 da gestire",
+      "badge": 1,
+      "panel": true,
+      "title": "1 richiesta a cui rispondere",
+      "detail": "Rumba · 15/09 · da rispondere",
+      "panelVisible": true
+    },
+    "waiting": {
+      "metric": "0 da gestire · 1 in attesa della persona",
+      "badge": 0,
+      "panel": false,
+      "panelVisible": false
+    },
+    "chosen": {
+      "metric": "1 da gestire",
+      "badge": 1,
+      "panel": true,
+      "title": "1 richiesta da prenotare",
+      "detail": "Rumba · 17/09 alle 17:30 · da prenotare",
+      "panelVisible": true
+    },
+    "declined": {
+      "metric": "1 da gestire",
+      "badge": 1,
+      "panel": true,
+      "title": "1 richiesta a cui rispondere",
+      "detail": "Rumba · proposte rifiutate · da rispondere",
+      "panelVisible": true
+    }
+  },
+  "alerts": {
+    "initialLoadTones": 0,
+    "afterStaffProposal": {
+      "count": 0,
+      "toneStarts": 0
+    },
+    "afterCustomerChoice": {
+      "count": 1,
+      "toneStarts": 2
+    },
+    "mechanism": "same two-oscillator sound; only actionable key set changed"
+  },
+  "requests": {
+    "allThree": {
+      "screen": 3,
+      "sourceRows": 3,
+      "badge": 2,
+      "quickCount": 2,
+      "labels": [
+        "Da rispondere",
+        "In attesa della persona",
+        "Da prenotare"
+      ]
+    },
+    "legacy": {
+      "state": "needs_response",
+      "screenCount": 1
+    },
+    "secondRound": {
+      "state": "waiting_customer",
+      "badge": 0
+    }
+  },
+  "layouts": [
+    {
+      "name": "dashboard-new-375",
+      "overflow": 0,
+      "hero": {
+        "copy": {
+          "left": 13,
+          "right": 260,
+          "width": 247
+        },
+        "right": {
+          "left": 270,
+          "right": 362,
+          "width": 92
+        },
+        "overlap": 0
+      },
+      "controls": [
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Esci",
+          "width": 46,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci richieste",
+          "width": 154,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Vedi calendario",
+          "width": 154,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci promozioni",
+          "width": 144.171875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 270,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Tutti1",
+          "width": 67.15625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Affidabili0",
+          "width": 93.515625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Fidelity0",
+          "width": 83.484375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Blacklist0",
+          "width": 90.53125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Nuovo Cliente",
+          "width": 130.09375,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "PianificazioneCalendarioVista completa della settimana e gestione conflittiSettimana completa",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Team operativoOperatività oggiPer gli operatori: appuntamenti del giorno e completamenti rapidiFocus",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Come è andataCome è andataCani passati e incassato, settimana per settimanaUltimi 7 giorni",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "RubricaContattiRichieste WhatsApp, lead da QR pubblico e contatti da seguireNuove richieste",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Area clienteRichieste clientiAppuntamenti richiesti dal portale e prossimi flussi cliente1 da gestir",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ComunicazionePromozioniIniziative pubblicate nell'area cliente del salone0 visibili",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ArchivioBarboncino · Ada ProvaAda Prova+3933300000900 visite—",
+          "width": 347,
+          "height": 61.1875,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "dashboard-waiting-375",
+      "overflow": 0,
+      "hero": {
+        "copy": {
+          "left": 13,
+          "right": 270.65625,
+          "width": 257.65625
+        },
+        "right": {
+          "left": 316,
+          "right": 362,
+          "width": 46
+        },
+        "overlap": 0
+      },
+      "controls": [
+        {
+          "text": "Esci",
+          "width": 46,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci promozioni",
+          "width": 144.171875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 270,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Tutti1",
+          "width": 67.15625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Affidabili0",
+          "width": 93.515625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Fidelity0",
+          "width": 83.484375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Blacklist0",
+          "width": 90.53125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Nuovo Cliente",
+          "width": 130.09375,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "PianificazioneCalendarioVista completa della settimana e gestione conflittiSettimana completa",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Team operativoOperatività oggiPer gli operatori: appuntamenti del giorno e completamenti rapidiFocus",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Come è andataCome è andataCani passati e incassato, settimana per settimanaUltimi 7 giorni",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "RubricaContattiRichieste WhatsApp, lead da QR pubblico e contatti da seguireNuove richieste",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Area clienteRichieste clientiAppuntamenti richiesti dal portale e prossimi flussi cliente0 da gestir",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ComunicazionePromozioniIniziative pubblicate nell'area cliente del salone0 visibili",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ArchivioBarboncino · Ada ProvaAda Prova+3933300000900 visite—",
+          "width": 347,
+          "height": 61.1875,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "dashboard-chosen-375",
+      "overflow": 0,
+      "hero": {
+        "copy": {
+          "left": 13,
+          "right": 260,
+          "width": 247
+        },
+        "right": {
+          "left": 270,
+          "right": 362,
+          "width": 92
+        },
+        "overlap": 0
+      },
+      "controls": [
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Esci",
+          "width": 46,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci richieste",
+          "width": 154,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Vedi calendario",
+          "width": 154,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci promozioni",
+          "width": 144.171875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 270,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Tutti1",
+          "width": 67.15625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Affidabili0",
+          "width": 93.515625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Fidelity0",
+          "width": 83.484375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Blacklist0",
+          "width": 90.53125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Nuovo Cliente",
+          "width": 130.09375,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "PianificazioneCalendarioVista completa della settimana e gestione conflittiSettimana completa",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Team operativoOperatività oggiPer gli operatori: appuntamenti del giorno e completamenti rapidiFocus",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Come è andataCome è andataCani passati e incassato, settimana per settimanaUltimi 7 giorni",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "RubricaContattiRichieste WhatsApp, lead da QR pubblico e contatti da seguireNuove richieste",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Area clienteRichieste clientiAppuntamenti richiesti dal portale e prossimi flussi cliente1 da gestir",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ComunicazionePromozioniIniziative pubblicate nell'area cliente del salone0 visibili",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ArchivioBarboncino · Ada ProvaAda Prova+3933300000900 visite—",
+          "width": 347,
+          "height": 61.1875,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "dashboard-declined-375",
+      "overflow": 0,
+      "hero": {
+        "copy": {
+          "left": 13,
+          "right": 260,
+          "width": 247
+        },
+        "right": {
+          "left": 270,
+          "right": 362,
+          "width": 92
+        },
+        "overlap": 0
+      },
+      "controls": [
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Esci",
+          "width": 46,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci richieste",
+          "width": 154,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Vedi calendario",
+          "width": 154,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci promozioni",
+          "width": 144.171875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 270,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Tutti1",
+          "width": 67.15625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Affidabili0",
+          "width": 93.515625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Fidelity0",
+          "width": 83.484375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Blacklist0",
+          "width": 90.53125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Nuovo Cliente",
+          "width": 130.09375,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "PianificazioneCalendarioVista completa della settimana e gestione conflittiSettimana completa",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Team operativoOperatività oggiPer gli operatori: appuntamenti del giorno e completamenti rapidiFocus",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Come è andataCome è andataCani passati e incassato, settimana per settimanaUltimi 7 giorni",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "RubricaContattiRichieste WhatsApp, lead da QR pubblico e contatti da seguireNuove richieste",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Area clienteRichieste clientiAppuntamenti richiesti dal portale e prossimi flussi cliente1 da gestir",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ComunicazionePromozioniIniziative pubblicate nell'area cliente del salone0 visibili",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ArchivioBarboncino · Ada ProvaAda Prova+3933300000900 visite—",
+          "width": 347,
+          "height": 61.1875,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "requests-three-states-375",
+      "overflow": 0,
+      "hero": {
+        "copy": {
+          "left": 13,
+          "right": 256.703125,
+          "width": 243.703125
+        },
+        "right": {
+          "left": 266.703125,
+          "right": 362,
+          "width": 95.296875
+        },
+        "overlap": 0
+      },
+      "controls": [
+        {
+          "text": "Grooming Hub",
+          "width": 102.015625,
+          "height": 12.34375,
+          "truncated": false
+        },
+        {
+          "text": "2",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Dashboard",
+          "width": 95.296875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Aggiorna",
+          "width": 78,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 4190
+}

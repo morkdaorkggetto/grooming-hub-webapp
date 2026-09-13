@@ -1,6 +1,7 @@
 import { supabase, getCurrentUser } from '../../../shared/supabase/client';
 import { PILOT_TENANT_SLUG } from '../../../shared/tenant/config';
 import { APPOINTMENT_CAPACITY_MESSAGE } from '../../../shared/tenant/workstationCapacity';
+import { currentAlternativeResponse } from '../../customer/lib/appointmentResponses';
 import { DEMO_MODE, DEMO_WRITE_BLOCK_MESSAGE } from './demoMode';
 import { getFileExtensionFromName, getSafeImageMimeType } from './imageFiles';
 
@@ -26,7 +27,7 @@ const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
 const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, service_id, date, treatments, issues, cost, discount_percent, photo_url, created_at, updated_at, service:services(id, name))`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, service:services(id, name, duration_minutes), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
-const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, staff_responded_at, proposed_alternatives, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
+const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, staff_responded_at, proposed_alternatives, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_PET_SELECT = `id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone)`;
 const PROMOTION_SELECT = 'id, tenant_id, title, body, image_url, valid_from, valid_to, cta_label, cta_url, display_order, is_active, created_at';
@@ -51,6 +52,56 @@ const getPublicAppOrigin = () =>
   PUBLIC_APP_URL ? PUBLIC_APP_URL.replace(/\/+$/, '') : window.location.origin;
 
 const relation = (value) => (Array.isArray(value) ? value[0] || null : value || null);
+
+export const APPOINTMENT_REQUEST_STAFF_ACTION = Object.freeze({
+  NEEDS_RESPONSE: 'needs_response',
+  WAITING_CUSTOMER: 'waiting_customer',
+  NEEDS_BOOKING: 'needs_booking',
+});
+
+export const getAppointmentRequestStaffAction = (request) => {
+  if (request?.request_kind === 'legacy') return APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_RESPONSE;
+  const response = currentAlternativeResponse(request);
+  if (response === 'accepted') return APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING;
+  if (response === 'declined') return APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_RESPONSE;
+  if (request?.proposed_alternatives?.length) return APPOINTMENT_REQUEST_STAFF_ACTION.WAITING_CUSTOMER;
+  return APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_RESPONSE;
+};
+
+const withAppointmentRequestStaffAction = (request) => ({
+  ...request,
+  staff_action: getAppointmentRequestStaffAction(request),
+});
+
+export const summarizePendingAppointmentRequests = (requests = []) => {
+  const needsResponse = [];
+  const waitingCustomer = [];
+  const needsBooking = [];
+  requests.forEach((request) => {
+    if (request.staff_action === APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING) {
+      needsBooking.push(request);
+    } else if (request.staff_action === APPOINTMENT_REQUEST_STAFF_ACTION.WAITING_CUSTOMER) {
+      waitingCustomer.push(request);
+    } else {
+      needsResponse.push(request);
+    }
+  });
+  const actionable = [...needsBooking, ...needsResponse];
+  return {
+    needsResponse,
+    waitingCustomer,
+    needsBooking,
+    actionable,
+    counts: {
+      needsResponse: needsResponse.length,
+      waitingCustomer: waitingCustomer.length,
+      needsBooking: needsBooking.length,
+      actionable: actionable.length,
+      total: requests.length,
+    },
+  };
+};
+
 const customerName = (customer) =>
   [customer?.first_name, customer?.last_name].filter(Boolean).join(' ').trim();
 
@@ -144,7 +195,7 @@ const mapAppointmentRequest = (row) => {
   const pet = mapPet(relation(row.pet));
   const service = relation(row.service);
   const appointment = relation(row.appointment);
-  return {
+  return withAppointmentRequestStaffAction({
     ...row,
     request_kind: 'structured',
     approval_status: row.status,
@@ -156,8 +207,13 @@ const mapAppointmentRequest = (row) => {
     pet,
     client: pet,
     notes: row.coat_condition_notes || null,
-  };
+  });
 };
+
+const mapLegacyAppointmentRequest = (row) => withAppointmentRequestStaffAction({
+  ...mapAppointment(row),
+  request_kind: 'legacy',
+});
 
 const mapCalendarVisit = (row) => {
   if (!row) return null;
@@ -1199,13 +1255,13 @@ export const getCalendarWeekData = async ({ from, to, includeSearchIndex = false
       .map(mapAppointment),
     requests: [
       ...(structuredResult.data || []).map(mapAppointmentRequest),
-      ...(legacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
+      ...(legacyResult.data || []).map(mapLegacyAppointmentRequest),
     ].sort((left, right) => String(right.created_at || '').localeCompare(String(left.created_at || ''))),
     visits: (visitsResult.data || []).map(mapCalendarVisit),
     openBookings: [
       ...(openAppointmentsResult.data || []).map(mapAppointment),
       ...(openStructuredResult.data || []).map(mapAppointmentRequest),
-      ...(openLegacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
+      ...(openLegacyResult.data || []).map(mapLegacyAppointmentRequest),
     ],
     searchAppointments: searchResult ? (searchResult.data || []).map(mapAppointment) : undefined,
     searchError: searchResult?.error
@@ -1234,7 +1290,7 @@ export const getPendingAppointmentRequests = async () => {
   }
   return [
     ...(structuredResult.data || []).map(mapAppointmentRequest),
-    ...(legacyResult.data || []).map((row) => ({ ...mapAppointment(row), request_kind: 'legacy' })),
+    ...(legacyResult.data || []).map(mapLegacyAppointmentRequest),
   ].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
 };
 

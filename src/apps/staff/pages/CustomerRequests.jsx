@@ -19,9 +19,11 @@ import {
   isAppointmentCapacityAvailable,
 } from '../../../shared/tenant/workstationCapacity';
 import {
+  APPOINTMENT_REQUEST_STAFF_ACTION,
   getPendingAppointmentRequests,
   proposeAppointmentRequestAlternatives,
   resolveAppointmentRequest,
+  summarizePendingAppointmentRequests,
   updateAppointmentApproval,
 } from '../lib/database';
 import {
@@ -182,18 +184,21 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
     .join(', ');
   const isUpdating = updatingId === request.id;
   const response = currentAlternativeResponse(request);
+  const actionLabel = {
+    [APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_RESPONSE]: 'Da rispondere',
+    [APPOINTMENT_REQUEST_STAFF_ACTION.WAITING_CUSTOMER]: 'In attesa della persona',
+    [APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING]: 'Da prenotare',
+  }[request.staff_action];
 
   return (
     <Panel className="gh-request-card">
       <div className="gh-request-row">
         <div className="gh-request-copy">
           <div className="gh-request-tags">
-            <StateTag tone={request.staff_responded_at ? 'success' : 'warning'}>
-              {request.staff_responded_at ? 'Risposto' : 'Da leggere'}
+            <StateTag tone={request.staff_action === APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING ? 'success' : 'warning'}>
+              {actionLabel}
             </StateTag>
-            {response ? <StateTag tone={response === 'accepted' ? 'success' : 'warning'}>
-              {response === 'accepted' ? 'Fascia scelta' : 'Nessuna fascia va bene'}
-            </StateTag> : request.proposed_alternatives?.length ? <StateTag tone="warning">In attesa della scelta</StateTag> : null}
+            {response === 'declined' ? <StateTag tone="warning">Proposte rifiutate</StateTag> : null}
             {request.client?.is_blacklisted ? <StateTag tone="danger">Blacklist</StateTag> : null}
             <span className="gh-meta gh-num">
               {request.staff_responded_at
@@ -454,18 +459,7 @@ export default function CustomerRequests() {
 
     try {
       const data = await getPendingAppointmentRequests();
-      const tenantIds = [...new Set(data.filter((item) => item.request_kind === 'structured').map((item) => item.tenant_id))];
-      // Enrich only this page; the shared pending list and GH-81 count stay unchanged.
-      if (tenantIds.length) {
-        const { data: responses, error: responseError } = await supabase.from('appointment_requests')
-          .select('id, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at')
-          .in('tenant_id', tenantIds).eq('status', 'pending');
-        if (responseError) throw new Error('Non riesco a leggere le risposte alle alternative. Aggiorna prima di confermare.');
-        const byId = new Map((responses || []).map((row) => [row.id, row]));
-        setRequests(data.map((request) => request.request_kind === 'structured' ? { ...request, ...byId.get(request.id) } : request));
-      } else {
-        setRequests(data);
-      }
+      setRequests(data);
     } catch (err) {
       setRequests([]);
       setError(err.message || 'Non riesco a caricare le richieste.');
@@ -479,20 +473,12 @@ export default function CustomerRequests() {
   }, []);
 
   const stats = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const nextSevenDays = new Date(today);
-    nextSevenDays.setDate(today.getDate() + 7);
+    const summary = summarizePendingAppointmentRequests(requests);
 
     return {
-      total: requests.length,
-      nextWeek: requests.filter((request) => {
-        const requestDate = request.desired_date
-          ? new Date(`${request.desired_date}T12:00:00`)
-          : new Date(request.scheduled_at);
-        return requestDate >= today && requestDate <= nextSevenDays;
-      }).length,
-      withPhone: requests.filter((request) => Boolean(request.client?.phone)).length,
+      actionable: summary.counts.actionable,
+      needsBooking: summary.counts.needsBooking,
+      waitingCustomer: summary.counts.waitingCustomer,
     };
   }, [requests]);
 
@@ -601,20 +587,20 @@ export default function CustomerRequests() {
         }} />
 
         <StatStrip items={[
-          { label: 'Da gestire', value: stats.total },
-          { label: 'Entro 7 giorni', value: stats.nextWeek },
-          { label: 'Con WhatsApp', value: stats.withPhone },
+          { label: 'Da gestire', value: stats.actionable },
+          { label: 'Da prenotare', value: stats.needsBooking },
+          { label: 'In attesa persona', value: stats.waitingCustomer },
         ]} />
 
         <Panel
           bridge
           eyebrow="Richieste in arrivo"
-          title="Richieste da confermare"
+          title="Tutte le richieste aperte"
           right={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>}
         >
           <div className="gh-request-pipeline">
               <p className="gh-body">
-                Qui arrivano le richieste di appuntamento: puoi confermarle, proporre alternative o rifiutarle.
+                Ogni richiesta resta visibile finché il salone la chiude.
               </p>
           </div>
         </Panel>

@@ -7,7 +7,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { getPendingAppointmentRequests } from '../lib/database';
+import {
+  getPendingAppointmentRequests,
+  summarizePendingAppointmentRequests,
+} from '../lib/database';
 
 export const STAFF_REQUEST_POLL_INTERVAL_MS = 60_000;
 export const STAFF_REQUEST_COUNT_LIMIT = 99;
@@ -124,10 +127,11 @@ export function StaffRequestAlertsProvider({
         const requests = await getPendingAppointmentRequests();
         if (disposed || document.visibilityState === 'hidden') return;
 
-        const nextKeys = new Set((requests || []).map(requestKey));
+        const { actionable, counts } = summarizePendingAppointmentRequests(requests);
+        const nextKeys = new Set(actionable.map(requestKey));
         const hasNewRequest = initializedRef.current
           && [...nextKeys].some((key) => !knownRequestKeysRef.current.has(key));
-        const nextCount = requests?.length || 0;
+        const nextCount = counts.actionable;
 
         knownRequestKeysRef.current = nextKeys;
         initializedRef.current = true;
