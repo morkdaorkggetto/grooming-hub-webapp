@@ -1,5 +1,11 @@
 # Incarico GH-85 — Quante postazioni restano
 
+> **⛔ RITIRATO IL 13/09/2026 — NON ESEGUIBILE.**
+> Superato da `GH-89-le-proposte-hanno-un-ora.md`, che contiene questo lavoro.
+> Davide ha chiesto che le alternative portino l'ora: cambia lo stesso modale
+> che questo mandato modificava, e farli in due giri significherebbe rifarlo
+> due volte. Il testo resta come traccia della misura del 12/9.
+
 **Progetto di appartenenza: Grooming Hub SaaS** — root `/Users/luigimaisto/Desktop/grooming-hub-web/`, worktree applicativo `webapp/`.
 **Per:** Codex (una sola sessione) · **Da:** Luigi · **Data:** 12 settembre 2026
 **Forma breve (regola 4).** Superficie sola: **nessuna migrazione, nessuna colonna, nessuna policy, nessun campo nuovo.**
