@@ -24,6 +24,7 @@ import Icon from '../../../shared/ui/Icon';
 import Skeleton from '../../../shared/ui/Skeleton';
 import StatusBadge from '../../../shared/ui/StatusBadge';
 import WarmNotice from '../../../shared/ui/WarmNotice';
+import BookingTimePreferenceChips from '../components/BookingTimePreferenceChips';
 import {
   buildWhatsAppUrl,
   getCustomerAppointmentRequestWhatsAppUrl,
@@ -33,7 +34,7 @@ import { usePets } from '../hooks/usePets';
 import { useAppointmentRequests } from '../hooks/useAppointmentRequests';
 import { useOpenPetAppointments } from '../hooks/useOpenPetAppointments';
 import { getBookingServices, submitAppointmentRequest } from '../lib/booking';
-import { getBookingFullPeriod } from '../lib/bookingDates';
+import { createBookingDateOptions, getBookingFullPeriod } from '../lib/bookingDates';
 import './Book.css';
 
 const UNSAVED_MESSAGE = 'Hai una richiesta non inviata. Vuoi davvero lasciare la pagina?';
@@ -49,20 +50,6 @@ const COAT_CONDITIONS = [
 const SERVICE_ICONS = ['drop', 'scissors', 'sparkle', 'bath'];
 const DATE_LABEL = new Intl.DateTimeFormat('it-IT', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-});
-
-const toLocalDateValue = (date) => {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const createDateOptions = () => Array.from({ length: 12 }, (_, index) => {
-  const date = new Date();
-  date.setHours(12, 0, 0, 0);
-  date.setDate(date.getDate() + index + 1);
-  return { date, value: toLocalDateValue(date) };
 });
 
 const formatDesiredDate = (value) => value
@@ -217,7 +204,7 @@ export default function Book() {
     () => getBookingSchedule(tenant?.settings),
     [tenant?.settings]
   );
-  const dateOptions = useMemo(() => createDateOptions().map((item) => {
+  const dateOptions = useMemo(() => createBookingDateOptions().map((item) => {
     const closure = getDateClosure(item.date, bookingSchedule);
     return {
       ...item,
@@ -428,18 +415,11 @@ export default function Book() {
                 <StepHead number="3" title="Quando ti andrebbe bene?" />
                 <DesiredDateStrip dates={dateOptions} value={desiredDate} onChange={handleDateChange} />
                 <p className="gh-book-date-hint">È la data che <em>preferiresti</em> — la confermiamo noi insieme all’orario.</p>
-                <div className="gh-book-chip-row" aria-label="Preferenza oraria facoltativa">
-                  {BOOKING_TIME_PREFERENCES.map((item) => (
-                    <SelectChip
-                      key={item.value}
-                      selected={timePreference === item.value}
-                      disabled={isTimePreferenceClosed(item.value, selectedDateClosure)}
-                      onClick={() => setTimePreference((current) => current === item.value ? '' : item.value)}
-                    >
-                      {item.label}
-                    </SelectChip>
-                  ))}
-                </div>
+                <BookingTimePreferenceChips
+                  value={timePreference}
+                  closure={selectedDateClosure}
+                  onChange={setTimePreference}
+                />
                 {selectedDateClosure.label && !selectedDateClosure.isClosed ? (
                   <p className="gh-book-availability-note" role="status">
                     {selectedDateClosure.label}. Per quel giorno scegli un’altra preferenza.

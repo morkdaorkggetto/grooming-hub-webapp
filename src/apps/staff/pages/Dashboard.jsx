@@ -25,6 +25,28 @@ import {
   summarizePendingAppointmentRequests,
 } from '../lib/database';
 import { getFidelityTierSnapshot } from '../lib/fidelity';
+import { getWaitingCustomerAge } from '../../customer/lib/appointmentRequestFlow';
+
+const formatProposalMoment = (value) => {
+  const date = new Date(value);
+  const day = date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+  const time = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  return `${day} alle ${time}`;
+};
+
+const formatProposedSlot = (slot) => `${new Date(`${slot.date}T12:00:00`).toLocaleDateString('it-IT', {
+  day: '2-digit',
+  month: '2-digit',
+})}${slot.time ? ` alle ${String(slot.time).slice(0, 5)}` : ''}`;
+
+const formatWaitingRequest = (request, now) => {
+  const age = getWaitingCustomerAge(request, now);
+  const pet = request.client?.name || 'Pet';
+  const slots = (request.proposed_alternatives || []).map(formatProposedSlot).join(' · ');
+  return age.needsFollowUp
+    ? `${pet} · nessuna risposta ${age.label}: conviene telefonare · ${slots}`
+    : `${pet} · proposto il ${formatProposalMoment(request.staff_responded_at)} · ${age.label} · ${slots}`;
+};
 
 const formatRequestTiming = (request) => {
   if (request.staff_action === APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING) {
@@ -164,6 +186,10 @@ export default function Dashboard() {
   const requestMetric = requestSummary.counts.waitingCustomer
     ? `${requestSummary.counts.actionable} da gestire · ${waitingMetric}`
     : `${requestSummary.counts.actionable} da gestire`;
+  const waitingNow = Date.now();
+  const waitingFollowUps = requestSummary.waitingCustomer.filter(
+    (request) => getWaitingCustomerAge(request, waitingNow).needsFollowUp
+  ).length;
 
   const statItems = [
     {
@@ -331,6 +357,20 @@ export default function Dashboard() {
                 </span>
               ))}
             </div>
+          </Panel>
+        )}
+
+        {requestSummary.counts.waitingCustomer > 0 && (
+          <Panel
+            eyebrow="Risposte attese"
+            title={waitingFollowUps
+              ? `${waitingFollowUps} ${waitingFollowUps === 1 ? 'risposta tarda' : 'risposte tardano'} ad arrivare`
+              : `${requestSummary.counts.waitingCustomer} ${requestSummary.counts.waitingCustomer === 1 ? 'persona deve' : 'persone devono'} ancora rispondere`}
+            right={<Button staff variant="outline" onClick={() => navigate('/requests')}>Vedi richieste</Button>}
+          >
+            {requestSummary.waitingCustomer.slice(0, 3).map((request) => (
+              <p className="gh-body gh-num" key={request.id}>{formatWaitingRequest(request, waitingNow)}</p>
+            ))}
           </Panel>
         )}
 

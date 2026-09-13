@@ -1,0 +1,7 @@
+GH-91 - Suite RLS demo
+Project: qttpinkslhenxrsbhhhg
+Command: node scripts/rls-tests/run.mjs
+Result: 60 PASS, 0 FAIL, 0 SKIP
+Cleanup: 0 pet, 0 visits, 0 customers, 0 appointment requests, 0 pet notes,
+0 customer notes, 0 promotions, 0 GH-52 appointments
+Elapsed: real 26.08 s; user 1.09 s; sys 0.18 s

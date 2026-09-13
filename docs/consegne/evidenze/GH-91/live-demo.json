@@ -1,0 +1,57 @@
+{
+  "projectRef": "qttpinkslhenxrsbhhhg",
+  "marker": "[DEMO GH-91]",
+  "fixtures": {
+    "baselineRequests": 0,
+    "created": 2,
+    "tenantId": "8ad7489b-15f9-44f5-8d50-cc89506c3ac9",
+    "openDates": [
+      "2026-09-15",
+      "2026-09-16",
+      "2026-09-17",
+      "2026-09-18",
+      "2026-09-19",
+      "2026-09-22",
+      "2026-09-23"
+    ],
+    "closedDate": "2026-09-14"
+  },
+  "checks": {
+    "declineWithDate": {
+      "before": "2026-09-15",
+      "desired_date": "2026-09-22",
+      "time_preference": "morning",
+      "customer_response": "declined",
+      "status": "pending"
+    },
+    "declineWithoutDate": {
+      "before": "2026-09-15",
+      "desired_date": "2026-09-15",
+      "time_preference": "morning",
+      "customer_response": "declined",
+      "status": "pending"
+    },
+    "alternativeRounds": {
+      "afterFirstProposal": 1,
+      "afterSecondProposal": 2
+    },
+    "closedDate": {
+      "attempted": "2026-09-14",
+      "code": "22023",
+      "message": "New desired date falls in a declared closure",
+      "before": {
+        "desired_date": "2026-09-15",
+        "time_preference": "morning"
+      },
+      "after": {
+        "desired_date": "2026-09-15",
+        "time_preference": "morning"
+      }
+    }
+  },
+  "cleanup": {
+    "markerRows": 0,
+    "finalRequests": 0
+  },
+  "elapsedMs": 5326
+}

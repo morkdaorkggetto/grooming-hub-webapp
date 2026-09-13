@@ -1,0 +1,457 @@
+{
+  "environment": "Real app and SDK, memory HTTP only, Chromium 375x812 Europe/Rome",
+  "customer": {
+    "declineWithDate": {
+      "payload": {
+        "p_request_id": "91919191-3333-4333-8333-919191919191",
+        "p_response": "declined",
+        "p_date": null,
+        "p_time": null,
+        "p_time_preference": null,
+        "p_new_desired_date": "2026-09-18",
+        "p_new_time_preference": "morning"
+      },
+      "desiredDate": "2026-09-18",
+      "timePreference": "morning",
+      "status": "pending"
+    },
+    "declineWithoutDate": {
+      "before": "2026-09-14",
+      "after": "2026-09-14",
+      "payload": {
+        "p_request_id": "91919191-3333-4333-8333-919191919191",
+        "p_response": "declined",
+        "p_date": null,
+        "p_time": null,
+        "p_time_preference": null,
+        "p_new_desired_date": null,
+        "p_new_time_preference": null
+      }
+    },
+    "closedDate": {
+      "databaseMessage": "New desired date falls in a declared closure",
+      "screenText": "Quel giorno il salone è chiuso. Scegli un’altra data."
+    },
+    "roundTwo": {
+      "declineButtons": 0,
+      "enabledChoices": 3,
+      "contactText": "Meglio sentirci",
+      "contactHref": "https://wa.me/393330000091?text=Ciao%21+Per+Rumba+non+riusciamo+a+trovare+una+fascia+adatta.+Possiamo+sentirci%3F"
+    },
+    "bookingReuse": {
+      "pet": "Rumba",
+      "service": "Bagno",
+      "date": "2026-09-15",
+      "timePreference": "morning",
+      "selected": true
+    }
+  },
+  "dashboard": {
+    "recent": {
+      "title": "1 persona deve ancora rispondere",
+      "row": "Rumba · proposto il 13/09 alle 05:42 · da 2 ore · 15/09 alle 11:00 · 16/09 alle 10:30 · 18/09 alle 09:00",
+      "badge": 0,
+      "toneStarts": 0
+    },
+    "followUp": {
+      "title": "1 risposta tarda ad arrivare",
+      "row": "Rumba · nessuna risposta da 2 giorni: conviene telefonare · 15/09 alle 11:00 · 16/09 alle 10:30 · 18/09 alle 09:00",
+      "badge": 0,
+      "toneStarts": 0
+    }
+  },
+  "requests": {
+    "newDate": {
+      "stateTag": "Proposte rifiutate",
+      "displayed": "venerdì 18 settembre",
+      "initial": "lunedì 14 settembre",
+      "initialAbsent": true
+    }
+  },
+  "limits": {
+    "maxDeclineRounds": 1,
+    "followUpHours": 48,
+    "round0": true,
+    "round1": true,
+    "round2": false,
+    "hour47": false,
+    "hour48": true
+  },
+  "layouts": [
+    {
+      "name": "customer-decline-date-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Rumba",
+          "width": 206.0625,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "RRumbaBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "lun14",
+          "width": 44.328125,
+          "height": 68.75,
+          "truncated": false
+        },
+        {
+          "text": "mar15",
+          "width": 44.328125,
+          "height": 68.75,
+          "truncated": false
+        },
+        {
+          "text": "mer16Chiuso",
+          "width": 44.328125,
+          "height": 68.75,
+          "truncated": false
+        },
+        {
+          "text": "gio17",
+          "width": 44.34375,
+          "height": 68.75,
+          "truncated": false
+        },
+        {
+          "text": "ven18",
+          "width": 44.328125,
+          "height": 68.75,
+          "truncated": false
+        },
+        {
+          "text": "sab19",
+          "width": 44.328125,
+          "height": 68.75,
+          "truncated": false
+        },
+        {
+          "text": "Mattina (9–13)",
+          "width": 118.171875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Pomeriggio (13–19)",
+          "width": 147.578125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Per me è uguale",
+          "width": 125.609375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Invia la nuova disponibilità",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta senza indicare una data",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Torna agli orari",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "customer-round-two-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Rumba",
+          "width": 206.0625,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "RRumbaBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "martedì 15 settembre alle 11:00",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "mercoledì 16 settembre alle 10:30",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "venerdì 18 settembre alle 09:00",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Meglio sentirci",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "dashboard-waiting-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Esci",
+          "width": 46,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Vedi richieste",
+          "width": 106.265625,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci promozioni",
+          "width": 144.171875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 270,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Tutti1",
+          "width": 67.15625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Affidabili0",
+          "width": 93.515625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Fidelity0",
+          "width": 83.484375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Blacklist0",
+          "width": 90.53125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Nuovo Cliente",
+          "width": 130.09375,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "PianificazioneCalendarioVista completa della settimana e gestione conflittiSettimana completa",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Team operativoOperatività oggiPer gli operatori: appuntamenti del giorno e completamenti rapidiFocus",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Come è andataCome è andataCani passati e incassato, settimana per settimanaUltimi 7 giorni",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "RubricaContattiRichieste WhatsApp, lead da QR pubblico e contatti da seguireNuove richieste",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Area clienteRichieste clientiAppuntamenti richiesti dal portale e prossimi flussi cliente0 da gestir",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ComunicazionePromozioniIniziative pubblicate nell'area cliente del salone0 visibili",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "RumbaBarboncino · Ada ProvaAda Prova+3933300000910 visite—",
+          "width": 347,
+          "height": 61.1875,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "dashboard-follow-up-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Esci",
+          "width": 46,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Vedi richieste",
+          "width": 106.265625,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Gestisci promozioni",
+          "width": 144.171875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 270,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Tutti1",
+          "width": 67.15625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Affidabili0",
+          "width": 93.515625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Fidelity0",
+          "width": 83.484375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Blacklist0",
+          "width": 90.53125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Nuovo Cliente",
+          "width": 130.09375,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "PianificazioneCalendarioVista completa della settimana e gestione conflittiSettimana completa",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Team operativoOperatività oggiPer gli operatori: appuntamenti del giorno e completamenti rapidiFocus",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Come è andataCome è andataCani passati e incassato, settimana per settimanaUltimi 7 giorni",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "RubricaContattiRichieste WhatsApp, lead da QR pubblico e contatti da seguireNuove richieste",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "Area clienteRichieste clientiAppuntamenti richiesti dal portale e prossimi flussi cliente0 da gestir",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "ComunicazionePromozioniIniziative pubblicate nell'area cliente del salone0 visibili",
+          "width": 349,
+          "height": 152,
+          "truncated": false
+        },
+        {
+          "text": "RumbaBarboncino · Ada ProvaAda Prova+3933300000910 visite—",
+          "width": 347,
+          "height": 61.1875,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 3455
+}
