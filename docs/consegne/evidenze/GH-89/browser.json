@@ -1,0 +1,419 @@
+{
+  "environment": "Real App and SDK, memory HTTP only, Chromium Europe/Rome",
+  "cases": [
+    {
+      "name": "Three timed alternatives, two same date; preference derived; reads cached",
+      "reads": [
+        "2026-10-12",
+        "2026-10-13"
+      ],
+      "calendarLoad": "3/3",
+      "modalLoad": "3/3 at 16:30; 0/3 at suggested 17:30",
+      "payload": [
+        {
+          "date": "2026-10-12",
+          "time": "17:30",
+          "time_preference": "afternoon"
+        },
+        {
+          "date": "2026-10-12",
+          "time": "18:00",
+          "time_preference": "afternoon"
+        },
+        {
+          "date": "2026-10-13",
+          "time": "10:00",
+          "time_preference": "morning"
+        }
+      ],
+      "whatsapp": "Ciao Ada Prova, purtroppo sabato 10 ottobre siamo pieni. Per Lacky avremmo lunedì 12 ottobre alle 17:30, lunedì 12 ottobre alle 18:00 oppure martedì 13 ottobre alle 10:00. Scegli nella tua area l'orario che preferisci: poi ti confermiamo l'appuntamento.",
+      "pass": true
+    },
+    {
+      "name": "Customer accepts exact time; request remains pending",
+      "payload": {
+        "p_request_id": "89898989-3333-4333-8333-898989898989",
+        "p_response": "accepted",
+        "p_date": "2026-10-12",
+        "p_time": "17:30",
+        "p_time_preference": "afternoon"
+      },
+      "status": "pending",
+      "pass": true
+    },
+    {
+      "name": "Legacy untimed proposal and decline remain supported",
+      "legacyTime": null,
+      "declinedStatus": "pending",
+      "pass": true
+    },
+    {
+      "name": "Unproposed slot returns non-technical customer message",
+      "text": "Questa alternativa non è più disponibile. Aggiorna le proposte e riprova.",
+      "pass": true
+    },
+    {
+      "name": "Approval starts from chosen date/time; capacity race stays in modal",
+      "date": "2026-10-13",
+      "time": "10:00",
+      "text": "Nel frattempo quell’orario si è riempito. Scegli un altro orario e riprova.",
+      "pass": true
+    },
+    {
+      "name": "Invalid time is blocked; inconsistent preference has no input and is derived",
+      "text": "Ogni alternativa deve avere una data e un’ora fra le fasce di apertura: 09:00–19:00.",
+      "derivedExample": {
+        "time": "17:30",
+        "time_preference": "afternoon"
+      },
+      "pass": true
+    }
+  ],
+  "layouts": [
+    {
+      "name": "staff-alternatives-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Annulla",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Registra e prepara WhatsApp",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Grooming Hub",
+          "width": 102.015625,
+          "height": 12.34375,
+          "truncated": false
+        },
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Dashboard",
+          "width": 95.296875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Aggiorna",
+          "width": 78,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "customer-timed-choice-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Lacky",
+          "width": 198.796875,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "LLackyBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Cambia risposta",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "staff-approval-race-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Annulla",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma e prepara WhatsApp",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Grooming Hub",
+          "width": 102.015625,
+          "height": 12.34375,
+          "truncated": false
+        },
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Dashboard",
+          "width": 95.296875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Aggiorna",
+          "width": 78,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "staff-invalid-time-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Aggiungi terza alternativa",
+          "width": 181.453125,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Annulla",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Registra e prepara WhatsApp",
+          "width": 335,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Grooming Hub",
+          "width": 102.015625,
+          "height": 12.34375,
+          "truncated": false
+        },
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Dashboard",
+          "width": 95.296875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Aggiorna",
+          "width": 78,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 4446
+}

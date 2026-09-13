@@ -9,7 +9,10 @@ import { alternativeResponseError, currentAlternativeResponse } from '../lib/app
 
 const dateFormat = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 const day = (date) => dateFormat.format(new Date(`${date}T12:00:00`));
-const slotLabel = (slot) => `${day(slot.date)}, ${getBookingTimePreferenceLabel(slot.time_preference)}`;
+const slotTime = (value) => String(value || '').slice(0, 5);
+const slotLabel = (slot) => slot.time
+  ? `${day(slot.date)} alle ${slotTime(slot.time)}`
+  : `${day(slot.date)}, ${getBookingTimePreferenceLabel(slot.time_preference)}`;
 const textStyle = { margin: '8px 0 0', fontSize: 14, lineHeight: 1.5, color: 'var(--color-text-secondary)' };
 const buttonStyle = { minHeight: 44, width: '100%', whiteSpace: 'normal', overflowWrap: 'anywhere' };
 
@@ -29,10 +32,11 @@ export default function PendingRequest({ request, onResponded }) {
     inFlight.current = true;
     setBusy(true); setError('');
     try {
-      const { data, error: rpcError } = await supabase.rpc('respond_appointment_request_alternatives', {
+      const { data, error: rpcError } = await supabase.rpc('respond_appointment_request_slot', {
         p_request_id: request.id,
         p_response: choice ? 'accepted' : 'declined',
         p_date: choice?.date || null,
+        p_time: choice?.time || null,
         p_time_preference: choice?.time_preference || null,
       });
       if (rpcError) throw rpcError;
@@ -60,16 +64,16 @@ export default function PendingRequest({ request, onResponded }) {
             <>
               <p role="status" style={textStyle}>
                 {response === 'accepted'
-                  ? `Hai scelto ${slotLabel({ date: current.chosen_date, time_preference: current.chosen_time_preference })}. Ora tocca al salone confermare l'ora.`
+                  ? `Hai scelto ${slotLabel({ date: current.chosen_date, time: current.chosen_time, time_preference: current.chosen_time_preference })}. Ora tocca al salone confermare l'appuntamento.`
                   : 'Hai risposto che nessuna di queste fasce ti va bene. Ora tocca al salone proporti un’alternativa.'}
               </p>
               <Button variant="ghost" style={buttonStyle} disabled={busy} onClick={() => setEditing(true)}>Cambia risposta</Button>
             </>
           ) : (
             <>
-              <p style={textStyle}>{editing ? 'Scegli una nuova risposta: sostituirà quella precedente.' : 'Quale di queste fasce ti va bene? Il salone confermerà l’ora.'}</p>
+              <p style={textStyle}>{editing ? 'Scegli una nuova risposta: sostituirà quella precedente.' : 'Quale di questi orari ti va bene? Il salone confermerà l’appuntamento.'}</p>
               {alternatives.map((slot) => (
-                <Button key={`${slot.date}:${slot.time_preference}`} variant="ghost" style={buttonStyle} disabled={busy || Boolean(error)} onClick={() => respond(slot)}>{slotLabel(slot)}</Button>
+                <Button key={`${slot.date}:${slot.time || slot.time_preference}`} variant="ghost" style={buttonStyle} disabled={busy || Boolean(error)} onClick={() => respond(slot)}>{slotLabel(slot)}</Button>
               ))}
               <Button variant="ghost" style={buttonStyle} disabled={busy || Boolean(error)} onClick={() => respond(null)}>Nessuna di queste mi va bene</Button>
               {editing ? <Button variant="ghost" style={buttonStyle} disabled={busy} onClick={() => setEditing(false)}>Annulla modifica</Button> : null}

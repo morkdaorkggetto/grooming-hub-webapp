@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { supabase } from '../../../shared/supabase/client';
@@ -7,10 +7,17 @@ import {
   getBookingSchedule,
   getBookingTimePreferenceDefaultTime,
   getBookingTimePreferenceLabel,
-  getBookingTimePreferenceName,
+  getBookingTimeWindowForTime,
   getDateClosure,
   isTimePreferenceClosed,
 } from '../../../shared/tenant/bookingSchedule';
+import {
+  APPOINTMENT_CAPACITY_MESSAGE,
+  getAppointmentLoadNotice,
+  findFirstCapacityAvailableTime,
+  getWorkstationCapacity,
+  isAppointmentCapacityAvailable,
+} from '../../../shared/tenant/workstationCapacity';
 import {
   getPendingAppointmentRequests,
   proposeAppointmentRequestAlternatives,
@@ -61,6 +68,90 @@ const formatDesiredDate = (value) =>
     month: 'long',
     year: 'numeric',
   });
+
+const formatSlotTime = (value) => String(value || '').slice(0, 5);
+const formatAlternative = (item) => item.time
+  ? `${formatDesiredDate(item.date)} alle ${formatSlotTime(item.time)}`
+  : `${formatDesiredDate(item.date)} · ${getBookingTimePreferenceLabel(item.time_preference)}`;
+
+const nextDate = (value) => {
+  const date = new Date(`${value}T12:00:00`);
+  date.setDate(date.getDate() + 1);
+  return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}-${`${date.getDate()}`.padStart(2, '0')}`;
+};
+
+const loadAppointmentsForDate = async (tenantId, date) => {
+  const { data, error } = await supabase.from('appointments')
+    .select('id, scheduled_at, duration_minutes, status, approval_status')
+    .eq('tenant_id', tenantId)
+    .gte('scheduled_at', new Date(`${date}T00:00:00`).toISOString())
+    .lt('scheduled_at', new Date(`${nextDate(date)}T00:00:00`).toISOString());
+  if (error) throw error;
+  return data || [];
+};
+
+function useAppointmentsByDate(tenantId, dates) {
+  const cache = useRef(new Map());
+  const mounted = useRef(true);
+  const [, redraw] = useState(0);
+  const dateKey = [...new Set(dates.filter(Boolean))].sort().join(',');
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  useEffect(() => {
+    if (!tenantId) return;
+    dateKey.split(',').filter(Boolean).forEach((date) => {
+      const key = `${tenantId}:${date}`;
+      if (cache.current.has(key)) return;
+      cache.current.set(key, { state: 'loading' });
+      loadAppointmentsForDate(tenantId, date)
+        .then((appointments) => cache.current.set(key, { state: 'ready', appointments }))
+        .catch(() => cache.current.set(key, { state: 'error' }))
+        .finally(() => { if (mounted.current) redraw((value) => value + 1); });
+    });
+  }, [dateKey, tenantId]);
+
+  return (date) => {
+    const result = cache.current.get(`${tenantId}:${date}`);
+    return result?.state === 'ready' ? result.appointments : null;
+  };
+}
+
+function CapacityNotice({ appointments, capacity, date, time, durationMinutes, onUseTime }) {
+  const window = getBookingTimeWindowForTime(time);
+  if (!window || appointments === null) return null;
+  const candidate = {
+    scheduled_at: new Date(`${date}T${time}`).toISOString(),
+    duration_minutes: Number(durationMinutes) || 60,
+  };
+  const loadNotice = getAppointmentLoadNotice({ candidate, appointments, capacity });
+  const occupied = loadNotice ? capacity - loadNotice.remainingAtStart : 0;
+  const available = isAppointmentCapacityAvailable({ candidate, appointments, capacity });
+  let nextTime = '';
+  if (!available) {
+    const found = findFirstCapacityAvailableTime({
+      appointments,
+      date,
+      window: { ...window, start: time },
+      durationMinutes,
+      capacity,
+    });
+    if (found !== time && isAppointmentCapacityAvailable({
+      candidate: { ...candidate, scheduled_at: new Date(`${date}T${found}`).toISOString() },
+      appointments,
+      capacity,
+    })) nextTime = found;
+  }
+  return (
+    <div className={`gh-calendar-notice${available ? '' : ' gh-calendar-notice--error'}`} role="status">
+      <p><strong>{occupied}/{capacity}</strong> postazioni occupate</p>
+      {!available ? <p>Alle {time} non c'è posto.{nextTime ? ` Il primo momento libero è alle ${nextTime}.` : ''}</p> : null}
+      {!available && nextTime ? <Button staff type="button" variant="outline" onClick={() => onUseTime(nextTime)}>Usa le {nextTime}</Button> : null}
+    </div>
+  );
+}
 
 const COAT_CONDITION_LABELS = {
   some_knots: 'Qualche nodo',
@@ -137,7 +228,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
             <div className="gh-request-notes">
               <p className="gh-eyebrow--staff">Alternative proposte</p>
               <p className="gh-body">
-                {request.proposed_alternatives.map((item) => `${formatDesiredDate(item.date)} · ${getBookingTimePreferenceLabel(item.time_preference)}`).join(' · ')}
+                {request.proposed_alternatives.map(formatAlternative).join(' · ')}
               </p>
             </div>
           ) : null}
@@ -155,7 +246,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
               <p className="gh-eyebrow--staff">Risposta ricevuta</p>
               <p className="gh-body">
                 {response === 'accepted'
-                  ? `Ha scelto ${formatDesiredDate(request.chosen_date)} · ${getBookingTimePreferenceLabel(request.chosen_time_preference)}. L’ora resta da confermare.`
+                  ? `Ha scelto ${formatAlternative({ date: request.chosen_date, time: request.chosen_time, time_preference: request.chosen_time_preference })}. Il salone deve ancora prenotare.`
                   : 'Nessuna delle fasce proposte va bene. Serve una nuova proposta.'}
               </p>
               <p className="gh-meta">Risposta del {formatCreatedAt(request.customer_responded_at)}</p>
@@ -191,13 +282,15 @@ function InfoTile({ label, value }) {
   );
 }
 
-function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
+function ApprovalDialog({ request, busy, schedule, capacity, actionError, onClearError, onClose, onConfirm }) {
   const hasChoice = currentAlternativeResponse(request) === 'accepted';
   const preference = hasChoice ? request.chosen_time_preference : request.time_preference;
   const defaultTime = getBookingTimePreferenceDefaultTime(preference);
   const [date, setDate] = useState((hasChoice ? request.chosen_date : request.desired_date) || '');
-  const [time, setTime] = useState(defaultTime);
+  const [time, setTime] = useState((hasChoice && formatSlotTime(request.chosen_time)) || defaultTime);
   const [durationMinutes, setDurationMinutes] = useState(request.duration_minutes || 60);
+  const appointmentsForDate = useAppointmentsByDate(request.tenant_id, [date]);
+  const appointments = appointmentsForDate(date);
   const today = new Date();
   const minDate = `${today.getFullYear()}-${`${today.getMonth() + 1}`.padStart(2, '0')}-${`${today.getDate()}`.padStart(2, '0')}`;
 
@@ -208,6 +301,17 @@ function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
     onConfirm(date, time, duration);
   };
   const closure = getDateClosure(date, schedule);
+  const window = getBookingTimeWindowForTime(time);
+  const candidate = date && time && window ? {
+    scheduled_at: new Date(`${date}T${time}`).toISOString(),
+    duration_minutes: Number(durationMinutes) || 60,
+  } : null;
+  const conflict = candidate && appointments !== null
+    ? !isAppointmentCapacityAvailable({ candidate, appointments, capacity })
+    : false;
+  const changeDate = (value) => { onClearError(); setDate(value); };
+  const changeTime = (value) => { onClearError(); setTime(value); };
+  const changeDuration = (value) => { onClearError(); setDurationMinutes(value); };
 
   return (
     <div className="gh-dialog-backdrop">
@@ -219,20 +323,22 @@ function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
         </p>
 
         <div className="gh-dialog-fields gh-dialog-fields--three">
-          <Field label="Giorno" type="date" min={minDate} value={date} onChange={(event) => setDate(event.target.value)} required />
-          <Field label="Ora" type="time" value={time} onChange={(event) => setTime(event.target.value)} required />
-          <Field label="Durata prevista (min)" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} required />
+          <Field label="Giorno" type="date" min={minDate} value={date} onChange={(event) => changeDate(event.target.value)} required />
+          <Field label="Ora" type="time" step="900" value={time} onChange={(event) => changeTime(event.target.value)} required />
+          <Field label="Durata prevista (min)" type="number" min="15" step="15" value={durationMinutes} onChange={(event) => changeDuration(event.target.value)} required />
         </div>
         <p className="gh-dialog-helper">Il servizio propone il valore iniziale: adattalo al cane che stai valutando.</p>
+        <CapacityNotice appointments={appointments} capacity={capacity} date={date} time={time} durationMinutes={durationMinutes} onUseTime={changeTime} />
         {closure.label ? (
           <p className="gh-calendar-notice gh-calendar-notice--error" role="status">
             Attenzione: {closure.isClosed ? 'il salone risulta chiuso in questo giorno' : closure.label.toLowerCase()}. Puoi confermare comunque se è un’eccezione voluta.
           </p>
         ) : null}
+        {actionError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{actionError}</p> : null}
 
         <div className="gh-dialog-actions">
           <Button staff type="button" variant="outline" onClick={onClose} disabled={busy}>Annulla</Button>
-          <Button staff type="submit" variant="success" disabled={busy || !date || !time || !Number.isInteger(Number(durationMinutes)) || Number(durationMinutes) < 15}>
+          <Button staff type="submit" variant="success" disabled={busy || conflict || !date || !time || !window || !Number.isInteger(Number(durationMinutes)) || Number(durationMinutes) < 15}>
             {busy ? 'Confermo...' : 'Conferma e prepara WhatsApp'}
           </Button>
         </div>
@@ -241,33 +347,46 @@ function ApprovalDialog({ request, busy, schedule, onClose, onConfirm }) {
   );
 }
 
-function AlternativesDialog({ request, busy, schedule, onClose, onConfirm }) {
+function AlternativesDialog({ request, busy, schedule, capacity, onClose, onConfirm }) {
   const [rows, setRows] = useState([
-    { date: '', time_preference: 'morning' },
-    { date: '', time_preference: 'afternoon' },
+    { date: '', time: '' },
+    { date: '', time: '' },
   ]);
   const [localError, setLocalError] = useState('');
+  const appointmentsForDate = useAppointmentsByDate(request.tenant_id, rows.map((row) => row.date));
   const minDate = new Date().toISOString().slice(0, 10);
-  const updateRow = (index, field, value) => setRows((current) => current.map((row, rowIndex) => (
-    rowIndex === index ? { ...row, [field]: value } : row
-  )));
-  const addThird = () => setRows((current) => [...current, { date: '', time_preference: 'morning' }]);
+  const updateRow = (index, field, value) => {
+    setLocalError('');
+    setRows((current) => current.map((row, rowIndex) => (
+      rowIndex === index ? { ...row, [field]: value } : row
+    )));
+  };
+  const addThird = () => setRows((current) => [...current, { date: '', time: '' }]);
   const submit = (event) => {
     event.preventDefault();
-    const invalid = rows.find((row) => {
-      const closure = getDateClosure(row.date, schedule);
-      return !row.date || closure.isClosed || isTimePreferenceClosed(row.time_preference, closure);
-    });
-    if (invalid) {
-      setLocalError('Ogni alternativa deve avere una data e una fascia in cui il salone è aperto.');
+    const withPreferences = rows.map((row) => ({
+      ...row,
+      time_preference: getBookingTimeWindowForTime(row.time)?.value || '',
+    }));
+    const invalidTime = withPreferences.find((row) => !row.date || !row.time || !row.time_preference);
+    if (invalidTime) {
+      setLocalError('Ogni alternativa deve avere una data e un’ora fra le fasce di apertura: 09:00–19:00.');
       return;
     }
-    const keys = new Set(rows.map((row) => `${row.date}:${row.time_preference}`));
-    if (keys.size !== rows.length) {
+    const invalidClosure = withPreferences.find((row) => {
+      const closure = getDateClosure(row.date, schedule);
+      return closure.isClosed || isTimePreferenceClosed(row.time_preference, closure);
+    });
+    if (invalidClosure) {
+      setLocalError('Ogni alternativa deve avere una data e un’ora in cui il salone è aperto.');
+      return;
+    }
+    const keys = new Set(withPreferences.map((row) => `${row.date}:${row.time}`));
+    if (keys.size !== withPreferences.length) {
       setLocalError('Le alternative devono essere diverse tra loro.');
       return;
     }
-    onConfirm(rows);
+    onConfirm(withPreferences);
   };
   return (
     <div className="gh-dialog-backdrop">
@@ -277,14 +396,14 @@ function AlternativesDialog({ request, busy, schedule, onClose, onConfirm }) {
         <p className="gh-body">La scelta arriva dall’app. Poi il salone conferma l’ora: fino ad allora la richiesta resta in attesa.</p>
         <div className="gh-calendar-form-stack">
           {rows.map((row, index) => {
-            const closure = getDateClosure(row.date, schedule);
+            const appointments = appointmentsForDate(row.date);
             return (
-              <div className="gh-dialog-fields" key={index}>
-                <Field label={`Data ${index + 1}`} type="date" min={minDate} value={row.date} onChange={(event) => updateRow(index, 'date', event.target.value)} required />
-                <Field label="Fascia" as="select" value={row.time_preference} onChange={(event) => updateRow(index, 'time_preference', event.target.value)}>
-                  <option value="morning" disabled={isTimePreferenceClosed('morning', closure)}>{getBookingTimePreferenceName('morning')}</option>
-                  <option value="afternoon" disabled={isTimePreferenceClosed('afternoon', closure)}>{getBookingTimePreferenceName('afternoon')}</option>
-                </Field>
+              <div className="gh-calendar-form-stack" key={index}>
+                <div className="gh-dialog-fields">
+                  <Field label={`Data ${index + 1}`} type="date" min={minDate} value={row.date} onChange={(event) => updateRow(index, 'date', event.target.value)} required />
+                  <Field label={`Ora ${index + 1}`} type="time" step="900" value={row.time} onChange={(event) => updateRow(index, 'time', event.target.value)} required />
+                </div>
+                <CapacityNotice appointments={appointments} capacity={capacity} date={row.date} time={row.time} durationMinutes={request.duration_minutes || request.service?.duration_minutes || 60} onUseTime={(time) => updateRow(index, 'time', time)} />
               </div>
             );
           })}
@@ -323,9 +442,11 @@ export default function CustomerRequests() {
   const [success, setSuccess] = useState('');
   const [updatingId, setUpdatingId] = useState('');
   const [approvalRequest, setApprovalRequest] = useState(null);
+  const [approvalError, setApprovalError] = useState('');
   const [alternativesRequest, setAlternativesRequest] = useState(null);
   const [whatsappDraft, setWhatsappDraft] = useState(null);
   const bookingSchedule = useMemo(() => getBookingSchedule(tenant?.settings), [tenant?.settings]);
+  const workstationCapacity = useMemo(() => getWorkstationCapacity(tenant?.settings), [tenant?.settings]);
 
   const loadRequests = async () => {
     setLoading(true);
@@ -337,7 +458,7 @@ export default function CustomerRequests() {
       // Enrich only this page; the shared pending list and GH-81 count stay unchanged.
       if (tenantIds.length) {
         const { data: responses, error: responseError } = await supabase.from('appointment_requests')
-          .select('id, chosen_date, chosen_time_preference, customer_response, customer_responded_at')
+          .select('id, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at')
           .in('tenant_id', tenantIds).eq('status', 'pending');
         if (responseError) throw new Error('Non riesco a leggere le risposte alle alternative. Aggiorna prima di confermare.');
         const byId = new Map((responses || []).map((row) => [row.id, row]));
@@ -396,7 +517,11 @@ export default function CustomerRequests() {
       setApprovalRequest(null);
       await loadRequests();
     } catch (err) {
-      setError(err.message || 'Non riesco ad aggiornare la richiesta.');
+      if (err.message === APPOINTMENT_CAPACITY_MESSAGE) {
+        setApprovalError('Nel frattempo quell’orario si è riempito. Scegli un altro orario e riprova.');
+      } else {
+        setError(err.message || 'Non riesco ad aggiornare la richiesta.');
+      }
     } finally {
       setUpdatingId('');
     }
@@ -424,6 +549,7 @@ export default function CustomerRequests() {
     if (request.request_kind === 'structured' && approvalStatus === 'approved') {
       setError('');
       setSuccess('');
+      setApprovalError('');
       setApprovalRequest(request);
       return;
     }
@@ -443,7 +569,10 @@ export default function CustomerRequests() {
           request={approvalRequest}
           busy={updatingId === approvalRequest.id}
           schedule={bookingSchedule}
-          onClose={() => setApprovalRequest(null)}
+          capacity={workstationCapacity}
+          actionError={approvalError}
+          onClearError={() => { setApprovalError(''); setError(''); }}
+          onClose={() => { setApprovalRequest(null); setApprovalError(''); }}
           onConfirm={(date, time, durationMinutes) => performApproval(approvalRequest, 'approved', date, time, durationMinutes)}
         />
       ) : null}
@@ -452,6 +581,7 @@ export default function CustomerRequests() {
           request={alternativesRequest}
           busy={updatingId === alternativesRequest.id}
           schedule={bookingSchedule}
+          capacity={workstationCapacity}
           onClose={() => setAlternativesRequest(null)}
           onConfirm={(alternatives) => performAlternatives(alternativesRequest, alternatives)}
         />

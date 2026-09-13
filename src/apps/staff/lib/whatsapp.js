@@ -39,6 +39,7 @@ const formatDay = (date) => {
 const formatTime = (date) => new Intl.DateTimeFormat('it-IT', {
   hour: '2-digit', minute: '2-digit', timeZone: DATE_ZONE,
 }).format(date);
+const formatClock = (value) => String(value || '').slice(0, 5);
 const formatDateTime = (date) => formatDay(date) ? `${formatDay(date)} alle ${formatTime(date)}` : '';
 
 const formatDesiredDate = (value) => {
@@ -175,8 +176,9 @@ export const getAppointmentAlternativesWhatsAppMessage = (appointment, alternati
     petName: appointment?.client?.name,
     petBreed: appointment?.client?.breed,
   });
-  const labels = alternatives.map(({ date, time_preference: preference }) => {
+  const labels = alternatives.map(({ date, time, time_preference: preference }) => {
     const day = formatDesiredDate(date);
+    if (time) return `${day} alle ${formatClock(time)}`;
     const windowLabel = getBookingTimePreferenceName(preference).toLowerCase() || 'fascia proposta';
     return `${day} ${preference === 'morning' ? 'di mattina' : preference === 'afternoon' ? 'nel pomeriggio' : windowLabel}`;
   });
@@ -184,7 +186,7 @@ export const getAppointmentAlternativesWhatsAppMessage = (appointment, alternati
     ? `${labels.slice(0, -1).join(', ')} oppure ${labels.at(-1)}`
     : labels[0] || 'altre fasce';
   const requestedWhen = formatDesiredDate(appointment?.desired_date) || 'nel giorno che ci hai chiesto';
-  return `${greeting(appointment?.client?.owner)} purtroppo ${requestedWhen} siamo pieni. Per ${clientName} avremmo ${alternativesText}. Scegli nella tua area la fascia che preferisci: poi ti confermiamo l'ora.`;
+  return `${greeting(appointment?.client?.owner)} purtroppo ${requestedWhen} siamo pieni. Per ${clientName} avremmo ${alternativesText}. Scegli nella tua area l'orario che preferisci: poi ti confermiamo l'appuntamento.`;
 };
 
 export const getAppointmentAlternativesWhatsAppUrl = (appointment, alternatives) =>

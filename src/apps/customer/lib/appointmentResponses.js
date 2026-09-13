@@ -3,9 +3,12 @@ export function currentAlternativeResponse(request) {
   if (!request.customer_responded_at) return null;
   // A newer proposal starts a new round even if the RPC retained the old choice.
   if (new Date(request.staff_responded_at).getTime() > new Date(request.customer_responded_at).getTime()) return null;
-  if (request.customer_response === 'accepted' && !request.proposed_alternatives?.some(
-    (slot) => slot.date === request.chosen_date && slot.time_preference === request.chosen_time_preference
-  )) return null;
+  if (request.customer_response === 'accepted' && !request.proposed_alternatives?.some((slot) => (
+    slot.date === request.chosen_date
+    && (slot.time
+      ? String(slot.time).slice(0, 5) === String(request.chosen_time).slice(0, 5)
+      : slot.time_preference === request.chosen_time_preference)
+  ))) return null;
   return request.customer_response;
 }
 

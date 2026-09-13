@@ -20,7 +20,7 @@ export function useAppointmentRequests() {
     setError(null);
     const { data: rows, error: fetchError } = await supabase
       .from('appointment_requests')
-      .select('id, pet_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, status, staff_responded_at, proposed_alternatives, chosen_date, chosen_time_preference, customer_response, customer_responded_at, created_at, service:services(id, name), pet:pets(id, name)')
+      .select('id, pet_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, status, staff_responded_at, proposed_alternatives, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at, created_at, service:services(id, name), pet:pets(id, name)')
       .eq('tenant_id', tenantId)
       .in('status', ['pending', 'rejected'])
       .order('created_at', { ascending: false });

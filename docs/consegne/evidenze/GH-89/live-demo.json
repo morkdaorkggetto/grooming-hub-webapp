@@ -1,0 +1,85 @@
+{
+  "project": {
+    "name": "grooming-hub-demo",
+    "ref": "qttpinkslhenxrsbhhhg",
+    "status": "ACTIVE_HEALTHY"
+  },
+  "schema": {
+    "columns": [
+      "chosen_date date",
+      "chosen_time time without time zone",
+      "chosen_time_preference text",
+      "customer_response text",
+      "customer_responded_at timestamp with time zone"
+    ],
+    "respond_appointment_request_slot": {
+      "security": "DEFINER",
+      "search_path": "",
+      "anon_execute": false,
+      "authenticated_execute": true
+    }
+  },
+  "transactional_probe": {
+    "workstation_capacity": 2,
+    "timed_proposal_readback": [
+      { "date": "2026-09-15", "time": "10:00", "time_preference": "morning" },
+      { "date": "2026-09-15", "time": "11:00", "time_preference": "morning" },
+      { "date": "2026-09-16", "time": "15:30", "time_preference": "afternoon" }
+    ],
+    "invalid_time": { "code": "22023", "message": "Invalid alternative time" },
+    "database_incoherent_pair": {
+      "accepted": true,
+      "examples": [
+        { "date": "2026-09-15", "time": "17:30", "time_preference": "morning" },
+        { "date": "2026-09-15", "time": "18:00", "time_preference": "morning" }
+      ],
+      "ui_guard": "time_preference is derived from time and has no independent input"
+    },
+    "timed_acceptance": {
+      "chosen_date": "2026-09-15",
+      "chosen_time": "10:00:00",
+      "chosen_time_preference": "morning",
+      "customer_response": "accepted",
+      "customer_responded_at": "2026-09-13T04:04:05.00667+00:00",
+      "status": "pending",
+      "appointment_id": null
+    },
+    "legacy_acceptance": {
+      "chosen_date": "2026-09-15",
+      "chosen_time": null,
+      "chosen_time_preference": "morning",
+      "customer_response": "accepted",
+      "status": "pending",
+      "appointment_id": null
+    },
+    "decline": {
+      "chosen_date": null,
+      "chosen_time": null,
+      "chosen_time_preference": null,
+      "customer_response": "declined",
+      "status": "pending",
+      "appointment_id": null
+    },
+    "unproposed_slot": { "code": "22023", "message": "Chosen slot was not proposed" },
+    "capacity_race": {
+      "code": "P0001",
+      "detail": "GH37_APPOINTMENT_CAPACITY",
+      "message": "Le postazioni sono tutte occupate nella fascia scelta.",
+      "request_status": "pending"
+    },
+    "rollback": {
+      "appointment_requests": "0 -> 1 -> 0",
+      "appointments": "8 -> 10 -> 8",
+      "remaining_gh89_requests": 0,
+      "remaining_gh89_appointments": 0
+    }
+  },
+  "rls_suite": {
+    "result": "60 PASS, 0 FAIL, 0 SKIP",
+    "real_seconds": 25.73,
+    "operational_objects_unchanged": 14,
+    "auth_users": "6 -> 6",
+    "storage_objects": "0 -> 0",
+    "unlink_audit": "10 -> 12 (two expected retained audit rows)"
+  }
+}
