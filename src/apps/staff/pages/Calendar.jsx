@@ -228,6 +228,8 @@ export default function Calendar() {
   const [creatingPet, setCreatingPet] = useState(false);
   const [requestForm, setRequestForm] = useState({ date: '', time: '09:00', durationMinutes: DEFAULT_DURATION, message: '' });
   const [detailForm, setDetailForm] = useState({ date: '', time: '', durationMinutes: DEFAULT_DURATION });
+  const [modalError, setModalError] = useState('');
+  const [modalSuccess, setModalSuccess] = useState('');
   const [deleteError, setDeleteError] = useState('');
   const [workPetId, setWorkPetId] = useState('');
   const [calendarSearchValue, setCalendarSearchValue] = useState('');
@@ -240,6 +242,23 @@ export default function Calendar() {
     [tenant?.settings]
   );
   const bookingTimeWindows = useMemo(() => getBookingTimeWindows(), []);
+  const clearModalFeedback = () => {
+    setModalError('');
+    setModalSuccess('');
+  };
+  const showModalError = (message) => {
+    setModalSuccess('');
+    setModalError(message);
+  };
+  const showModalSuccess = (message) => {
+    setModalError('');
+    setModalSuccess(message);
+  };
+  const closeModal = () => {
+    clearModalFeedback();
+    setDeleteError('');
+    setModal(null);
+  };
 
   const loadWeek = useCallback(async () => {
     const requestId = latestWeekLoadRef.current + 1;
@@ -449,6 +468,8 @@ export default function Calendar() {
 
   const openManual = useCallback(async (clientId = '', preset = null) => {
     setError('');
+    setModalError('');
+    setModalSuccess('');
     try {
       const [, serviceContext] = await Promise.all([
         ensurePets(),
@@ -511,7 +532,7 @@ export default function Calendar() {
     setManualPetCreation(false);
     setManualPhoneConflict(null);
     setManualPetError('');
-    setSuccess('Pet creato e selezionato. Puoi completare l’appuntamento.');
+    showModalSuccess('Pet creato e selezionato. Puoi completare l’appuntamento.');
   };
   const createManualPet = async (existingCustomerId = null) => {
     setManualPetError('');
@@ -553,6 +574,7 @@ export default function Calendar() {
   };
   const openWork = async () => {
     setError('');
+    clearModalFeedback();
     try {
       const pets = await ensurePets();
       setWorkPetId((current) => current || pets[0]?.id || '');
@@ -570,6 +592,7 @@ export default function Calendar() {
 
   const openItem = (item) => {
     setError(''); setSuccess('');
+    clearModalFeedback();
     if (item.kind === 'visit') { navigate(`/client/${item.pet_id}`); return; }
     setSelectedItem(item);
     if (item.kind === 'request') {
@@ -594,6 +617,21 @@ export default function Calendar() {
   const manualConflict = manualCandidate ? hasCapacityConflict(manualCandidate) : false;
   const requestConflict = requestCandidate ? hasCapacityConflict(requestCandidate, selectedItem?.request_kind === 'legacy' ? selectedItem.id : null) : false;
   const detailConflict = detailCandidate ? hasCapacityConflict(detailCandidate, selectedItem?.id) : false;
+  const detailSamePetConflict = detailCandidate && selectedItem
+    ? !isAppointmentCapacityAvailable({
+      candidate: detailCandidate,
+      appointments: data.appointments.filter((appointment) => appointment.pet_id === selectedItem.pet_id),
+      capacity: 1,
+      excludedId: selectedItem.id,
+    })
+    : false;
+  const restoreBlockMessage = selectedItem?.status === 'cancelled'
+    ? detailSamePetConflict
+      ? 'Questo appuntamento è già stato rifatto nello stesso orario. L’annullato non serve più e non può essere ripristinato.'
+      : detailConflict
+        ? APPOINTMENT_CAPACITY_MESSAGE
+        : ''
+    : '';
   const getLoadNotice = useCallback((candidate, excludedId = null) => getAppointmentLoadNotice({
     candidate,
     appointments: data.appointments,
@@ -653,9 +691,9 @@ export default function Calendar() {
   };
 
   const submitManual = async (event) => {
-    event.preventDefault(); setError(''); setSuccess('');
-    if (!manualForm.clientId || !manualCandidate) { setError('Pet, data e ora sono obbligatori.'); return; }
-    if (manualConflict) { setError(APPOINTMENT_CAPACITY_MESSAGE); return; }
+    event.preventDefault(); clearModalFeedback(); setSuccess('');
+    if (!manualForm.clientId || !manualCandidate) { showModalError('Pet, data e ora sono obbligatori.'); return; }
+    if (manualConflict) { showModalError(APPOINTMENT_CAPACITY_MESSAGE); return; }
     setSaving(true);
     try {
       await addAppointment({
@@ -668,15 +706,15 @@ export default function Calendar() {
       });
       const nextTime = findNextCapacityAvailableTime({ date: manualForm.date, time: manualForm.time, durationMinutes: manualForm.durationMinutes, appointments: [...data.appointments, { ...manualCandidate, status: 'scheduled', approval_status: 'approved' }], capacity: workstationCapacity });
       setManualForm((current) => ({ ...current, time: nextTime, notes: '' }));
-      setSuccess('Appuntamento creato. Il prossimo orario libero è già pronto.');
+      showModalSuccess('Appuntamento creato. Il prossimo orario libero è già pronto.');
       await loadWeek();
-    } catch (saveError) { setError(saveError.message || 'Non riesco a creare l’appuntamento'); }
+    } catch (saveError) { showModalError(saveError.message || 'Non riesco a creare l’appuntamento'); }
     finally { setSaving(false); }
   };
   const confirmRequest = async () => {
     if (!selectedItem || !requestCandidate) return;
-    if (requestConflict) { setError(APPOINTMENT_CAPACITY_MESSAGE); return; }
-    setSaving(true); setError(''); setSuccess('');
+    if (requestConflict) { showModalError(APPOINTMENT_CAPACITY_MESSAGE); return; }
+    setSaving(true); clearModalFeedback(); setSuccess('');
     try {
       if (selectedItem.request_kind === 'structured') {
         await resolveAppointmentRequest(
@@ -689,47 +727,51 @@ export default function Calendar() {
       }
       else { await updateAppointmentSchedule(selectedItem.id, requestCandidate); await updateAppointmentApproval(selectedItem.id, 'approved'); }
       const whatsappUrl = buildWhatsAppUrl(selectedItem.client?.phone, requestForm.message);
-      setModal(null); await loadWeek();
+      closeModal(); await loadWeek();
       setWhatsappDraft({ url: whatsappUrl, message: requestForm.message, recipient: selectedItem.client?.owner || 'cliente' });
       setSuccess('Richiesta confermata e appuntamento creato. Ora puoi avvisare il cliente.');
-    } catch (saveError) { setError(saveError.message || 'Non riesco a confermare la richiesta'); }
+    } catch (saveError) { showModalError(saveError.message || 'Non riesco a confermare la richiesta'); }
     finally { setSaving(false); }
   };
   const rejectRequest = async () => {
     if (!selectedItem) return;
-    setSaving(true); setError(''); setSuccess('');
+    setSaving(true); clearModalFeedback(); setSuccess('');
     try {
       if (selectedItem.request_kind === 'structured') await resolveAppointmentRequest(selectedItem.id, 'rejected', null, null, null);
       else await updateAppointmentApproval(selectedItem.id, 'rejected');
       const rejectionMessage = getAppointmentApprovalWhatsAppMessage(selectedItem, 'rejected');
       const rejectionUrl = buildWhatsAppUrl(selectedItem.client?.phone, rejectionMessage);
-      setModal(null); await loadWeek();
+      closeModal(); await loadWeek();
       setWhatsappDraft({ url: rejectionUrl, message: rejectionMessage, recipient: selectedItem.client?.owner || 'cliente' });
       setSuccess('Richiesta rifiutata. Ora puoi avvisare il cliente.');
-    } catch (saveError) { setError(saveError.message || 'Non riesco a rifiutare la richiesta'); }
+    } catch (saveError) { showModalError(saveError.message || 'Non riesco a rifiutare la richiesta'); }
     finally { setSaving(false); }
   };
   const saveSchedule = async (event) => {
     event.preventDefault();
     if (!selectedItem || !detailCandidate) return;
     if (selectedItem.status === 'no_show') return;
-    if (detailConflict) { setError(APPOINTMENT_CAPACITY_MESSAGE); return; }
-    setSaving(true); setError('');
+    if (detailConflict) { showModalError(APPOINTMENT_CAPACITY_MESSAGE); return; }
+    setSaving(true); clearModalFeedback();
     try {
       const updated = await updateAppointmentSchedule(selectedItem.id, detailCandidate);
       setSelectedItem((current) => ({ ...current, ...updated }));
-      setSuccess('Appuntamento riprogrammato.'); await loadWeek();
-    } catch (saveError) { setError(saveError.message || 'Non riesco a riprogrammare l’appuntamento'); }
+      showModalSuccess('Appuntamento riprogrammato.'); await loadWeek();
+    } catch (saveError) { showModalError(saveError.message || 'Non riesco a riprogrammare l’appuntamento'); }
     finally { setSaving(false); }
   };
   const changeStatus = async (status) => {
     if (!selectedItem || !VALID_APPOINTMENT_STATUSES.includes(status)) return;
-    setSaving(true); setError('');
+    if (status === 'scheduled' && selectedItem.status === 'cancelled' && restoreBlockMessage) {
+      showModalError(restoreBlockMessage);
+      return;
+    }
+    setSaving(true); clearModalFeedback();
     try {
       await updateAppointmentStatus(selectedItem.id, status);
       const previousStatus = selectedItem.status;
       setSelectedItem((current) => ({ ...current, status }));
-      setSuccess(
+      showModalSuccess(
         status === 'no_show'
           ? 'Assenza registrata con la data dell’appuntamento.'
           : previousStatus === 'no_show'
@@ -737,10 +779,11 @@ export default function Calendar() {
             : `Stato aggiornato: ${statusLabel(status)}.`
       );
       await loadWeek();
-    } catch (saveError) { setError(saveError.message || 'Non riesco ad aggiornare lo stato'); }
+    } catch (saveError) { showModalError(saveError.message || 'Non riesco ad aggiornare lo stato'); }
     finally { setSaving(false); }
   };
   const openDeleteConfirmation = () => {
+    clearModalFeedback();
     setDeleteError('');
     setModal('delete');
   };
@@ -749,7 +792,7 @@ export default function Calendar() {
     setSaving(true); setDeleteError(''); setSuccess('');
     try {
       await deleteAppointment(selectedItem.id);
-      setModal(null);
+      closeModal();
       setSelectedItem(null);
       setSuccess('Appuntamento eliminato: la riga inserita per errore non fa più parte della storia.');
       await loadWeek();
@@ -761,8 +804,10 @@ export default function Calendar() {
   };
   const openReminder = () => {
     const url = getAppointmentWhatsAppUrl(selectedItem);
-    if (!url) { setError('Numero cliente non disponibile per WhatsApp.'); return; }
+    if (!url) { showModalError('Numero cliente non disponibile per WhatsApp.'); return; }
+    clearModalFeedback();
     window.open(url, '_blank', 'noopener,noreferrer');
+    showModalSuccess('Promemoria aperto in WhatsApp.');
   };
 
   const weekIsEmpty = data.requests.length === 0
@@ -860,7 +905,7 @@ export default function Calendar() {
       </main>
       <Fab label="Registra lavorazione" icon="pencil" onClick={openWork} />
 
-      {modal === 'manual' && <Modal variant="side" title="Nuovo appuntamento" onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={manualPetCreation || !manualForm.clientId || Boolean(manualConflict)} onClick={submitManual}>Salva appuntamento</Button></>}>
+      {modal === 'manual' && <Modal variant="side" title="Nuovo appuntamento" onClose={closeModal} footer={<><Button staff variant="ghost" onClick={closeModal}>Chiudi</Button><Button staff loading={saving} disabled={manualPetCreation || !manualForm.clientId || Boolean(manualConflict)} onClick={submitManual}>Salva appuntamento</Button></>}>
         <form className="gh-calendar-form-stack" onSubmit={submitManual}>
           <CalendarPetCombobox
             options={petOptions}
@@ -940,16 +985,18 @@ export default function Calendar() {
           {manualConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <AppointmentLoadNote notice={manualLoadNotice} />
           <PetDuplicateNotice booking={manualDuplicateBooking} petName={manualPet?.name} />
+          {modalError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{modalError}</p> : null}
+          {modalSuccess ? <p className="gh-calendar-notice gh-calendar-notice--success" role="status">{modalSuccess}</p> : null}
         </form>
       </Modal>}
 
-      {modal === 'work' && <Modal title="Registra lavorazione" narrow onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff disabled={!workPetId} onClick={() => navigate(`/client/${workPetId}/add-visit`)}>Continua</Button></>}>
+      {modal === 'work' && <Modal title="Registra lavorazione" narrow onClose={closeModal} footer={<><Button staff variant="ghost" onClick={closeModal}>Chiudi</Button><Button staff disabled={!workPetId} onClick={() => navigate(`/client/${workPetId}/add-visit`)}>Continua</Button></>}>
         <div className="gh-calendar-form-stack"><p className="gh-body">Scegli il pet per aprire la registrazione della lavorazione.</p>
           <Field label="Pet" as="select" value={workPetId} onChange={(event) => setWorkPetId(event.target.value)}><option value="">Seleziona pet</option>{petOptions.map((pet) => <option value={pet.id} key={pet.id}>{pet.name} · {pet.owner || 'senza proprietario'}</option>)}</Field>
         </div>
       </Modal>}
 
-      {modal === 'request' && selectedItem && <Modal title="Conferma richiesta" onClose={() => setModal(null)} footer={<><Button staff variant="danger" loading={saving} onClick={rejectRequest}>Rifiuta e prepara WhatsApp</Button><Button staff loading={saving} disabled={Boolean(requestConflict)} onClick={confirmRequest}>Conferma e prepara WhatsApp</Button></>}>
+      {modal === 'request' && selectedItem && <Modal title="Conferma richiesta" onClose={closeModal} footer={<><Button staff variant="danger" loading={saving} onClick={rejectRequest}>Rifiuta e prepara WhatsApp</Button><Button staff loading={saving} disabled={Boolean(requestConflict)} onClick={confirmRequest}>Conferma e prepara WhatsApp</Button></>}>
         <div className="gh-calendar-form-stack">
           <div className="gh-calendar-modal-context"><PetAvatar name={selectedItem.petName} photo={selectedItem.photo} size={42} tier="base" /><div><strong>{selectedItem.petName}</strong><span>{selectedItem.client?.owner || 'Proprietario non indicato'} · {selectedItem.service?.name || selectedItem.notes || 'Bisogno non specificato'}</span></div></div>
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
@@ -970,10 +1017,12 @@ export default function Calendar() {
           {requestConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <AppointmentLoadNote notice={requestLoadNotice} />
           <PetDuplicateNotice booking={requestDuplicateBooking} petName={selectedItem.petName} />
+          {modalError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{modalError}</p> : null}
+          {modalSuccess ? <p className="gh-calendar-notice gh-calendar-notice--success" role="status">{modalSuccess}</p> : null}
         </div>
       </Modal>}
 
-      {modal === 'detail' && selectedItem && <Modal variant="side" title={`Appuntamento · ${selectedItem.petName}`} onClose={() => setModal(null)} footer={<><Button staff variant="ghost" onClick={() => setModal(null)}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict) || selectedItem.status === 'no_show'} onClick={saveSchedule}>Salva orario</Button></>}>
+      {modal === 'detail' && selectedItem && <Modal variant="side" title={`Appuntamento · ${selectedItem.petName}`} onClose={closeModal} footer={<><Button staff variant="ghost" onClick={closeModal}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict) || selectedItem.status === 'no_show'} onClick={saveSchedule}>Salva orario</Button></>}>
         <form className="gh-calendar-form-stack" onSubmit={saveSchedule}>
           <div className="gh-calendar-modal-context"><PetAvatar name={selectedItem.petName} photo={selectedItem.photo} size={42} tier="base" /><div><strong>{selectedItem.petName}</strong><span>{selectedItem.client?.owner || 'Proprietario non indicato'} · {statusLabel(selectedItem.status)}</span>{selectedItem.service?.name ? <span>{selectedItem.service.name}</span> : null}</div></div>
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
@@ -981,9 +1030,11 @@ export default function Calendar() {
             <Field label="Ora" type="time" value={detailForm.time} disabled={selectedItem.status === 'no_show'} onChange={(event) => setDetailForm((current) => ({ ...current, time: event.target.value }))} />
             <Field label="Durata (min)" type="number" min="15" step="15" value={detailForm.durationMinutes} disabled={selectedItem.status === 'no_show'} onChange={(event) => setDetailForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
           </div>
-          {detailConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
+          {detailConflict && !restoreBlockMessage && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
           <AppointmentLoadNote notice={detailLoadNotice} />
           <PetDuplicateNotice booking={detailDuplicateBooking} petName={selectedItem.petName} />
+          {modalError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{modalError}</p> : null}
+          {modalSuccess ? <p className="gh-calendar-notice gh-calendar-notice--success" role="status">{modalSuccess}</p> : null}
           <div className="gh-calendar-detail-actions">
             <Button staff variant="whatsapp" icon="whatsapp" onClick={openReminder}>Promemoria</Button>
             <Button staff variant="outline" icon="calendar" onClick={() => window.open(getGoogleCalendarUrl(selectedItem), '_blank', 'noopener,noreferrer')}>Google</Button>
@@ -996,6 +1047,7 @@ export default function Calendar() {
             ) : null}
             <Button staff variant="outline" icon="plus" onClick={() => { setModal(null); openManual(selectedItem.pet_id); }}>Nuovo per lo stesso cliente</Button>
           </div>
+          {restoreBlockMessage ? <p className="gh-calendar-notice gh-calendar-notice--error" role="status">{restoreBlockMessage}</p> : null}
           <div className="gh-calendar-detail-actions">
             {selectedItem.status === 'scheduled' ? (
               <Button staff variant="danger" onClick={() => changeStatus('no_show')}>Segna assenza</Button>
@@ -1007,7 +1059,9 @@ export default function Calendar() {
               <Button staff variant="danger" disabled={selectedItem.status === 'cancelled'} onClick={() => changeStatus('cancelled')}>Annulla appuntamento</Button>
             ) : null}
             {selectedItem.status === 'cancelled' ? (
-              <Button staff variant="ghost" onClick={() => changeStatus('scheduled')}>Ripristina programmato</Button>
+              <Button staff variant="ghost" disabled={Boolean(restoreBlockMessage)} onClick={() => changeStatus('scheduled')}>
+                {detailSamePetConflict ? 'Già rifatto' : detailConflict ? 'Postazioni occupate' : 'Ripristina programmato'}
+              </Button>
             ) : null}
           </div>
           {selectedItem.status !== 'completed'
@@ -1023,7 +1077,7 @@ export default function Calendar() {
         </form>
       </Modal>}
 
-      {modal === 'delete' && selectedItem && <Modal title="Elimina appuntamento" narrow onClose={() => setModal('detail')} footer={<><Button staff variant="ghost" onClick={() => setModal('detail')}>Torna indietro</Button><Button staff variant="danger" loading={saving} onClick={confirmDelete}>Elimina definitivamente</Button></>}>
+      {modal === 'delete' && selectedItem && <Modal title="Elimina appuntamento" narrow onClose={() => { setDeleteError(''); setModal('detail'); }} footer={<><Button staff variant="ghost" onClick={() => { setDeleteError(''); setModal('detail'); }}>Torna indietro</Button><Button staff variant="danger" loading={saving} onClick={confirmDelete}>Elimina definitivamente</Button></>}>
         <div className="gh-calendar-form-stack">
           <p className="gh-body"><strong>Elimini l&apos;appuntamento di {selectedItem.petName} di {formatFullDayLabel(toLocalDateString(new Date(selectedItem.scheduled_at)))} alle {formatTime(selectedItem.scheduled_at)}?</strong></p>
           <p className="gh-body">Sparisce del tutto. Se invece il cliente ha disdetto, usa «Annulla appuntamento»: resta come fatto.</p>

@@ -1,0 +1,198 @@
+{
+  "environment": "Real app and SDK, memory HTTP only, Chromium 375x812 Europe/Rome",
+  "restore": {
+    "samePet": {
+      "button": "Già rifatto",
+      "disabled": true,
+      "buttonMeasure": {
+        "top": 605.28125,
+        "bottom": 651.28125,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true
+      },
+      "message": "Questo appuntamento è già stato rifatto nello stesso orario. L’annullato non serve più e non può essere ripristinato.",
+      "measure": {
+        "messageInsideModal": true,
+        "messageTop": 508.03125,
+        "messageBottom": 588.28125,
+        "footerTop": 683,
+        "gapToFooter": 94.71875,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true,
+        "overflow": 0,
+        "truncatedMessages": 0,
+        "minButtonWidth": 60.71875,
+        "minButtonHeight": 44
+      }
+    },
+    "clearedOnClose": true,
+    "capacity": {
+      "button": "Postazioni occupate",
+      "disabled": true,
+      "buttonMeasure": {
+        "top": 567.78125,
+        "bottom": 613.78125,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true
+      },
+      "message": "Le postazioni sono tutte occupate nella fascia scelta.",
+      "distinctFromSamePet": true,
+      "measure": {
+        "messageInsideModal": true,
+        "messageTop": 508.03125,
+        "messageBottom": 550.78125,
+        "footerTop": 683,
+        "gapToFooter": 132.21875,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true,
+        "overflow": 0,
+        "truncatedMessages": 0,
+        "minButtonWidth": 60.71875,
+        "minButtonHeight": 44
+      }
+    },
+    "success": {
+      "buttonBefore": "Ripristina programmato",
+      "enabledBefore": true,
+      "statusAfter": "scheduled",
+      "message": "Stato aggiornato: Programmato.",
+      "measure": {
+        "messageInsideModal": true,
+        "messageTop": 443.421875,
+        "messageBottom": 486.171875,
+        "footerTop": 683,
+        "gapToFooter": 196.828125,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true,
+        "overflow": 0,
+        "truncatedMessages": 0,
+        "minButtonWidth": 60.71875,
+        "minButtonHeight": 44
+      }
+    },
+    "databaseLastWord": {
+      "preflightButton": "Ripristina programmato",
+      "enabledBefore": true,
+      "buttonMeasure": {
+        "top": 620.171875,
+        "bottom": 666.171875,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true
+      },
+      "message": "Le postazioni sono tutte occupate nella fascia scelta.",
+      "statusAfter": "cancelled",
+      "measure": {
+        "messageInsideModal": true,
+        "messageTop": 443.421875,
+        "messageBottom": 486.171875,
+        "footerTop": 683,
+        "gapToFooter": 196.828125,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true,
+        "overflow": 0,
+        "truncatedMessages": 0,
+        "minButtonWidth": 60.71875,
+        "minButtonHeight": 44
+      }
+    }
+  },
+  "otherActions": {
+    "move": {
+      "message": "Non riesco a spostare l'appuntamento: spostamento simulato non disponibile",
+      "location": "detail modal",
+      "measure": {
+        "messageInsideModal": true,
+        "messageTop": 443.421875,
+        "messageBottom": 504.921875,
+        "footerTop": 683,
+        "gapToFooter": 178.078125,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true,
+        "overflow": 0,
+        "truncatedMessages": 0,
+        "minButtonWidth": 60.71875,
+        "minButtonHeight": 44
+      }
+    },
+    "reminder": {
+      "message": "Numero cliente non disponibile per WhatsApp.",
+      "location": "detail modal",
+      "measure": {
+        "messageInsideModal": true,
+        "messageTop": 443.421875,
+        "messageBottom": 486.171875,
+        "footerTop": 683,
+        "gapToFooter": 196.828125,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true,
+        "overflow": 0,
+        "truncatedMessages": 0,
+        "minButtonWidth": 60.71875,
+        "minButtonHeight": 44
+      }
+    },
+    "absence": {
+      "message": "Assenza registrata con la data dell’appuntamento.",
+      "location": "detail modal",
+      "measure": {
+        "messageInsideModal": true,
+        "messageTop": 443.421875,
+        "messageBottom": 486.171875,
+        "footerTop": 683,
+        "gapToFooter": 196.828125,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true,
+        "overflow": 0,
+        "truncatedMessages": 0,
+        "minButtonWidth": 60.71875,
+        "minButtonHeight": 44
+      }
+    },
+    "delete": {
+      "message": "Questo appuntamento ha una lavorazione collegata e non si elimina.",
+      "location": "delete modal",
+      "measure": {
+        "messageInsideModal": true,
+        "messageTop": 186.375,
+        "messageBottom": 247.875,
+        "footerTop": 263.875,
+        "gapToFooter": 16,
+        "visibleAboveFooter": true,
+        "visibleInViewport": true,
+        "overflow": 0,
+        "truncatedMessages": 0,
+        "minButtonWidth": 60.71875,
+        "minButtonHeight": 44
+      }
+    }
+  },
+  "outsideModal": {
+    "message": "Non riesco a caricare gli appuntamenti: caricamento settimana simulato",
+    "location": "main page, no dialog",
+    "dialogs": 0
+  },
+  "rpcCalls": [
+    {
+      "rpc": "set_staff_appointment_status",
+      "p_appointment_id": "cancel-success",
+      "p_status": "scheduled"
+    },
+    {
+      "rpc": "set_staff_appointment_status",
+      "p_appointment_id": "cancel-stale",
+      "p_status": "scheduled"
+    },
+    {
+      "rpc": "set_staff_appointment_status",
+      "p_appointment_id": "absence",
+      "p_status": "no_show"
+    },
+    {
+      "rpc": "delete_staff_appointment",
+      "p_appointment_id": "delete-error"
+    }
+  ],
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 2422
+}
