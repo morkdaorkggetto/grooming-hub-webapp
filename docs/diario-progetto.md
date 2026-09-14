@@ -8,7 +8,48 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 1 settembre 2026.*
+*Aggiornato il 13 settembre 2026.*
+
+> # Il giro si chiude dentro l'app. Quello che manca non è più codice.
+>
+> **Fra la sera del 12 e la mattina del 13 settembre** il percorso di una prenotazione è stato smontato fase per fase con Luigi al banco e Davide al telefono, e ricostruito: la persona chiede, il salone propone **tre orari precisi** guardando quante postazioni restano, la persona ne tocca uno **dall'app**, il salone prenota con un tocco. Prima del 12 settembre quel giro **usciva su WhatsApp e non rientrava**.
+>
+> Produzione, misurata il 13/9: **351 clienti attivi, 576 visite storiche, 226 appuntamenti**.
+
+**Nove mandati in una notte** — `GH-84` interrotto, poi `GH-86` → `GH-92` — e **cinque migrazioni** applicate in produzione da Cowork con autorizzazione singola: `gh87`, `gh87b`, `gh89`, `gh89b`, `gh91`.
+
+**I tre cancelli del lancio, in ordine:**
+
+| # | Cosa | Stato |
+|---|---|---|
+| 1 | **Un mittente vero per le email** | **Bloccante.** Senza SMTP configurato, Supabase **rifiuta di consegnare a chiunque non sia nel team del progetto**: il recupero password non funziona per nessun cliente. Non è una questione di quante email all'ora — non partono |
+| 2 | **Un dominio** | Deciso con Luigi il 13/9: **del prodotto**, non del salone, perché ZavaRoby è il primo inquilino e non il proprietario. `.com` o `.app` su Cloudflare Registrar; Resend come mittente. In attesa di Davide |
+| 3 | **Gli avvisi** | Il salone ha pallino, suono e riquadro **solo a gestionale aperto**. La persona **non ha nessun avviso**: scopre la conferma aprendo l'app. Manifest e icone ci sono da `GH-88`: le notifiche a app chiusa sono un giro solo, per entrambi i lati |
+
+*Rattoppo disponibile per il cancello 1, se serve prima del dominio: SMTP di Gmail con una App Password, porta 587. Funziona per le prove, non per trecentoventi persone.*
+
+**Le decisioni di prodotto prese in quella notte:**
+
+- **A prenotare resta il salone.** Il cliente sceglie uno slot, non se lo prende. Chiesto da Davide con parole sue: *«il cliente conferma e io prenoto»*;
+- **Un rifiuto solo**, e porta con sé una data nuova. Poi «Meglio sentirci» e si parla. Il rimpallo infinito era il rischio che Luigi ha visto per primo;
+- **Niente opzione a scadenza sugli slot proposti.** Valutata e scartata il 13/9: costerebbe l'invariante dell'occupazione — tre posti bloccati per un cane, su giornate che arrivano a 13 — per un rischio mai osservato. La rete di sicurezza è il rifiuto del database al momento della prenotazione, **e ora è scritto in italiano**;
+- **Il pallino conta solo ciò che tocca al salone.** Un'attesa della persona non suona, ma **si vede**: pannello quieto in dashboard, che dopo 48 ore suggerisce di telefonare.
+
+**Code aperte, nessuna bloccante** (le precedenti restano valide più sotto):
+
+- **Il campo `owner` contiene numeri di telefono in 133 clienti su 322.** `GH-87` ha smesso di leggerli ad alta voce — se il valore non sembra un nome, il messaggio si apre senza nome — ma **il dato resta sporco**. La bonifica è un lavoro con Davide che legge;
+- **Le chiusure non sono controllate da `submit_appointment_request`.** L'interfaccia le impedisce, il database no. Migrazione di Cowork, dieci righe, mai applicata;
+- **`#d4a574` è un colore morto** in `tailwind.config.js`: nessuna classe lo usa, e il marchio è `#6f9792`. Prima o poi qualcuno lo prenderà per il colore giusto;
+- **Il link `Grooming Hub` nell'intestazione staff è 102 × 12,34 px**, sotto i 44 richiesti. Preesistente, misurato da Codex in `GH-87`, escluso da tutti i mandati successivi. Micro-mandato dedicato su `StaffKit`;
+- **La data iniziale sparisce** quando la persona rifiuta indicando una data nuova: `desired_date` viene sostituita. Voluto, ma se a Davide serve lo storico è un altro giro;
+- **Il demo si scosta a ogni migrazione.** Il collegamento OAuth di Supabase **vede un'organizzazione alla volta e sostituisce invece di sommare** (misurato il 24/8, riconfermato il 13/9): Cowork non raggiunge il demo. Regola adottata: **il file va in `supabase/migrations/`, Luigi lo incolla nell'editor del demo, il preflight di Codex lo verifica**. Alternativa scartata: spostare il demo su `Webapp_Project`, ~10 $/mese, e perdere la garanzia che Cowork non possa sbagliare progetto;
+- **`salva.sh` non pubblica `supabase/`.** Per questo i file delle migrazioni entrano nei commit di Codex, con autorizzazione esplicita ogni volta.
+
+**Cinque errori di Cowork in una notte, tutti della stessa famiglia** — verificare un pezzo e concludere sul percorso intero: detto che il modale bloccava i giorni chiusi (avvisa e lascia passare); detto che l'invio della richiesta non produceva nessun avviso (c'è un pulsante WhatsApp); scritto che senza manifest l'app **non si può** aggiungere alla Home (si può, viene brutta); scritto in `GH-86` «suite RLS da rieseguire» **e** «nessun dato scritto», che sono incompatibili perché la suite scrive; dichiarato in `GH-87` che una migrazione era applicata, confinando poi Codex al demo dove non era. **Codex si è fermato tre volte su cinque, e aveva ragione tutte e tre.**
+
+---
+
+*Stato precedente, conservato per storia — aggiornato il 1 settembre 2026.*
 
 > # Il salone usa lo strumento, e adesso è lo strumento a doversi adattare.
 >
@@ -132,6 +173,45 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 ---
 
 ## Cronologia
+
+### 12–13 settembre 2026 — Il giro si chiude dentro l'app (GH-84 → GH-92)
+
+**Attori**: Luigi (al banco e al telefono con Davide), Cowork, Codex.
+
+**Contesto**: dopo il rilascio di `GH-81` e `GH-83` la sera del 12, Luigi ha chiesto di ripercorrere **fase per fase** cosa accade quando una persona chiede un appuntamento — non per correggere un difetto noto, ma per vedere dove il percorso si interrompe. È stata la sessione più produttiva del progetto, e ha prodotto nove mandati in dodici ore.
+
+**Cosa ha trovato lo smontaggio, fase per fase:**
+
+- **Fase 1** — la persona non può chiedere un'ora: chiede **giorno e mezza giornata**. Il database non controlla le chiusure (l'interfaccia sì);
+- **Fase 2** — nessun avviso automatico: la richiesta resta ferma finché qualcuno non apre `/requests`. Il cliente ha però un pulsante WhatsApp, che è il modo con cui il salone lo scopre davvero;
+- **Fase 3** — il modale di approvazione ha **tre campi vuoti e nessun contesto**: non mostra il carico delle postazioni, e l'avviso di chiusura è **scavalcabile**;
+- **Fase 5** — il punto rotto. Il messaggio partito davvero diceva **«Ciao 3339509149, ti aspettiamo 10/10/2026, 15:00 con Lacky.»**: saluta un numero, detta una data come un modulo. E l'app **faceva sparire la richiesta in silenzio** invece di dire che era stata confermata. Sulle alternative diceva testualmente *«controlla il messaggio WhatsApp»*: **il giro usciva dall'app e non rientrava**.
+
+**Decisioni prese:**
+
+- **`GH-84` interrotto e chiuso come interruzione**, non riaperto. Cercava di separare le sessioni di gestionale e app cliente, che oggi si scavalcano perché `localStorage` è uno per origine. Codex ha misurato che il confine **non esiste**: `/login` autentica anche i clienti, e `/reset-password` non ha ruolo. La separazione richiede prima di decidere quelle due rotte;
+- **da quell'interruzione è nato `GH-86`**, che era il vero bloccante: **il recupero password per i clienti non esisteva**. `/u/forgot` era un cartello che diceva di telefonare al salone;
+- **`GH-87` — la conferma è un momento.** I messaggi WhatsApp in italiano con **una sola grammatica delle date**; la conferma visibile nell'app per 72 ore; l'alternativa accettabile dal telefono. E la regola sui nomi: **non si saluta un numero**;
+- **`GH-88` — l'app si tiene in tasca.** Non esisteva `public/`, non esisteva un manifest, l'icona dichiarata era il segnaposto di Vite e **quel file non c'era**: in produzione l'app non aveva nemmeno una favicon;
+- **`GH-89` — le proposte hanno un'ora**, chiesto da Davide: *«puoi venire il 17 settembre alle 17:30»*. Assorbe `GH-85`, ritirato, perché per proporre un'ora bisogna vedere il carico e sono lo stesso modale;
+- **`GH-90` — la palla è di chi deve muoversi.** Tre stati invece di uno: da rispondere, in attesa della persona, da prenotare;
+- **`GH-91` — il rimpallo ha una fine.** Un rifiuto solo, e porta una data nuova;
+- **`GH-92`** — i campi affiancati si allineano **sulla riga del campo, non su quella dell'etichetta**.
+
+**Regola di canone aggiunta**: *quando una migrazione serve anche al demo, il mandato non la dà per applicata* — il file sta in `supabase/migrations/`, Luigi la incolla nell'editor del demo, e il preflight di Codex la verifica prima di cominciare. Nata da `GH-87`, che si è fermato al preflight per un errore di Cowork.
+
+**Regola di composizione aggiunta**: **i campi affiancati si allineano sulla riga del campo, non su quella dell'etichetta.** Parente di quella di `GH-67`.
+
+**Misurato:**
+
+- **5,1 appuntamenti al giorno** in media negli ultimi 60 giorni, massimo 13, 16 giorni su 41 sopra i sei. È il numero che ha fatto scartare l'opzione a scadenza sugli slot;
+- **133 clienti su 322** hanno un numero di telefono nel campo del proprietario;
+- **3 richieste** in tutto in produzione, una sola con alternative: cambiare la forma delle proposte non è costato niente in dati;
+- il pacchetto servito dalla produzione, `index-X4vt5R8F.js`, **contiene** `respond_appointment_request_slot` e **non contiene** la funzione precedente. È la misura che ha autorizzato la rimozione della vecchia RPC, invece di aspettare a occhio.
+
+**Consegne di Codex degne di nota**: la corrispondenza fra cornice e ritaglio in `GH-82` trovata **all'ispezione visiva dopo che tutti i numeri erano verdi**; la prima rasterizzazione dell'icona a **512×513** in `GH-88`, scoperta dalla propria prova pixel; il rifiuto di dichiarare il comportamento del deposito iOS senza un telefono in mano; e in `GH-92` la controprova con un'etichetta di **cinque righe**, che distingue una regola da un rattoppo.
+
+**Aperto**: i tre cancelli del lancio, in cima allo Stato attuale.
 
 ### 6 settembre 2026 — Il video si riordina sull'orologio (piano delle sequenze per CD)
 
