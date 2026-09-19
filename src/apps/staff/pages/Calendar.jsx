@@ -992,7 +992,7 @@ export default function Calendar() {
 
       {modal === 'work' && <Modal title="Registra lavorazione" narrow onClose={closeModal} footer={<><Button staff variant="ghost" onClick={closeModal}>Chiudi</Button><Button staff disabled={!workPetId} onClick={() => navigate(`/client/${workPetId}/add-visit`)}>Continua</Button></>}>
         <div className="gh-calendar-form-stack"><p className="gh-body">Scegli il pet per aprire la registrazione della lavorazione.</p>
-          <Field label="Pet" as="select" value={workPetId} onChange={(event) => setWorkPetId(event.target.value)}><option value="">Seleziona pet</option>{petOptions.map((pet) => <option value={pet.id} key={pet.id}>{pet.name} · {pet.owner || 'senza proprietario'}</option>)}</Field>
+          <CalendarPetCombobox options={petOptions} selectedId={workPetId} onSelect={setWorkPetId} />
         </div>
       </Modal>}
 

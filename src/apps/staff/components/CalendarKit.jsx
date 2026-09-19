@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useMemo, useState } from 'react';
 import { getBookingTimePreferenceName } from '../../../shared/tenant/bookingSchedule';
 import Icon from '../../../shared/ui/Icon';
+import PetAvatar from '../../../shared/ui/PetAvatar';
 import { Button, StateTag } from './StaffKit';
 
 const formatWindowTime = (value) => {
@@ -169,7 +170,7 @@ function UnplacedItems({ items, onOpen }) {
 }
 
 const petOptionLabel = (pet) =>
-  `${pet.name} · ${pet.owner || 'proprietario non indicato'}`;
+  [pet.name, pet.breed, pet.owner || 'proprietario non indicato'].filter(Boolean).join(' · ');
 
 export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate }) {
   const listId = useId();
@@ -185,7 +186,7 @@ export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate })
       .some((value) => String(value || '').toLocaleLowerCase('it').includes(normalizedQuery));
   }), [normalizedQuery, options, query, selected, selectedLabel]);
   const matches = allMatches.slice(0, 12);
-  const canCreate = Boolean(query.trim());
+  const canCreate = Boolean(query.trim()) && typeof onCreate === 'function';
   const optionCount = matches.length + (canCreate ? 1 : 0);
 
   useEffect(() => {
@@ -284,8 +285,17 @@ export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate })
               onClick={() => choosePet(pet)}
               key={pet.id}
             >
-              <strong>{pet.name}</strong>
-              <span>{pet.owner || 'Proprietario non indicato'}</span>
+              {pet.photo ? (
+                <PetAvatar name={pet.name} photo={pet.photo} size={40} />
+              ) : (
+                <span className="gh-pet-combobox__initial" aria-hidden="true">
+                  {String(pet.name || 'P').trim().charAt(0).toLocaleUpperCase('it') || 'P'}
+                </span>
+              )}
+              <span className="gh-pet-combobox__copy">
+                <strong>{pet.name}</strong>
+                <span>{pet.breed || 'Razza non indicata'} · {pet.owner || 'Proprietario non indicato'}</span>
+              </span>
             </button>
           ))}
           {canCreate && (

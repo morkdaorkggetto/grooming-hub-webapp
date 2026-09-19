@@ -1,0 +1,126 @@
+{
+  "environment": "Real app and SDK, memory HTTP only",
+  "uses": {
+    "work": {
+      "count": 12,
+      "overflowX": 0,
+      "outsideViewportX": 0,
+      "truncated": 0,
+      "minTargetHeight": 58,
+      "rows": [
+        {
+          "name": "Barboncino",
+          "detail": "Toy · 3296167453",
+          "image": true,
+          "initial": null
+        },
+        {
+          "name": "barboncino",
+          "detail": "Nano · 3296167453",
+          "image": false,
+          "initial": "B"
+        },
+        {
+          "name": "Luna",
+          "detail": "Razza non indicata · Paola Foto",
+          "image": true,
+          "initial": null
+        },
+        {
+          "name": "Nina",
+          "detail": "Razza non indicata · Paola Base",
+          "image": false,
+          "initial": "N"
+        }
+      ]
+    },
+    "appointment": {
+      "count": 12,
+      "overflowX": 0,
+      "outsideViewportX": 0,
+      "truncated": 0,
+      "minTargetHeight": 58,
+      "rows": [
+        {
+          "name": "Barboncino",
+          "detail": "Toy · 3296167453",
+          "image": true,
+          "initial": null
+        },
+        {
+          "name": "barboncino",
+          "detail": "Nano · 3296167453",
+          "image": false,
+          "initial": "B"
+        },
+        {
+          "name": "Luna",
+          "detail": "Razza non indicata · Paola Foto",
+          "image": true,
+          "initial": null
+        },
+        {
+          "name": "Nina",
+          "detail": "Razza non indicata · Paola Base",
+          "image": false,
+          "initial": "N"
+        }
+      ]
+    }
+  },
+  "cases": {
+    "Barboncino": {
+      "name": "Barboncino",
+      "detail": "Toy · 3296167453",
+      "image": true,
+      "initial": null
+    },
+    "barboncino": {
+      "name": "barboncino",
+      "detail": "Nano · 3296167453",
+      "image": false,
+      "initial": "B"
+    },
+    "Luna": {
+      "name": "Luna",
+      "detail": "Razza non indicata · Paola Foto",
+      "image": true,
+      "initial": null
+    },
+    "Nina": {
+      "name": "Nina",
+      "detail": "Razza non indicata · Paola Base",
+      "image": false,
+      "initial": "N"
+    }
+  },
+  "search": {
+    "name": {
+      "query": "MiloUnique",
+      "result": "MiloUnique"
+    },
+    "owner": {
+      "query": "Ada Distinta",
+      "result": "Teo"
+    },
+    "phone": {
+      "query": "3451112294",
+      "result": "Rocky"
+    },
+    "breed": {
+      "query": "Lagotto",
+      "result": "Teo"
+    }
+  },
+  "reads": {
+    "afterWork": 1,
+    "afterAppointment": 1
+  },
+  "viewport": {
+    "mobile": "375x812",
+    "desktop": "1365x900"
+  },
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 1641
+}
