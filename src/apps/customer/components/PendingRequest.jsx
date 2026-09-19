@@ -58,6 +58,7 @@ export default function PendingRequest({ request, onResponded }) {
   const [error, setError] = useState('');
   const [confirmingWithdrawal, setConfirmingWithdrawal] = useState(false);
   const [withdrawalError, setWithdrawalError] = useState('');
+  const [withdrawalSucceeded, setWithdrawalSucceeded] = useState(false);
   const inFlight = useRef(false);
   const current = saved && new Date(saved.customer_responded_at) >= new Date(request.customer_responded_at || 0)
     && saved.staff_responded_at === request.staff_responded_at ? { ...request, ...saved } : request;
@@ -118,7 +119,8 @@ export default function PendingRequest({ request, onResponded }) {
       if (row?.status !== 'withdrawn' || !row.withdrawn_at || row.appointment_id) {
         throw new Error('Withdrawal not confirmed');
       }
-      navigate(`/u/book?petId=${request.pet_id}`, { replace: true });
+      setConfirmingWithdrawal(false);
+      setWithdrawalSucceeded(true);
     } catch (err) {
       setConfirmingWithdrawal(false);
       setWithdrawalError(
@@ -130,6 +132,22 @@ export default function PendingRequest({ request, onResponded }) {
       inFlight.current = false; setBusy(false);
     }
   };
+
+  if (withdrawalSucceeded) {
+    return (
+      <Card padding={20}>
+        <Eyebrow style={{ marginBottom: 12 }}>Richiesta appuntamento</Eyebrow>
+        <p role="status" style={textStyle}>Richiesta ritirata. Per ora è tutto.</p>
+        <Button
+          variant="ghost"
+          style={{ ...buttonStyle, marginTop: 12 }}
+          onClick={() => navigate(`/u/book?petId=${request.pet_id}`)}
+        >
+          Scegli un’altra data
+        </Button>
+      </Card>
+    );
+  }
 
   return (
     <Card padding={20}>
@@ -143,7 +161,7 @@ export default function PendingRequest({ request, onResponded }) {
           <p style={textStyle}>Puoi ancora correggerla: appena ti rispondiamo, l’orario è fissato.</p>
           {confirmingWithdrawal ? (
             <>
-              <p style={textStyle}>Vuoi ritirare questa richiesta? Potrai sceglierne subito una nuova.</p>
+              <p style={textStyle}>Vuoi ritirare questa richiesta?</p>
               <Button variant="ghost" style={buttonStyle} disabled={busy} onClick={withdraw}>{busy ? 'Ritiro...' : 'Sì, ritirala'}</Button>
               <Button variant="ghost" style={buttonStyle} disabled={busy} onClick={() => setConfirmingWithdrawal(false)}>No, lasciala</Button>
             </>

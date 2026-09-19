@@ -1,0 +1,67 @@
+{
+  "cases": {
+    "stay": {
+      "beforeUrl": "http://127.0.0.1:5173/u/home?case=stay",
+      "afterUrl": "http://127.0.0.1:5173/u/home?case=stay",
+      "canceledCalls": 0,
+      "totalCalls": 1,
+      "backDestination": "/u/promotions",
+      "openRequestVisible": false
+    },
+    "optionalRebook": {
+      "destination": "/u/book?petId=97979797-2222-4222-8222-979797979797"
+    },
+    "resolved": {
+      "code": "23514",
+      "detail": "GH96_ALREADY_RESOLVED",
+      "screenText": "Il salone ha già risposto a questa richiesta. Aggiorna la pagina per vedere cosa è cambiato."
+    }
+  },
+  "layouts": [
+    {
+      "name": "withdrawn-stay-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Rumba",
+          "width": 206.0625,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "RRumbaBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Scegli un’altra data",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 3322
+}
