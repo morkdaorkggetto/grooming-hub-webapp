@@ -23,11 +23,12 @@ const PROFILE_ROLES = ['operator', 'customer'];
 const APPROVAL_STATUSES = ['pending', 'approved', 'rejected'];
 const APPOINTMENT_SOURCES = ['operator', 'customer'];
 const STAFF_ROLES = ['owner', 'staff'];
+export const RECENT_WITHDRAWN_REQUEST_DAYS = 5;
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
 const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, service_id, date, treatments, issues, cost, discount_percent, photo_url, created_at, updated_at, service:services(id, name))`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, service:services(id, name, duration_minutes), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
-const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, staff_responded_at, proposed_alternatives, alternatives_round, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
+const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, withdrawn_at, staff_responded_at, proposed_alternatives, alternatives_round, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_PET_SELECT = `id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone)`;
 const PROMOTION_SELECT = 'id, tenant_id, title, body, image_url, valid_from, valid_to, cta_label, cta_url, display_order, is_active, created_at';
@@ -1292,6 +1293,33 @@ export const getPendingAppointmentRequests = async () => {
     ...(structuredResult.data || []).map(mapAppointmentRequest),
     ...(legacyResult.data || []).map(mapLegacyAppointmentRequest),
   ].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+};
+
+export const getAppointmentRequestsForStaff = async () => {
+  const { tenantId } = await requireStaff();
+  const withdrawnSince = new Date(
+    Date.now() - RECENT_WITHDRAWN_REQUEST_DAYS * 24 * 60 * 60 * 1000
+  ).toISOString();
+  const [structuredResult, legacyResult, withdrawnResult] = await Promise.all([
+    supabase.from('appointment_requests').select(APPOINTMENT_REQUEST_SELECT)
+      .eq('tenant_id', tenantId).eq('status', 'pending')
+      .order('created_at', { ascending: false }),
+    supabase.from('appointments').select(APPOINTMENT_SELECT)
+      .eq('tenant_id', tenantId).eq('approval_status', 'pending')
+      .eq('appointment_source', 'customer').order('created_at', { ascending: false }),
+    supabase.from('appointment_requests').select(APPOINTMENT_REQUEST_SELECT)
+      .eq('tenant_id', tenantId).eq('status', 'withdrawn')
+      .gte('withdrawn_at', withdrawnSince)
+      .order('withdrawn_at', { ascending: false }),
+  ]);
+  if (structuredResult.error || legacyResult.error || withdrawnResult.error) {
+    throw new Error('Non riesco a caricare le richieste del salone');
+  }
+  return [
+    ...(structuredResult.data || []).map(mapAppointmentRequest),
+    ...(legacyResult.data || []).map(mapLegacyAppointmentRequest),
+    ...(withdrawnResult.data || []).map(mapAppointmentRequest),
+  ].sort((a, b) => String(b.withdrawn_at || b.created_at || '').localeCompare(String(a.withdrawn_at || a.created_at || ''), 'it'));
 };
 
 export const resolveAppointmentRequest = async (

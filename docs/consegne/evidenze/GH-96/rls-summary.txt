@@ -1,0 +1,5 @@
+GH-06 - Suite RLS demo
+Progetto: qttpinkslhenxrsbhhhg
+Data: 2026-09-19
+Esito: 60 PASS, 0 FAIL, 0 SKIP
+Pulizia fixture: PASS; 0 pet, 0 visite, 0 customer, 0 richieste, 0 note pet, 0 note customer, 0 promozioni, 0 appuntamenti GH-52 residui.

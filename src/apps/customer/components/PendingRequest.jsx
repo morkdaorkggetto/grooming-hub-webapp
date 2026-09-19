@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../shared/supabase/client';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { getTenantWhatsAppPhone } from '../../../shared/tenant/contact';
@@ -46,6 +47,7 @@ const contactStyle = {
 };
 
 export default function PendingRequest({ request, onResponded }) {
+  const navigate = useNavigate();
   const { tenant } = useTenant();
   const [saved, setSaved] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -54,6 +56,8 @@ export default function PendingRequest({ request, onResponded }) {
   const [newTimePreference, setNewTimePreference] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [confirmingWithdrawal, setConfirmingWithdrawal] = useState(false);
+  const [withdrawalError, setWithdrawalError] = useState('');
   const inFlight = useRef(false);
   const current = saved && new Date(saved.customer_responded_at) >= new Date(request.customer_responded_at || 0)
     && saved.staff_responded_at === request.staff_responded_at ? { ...request, ...saved } : request;
@@ -69,6 +73,7 @@ export default function PendingRequest({ request, onResponded }) {
   }), [bookingSchedule]);
   const selectedDateClosure = getDateClosure(newDesiredDate, bookingSchedule);
   const canDecline = canDeclineAppointmentAlternatives(current);
+  const canWithdraw = current.status === 'pending' && !current.appointment_id;
   const salonWhatsAppUrl = buildWhatsAppUrl(
     getTenantWhatsAppPhone(tenant),
     `Ciao! Per ${current.pet?.name || 'il mio pet'} non riusciamo a trovare una fascia adatta. Possiamo sentirci?`
@@ -100,6 +105,32 @@ export default function PendingRequest({ request, onResponded }) {
     }
   };
 
+  const withdraw = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true); setWithdrawalError('');
+    try {
+      const { data, error: rpcError } = await supabase.rpc('withdraw_appointment_request', {
+        p_request_id: request.id,
+      });
+      if (rpcError) throw rpcError;
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row?.status !== 'withdrawn' || !row.withdrawn_at || row.appointment_id) {
+        throw new Error('Withdrawal not confirmed');
+      }
+      navigate(`/u/book?petId=${request.pet_id}`, { replace: true });
+    } catch (err) {
+      setConfirmingWithdrawal(false);
+      setWithdrawalError(
+        err?.details === 'GH96_ALREADY_RESOLVED' || err?.details === 'GH96_APPOINTMENT_EXISTS' || err?.code === '23514'
+          ? 'Il salone ha già risposto a questa richiesta. Aggiorna la pagina per vedere cosa è cambiato.'
+          : 'Non siamo riusciti a ritirare la richiesta. Aggiorna la pagina e riprova.'
+      );
+    } finally {
+      inFlight.current = false; setBusy(false);
+    }
+  };
+
   return (
     <Card padding={20}>
       <Eyebrow style={{ marginBottom: 12 }}>Richiesta appuntamento</Eyebrow>
@@ -107,6 +138,21 @@ export default function PendingRequest({ request, onResponded }) {
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 500, textTransform: 'capitalize' }}>{day(current.desired_date)}</div>
       <p style={textStyle}>{current.pet?.name || 'Il tuo pet'} · {current.service?.name || 'Indicazione non disponibile'} · {getBookingTimePreferenceLabel(current.time_preference, 'Nessuna preferenza') || 'Nessuna preferenza'}</p>
       <p style={{ ...textStyle, fontSize: 13 }}>Inviata il {new Date(request.created_at).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
+      {canWithdraw ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }}>
+          <p style={textStyle}>Puoi ancora correggerla: appena ti rispondiamo, l’orario è fissato.</p>
+          {confirmingWithdrawal ? (
+            <>
+              <p style={textStyle}>Vuoi ritirare questa richiesta? Potrai sceglierne subito una nuova.</p>
+              <Button variant="ghost" style={buttonStyle} disabled={busy} onClick={withdraw}>{busy ? 'Ritiro...' : 'Sì, ritirala'}</Button>
+              <Button variant="ghost" style={buttonStyle} disabled={busy} onClick={() => setConfirmingWithdrawal(false)}>No, lasciala</Button>
+            </>
+          ) : (
+            <Button variant="ghost" style={buttonStyle} disabled={busy} onClick={() => { setWithdrawalError(''); setConfirmingWithdrawal(true); }}>Correggi data</Button>
+          )}
+          {withdrawalError ? <p role="alert" style={textStyle}>{withdrawalError}</p> : null}
+        </div>
+      ) : null}
       {alternatives.length > 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }} aria-busy={busy}>
           {response && !editing ? (

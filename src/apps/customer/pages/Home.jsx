@@ -138,6 +138,10 @@ export default function Home() {
     getTenantWhatsAppPhone(tenant),
     'Ciao! Vorrei aggiungere il mio pet alla scheda del salone.'
   );
+  const appointmentWhatsAppUrl = nextAppt ? buildWhatsAppUrl(
+    getTenantWhatsAppPhone(tenant),
+    `Ciao! Non riesco più a venire all’appuntamento di ${nextAppt.pet?.name || 'il mio pet'} del ${DAY_FMT.format(new Date(nextAppt.scheduled_at))} alle ${TIME_FMT.format(new Date(nextAppt.scheduled_at))}. Possiamo sentirci?`
+  ) : '';
   const requestPetName = pendingRequest?.pet?.name || 'il tuo pet';
 
   // Loading state generale
@@ -362,6 +366,17 @@ export default function Home() {
                 <p role="status" style={{ margin: '12px 0 0', fontSize: 14, color: 'var(--color-primary)', lineHeight: 1.5 }}>
                   Confermato dal salone
                 </p>
+              ) : null}
+              <p style={{ margin: '12px 0 0', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+                Se non riesci più a venire, scrivici il prima possibile: proviamo a dare il posto a qualcun altro.
+              </p>
+              {appointmentWhatsAppUrl ? (
+                <a href={appointmentWhatsAppUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', textDecoration: 'none', marginTop: 12 }}>
+                  <span style={{ ...secondaryBtnStyle, minHeight: 44, boxSizing: 'border-box' }}>
+                    <Icon name="whatsapp" size={16} />
+                    Scrivici su WhatsApp
+                  </span>
+                </a>
               ) : null}
             </Card>
           ) : pendingRequest ? (

@@ -1,0 +1,319 @@
+{
+  "customer": {
+    "withdraw": {
+      "confirmations": 1,
+      "canceledCalls": 0,
+      "totalCalls": 1,
+      "destination": "/u/book?petId=96969696-2222-4222-8222-969696969696"
+    },
+    "resolved": {
+      "databaseCode": "23514",
+      "databaseDetail": "GH96_ALREADY_RESOLVED",
+      "screenText": "Il salone ha già risposto a questa richiesta. Aggiorna la pagina per vedere cosa è cambiato."
+    },
+    "confirmed": {
+      "text": "Se non riesci più a venire, scrivici il prima possibile: proviamo a dare il posto a qualcun altro.",
+      "whatsappHref": "https://wa.me/393330000096?text=Ciao%21+Non+riesco+pi%C3%B9+a+venire+all%E2%80%99appuntamento+di+Rumba+del+marted%C3%AC+22+settembre+alle+10%3A00.+Possiamo+sentirci%3F",
+      "appCancellationControls": 0
+    }
+  },
+  "staff": {
+    "requests": {
+      "visibleDays": 5,
+      "marker": "Ritirata",
+      "stats": "DA GESTIRE 1 DA PRENOTARE 0 IN ATTESA PERSONA 0",
+      "actionButtons": 0
+    },
+    "alerts": {
+      "before": {
+        "badge": 1,
+        "tones": 0
+      },
+      "after": {
+        "badge": 0,
+        "tones": 0
+      }
+    }
+  },
+  "layouts": [
+    {
+      "name": "customer-confirm-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Vedi la scheda di Rumba",
+          "width": 206.0625,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "RRumbaBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Sì, ritirala",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "No, lasciala",
+          "width": 285,
+          "height": 44.5,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "customer-rebook-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "RRumbaBarboncino",
+          "width": 172.5,
+          "height": 70,
+          "truncated": false
+        },
+        {
+          "text": "Bagno",
+          "width": 172.5,
+          "height": 70,
+          "truncated": false
+        },
+        {
+          "text": "dom20",
+          "width": 54.328125,
+          "height": 68,
+          "truncated": false
+        },
+        {
+          "text": "lun21",
+          "width": 54.328125,
+          "height": 68,
+          "truncated": false
+        },
+        {
+          "text": "mar22",
+          "width": 54.328125,
+          "height": 68,
+          "truncated": false
+        },
+        {
+          "text": "mer23",
+          "width": 54.34375,
+          "height": 68,
+          "truncated": false
+        },
+        {
+          "text": "gio24",
+          "width": 54.328125,
+          "height": 68,
+          "truncated": false
+        },
+        {
+          "text": "ven25",
+          "width": 54.328125,
+          "height": 68,
+          "truncated": false
+        },
+        {
+          "text": "Mattina (9–13)",
+          "width": 118.171875,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Pomeriggio (13–19)",
+          "width": 147.578125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Per me è uguale",
+          "width": 125.609375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Qualche nodo",
+          "width": 112.265625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Molto annodato",
+          "width": 123.53125,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Perde tanto pelo",
+          "width": 128.734375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Lo porto regolarmente",
+          "width": 164.65625,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Pulito, solo lungo",
+          "width": 133.34375,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "customer-confirmed-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Prenota un nuovo appuntamento",
+          "width": 292.390625,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "Vedi la scheda di Rumba",
+          "width": 206.0625,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "RRumbaBarboncino",
+          "width": 285,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Scrivici su WhatsApp",
+          "width": 208.953125,
+          "height": 45,
+          "truncated": false
+        },
+        {
+          "text": "Home",
+          "width": 45.296875,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Promozioni",
+          "width": 72.28125,
+          "height": 48,
+          "truncated": false
+        },
+        {
+          "text": "Profilo",
+          "width": 49.140625,
+          "height": 48,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "staff-withdrawn-375",
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "Grooming Hub",
+          "width": 102.015625,
+          "height": 12.34375,
+          "truncated": false
+        },
+        {
+          "text": "1",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "",
+          "width": 44,
+          "height": 44,
+          "truncated": false
+        },
+        {
+          "text": "Dashboard",
+          "width": 95.296875,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Aggiorna",
+          "width": 78,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Conferma",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Proponi alternative",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Rifiuta",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        },
+        {
+          "text": "Apri scheda cane",
+          "width": 321,
+          "height": 46,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "unexpected": [],
+  "elapsedMs": 3114
+}

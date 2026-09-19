@@ -20,8 +20,9 @@ import {
 } from '../../../shared/tenant/workstationCapacity';
 import {
   APPOINTMENT_REQUEST_STAFF_ACTION,
-  getPendingAppointmentRequests,
+  getAppointmentRequestsForStaff,
   proposeAppointmentRequestAlternatives,
+  RECENT_WITHDRAWN_REQUEST_DAYS,
   resolveAppointmentRequest,
   summarizePendingAppointmentRequests,
   updateAppointmentApproval,
@@ -175,6 +176,7 @@ const getRequestWindow = (notes = '') => {
 
 function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenClient }) {
   const isStructured = request.request_kind === 'structured';
+  const isWithdrawn = request.status === 'withdrawn';
   const service = request.service?.name || getRequestService(request.notes);
   const windowLabel = isStructured
     ? getBookingTimePreferenceLabel(request.time_preference, 'Nessuna preferenza') || 'Nessuna preferenza'
@@ -184,7 +186,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
     .join(', ');
   const isUpdating = updatingId === request.id;
   const response = currentAlternativeResponse(request);
-  const actionLabel = {
+  const actionLabel = isWithdrawn ? 'Ritirata' : {
     [APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_RESPONSE]: 'Da rispondere',
     [APPOINTMENT_REQUEST_STAFF_ACTION.WAITING_CUSTOMER]: 'In attesa della persona',
     [APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING]: 'Da prenotare',
@@ -195,13 +197,15 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
       <div className="gh-request-row">
         <div className="gh-request-copy">
           <div className="gh-request-tags">
-            <StateTag tone={request.staff_action === APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING ? 'success' : 'warning'}>
+            <StateTag tone={isWithdrawn ? 'neutral' : request.staff_action === APPOINTMENT_REQUEST_STAFF_ACTION.NEEDS_BOOKING ? 'success' : 'warning'}>
               {actionLabel}
             </StateTag>
             {response === 'declined' ? <StateTag tone="warning">Proposte rifiutate</StateTag> : null}
             {request.client?.is_blacklisted ? <StateTag tone="danger">Blacklist</StateTag> : null}
             <span className="gh-meta gh-num">
-              {request.staff_responded_at
+              {isWithdrawn
+                ? `Ritirata il ${formatCreatedAt(request.withdrawn_at)}`
+                : request.staff_responded_at
                 ? `Risposto il ${formatCreatedAt(request.staff_responded_at)}`
                 : `Arrivata il ${formatCreatedAt(request.created_at)}`}
             </span>
@@ -259,7 +263,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
           ) : null}
         </div>
 
-        <div className="gh-request-actions">
+        {!isWithdrawn ? <div className="gh-request-actions">
           <Button staff wide variant="success" onClick={() => onApproval(request, 'approved')} disabled={isUpdating}>
             {isUpdating ? 'Aggiorno...' : 'Conferma'}
           </Button>
@@ -272,7 +276,7 @@ function RequestCard({ request, updatingId, onApproval, onAlternatives, onOpenCl
             {isUpdating ? 'Aggiorno...' : 'Rifiuta'}
           </Button>
           <Button staff wide variant="outline" onClick={() => onOpenClient(request.pet_id)}>Apri scheda cane</Button>
-        </div>
+        </div> : null}
       </div>
     </Panel>
   );
@@ -452,13 +456,15 @@ export default function CustomerRequests() {
   const [whatsappDraft, setWhatsappDraft] = useState(null);
   const bookingSchedule = useMemo(() => getBookingSchedule(tenant?.settings), [tenant?.settings]);
   const workstationCapacity = useMemo(() => getWorkstationCapacity(tenant?.settings), [tenant?.settings]);
+  const openRequests = useMemo(() => requests.filter((request) => request.status !== 'withdrawn'), [requests]);
+  const withdrawnRequests = useMemo(() => requests.filter((request) => request.status === 'withdrawn'), [requests]);
 
   const loadRequests = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const data = await getPendingAppointmentRequests();
+      const data = await getAppointmentRequestsForStaff();
       setRequests(data);
     } catch (err) {
       setRequests([]);
@@ -473,14 +479,14 @@ export default function CustomerRequests() {
   }, []);
 
   const stats = useMemo(() => {
-    const summary = summarizePendingAppointmentRequests(requests);
+    const summary = summarizePendingAppointmentRequests(openRequests);
 
     return {
       actionable: summary.counts.actionable,
       needsBooking: summary.counts.needsBooking,
       waitingCustomer: summary.counts.waitingCustomer,
     };
-  }, [requests]);
+  }, [openRequests]);
 
   const performApproval = async (request, approvalStatus, scheduledDate = null, scheduledTime = null, durationMinutes = null) => {
     setError('');
@@ -595,12 +601,12 @@ export default function CustomerRequests() {
         <Panel
           bridge
           eyebrow="Richieste in arrivo"
-          title="Tutte le richieste aperte"
+          title="Richieste aperte e ritiri recenti"
           right={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>}
         >
           <div className="gh-request-pipeline">
               <p className="gh-body">
-                Ogni richiesta resta visibile finché il salone la chiude.
+                I ritiri recenti restano visibili, separati dalle richieste da gestire e dai conteggi.
               </p>
           </div>
         </Panel>
@@ -611,7 +617,18 @@ export default function CustomerRequests() {
           <Panel><EmptyState title="Nessuna richiesta in attesa" body="Quando arriva una richiesta dall’area dei proprietari, la trovi qui." action={<Button staff variant="outline" onClick={loadRequests}>Aggiorna</Button>} /></Panel>
         ) : (
           <div className="gh-request-list">
-            {requests.map((request) => (
+            {openRequests.map((request) => (
+              <RequestCard
+                key={request.id}
+                request={request}
+                updatingId={updatingId}
+                onApproval={handleApproval}
+                onAlternatives={setAlternativesRequest}
+                onOpenClient={handleOpenClient}
+              />
+            ))}
+            {withdrawnRequests.length ? <p className="gh-eyebrow--staff">Ritirate negli ultimi {RECENT_WITHDRAWN_REQUEST_DAYS} giorni</p> : null}
+            {withdrawnRequests.map((request) => (
               <RequestCard
                 key={request.id}
                 request={request}

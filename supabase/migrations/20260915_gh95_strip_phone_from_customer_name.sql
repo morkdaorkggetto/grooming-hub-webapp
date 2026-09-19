@@ -1,0 +1,65 @@
+-- gh95_strip_phone_from_customer_name  (+ gh95b_fix_names_split_across_columns)
+-- Applicata in produzione (azgehoseiojodltcttfb) il 15/09/2026, autorizzata da Luigi.
+-- NON applicata al demo: riguarda dati reali del salone, non lo schema.
+--
+-- Toglie il numero di telefono dal nome dei clienti che avevano nome E numero nello
+-- stesso campo. Regola: sequenze di 5+ cifre, eventualmente con + spazi . / - in mezzo.
+-- Nient'altro viene toccato: né maiuscole, né accenti, né parole, né telefoni.
+--
+-- Esito misurato: 55 clienti cambiati su 57 candidati. I due invariati sono
+-- "2 maltipoo" e "signor Giuseppe 2 cani", dove la cifra è il numero di cani e non
+-- raggiunge la soglia. 0 clienti rimasti senza nome. 0 telefoni toccati.
+-- I 128 clienti il cui nome è SOLO un numero non sono oggetto di questa migrazione.
+--
+-- ERRORE E CORREZIONE, dichiarati: la prima esecuzione applicava la regola a
+-- first_name e last_name SEPARATAMENTE, mentre la verifica preventiva era stata
+-- fatta sul nome CONCATENATO. In 5 clienti il numero era spezzato fra le due
+-- colonne e nessuno dei due pezzi raggiungeva la soglia: sono rimasti frammenti
+-- ("Vania 2335"). gh95b ha ripreso gli originali dal backup, applicato la regola
+-- al concatenato e scritto il risultato in first_name con last_name a NULL.
+--
+-- Il vincolo customers_identity_check impone first_name NOT NULL per chi non ha un
+-- account: dove il nome proprio si svuotava, il cognome ripulito ha preso il posto.
+-- Il nome mostrato non cambia, perché l'app concatena i due campi.
+
+-- ---------------------------------------------------------------------------
+-- ROLLBACK — riporta i 55 nomi com'erano. Si rifiuta di partire se il backup
+-- non c'è o se qualcuno ha modificato quei clienti dopo la migrazione.
+-- ---------------------------------------------------------------------------
+--
+-- do $$
+-- declare v_drift integer;
+-- begin
+--   if to_regclass('public.gh95_customer_name_backup') is null then
+--     raise exception 'Backup assente: rollback rifiutato';
+--   end if;
+--
+--   -- righe modificate dopo la migrazione da qualcun altro
+--   select count(*) into v_drift
+--   from public.customers c
+--   join public.gh95_customer_name_backup b on b.id = c.id
+--   where c.updated_at > b.backed_up_at + interval '5 minutes';
+--
+--   if v_drift > 0 then
+--     raise exception 'Deriva rilevata su % clienti: rollback rifiutato', v_drift;
+--   end if;
+--
+--   update public.customers c
+--      set first_name = b.first_name,
+--          last_name  = b.last_name,
+--          updated_at = now()
+--     from public.gh95_customer_name_backup b
+--    where c.id = b.id;
+-- end $$;
+--
+-- ---------------------------------------------------------------------------
+-- CODA: tre clienti avevano nel nome un numero DIVERSO da quello nel campo
+-- telefono. Il nome è stato ripulito, quindi quei numeri vivono ora solo nel
+-- backup. Da decidere con Davide, non da correggere d'ufficio:
+--   - "Mamma scuola Gabriele": nel nome 3336229377, nel campo 333622977 (una cifra in meno)
+--   - "Parrucchiere":          nel nome 3341348370, nel campo 3341349370 (una cifra diversa)
+--   - "Ciccarelli":            nel campo +3922696034, il 3 iniziale assorbito dal prefisso
+--
+-- La tabella gh95_customer_name_backup NON va cancellata finché questi tre non
+-- sono stati chiusi e finché Luigi non ha controllato il file
+-- nomi-da-recuperare/gh95-prima-dopo.csv.
