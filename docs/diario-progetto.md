@@ -8,9 +8,13 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 13 settembre 2026.*
+*Aggiornato il 19 settembre 2026.*
 
 > # Il giro si chiude dentro l'app. Quello che manca non è più codice.
+>
+> **Dal 14 al 19 settembre** il lavoro è tutto arrivato dal banco: quattro segnalazioni di Davide e Roby usando lo strumento, nessuna dall'analisi. `GH-93` → `GH-96`, più la bonifica di 55 nomi.
+>
+> **Il cliente ora può correggere una richiesta sbagliata finché il salone non ha risposto**, e dopo la conferma trova la via per scrivere al salone dove sta l'appuntamento, non per caso.
 >
 > **Fra la sera del 12 e la mattina del 13 settembre** il percorso di una prenotazione è stato smontato fase per fase con Luigi al banco e Davide al telefono, e ricostruito: la persona chiede, il salone propone **tre orari precisi** guardando quante postazioni restano, la persona ne tocca uno **dall'app**, il salone prenota con un tocco. Prima del 12 settembre quel giro **usciva su WhatsApp e non rientrava**.
 >
@@ -37,7 +41,9 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 **Code aperte, nessuna bloccante** (le precedenti restano valide più sotto):
 
-- **Il campo `owner` contiene numeri di telefono in 133 clienti su 322.** `GH-87` ha smesso di leggerli ad alta voce — se il valore non sembra un nome, il messaggio si apre senza nome — ma **il dato resta sporco**. La bonifica è un lavoro con Davide che legge;
+- **Restano 128 clienti il cui nome è solo un numero di telefono** (133 cani). I 57 «misti» sono stati ripuliti il 15/9 con `gh95`. Questi non si aggiustano con un'espressione: serve Davide, con il foglio `nomi-da-recuperare/`, ordinato per numero di visite. **Non deve finirlo**: i primi trenta cambiano già la faccia dei messaggi e dell'elenco al banco;
+- **La frase del conflitto telefono nomina un numero invece di un cane.** Creando un pet il cui numero è già di qualcuno, l'app chiede *«Questo numero è di X. È un altro suo pet?»* — e per 128 clienti **X è un numero**. Non nomina mai il cane già presente, che è l'unica cosa che farebbe riconoscere la situazione. Sospeso il 15/9 in attesa di sapere da Davide se avesse premuto «Sì, aggiungilo»;
+- **Tre numeri di telefono vivono solo nel backup.** `Mamma scuola Gabriele`, `Parrucchiere` e `Ciccarelli` avevano nel nome un numero diverso da quello nel campo telefono. `gh95_customer_name_backup` **non si cancella** finché Davide non decide quale dei due sia giusto;
 - **Le chiusure non sono controllate da `submit_appointment_request`.** L'interfaccia le impedisce, il database no. Migrazione di Cowork, dieci righe, mai applicata;
 - **`#d4a574` è un colore morto** in `tailwind.config.js`: nessuna classe lo usa, e il marchio è `#6f9792`. Prima o poi qualcuno lo prenderà per il colore giusto;
 - **Il link `Grooming Hub` nell'intestazione staff è 102 × 12,34 px**, sotto i 44 richiesti. Preesistente, misurato da Codex in `GH-87`, escluso da tutti i mandati successivi. Micro-mandato dedicato su `StaffKit`;
@@ -173,6 +179,40 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 ---
 
 ## Cronologia
+
+### 14–19 settembre 2026 — Le cose che il salone chiede usandola (GH-93 → GH-96, e la bonifica dei nomi)
+
+**Attori**: Davide e Roby al banco, Luigi, Cowork, Codex.
+
+**Contesto**: quattro segnalazioni arrivate dall'uso vero, nessuna dall'analisi. È il modo in cui il progetto lavora da quando il salone ha lo strumento in mano.
+
+**Cosa è arrivato, e cosa ha rivelato:**
+
+- **«Ho annullato un appuntamento e il ripristino non me lo salvava»** (Davide, 14/9). Ricostruito dai dati: aveva annullato e rifatto **nello stesso slot a 51 secondi di distanza**, e il ripristino avrebbe fatto il quarto cane su tre postazioni. **Il rifiuto era corretto; il messaggio compariva dietro al modale aperto.** `GH-93` porta gli esiti dentro i modali — tutti, non solo il ripristino — e distingue *«è già stato rifatto»* da *«non c'è posto»*;
+- **«Come associo i cani di una stessa famiglia?»** (Luigi, 14/9). Misurato: **24 famiglie con più di un cane, 53 cani**, e dentro nessuna famiglia due nomi uguali. Ma il selettore mostrava **solo nome e proprietario** — e per 132 clienti il proprietario è un numero. **La razza c'era nei dati, veniva usata per filtrare e non veniva mostrata.** `GH-94` la mostra, con la foto di riconoscimento;
+- **«Il modale mi impedisce di prenotare un cane che condivide il cellulare con un altro»** (Davide, 15/9). Misurato: la via esiste — *«Questo numero è di X. È un altro suo pet?»* — ma per 132 clienti su 327 al posto di **X** compare un numero di telefono, e la frase **non nomina mai il cane già presente**. Non risolto: serviva sapere se Davide avesse premuto «Sì, aggiungilo»;
+- **«Se un cliente sbaglia la data, come rimedia?»** (Davide, 18/9, in vista del lancio). Misurato: **non può fare niente**. `GH-96`.
+
+**Decisioni prese:**
+
+- **Si corregge finché il salone non ha risposto.** Non una soglia di ore: un confine naturale. Appena qualcuno in salone tocca la richiesta, l'orario esiste per due persone e non si disfa da soli;
+- **Dopo la conferma non si disdice dall'app: si scrive al salone** — e **il testo chiede collaborazione, non annuncia conseguenze.** Luigi aveva proposto di dire che l'annullamento incide sulla reputazione del pet; la proposta è stata scartata **sui numeri**: 9 assenze e 10 annullamenti su 278 appuntamenti. Rendere costosa la disdetta sposta quei dieci nella colonna delle nove, dove il posto resta vuoto davvero. **Chi avvisa va agevolato.** Decisione di Luigi, 18/9;
+- **`no_show_score` non si automatizza**: resta un giudizio che il salone mette a mano a chi non si è presentato;
+- **Se la frase sulle annotazioni servirà, lo dirà la misura.** Linea di partenza fissata al 18/9 — **9 assenze · 10 annullamenti · 278 appuntamenti**. Fra due mesi si rifà il conto: se crescono le assenze più degli annullamenti, la frase serve.
+
+**Bonifica dei nomi (15/9), e un errore di Cowork in produzione:**
+
+Misurato: **128 clienti** hanno per nome **solo un numero di telefono** (133 cani), **57** hanno un nome **misto** a cifre (69 cani). I 57 si riparano da soli: basta togliere il numero. **55 ripuliti** — `Alessandro`, `Antonella Natola`, `Dott. Pezzullo`, `Ginevra Cante`. I due non toccati sono `2 maltipoo` e `signor Giuseppe 2 cani`, dove la cifra è il numero di cani.
+
+> **Errore dichiarato.** La verifica preventiva era stata fatta sul nome **concatenato**; l'aggiornamento ha operato sulle **due colonne separatamente**. In cinque clienti il numero era spezzato fra `first_name` e `last_name` e nessun pezzo raggiungeva la soglia: sono rimasti frammenti — `Vania 2335`, `Arturo Palma 342`. Ripristinati dal backup e riparati in pochi minuti. **Regola che ne discende: la prova di una migrazione deve girare sulla stessa espressione che poi esegue l'aggiornamento.** Se la prova legge il concatenato e l'update scrive le colonne, la prova non prova niente.
+
+**Coda aperta dalla bonifica**: tre clienti avevano nel nome un numero **diverso** da quello nel campo telefono (`Mamma scuola Gabriele`, `Parrucchiere`, `Ciccarelli`). I numeri vivono ora solo in `gh95_customer_name_backup`, che **non si cancella** finché Davide non decide.
+
+**Materiali prodotti per il salone, fuori dal repository** (contengono dati personali di 351 persone): **351 PNG dei QR** più l'indice stampabile per accoppiare gadget e cane — tutti e 351 riletti con un decodificatore, **351 su 351 corrispondenti** — e il foglio dei **128 nomi da recuperare**, ordinato per numero di visite, con la colonna vuota dove Davide scrive.
+
+**Consegne di Codex degne di nota**: in `GH-93` ha esteso la revisione a **tutte** le azioni del calendario invece che al solo ripristino, e ha dimostrato che il database resta l'ultima parola **rendendo volutamente permissivo il controllo in memoria**; in `GH-94` ha riusato `isAppointmentCapacityAvailable` **con capienza 1 filtrata sullo stesso pet** per distinguere il gemello, senza inventare un secondo criterio; in `GH-96` ha trasformato l'invariante sul tono in una misura — *«il diff non contiene `altrimenti`, `penale`, `conseguenz`»* — e si è fermato prima di eseguire quando ha trovato nell'albero il lavoro non committato di `GH-94`.
+
+**Aperto**: i tre cancelli del lancio, invariati. Più `GH-95`, la frase del conflitto telefono che nomina un numero invece di un cane.
 
 ### 12–13 settembre 2026 — Il giro si chiude dentro l'app (GH-84 → GH-92)
 
