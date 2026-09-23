@@ -1,0 +1,13 @@
+base a99a372ba471485bae7591ddc78dc2d1e7867747
+
+getAppointmentRequestStaffAction
+base    63bf16bf5ec0c935cd127b4fe97277e70f2be7afc109a35b25852af9a62859b9
+current 63bf16bf5ec0c935cd127b4fe97277e70f2be7afc109a35b25852af9a62859b9
+
+summarizePendingAppointmentRequests
+base    aa506ba0bdffde8e49d5bbf43a6ad10bfcdf5b6b6e23ec28ece715b488f3dc52
+current aa506ba0bdffde8e49d5bbf43a6ad10bfcdf5b6b6e23ec28ece715b488f3dc52
+
+other staff files excluding Calendar.jsx and CalendarKit.jsx: 36 checked, 0 mismatches
+src/apps/customer: 0 changed files
+src/shared/tenant/workstationCapacity.js: 0 changed files

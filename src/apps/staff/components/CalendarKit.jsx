@@ -123,6 +123,29 @@ function CancelledFooter({ appointments, onOpen }) {
   );
 }
 
+export function CalendarPastQueue({ items, onOpen }) {
+  if (!items.length) return null;
+  return (
+    <div className="gh-calendar-form-stack" aria-label="Appuntamenti passati ancora programmati">
+      {items.map((item) => (
+        <button
+          className="gh-planning-chip gh-planning-chip--appointment"
+          type="button"
+          onClick={() => onOpen(item)}
+          key={item.id}
+        >
+          <span className="gh-planning-chip__time">{item.time}</span>
+          <span className="gh-planning-chip__copy">
+            <strong>{item.petName}</strong>
+            <small>{item.dateLabel}</small>
+            <small>{item.hasVisit ? 'Lavorazione registrata quel giorno' : 'Nessuna lavorazione registrata quel giorno'}</small>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function PlanningBand({ band, onOpen, onBook, showCancelled = false }) {
   const appointments = showCancelled ? band.dayAppointments : band.appointments;
   const hasContent = band.requests.length > 0 || appointments.length > 0;

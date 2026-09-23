@@ -1,0 +1,16 @@
+rg -n "addAppointment|resolveAppointmentRequest|updateAppointmentSchedule" src/apps/staff/pages/Calendar.jsx
+
+756: addAppointment
+Manual creation. Confirmation names the complete date and time.
+
+778: resolveAppointmentRequest
+Structured request approval. Confirmation names the complete date and time.
+
+786: updateAppointmentSchedule
+Legacy request approval. Uses the same request confirmation, with complete date and time.
+
+815: updateAppointmentSchedule
+Existing appointment move. Confirmation names the complete destination date and time.
+
+798: resolveAppointmentRequest
+Request rejection. It does not save or move an appointment and is outside this confirmation requirement.

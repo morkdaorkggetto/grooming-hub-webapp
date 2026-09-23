@@ -1,0 +1,7 @@
+{
+  "projectRef": "qttpinkslhenxrsbhhhg",
+  "query": "select count(*)::int as past_scheduled_count from public.appointments where status = 'scheduled' and scheduled_at < (date_trunc('day', now() at time zone 'Europe/Rome') at time zone 'Europe/Rome');",
+  "pastScheduledCount": 7,
+  "apiCountAfterTeardown": 7,
+  "matches": true
+}

@@ -1,0 +1,202 @@
+{
+  "dates": {
+    "today": {
+      "warning": false,
+      "saveEnabled": true
+    },
+    "past": {
+      "warning": "Attenzione: stai scegliendo martedì 22 settembre, un giorno già passato. Puoi salvare comunque.",
+      "saveEnabled": true
+    },
+    "future": {
+      "warning": false
+    }
+  },
+  "saves": {
+    "manual": [
+      "Appuntamento salvato per mercoledì 23 settembre alle 08:00. Il prossimo orario libero è già pronto.",
+      "Appuntamento salvato per mercoledì 30 settembre alle 10:00. Il prossimo orario libero è già pronto.",
+      "Appuntamento salvato per venerdì 23 ottobre alle 11:00. Il prossimo orario libero è già pronto."
+    ],
+    "request": "Richiesta confermata: appuntamento salvato per mercoledì 30 settembre alle 12:00. Ora puoi avvisare il cliente.",
+    "move": "Appuntamento spostato a venerdì 23 ottobre alle 14:00."
+  },
+  "queue": {
+    "count": 2,
+    "labels": [
+      "Lavorazione registrata quel giorno",
+      "Nessuna lavorazione registrata quel giorno"
+    ],
+    "fullReads": {
+      "tenant_memberships": 9,
+      "profiles": 4,
+      "tenants": 1,
+      "appointments": 10,
+      "appointment_requests": 5,
+      "visits": 3
+    },
+    "emptyReads": {
+      "tenant_memberships": 9,
+      "profiles": 4,
+      "tenants": 1,
+      "appointments": 10,
+      "appointment_requests": 5,
+      "visits": 3
+    },
+    "requestBadgeBefore": 0,
+    "requestBadgeAfter": 0
+  },
+  "unfinishedPet": {
+    "created": {
+      "text": "Pet creato. L’appuntamento non è stato salvato.",
+      "deleteCalls": 0
+    },
+    "emptyClose": {
+      "textVisible": false
+    }
+  },
+  "layouts": [
+    {
+      "name": "queue-full-375",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "10:00ConVisitadomenica 20 settembreLavorazione registrata quel giorno",
+          "width": 321,
+          "height": 64.25,
+          "truncated": false
+        },
+        {
+          "text": "11:00SenzaVisitasabato 19 settembreNessuna lavorazione registrata quel giorno",
+          "width": 321,
+          "height": 64.25,
+          "truncated": false
+        }
+      ]
+    },
+    {
+      "name": "queue-full-1365",
+      "viewport": {
+        "width": 1365,
+        "height": 900
+      },
+      "overflow": 0,
+      "controls": [
+        {
+          "text": "10:00ConVisitadomenica 20 settembreLavorazione registrata quel giorno",
+          "width": 1112,
+          "height": 64.25,
+          "truncated": false
+        },
+        {
+          "text": "11:00SenzaVisitasabato 19 settembreNessuna lavorazione registrata quel giorno",
+          "width": 1112,
+          "height": 64.25,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "unexpected": [],
+  "rpcCalls": [
+    {
+      "rpc": "resolve_appointment_request_local",
+      "payload": {
+        "p_request_id": "request-gh98",
+        "p_decision": "approved",
+        "p_scheduled_date": "2026-09-30",
+        "p_scheduled_time": "12:00",
+        "p_duration_minutes": 60
+      }
+    },
+    {
+      "rpc": "create_calendar_customer_pet",
+      "payload": {
+        "p_tenant_id": "98989898-1111-4111-8111-989898989898",
+        "p_customer_first_name": "Cliente",
+        "p_customer_last_name": "Prova",
+        "p_customer_phone": null,
+        "p_phone_not_provided": true,
+        "p_pet_name": "Nuovo Pet",
+        "p_pet_species": null,
+        "p_pet_breed": null,
+        "p_pet_sex": null
+      }
+    }
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "table": "appointments",
+      "payload": {
+        "id": "bf90698d-477c-4bbf-8aa1-5dd355e9ed4c",
+        "user_id": "98989898-9898-4989-8989-989898989898",
+        "pet_id": "pet-future",
+        "tenant_id": "98989898-1111-4111-8111-989898989898",
+        "scheduled_at": "2026-09-23T06:00:00.000Z",
+        "duration_minutes": 60,
+        "status": "scheduled",
+        "approval_status": "approved",
+        "appointment_source": "operator",
+        "requested_by_customer_id": null,
+        "notes": null,
+        "external_calendar": null,
+        "service_id": null
+      }
+    },
+    {
+      "method": "POST",
+      "table": "appointments",
+      "payload": {
+        "id": "6d0a113b-d304-4d35-9b6a-25300acf1a68",
+        "user_id": "98989898-9898-4989-8989-989898989898",
+        "pet_id": "pet-future",
+        "tenant_id": "98989898-1111-4111-8111-989898989898",
+        "scheduled_at": "2026-09-30T08:00:00.000Z",
+        "duration_minutes": 60,
+        "status": "scheduled",
+        "approval_status": "approved",
+        "appointment_source": "operator",
+        "requested_by_customer_id": null,
+        "notes": null,
+        "external_calendar": null,
+        "service_id": null
+      }
+    },
+    {
+      "method": "POST",
+      "table": "appointments",
+      "payload": {
+        "id": "20c1c3b4-b440-4318-874e-ff4bcbcaa352",
+        "user_id": "98989898-9898-4989-8989-989898989898",
+        "pet_id": "pet-future",
+        "tenant_id": "98989898-1111-4111-8111-989898989898",
+        "scheduled_at": "2026-10-23T09:00:00.000Z",
+        "duration_minutes": 60,
+        "status": "scheduled",
+        "approval_status": "approved",
+        "appointment_source": "operator",
+        "requested_by_customer_id": null,
+        "notes": null,
+        "external_calendar": null,
+        "service_id": null
+      }
+    },
+    {
+      "method": "PATCH",
+      "table": "appointments",
+      "id": "bf90698d-477c-4bbf-8aa1-5dd355e9ed4c",
+      "payload": {
+        "scheduled_at": "2026-10-23T12:00:00.000Z",
+        "duration_minutes": 60,
+        "updated_at": "2026-09-23T09:22:28.988Z"
+      }
+    }
+  ],
+  "elapsedMs": 3985
+}

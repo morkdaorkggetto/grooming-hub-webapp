@@ -30,6 +30,7 @@ import { Button, Fab, Field, Hero, HeroButton, Panel } from '../components/Staff
 import {
   CalendarLoading,
   CalendarNavigation,
+  CalendarPastQueue,
   CalendarPetCombobox,
   CalendarPlanningDay,
   CalendarPlanningWeek,
@@ -41,6 +42,7 @@ import {
   deleteAppointment,
   getCalendarPetOptions,
   getCalendarWeekData,
+  getRevenueReportData,
   getVisitFormContext,
   resolveAppointmentRequest,
   updateAppointmentApproval,
@@ -66,6 +68,7 @@ const DEFAULT_FORM = {
   notes: '',
 };
 const DEFAULT_NEW_PET = { petName: '', ownerName: '', phone: '', phoneNotProvided: false, breed: '' };
+const DATE_ZONE = 'Europe/Rome';
 
 const toLocalDateString = (date) => {
   const year = date.getFullYear();
@@ -85,8 +88,18 @@ const startOfWeek = (dateString) => {
   date.setDate(date.getDate() + (weekday === 0 ? -6 : 1 - weekday));
   return toLocalDateString(date);
 };
-const formatTime = (iso) => new Date(iso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-const formatFullDayLabel = (dateString) => new Date(`${dateString}T12:00:00`).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+const formatTime = (iso) => new Intl.DateTimeFormat('it-IT', {
+  hour: '2-digit', minute: '2-digit', timeZone: DATE_ZONE,
+}).format(new Date(iso));
+const formatDay = (date) => {
+  const year = new Intl.DateTimeFormat('it-IT', { year: 'numeric', timeZone: DATE_ZONE });
+  return new Intl.DateTimeFormat('it-IT', {
+    weekday: 'long', day: 'numeric', month: 'long', timeZone: DATE_ZONE,
+    ...(year.format(date) !== year.format(new Date()) ? { year: 'numeric' } : {}),
+  }).format(date);
+};
+const formatFullDayLabel = (dateString) => formatDay(new Date(`${dateString}T12:00:00`));
+const formatCalendarDateTime = (iso) => `${formatDay(new Date(iso))} alle ${formatTime(iso)}`;
 const formatWeekLabel = (from, to) => {
   const start = new Date(`${from}T12:00:00`);
   const end = new Date(`${to}T12:00:00`);
@@ -119,6 +132,9 @@ const getManualClosureNotice = (date, time, schedule) => {
     : closure.label.toLowerCase();
   return `Attenzione: ${reason}. Puoi confermare comunque se è un’eccezione voluta.`;
 };
+const getPastDateNotice = (date) => date && date < todayString()
+  ? `Attenzione: stai scegliendo ${formatFullDayLabel(date)}, un giorno già passato. Puoi salvare comunque.`
+  : '';
 
 const getAppointmentEnd = (appointment) => {
   const start = new Date(appointment.scheduled_at);
@@ -203,7 +219,9 @@ export default function Calendar() {
   const openedQueryClientRef = useRef('');
   const latestWeekLoadRef = useRef(0);
   const searchIndexRequestRef = useRef(null);
+  const visitIndexRequestRef = useRef(null);
   const [searchIndex, setSearchIndex] = useState({ appointments: [], error: '', ready: false });
+  const [visitIndex, setVisitIndex] = useState({ visits: [], error: '', ready: false });
   const [calendarMode, setCalendarMode] = useState('week');
   const [weekStart, setWeekStart] = useState(() => startOfWeek(todayString()));
   const weekEnd = addDays(weekStart, 6);
@@ -225,6 +243,7 @@ export default function Calendar() {
   const [manualPetDraft, setManualPetDraft] = useState(DEFAULT_NEW_PET);
   const [manualPetError, setManualPetError] = useState('');
   const [manualPhoneConflict, setManualPhoneConflict] = useState(null);
+  const [manualCreatedPetId, setManualCreatedPetId] = useState('');
   const [creatingPet, setCreatingPet] = useState(false);
   const [requestForm, setRequestForm] = useState({ date: '', time: '09:00', durationMinutes: DEFAULT_DURATION, message: '' });
   const [detailForm, setDetailForm] = useState({ date: '', time: '', durationMinutes: DEFAULT_DURATION });
@@ -255,9 +274,12 @@ export default function Calendar() {
     setModalSuccess(message);
   };
   const closeModal = () => {
+    const abandonedCreatedPet = modal === 'manual' && Boolean(manualCreatedPetId);
     clearModalFeedback();
     setDeleteError('');
     setModal(null);
+    setManualCreatedPetId('');
+    if (abandonedCreatedPet) setSuccess('Pet creato. L’appuntamento non è stato salvato.');
   };
 
   const loadWeek = useCallback(async () => {
@@ -274,10 +296,21 @@ export default function Calendar() {
         () => ({ appointments: [], error: 'Non riesco a cercare fuori settimana. Ricarica la pagina per riprovare.', ready: true })
       );
     }
+    if (!visitIndexRequestRef.current) {
+      visitIndexRequestRef.current = getRevenueReportData().then(
+        (visits) => ({ visits, error: '', ready: true }),
+        () => ({ visits: [], error: 'Non riesco a distinguere le lavorazioni negli appuntamenti passati.', ready: true })
+      );
+    }
     try {
-      const [nextData, initialIndex] = await Promise.all([weekRequest, searchIndexRequestRef.current]);
+      const [nextData, initialIndex, initialVisits] = await Promise.all([
+        weekRequest,
+        searchIndexRequestRef.current,
+        visitIndexRequestRef.current,
+      ]);
       if (requestId !== latestWeekLoadRef.current) return;
       setData(nextData);
+      setVisitIndex(initialVisits);
       setSearchIndex((current) => {
         const index = current.ready ? current : initialIndex;
         const outsideWeek = index.appointments.filter((item) => {
@@ -465,9 +498,30 @@ export default function Calendar() {
       || a.searchKey.localeCompare(b.searchKey)
     );
   }, [data.openBookings, isSearchMatch, searchIndex.appointments, weekEnd, weekStart]);
+  const pastScheduledAppointments = useMemo(() => {
+    const todayStart = new Date(`${todayString()}T00:00:00`).getTime();
+    const visitKeys = new Set(visitIndex.visits.map((visit) => `${visit.pet_id}:${visit.date}`));
+    return [...new Map(searchIndex.appointments.map((appointment) => [appointment.id, appointment])).values()]
+      .filter((appointment) => appointment.status === 'scheduled'
+        && new Date(appointment.scheduled_at).getTime() < todayStart)
+      .map((appointment) => {
+        const date = toLocalDateString(new Date(appointment.scheduled_at));
+        return {
+          ...appointment,
+          kind: 'appointment',
+          petName: appointment.client?.name || 'Pet',
+          ownerName: appointment.client?.owner || '',
+          photo: appointment.client?.photo,
+          time: formatTime(appointment.scheduled_at),
+          dateLabel: formatFullDayLabel(date),
+          hasVisit: visitKeys.has(`${appointment.pet_id}:${date}`),
+        };
+      })
+      .sort((left, right) => String(right.scheduled_at).localeCompare(String(left.scheduled_at)));
+  }, [searchIndex.appointments, visitIndex.visits]);
 
   const openManual = useCallback(async (clientId = '', preset = null) => {
-    setError('');
+    setError(''); setSuccess('');
     setModalError('');
     setModalSuccess('');
     try {
@@ -501,6 +555,7 @@ export default function Calendar() {
       setManualPetDraft(DEFAULT_NEW_PET);
       setManualPetError('');
       setManualPhoneConflict(null);
+      setManualCreatedPetId('');
       setModal('manual');
     } catch (loadError) {
       setError(loadError.message || 'Non riesco a caricare i pet');
@@ -532,6 +587,7 @@ export default function Calendar() {
     setManualPetCreation(false);
     setManualPhoneConflict(null);
     setManualPetError('');
+    setManualCreatedPetId(petId);
     showModalSuccess('Pet creato e selezionato. Puoi completare l’appuntamento.');
   };
   const createManualPet = async (existingCustomerId = null) => {
@@ -640,6 +696,7 @@ export default function Calendar() {
   }), [data.appointments, workstationCapacity]);
   const manualLoadNotice = manualCandidate && !manualConflict ? getLoadNotice(manualCandidate) : null;
   const manualClosureNotice = getManualClosureNotice(manualForm.date, manualForm.time, bookingSchedule);
+  const manualPastDateNotice = getPastDateNotice(manualForm.date);
   const requestLoadNotice = requestCandidate && !requestConflict
     ? getLoadNotice(requestCandidate, selectedItem?.request_kind === 'legacy' ? selectedItem.id : null)
     : null;
@@ -706,7 +763,8 @@ export default function Calendar() {
       });
       const nextTime = findNextCapacityAvailableTime({ date: manualForm.date, time: manualForm.time, durationMinutes: manualForm.durationMinutes, appointments: [...data.appointments, { ...manualCandidate, status: 'scheduled', approval_status: 'approved' }], capacity: workstationCapacity });
       setManualForm((current) => ({ ...current, time: nextTime, notes: '' }));
-      showModalSuccess('Appuntamento creato. Il prossimo orario libero è già pronto.');
+      setManualCreatedPetId('');
+      showModalSuccess(`Appuntamento salvato per ${formatCalendarDateTime(manualCandidate.scheduled_at)}. Il prossimo orario libero è già pronto.`);
       await loadWeek();
     } catch (saveError) { showModalError(saveError.message || 'Non riesco a creare l’appuntamento'); }
     finally { setSaving(false); }
@@ -729,7 +787,7 @@ export default function Calendar() {
       const whatsappUrl = buildWhatsAppUrl(selectedItem.client?.phone, requestForm.message);
       closeModal(); await loadWeek();
       setWhatsappDraft({ url: whatsappUrl, message: requestForm.message, recipient: selectedItem.client?.owner || 'cliente' });
-      setSuccess('Richiesta confermata e appuntamento creato. Ora puoi avvisare il cliente.');
+      setSuccess(`Richiesta confermata: appuntamento salvato per ${formatCalendarDateTime(requestCandidate.scheduled_at)}. Ora puoi avvisare il cliente.`);
     } catch (saveError) { showModalError(saveError.message || 'Non riesco a confermare la richiesta'); }
     finally { setSaving(false); }
   };
@@ -756,7 +814,7 @@ export default function Calendar() {
     try {
       const updated = await updateAppointmentSchedule(selectedItem.id, detailCandidate);
       setSelectedItem((current) => ({ ...current, ...updated }));
-      showModalSuccess('Appuntamento riprogrammato.'); await loadWeek();
+      showModalSuccess(`Appuntamento spostato a ${formatCalendarDateTime(detailCandidate.scheduled_at)}.`); await loadWeek();
     } catch (saveError) { showModalError(saveError.message || 'Non riesco a riprogrammare l’appuntamento'); }
     finally { setSaving(false); }
   };
@@ -890,6 +948,17 @@ export default function Calendar() {
           onToday={goToToday}
           summary={planningSummary}
         />
+        {visitIndex.error ? (
+          <div className="gh-calendar-notice gh-calendar-notice--error" role="alert">{visitIndex.error}</div>
+        ) : null}
+        {searchIndex.ready && visitIndex.ready && !visitIndex.error && pastScheduledAppointments.length ? (
+          <Panel
+            eyebrow="Appuntamenti rimasti programmati"
+            title={`${pastScheduledAppointments.length} ${pastScheduledAppointments.length === 1 ? 'appuntamento passato da verificare' : 'appuntamenti passati da verificare'}`}
+          >
+            <CalendarPastQueue items={pastScheduledAppointments} onOpen={openItem} />
+          </Panel>
+        ) : null}
         {weekIsEmpty && calendarMode === 'week' && !loading ? (
           <div className="gh-calendar-future-note" role="status">
             Questa settimana è ancora tutta da riempire: è la condizione normale quando si guarda avanti, non un errore.
@@ -976,6 +1045,9 @@ export default function Calendar() {
             <Field label="Ora" type="time" value={manualForm.time} onChange={(event) => setManualForm((current) => ({ ...current, time: event.target.value }))} required />
             <Field label="Durata (min)" type="number" min="15" step="15" value={manualForm.durationMinutes} onChange={(event) => setManualForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
           </div>
+          {manualPastDateNotice ? (
+            <p className="gh-calendar-notice gh-calendar-notice--error" role="status">{manualPastDateNotice}</p>
+          ) : null}
           <Field label="Note" area value={manualForm.notes} onChange={(event) => setManualForm((current) => ({ ...current, notes: event.target.value }))} />
           {manualClosureNotice ? (
             <p className="gh-calendar-notice gh-calendar-notice--error" role="status">

@@ -1,0 +1,43 @@
+{
+  "projectRef": "qttpinkslhenxrsbhhhg",
+  "marker": "[DEMO GH-98]",
+  "baseline": {
+    "tenantId": "8ad7489b-15f9-44f5-8d50-cc89506c3ac9",
+    "pets": 7,
+    "appointments": 8,
+    "visits": 90
+  },
+  "checks": {
+    "apiGhostCountWithFixtures": 9,
+    "fixtureGhosts": [
+      {
+        "id": "701c7d89-fa7a-47c0-967a-1b02df08564c",
+        "pet": "[DEMO GH-98] Con visita",
+        "scheduledDate": "2026-09-20",
+        "hasVisit": true
+      },
+      {
+        "id": "ab313aa9-90ab-4559-8515-ff671d749008",
+        "pet": "[DEMO GH-98] Senza visita",
+        "scheduledDate": "2026-09-19",
+        "hasVisit": false
+      }
+    ],
+    "visitReadsForQueue": 1,
+    "unfinishedPet": {
+      "id": "e3e20fbb-5a01-483d-b060-7fd438f10ceb",
+      "name": "[DEMO GH-98] Solo pet",
+      "appointmentCount": 0
+    }
+  },
+  "cleanup": {
+    "markerPets": 0,
+    "markerAppointments": 0,
+    "markerVisits": 0,
+    "finalPets": 7,
+    "finalAppointments": 8,
+    "finalVisits": 90,
+    "finalPastScheduledCount": 7
+  },
+  "elapsedMs": 13479
+}
