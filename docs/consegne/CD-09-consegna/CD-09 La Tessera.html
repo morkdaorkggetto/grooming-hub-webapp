@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>CD-09 · La tessera del cane · composizione</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+html,body{margin:0;padding:0;background:#f0eee9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#root{width:100vw;height:100vh;overflow:hidden}
+em{font-style:italic}
+a{color:var(--color-link)}a:hover{color:var(--color-primary-hover)}
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><rect x="62" y="40" width="116" height="80" rx="12" fill="#fbf6f3"/><g fill="#6f9792"><circle cx="84" cy="96" r="7"/><circle cx="102" cy="96" r="7"/></g><g fill="none" stroke="#cfc1c4" stroke-width="1.5" stroke-dasharray="2 2"><circle cx="120" cy="96" r="7"/><circle cx="138" cy="96" r="7"/><circle cx="156" cy="96" r="7"/></g><rect x="76" y="54" width="44" height="9" rx="4.5" fill="#2b2525"/></svg>
+</template>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+<script type="text/babel" src="cd01-cal-note.jsx"></script>
+<script type="text/babel" src="cd04-card-kit.jsx"></script>
+<script type="text/babel" src="cd09-tessera-kit.jsx"></script>
+<script type="text/babel" src="cd09-tessera-viste.jsx"></script>
+<script type="text/babel" src="cd09-tessera-note.jsx"></script>
+<script type="text/babel" data-presets="react">
+const C = ({ children }) => <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>;
+const App = () => (
+  <DesignCanvas>
+    <DCSection id="cd09-strada" title="CD-09 · La strada verso il Bronzo" subtitle="Composta dall’inizio, perché l’inizio è la norma: per mesi la maggior parte dei cani avrà una o due visite su sei. I timbri contano quanto c’è, non quanto manca. Tutti senza ritratto — il caso della quasi totalità.">
+      <DCArtboard id="inizio" label="375 · all’inizio — una visita su sei (la maggioranza)" width={455} height={880}><C><TInizio/></C></DCArtboard>
+      <DCArtboard id="meta" label="375 · a metà strada" width={455} height={880}><C><TMeta/></C></DCArtboard>
+    </DCSection>
+    <DCSection id="cd09-livelli" title="CD-09 · Chi è già arrivato" subtitle="Se il livello c’è, quanto manca riguarda quello dopo. Livello calcolato e livello dato a mano hanno la stessa identica tessera.">
+      <DCArtboard id="raggiunto" label="375 · ha raggiunto il Bronzo — con ritratto" width={455} height={880}><C><TRaggiunto/></C></DCArtboard>
+      <DCArtboard id="mano" label="375 · Bronzo dato a mano, verso l’Argento" width={455} height={880}><C><TMano/></C></DCArtboard>
+      <DCArtboard id="argento" label="375 · Argento, verso l’Oro — le tacche" width={455} height={880}><C><TArgento/></C></DCArtboard>
+      <DCArtboard id="oro" label="375 · Oro — non c’è un dopo" width={455} height={880}><C><TOro/></C></DCArtboard>
+    </DCSection>
+    <DCSection id="cd09-banco" title="CD-09 · Al banco, e come ci si arriva" subtitle="Al banco il QR diventa il protagonista e tutto il resto sparisce. In Home la striscia della tessera prende il posto del blocco «Punti»: la barra resta a tre voci.">
+      <DCArtboard id="banco" label="375 · mostrata al banco — il QR a tutto schermo" width={455} height={880}><C><TBanco/></C></DCArtboard>
+      <DCArtboard id="home0" label="375 · la Home oggi" width={455} height={880}><C><HomePrima/></C></DCArtboard>
+      <DCArtboard id="home1" label="375 · la Home con la tessera" width={455} height={880}><C><HomeDopo/></C></DCArtboard>
+    </DCSection>
+    <DCSection id="cd09-ragioni" title="CD-09 · Le ragioni" subtitle="La domanda da sciogliere, le tre tensioni, il QR e l’accesso.">
+      <DCArtboard id="giudizio" label="Il giudizio · lo storico" width={1280} height={640}><CD9_Giudizio/></DCArtboard>
+      <DCArtboard id="livelli" label="I livelli · il premio" width={1280} height={640}><CD9_Livelli/></DCArtboard>
+      <DCArtboard id="qr" label="Il QR · l’accesso" width={1280} height={700}><CD9_Banco/></DCArtboard>
+      <DCArtboard id="nontorna" label="Cosa non torna · campi ⚠" width={1280} height={760}><CD9_NonTorna/></DCArtboard>
+    </DCSection>
+    <DCPostIt x={44} y={44} width={340}>
+      <strong>CD-09 · La tessera del cane</strong><br/><br/>
+      <strong>Timbri, non una barra.</strong> La barra misura quanto manca; sei timbri contano quanto c’è. «La prossima è la seconda», non «ti mancano 5».<br/><br/>
+      <strong>«Contiamo da settembre» non si dice</strong>: sarebbe falso per una parte dei cani. Al suo posto la regola — ogni visita è un timbro, contano gli ultimi 12 mesi.<br/><br/>
+      <strong>Il livello a mano è invisibile</strong>: stessa tessera del calcolato, e la soglia del livello raggiunto non compare mai.<br/><br/>
+      <strong>Due momenti, due protagonisti</strong>: da solo il cane, al banco il QR a tutto schermo su bianco pieno.<br/><br/>
+      <strong>Barra a tre voci.</strong> La striscia prende il posto del blocco «Punti».<br/><br/>
+      <strong>Da leggere prima di tutto:</strong> «Cosa non torna», punto 1 — i timbri scadono, e non sappiamo se un livello si perde.
+    </DCPostIt>
+  </DesignCanvas>
+);
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
