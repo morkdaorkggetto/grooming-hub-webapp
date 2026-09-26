@@ -1,0 +1,105 @@
+{
+  "disabled": {
+    "typedButUnselected": {
+      "disabled": true,
+      "visibleReason": "niente",
+      "insertAttempts": 0
+    },
+    "petCreationOpen": {
+      "disabled": true,
+      "visibleReason": "Nuovo pet; Crea e seleziona il pet"
+    },
+    "missingDate": {
+      "disabled": false,
+      "visibleReasonAfterClick": "Pet, data e ora sono obbligatori."
+    },
+    "capacity": {
+      "disabled": true,
+      "visibleReason": "Le postazioni sono tutte occupate nella fascia scelta."
+    }
+  },
+  "failures": {
+    "expiredSession": {
+      "visible": "JWT expired",
+      "resemblesSuccess": false
+    },
+    "networkBeforeCommit": {
+      "visible": "Non riesco a creare l'appuntamento: collegamento interrotto",
+      "resemblesSuccess": false
+    },
+    "responseLostAfterCommit": {
+      "visible": "Non riesco a creare l'appuntamento: risposta persa dopo il commit",
+      "rowExists": true,
+      "rowVisibleWithoutReload": false
+    }
+  },
+  "acknowledgement": {
+    "closedWhileSaving": {
+      "saveState": "…",
+      "closeEnabled": true,
+      "rowExists": true,
+      "successVisible": false,
+      "searchBeforeReload": "Nessun appuntamento aperto trovato.",
+      "searchAfterReload": "1 corrispondenza nelle altre settimane."
+    }
+  },
+  "deletion": {
+    "direct": {
+      "touchesFromPlanner": 3,
+      "firstCommand": "Elimina",
+      "confirmation": "Elimini l'appuntamento di DaEliminare di sabato 26 settembre alle 12:00?",
+      "warning": "Sparisce del tutto. Se invece il cliente ha disdetto, usa «Annulla appuntamento»: resta come fatto.",
+      "finalCommand": "Elimina definitivamente",
+      "separatedBelowCancelByPx": 41,
+      "rowExistsAfter": false
+    }
+  },
+  "visibility": {
+    "homonyms": {
+      "cards": 2,
+      "ownerNamesOnCards": 0,
+      "distinguishableOnlyAfterOpen": true
+    },
+    "closedDay": {
+      "insideWindowInWeek": true,
+      "insideWindowLabel": "fuori orario",
+      "outsideWindowInWeekWhenBandedSiblingExists": true,
+      "outsideWindowInWeek": false,
+      "outsideWindowInDay": true,
+      "outsideWindowInDaily": true
+    },
+    "dailyStatuses": [
+      "Programmato",
+      "Completato",
+      "Assenza",
+      "Annullato"
+    ]
+  },
+  "errors": [],
+  "unexpected": [],
+  "writeSummary": [
+    {
+      "kind": "insert_attempt",
+      "mode": "networkFailure",
+      "id": "162d75ad-9cd2-4e87-98a9-3928fcbccb9e",
+      "scheduled_at": "2026-09-26T15:15:00.000Z"
+    },
+    {
+      "kind": "insert_attempt",
+      "mode": "committedFailure",
+      "id": "f8ccb0e4-6828-4de2-b0c5-57bc7367ab8e",
+      "scheduled_at": "2026-09-26T15:30:00.000Z"
+    },
+    {
+      "kind": "insert_attempt",
+      "mode": "delayedSuccess",
+      "id": "b49934f5-b182-4b2a-a29b-0ce367fe3b51",
+      "scheduled_at": "2026-10-10T09:00:00.000Z"
+    },
+    {
+      "kind": "delete_rpc",
+      "id": "delete-me"
+    }
+  ],
+  "elapsedMs": 3842
+}
