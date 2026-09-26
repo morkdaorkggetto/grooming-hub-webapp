@@ -1,0 +1,197 @@
+{
+  "base": "eb358894c0b07b06eaaf12dc35ec21322a2ec116",
+  "customerDiff": "",
+  "otherStaffPages": {
+    "count": 19,
+    "changed": [],
+    "files": [
+      {
+        "file": "src/apps/staff/pages/AddClient.jsx",
+        "before": "34968b6a4728f4297df562641c5a341fa828afeb536f93910ebcc8c0e5802ac2",
+        "after": "34968b6a4728f4297df562641c5a341fa828afeb536f93910ebcc8c0e5802ac2",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/AddVisit.jsx",
+        "before": "075e58e4f33504156ba39aff3dd3a774cbd34c69532dbfec742143003ab0732a",
+        "after": "075e58e4f33504156ba39aff3dd3a774cbd34c69532dbfec742143003ab0732a",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/Calendar.css",
+        "before": "224c7229496558ee3ad00ea4c7ab07451c9c12a3c0f545ce51766d26a6ecb21a",
+        "after": "224c7229496558ee3ad00ea4c7ab07451c9c12a3c0f545ce51766d26a6ecb21a",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/ClientCard.jsx",
+        "before": "b70c2922239c2533a35ac6a416b049cd78e9e85fb46a7bd5a7f30203d93aac8e",
+        "after": "b70c2922239c2533a35ac6a416b049cd78e9e85fb46a7bd5a7f30203d93aac8e",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/ClientDetail.jsx",
+        "before": "570954add9bcdce96e31bd4ce067195660febb4e2490f052d64cafeef0bca89f",
+        "after": "570954add9bcdce96e31bd4ce067195660febb4e2490f052d64cafeef0bca89f",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/Contacts.jsx",
+        "before": "1eb2a0ea6ca24a5e7dd58e96b57b7b59b92c8494bf8d1a1f3e77368fd3e1ed39",
+        "after": "1eb2a0ea6ca24a5e7dd58e96b57b7b59b92c8494bf8d1a1f3e77368fd3e1ed39",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/CustomerInvite.jsx",
+        "before": "c9ae47833df6b130d213b979d61c6c3c477f7009e674720cb21763b96cece149",
+        "after": "c9ae47833df6b130d213b979d61c6c3c477f7009e674720cb21763b96cece149",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/CustomerLogin.jsx",
+        "before": "9f61e73c0aca46768808b743e3974bf58c8bc82fa0b541921a5dff3dd0a020bc",
+        "after": "9f61e73c0aca46768808b743e3974bf58c8bc82fa0b541921a5dff3dd0a020bc",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/CustomerPortal.jsx",
+        "before": "5a891f22acdab51bae91cbc56537a5f29b63fc11d101cb8a0c2732ff8d1ef913",
+        "after": "5a891f22acdab51bae91cbc56537a5f29b63fc11d101cb8a0c2732ff8d1ef913",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/CustomerRequests.jsx",
+        "before": "2f0acfb103680d12cf488a81656b8a2c0a37318134b24d024333904bd82d3f16",
+        "after": "2f0acfb103680d12cf488a81656b8a2c0a37318134b24d024333904bd82d3f16",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/DailyAppointments.jsx",
+        "before": "1e25a8e5b15b701fa975392329029973cb46918d9e27636c4e955650dbbfed29",
+        "after": "1e25a8e5b15b701fa975392329029973cb46918d9e27636c4e955650dbbfed29",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/Dashboard.jsx",
+        "before": "548f2ffd7ba82aad27819537d1921af178f21d37090614ec6e58d38676bdb100",
+        "after": "548f2ffd7ba82aad27819537d1921af178f21d37090614ec6e58d38676bdb100",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/PromotionsManager.css",
+        "before": "94200da480adb49bd800cfc6ea01fd8f99545afeb6ac03578fa5c41734fa3311",
+        "after": "94200da480adb49bd800cfc6ea01fd8f99545afeb6ac03578fa5c41734fa3311",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/PromotionsManager.jsx",
+        "before": "03213954f3c8cc4c722fa969245f5d5128ccefd5ff03e4470f231ff67c1ff8a3",
+        "after": "03213954f3c8cc4c722fa969245f5d5128ccefd5ff03e4470f231ff67c1ff8a3",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/PublicPetCard.css",
+        "before": "ee791b61be216d2ccc4f742b110417b5f6b01cfea4a87421a47bfde830ce99ed",
+        "after": "ee791b61be216d2ccc4f742b110417b5f6b01cfea4a87421a47bfde830ce99ed",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/PublicPetCard.jsx",
+        "before": "d220ba50c381c04f2f014fb1a996e22041e796af27242d444d51590097c524a9",
+        "after": "d220ba50c381c04f2f014fb1a996e22041e796af27242d444d51590097c524a9",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/ResetPassword.jsx",
+        "before": "2faf42a3931c2a3447dac8e9ad73e801de33b6b319eb70f138917a55f61bc938",
+        "after": "2faf42a3931c2a3447dac8e9ad73e801de33b6b319eb70f138917a55f61bc938",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/WeeklyRevenue.css",
+        "before": "dab9bd244dde0f2094a07c4457af250b9d1e987edcc844349966bcbab35e835a",
+        "after": "dab9bd244dde0f2094a07c4457af250b9d1e987edcc844349966bcbab35e835a",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/pages/WeeklyRevenue.jsx",
+        "before": "9ed93bacf322c8bbbeeb87ecc05e12321725dd4baf76ad94428c1876123e2c49",
+        "after": "9ed93bacf322c8bbbeeb87ecc05e12321725dd4baf76ad94428c1876123e2c49",
+        "unchanged": true
+      }
+    ]
+  },
+  "gh81": {
+    "changed": [],
+    "files": [
+      {
+        "file": "src/apps/staff/StaffApp.jsx",
+        "before": "ddd30b7fb18eb935dda1b7afc72ab6620d78e91e0378c5b59f8549ae003918b9",
+        "after": "ddd30b7fb18eb935dda1b7afc72ab6620d78e91e0378c5b59f8549ae003918b9",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/components/StaffRequestAlerts.jsx",
+        "before": "4bae30007e3266179fd2a7d58201fb1202c33f5494f5dea5e051ac46c437ed77",
+        "after": "4bae30007e3266179fd2a7d58201fb1202c33f5494f5dea5e051ac46c437ed77",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/components/StaffKit.jsx",
+        "before": "ac463e48ed92f2732532416a909013ee343d478864a677dbbcbbcf5b35ab335f",
+        "after": "ac463e48ed92f2732532416a909013ee343d478864a677dbbcbbcf5b35ab335f",
+        "unchanged": true
+      },
+      {
+        "file": "src/apps/staff/styles/gh15-staff.css",
+        "before": "fd140e20f6f9da5444895a3b87dd4ac6968d2d55c422b448fb858cc0f2c63154",
+        "after": "fd140e20f6f9da5444895a3b87dd4ac6968d2d55c422b448fb858cc0f2c63154",
+        "unchanged": true
+      },
+      {
+        "file": "src/shared/ui/Icon.jsx",
+        "before": "25e9b2cc5bb83b3faa2fe248af3e3bde7dbf76f792555832b928bfc6015bd0e2",
+        "after": "25e9b2cc5bb83b3faa2fe248af3e3bde7dbf76f792555832b928bfc6015bd0e2",
+        "unchanged": true
+      }
+    ]
+  },
+  "modal": {
+    "imports": [
+      {
+        "file": "src/apps/staff/pages/Calendar.jsx",
+        "line": 27
+      }
+    ],
+    "uses": [
+      {
+        "file": "src/apps/staff/pages/Calendar.jsx",
+        "line": 988,
+        "closeDisabled": true
+      },
+      {
+        "file": "src/apps/staff/pages/Calendar.jsx",
+        "line": 1077,
+        "closeDisabled": false
+      },
+      {
+        "file": "src/apps/staff/pages/Calendar.jsx",
+        "line": 1083,
+        "closeDisabled": true
+      },
+      {
+        "file": "src/apps/staff/pages/Calendar.jsx",
+        "line": 1110,
+        "closeDisabled": true
+      },
+      {
+        "file": "src/apps/staff/pages/Calendar.jsx",
+        "line": 1166,
+        "closeDisabled": true
+      }
+    ],
+    "totalUses": 5,
+    "protectedUses": 4,
+    "unchangedUses": 1
+  }
+}

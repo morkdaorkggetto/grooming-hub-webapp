@@ -195,6 +195,9 @@ function UnplacedItems({ items, onOpen }) {
 const petOptionLabel = (pet) =>
   [pet.name, pet.breed, pet.owner || 'proprietario non indicato'].filter(Boolean).join(' · ');
 
+const normalizePetOptionText = (value) =>
+  String(value || '').trim().toLocaleLowerCase('it');
+
 export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate }) {
   const listId = useId();
   const selected = options.find((pet) => pet.id === selectedId) || null;
@@ -284,10 +287,21 @@ export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate })
             setActiveIndex(optionCount ? 0 : -1);
           }}
           onChange={(event) => {
-            setQuery(event.target.value);
-            onSelect('');
-            setOpen(true);
-            setActiveIndex(0);
+            const nextQuery = event.target.value;
+            const normalizedNextQuery = normalizePetOptionText(nextQuery);
+            const selectedStillDescribed = selected && normalizedNextQuery
+              && normalizePetOptionText(selectedLabel).startsWith(normalizedNextQuery);
+            const exactMatches = options.filter((pet) =>
+              normalizePetOptionText(pet.name) === normalizedNextQuery
+              || normalizePetOptionText(petOptionLabel(pet)) === normalizedNextQuery
+            );
+            const resolvedPet = selectedStillDescribed
+              ? selected
+              : exactMatches.length === 1 ? exactMatches[0] : null;
+            setQuery(nextQuery);
+            onSelect(resolvedPet?.id || '');
+            setOpen(!resolvedPet);
+            setActiveIndex(resolvedPet ? -1 : 0);
           }}
           onKeyDown={handleKeyDown}
         />
@@ -448,9 +462,9 @@ export function CalendarPlanningWeek({ days, onOpen, onBook, onSelectDay }) {
             ) : (
               <>
                 {day.bands.map((band) => <PlanningBand band={band} onOpen={onOpen} onBook={onBook} key={band.window.value} />)}
-                <UnplacedItems items={day.unplacedItems} onOpen={onOpen} />
               </>
             )}
+            <UnplacedItems items={day.unplacedItems} onOpen={onOpen} />
             <footer className="gh-planning-day__foot">
               <WalkInFooter visits={day.visits} onOpen={onOpen} />
               <CancelledFooter appointments={day.cancelledAppointments} onOpen={onOpen} />

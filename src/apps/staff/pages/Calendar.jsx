@@ -718,6 +718,17 @@ export default function Calendar() {
       excludeAppointmentId: selectedItem.id,
     })
     : null;
+  const savingMessage = saving ? 'Salvataggio in corso. Attendi l’esito.' : '';
+  const manualSaveGuidance = savingMessage
+    || (manualPetCreation
+      ? 'Completa o annulla la creazione del pet prima di salvare.'
+      : !manualForm.clientId
+        ? 'Scegli un pet dall’elenco per salvare l’appuntamento.'
+        : '');
+  const detailSaveGuidance = savingMessage
+    || (selectedItem?.status === 'no_show'
+      ? 'Annulla prima l’assenza per modificare data e ora.'
+      : '');
 
   const updateRequestTiming = (field, value) => {
     setRequestForm((current) => {
@@ -974,7 +985,7 @@ export default function Calendar() {
       </main>
       <Fab label="Registra lavorazione" icon="pencil" onClick={openWork} />
 
-      {modal === 'manual' && <Modal variant="side" title="Nuovo appuntamento" onClose={closeModal} footer={<><Button staff variant="ghost" onClick={closeModal}>Chiudi</Button><Button staff loading={saving} disabled={manualPetCreation || !manualForm.clientId || Boolean(manualConflict)} onClick={submitManual}>Salva appuntamento</Button></>}>
+      {modal === 'manual' && <Modal variant="side" title="Nuovo appuntamento" onClose={closeModal} closeDisabled={saving} footer={<><Button staff variant="ghost" disabled={saving} onClick={closeModal}>Chiudi</Button><Button staff loading={saving} disabled={manualPetCreation || !manualForm.clientId || Boolean(manualConflict)} onClick={submitManual}>Salva appuntamento</Button></>}>
         <form className="gh-calendar-form-stack" onSubmit={submitManual}>
           <CalendarPetCombobox
             options={petOptions}
@@ -1055,6 +1066,7 @@ export default function Calendar() {
             </p>
           ) : null}
           {manualConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
+          {manualSaveGuidance ? <p className="gh-calendar-form-helper" role="status">{manualSaveGuidance}</p> : null}
           <AppointmentLoadNote notice={manualLoadNotice} />
           <PetDuplicateNotice booking={manualDuplicateBooking} petName={manualPet?.name} />
           {modalError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{modalError}</p> : null}
@@ -1068,7 +1080,7 @@ export default function Calendar() {
         </div>
       </Modal>}
 
-      {modal === 'request' && selectedItem && <Modal title="Conferma richiesta" onClose={closeModal} footer={<><Button staff variant="danger" loading={saving} onClick={rejectRequest}>Rifiuta e prepara WhatsApp</Button><Button staff loading={saving} disabled={Boolean(requestConflict)} onClick={confirmRequest}>Conferma e prepara WhatsApp</Button></>}>
+      {modal === 'request' && selectedItem && <Modal title="Conferma richiesta" onClose={closeModal} closeDisabled={saving} footer={<><Button staff variant="danger" loading={saving} onClick={rejectRequest}>Rifiuta e prepara WhatsApp</Button><Button staff loading={saving} disabled={Boolean(requestConflict)} onClick={confirmRequest}>Conferma e prepara WhatsApp</Button></>}>
         <div className="gh-calendar-form-stack">
           <div className="gh-calendar-modal-context"><PetAvatar name={selectedItem.petName} photo={selectedItem.photo} size={42} tier="base" /><div><strong>{selectedItem.petName}</strong><span>{selectedItem.client?.owner || 'Proprietario non indicato'} · {selectedItem.service?.name || selectedItem.notes || 'Bisogno non specificato'}</span></div></div>
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
@@ -1087,6 +1099,7 @@ export default function Calendar() {
             <Button staff variant="secondary" onClick={() => navigate('/requests')}>Proponi alternative dalla coda richieste</Button>
           ) : null}
           {requestConflict && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
+          {savingMessage ? <p className="gh-calendar-form-helper" role="status">{savingMessage}</p> : null}
           <AppointmentLoadNote notice={requestLoadNotice} />
           <PetDuplicateNotice booking={requestDuplicateBooking} petName={selectedItem.petName} />
           {modalError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{modalError}</p> : null}
@@ -1094,7 +1107,7 @@ export default function Calendar() {
         </div>
       </Modal>}
 
-      {modal === 'detail' && selectedItem && <Modal variant="side" title={`Appuntamento · ${selectedItem.petName}`} onClose={closeModal} footer={<><Button staff variant="ghost" onClick={closeModal}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict) || selectedItem.status === 'no_show'} onClick={saveSchedule}>Salva orario</Button></>}>
+      {modal === 'detail' && selectedItem && <Modal variant="side" title={`Appuntamento · ${selectedItem.petName}`} onClose={closeModal} closeDisabled={saving} footer={<><Button staff variant="ghost" disabled={saving} onClick={closeModal}>Chiudi</Button><Button staff loading={saving} disabled={Boolean(detailConflict) || selectedItem.status === 'no_show'} onClick={saveSchedule}>Salva orario</Button></>}>
         <form className="gh-calendar-form-stack" onSubmit={saveSchedule}>
           <div className="gh-calendar-modal-context"><PetAvatar name={selectedItem.petName} photo={selectedItem.photo} size={42} tier="base" /><div><strong>{selectedItem.petName}</strong><span>{selectedItem.client?.owner || 'Proprietario non indicato'} · {statusLabel(selectedItem.status)}</span>{selectedItem.service?.name ? <span>{selectedItem.service.name}</span> : null}</div></div>
           <div className="gh-calendar-form-grid gh-calendar-form-grid--three">
@@ -1103,6 +1116,7 @@ export default function Calendar() {
             <Field label="Durata (min)" type="number" min="15" step="15" value={detailForm.durationMinutes} disabled={selectedItem.status === 'no_show'} onChange={(event) => setDetailForm((current) => ({ ...current, durationMinutes: event.target.value }))} />
           </div>
           {detailConflict && !restoreBlockMessage && <p className="gh-calendar-conflict">{APPOINTMENT_CAPACITY_MESSAGE}</p>}
+          {detailSaveGuidance ? <p className="gh-calendar-form-helper" role="status">{detailSaveGuidance}</p> : null}
           <AppointmentLoadNote notice={detailLoadNotice} />
           <PetDuplicateNotice booking={detailDuplicateBooking} petName={selectedItem.petName} />
           {modalError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{modalError}</p> : null}
@@ -1149,10 +1163,11 @@ export default function Calendar() {
         </form>
       </Modal>}
 
-      {modal === 'delete' && selectedItem && <Modal title="Elimina appuntamento" narrow onClose={() => { setDeleteError(''); setModal('detail'); }} footer={<><Button staff variant="ghost" onClick={() => { setDeleteError(''); setModal('detail'); }}>Torna indietro</Button><Button staff variant="danger" loading={saving} onClick={confirmDelete}>Elimina definitivamente</Button></>}>
+      {modal === 'delete' && selectedItem && <Modal title="Elimina appuntamento" narrow closeDisabled={saving} onClose={() => { setDeleteError(''); setModal('detail'); }} footer={<><Button staff variant="ghost" disabled={saving} onClick={() => { setDeleteError(''); setModal('detail'); }}>Torna indietro</Button><Button staff variant="danger" loading={saving} onClick={confirmDelete}>Elimina definitivamente</Button></>}>
         <div className="gh-calendar-form-stack">
           <p className="gh-body"><strong>Elimini l&apos;appuntamento di {selectedItem.petName} di {formatFullDayLabel(toLocalDateString(new Date(selectedItem.scheduled_at)))} alle {formatTime(selectedItem.scheduled_at)}?</strong></p>
           <p className="gh-body">Sparisce del tutto. Se invece il cliente ha disdetto, usa «Annulla appuntamento»: resta come fatto.</p>
+          {savingMessage ? <p className="gh-calendar-form-helper" role="status">{savingMessage}</p> : null}
           {deleteError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{deleteError}</p> : null}
         </div>
       </Modal>}

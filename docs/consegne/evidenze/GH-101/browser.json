@@ -1,0 +1,114 @@
+{
+  "selection": {
+    "clover": {
+      "typed": "Clover",
+      "clickedOption": false,
+      "selectedLabel": "Clover · Maltese · Ada Verdi",
+      "saveEnabled": true,
+      "insertCount": 1,
+      "visibleOutcome": "Appuntamento salvato per sabato 26 settembre alle 17:00. Il prossimo orario libero è già pronto."
+    },
+    "homonyms": {
+      "typed": "Leo",
+      "clickedOption": false,
+      "automaticSelection": false,
+      "options": [
+        "Leo · Meticcio · Ada Verdi",
+        "Leo · Meticcio · Bruno Blu"
+      ],
+      "visibleReason": "Scegli un pet dall’elenco per salvare l’appuntamento."
+    }
+  },
+  "disabled": {
+    "petMissing": {
+      "disabled": true,
+      "visibleBeforeClick": "Scegli un pet dall’elenco per salvare l’appuntamento."
+    },
+    "petCreationOpen": {
+      "disabled": true,
+      "visibleBeforeClick": "Completa o annulla la creazione del pet prima di salvare."
+    },
+    "missingDate": {
+      "disabled": false,
+      "visibleReasonAfterClick": "Pet, data e ora sono obbligatori."
+    },
+    "capacity": {
+      "disabled": true,
+      "visibleBeforeClick": "Le postazioni sono tutte occupate nella fascia scelta."
+    },
+    "noShowSchedule": {
+      "disabled": true,
+      "visibleBeforeClick": "Annulla prima l’assenza per modificare data e ora."
+    }
+  },
+  "saving": {
+    "success": {
+      "visibleWhileModalOpen": "Appuntamento salvato per sabato 26 settembre alle 18:15. Il prossimo orario libero è già pronto.",
+      "headerCloseBlocked": true,
+      "footerCloseBlocked": true,
+      "scrimCloseBlocked": true,
+      "visibleDuringFlight": "Salvataggio in corso. Attendi l’esito."
+    },
+    "rejected": {
+      "visibleWhileModalOpen": "Non riesco a creare l'appuntamento: collegamento interrotto",
+      "modalStayedOpen": true
+    }
+  },
+  "visibility": {
+    "closedDay": {
+      "outsideWindowOnly": true,
+      "visibleInWeek": true,
+      "section": "Da collocare",
+      "counted": 1,
+      "renderedRows": 1
+    }
+  },
+  "layout": {
+    "desktop": {
+      "viewport": 1365,
+      "scrollWidth": 1365,
+      "overflowX": 0
+    },
+    "mobile": {
+      "viewport": 375,
+      "scrollWidth": 375,
+      "overflowX": 0,
+      "affectedButtonHeights": [
+        44,
+        46,
+        46
+      ],
+      "guidanceClipped": false
+    }
+  },
+  "modal": {
+    "unchangedWorkModal": {
+      "headerCloseEnabled": true,
+      "footerCloseEnabled": true,
+      "scrimCloseEnabled": true
+    }
+  },
+  "errors": [],
+  "unexpected": [],
+  "writeSummary": [
+    {
+      "kind": "insert_attempt",
+      "mode": "normal",
+      "id": "27a53257-ef27-4ae8-b1ad-6a29467ba242",
+      "scheduled_at": "2026-09-26T15:00:00.000Z"
+    },
+    {
+      "kind": "insert_attempt",
+      "mode": "delayedSuccess",
+      "id": "cee4b96f-8d92-46af-92e5-e0b1c4339639",
+      "scheduled_at": "2026-09-26T16:15:00.000Z"
+    },
+    {
+      "kind": "insert_attempt",
+      "mode": "networkFailure",
+      "id": "789ad282-24f5-4767-8e2f-1df069a70b88",
+      "scheduled_at": "2026-09-26T18:00:00.000Z"
+    }
+  ],
+  "elapsedMs": 3645
+}
