@@ -1,5 +1,149 @@
 # GH-102 — Cosa puo raggiungere un cliente
 
+## Esito vigente dopo Emendamento 1: NO al via libera
+
+**Non possiamo ancora invitare 320 persone con la garanzia richiesta.**
+E stata dimostrata sul demo una fuga fra clienti: **Luca riceve il telefono
+di Mario nel messaggio d'errore di `accept_customer_invite`**, pur non
+potendolo leggere con una SELECT diretta. Non e il rilievo economico: e un
+dato personale di un altro cliente. Scatta quindi l'arresto obbligatorio
+previsto anche dall'Emendamento 1. Dopo la prova, solo pulizia e registro.
+
+### Prima del lancio: priorita e prove
+
+1. **P1, osservato: telefono altrui nell'errore di riscatto invito.**
+   Precondizioni: account customer autenticato e possesso di un link valido,
+   non scaduto e non ancora usato, destinato a una scheda gia collegata a un
+   altro utente. Non e un'enumerazione libera di telefoni o un accesso anonimo.
+   Il test simula precisamente l'inoltro di un link o l'uso con account
+   cliente sbagliato. Il collegamento viene rifiutato, ma il corpo dell'errore
+   contiene il telefono completo del destinatario.
+2. **P1 da chiarire, possibile: riscatto con destinatario non verificato.**
+   Nella definizione viva la RPC legge l'email del chiamante ma non la
+   confronta con `customer_email` dell'invito; per una scheda non collegata
+   procede all'adozione. La presa di possesso di una scheda non collegata da
+   chi riceve un link inoltrato non e stata eseguita: la prova precedente ha
+   imposto lo stop. Serve una decisione esplicita sull'identificazione del
+   destinatario, non assumere che il solo login basti.
+3. **P2, osservato e gia deciso da Luigi: importi/sconti accessibili al
+   customer.** Restano i tre campi economici misurati nella ripresa precedente;
+   correzione prima del lancio con dati economici staff-only. Nessun nuovo
+   approfondimento o tentativo di riparazione in questo giro.
+
+Il precedente problema QR e superato dal riallineamento, come documentato
+sotto. La questione backup resta chiusa da Cowork: non e stata riaperta.
+
+### Prova della fuga e causa
+
+Base della ripresa: `129ec3aeaa2cc0e75cb67258ba20bfba25aecb54`, branch `main`.
+Root `/Users/luigimaisto/Desktop/grooming-hub-web`, worktree `webapp/`.
+Unico ambiente: demo `qttpinkslhenxrsbhhhg`; produzione mai interrogata.
+Fonte operativa: GH-102 + `GH-102-emendamento-1.md`, letto integralmente.
+
+Tre login API distinti: Mario, Luca e sonda staff esistenti. Le credenziali
+sono lette localmente in memoria; niente password, JWT, telefoni, nomi reali
+o token invito nei log/registro. La sonda crea un invito temporaneo per il
+customer di Mario, usando il modello di fixture di `scripts/rls-tests/run.mjs`.
+
+| Controprova viva | Misura | Classificazione |
+|---|---|---|
+| Luca SELECT phone sul customer Mario | 0 righe, nessun errore | esclusa lettura diretta per questa riga |
+| Luca riscatta invito fresco per Mario | errore P0001, nessun risultato JSON di successo | riscatto rifiutato |
+| Confronto in memoria error.message con telefono Mario | recipientPhoneInError = true | **osservata fuga cross-customer** |
+| Confronto customer, profili e membership prima/dopo | stessa impronta SHA-256 del contenuto ordinato | nessuna modifica ai dati originali dei due account |
+
+La stringa dell'errore ha forma `Phone [TELEFONO DESTINATARIO] gia associato
+ad altro utente ...`. Il dato e restituito al chiamante dalla RPC, non letto
+da Codex con privilegi amministrativi per simulare un risultato cliente.
+Il confronto usa il valore del customer destinatario ed esclude che sia il
+telefono di Luca; il contenuto non viene stampato.
+
+Causa nella definizione SQL viva, riscontrabile anche in
+`supabase/migrations/20260827170005_gh25_accept_customer_invite_membership.sql:97`:
+`RAISE EXCEPTION 'Phone % ...', v_invitation.phone`. La funzione SECURITY
+DEFINER puo leggere l'invito e il customer; il controllo di appartenenza
+nega correttamente l'adozione ma incorpora un dato riservato nell'errore.
+Le policy della tabella non filtrano quel messaggio.
+
+**Soluzione minima consigliata a Cowork:** nuova correzione della RPC, senza
+riscrivere la migration storica: conservare il rifiuto e l'atomicita, ma
+restituire un codice stabile e un messaggio generico senza telefono, nome,
+email o identificativi in message/details/hint. Non basta mascherarlo nella
+UI: il corpo HTTP resta leggibile. Ripetere la prova Luca->invito Mario e
+controllare l'intero errore, oltre all'assenza di mutazioni. Il rischio
+residuo dell'invito inoltrato su scheda non collegata va valutato nello
+stesso mandato; l'eventuale vincolo deve verificare davvero il destinatario
+(canale verificato o conferimento staff), non solo un'email auto-dichiarata.
+Cowork verifichi separatamente il codice in produzione: qui non e provato
+che abbia lo stesso difetto. Nessuna correzione applicata da Codex.
+
+### Controprove completate prima dello stop
+
+| Caso | Prova | Esito |
+|---|---|---|
+| respond_appointment_request_slot altrui | Luca su richiesta pending di Mario | 42501, nessun dato restituito, riga intera invariata |
+| withdraw_appointment_request altrui | Luca sulla stessa richiesta | 42501, nessun dato restituito, riga intera invariata |
+| Invito scaduto | fixture scaduta, riscatto Luca | P0001 / GH_INVITE_EXPIRED |
+| Invito gia usato, stesso account | fixture accepted_by Mario, chiamata Mario | already_accepted, customer proprio |
+| Invito gia usato, altro account | stessa fixture, chiamata Luca | P0001 / GH_INVITE_ALREADY_USED |
+| Sessione staff preesistente | invito fresco, chiamata sonda staff | P0001 / GH_INVITE_STAFF_ACCOUNT |
+| Account customer diverso dal destinatario | invito fresco per Mario, chiamata Luca | rifiuto con fuga telefono: STOP |
+
+Limiti: lo stato «gia usato» e stato predisposto dalla fixture, non ottenuto
+con un primo riscatto riuscito; verifica il ramo idempotente ma non l'intero
+doppio riscatto. La richiesta altrui non aveva alternative: il controllo
+proprietario e stato esercitato prima della validazione delle alternative.
+Nessuna modifica customer e stata accettata su quella richiesta.
+
+I cinque casi invito hanno quindi copertura **parziale**, non cinque PASS:
+inoltro/account gia presente provati nel caso di destinatario gia collegato;
+gia usato e scaduto come sopra; sessione diversa verificata via RPC, non con
+browser. Nel codice letto, `CustomerInvite.jsx:40` chiama automaticamente il
+riscatto nel useEffect usando la sessione corrente: rischio di account
+sbagliato **possibile**, non prova interattiva. Nessuna ulteriore chiamata di
+audit dopo la fuga. Restano non percorsi whitelist completa, matrice
+scritture restante, confine delle tre rotte staff e browser inviti. Non li
+dichiaro sicuri e non li considero chiusi dall'arresto.
+
+La suite intera non e stata eseguita: questo giro aggiunge controprove
+mirate ai suoi pattern di fixture. Il controllo che mancava e sul **contenuto
+dell'errore** di un invito fresco destinato a un customer gia collegato:
+un semplice assert «il riscatto fallisce» avrebbe promosso il caso vulnerabile.
+
+### Pulizia, file e tempi Emendamento 1
+
+Create solo fixture temporanee: **1 pet di test per Mario, 1 richiesta,
+3 inviti** (scaduto, gia usato, fresco). Cancellati nella stessa esecuzione
+in finally; rilettura degli ID: **0 inviti, 0 richieste, 0 pet residui**,
+nessun errore di cancellazione/verifica. Pet tenant tornati a **7**.
+Customer/profili/membership originali Mario e Luca identici prima/dopo;
+nessun account nuovo, password cambiata, fixture Storage o appuntamento
+creato. Tre sessioni temporanee chiuse; sonde permanenti conservate.
+Exit 2 della sonda significa arresto intenzionale CROSS_CUSTOMER_INVITE,
+non fallimento della pulizia.
+
+| File toccato | Destino |
+|---|---|
+| docs/consegne/GH-102-cosa-puo-raggiungere-un-cliente-esito.md | unico file del commit, nuovo esito in testa e storico conservato |
+| /private/tmp/gh102-amendment-probe.mjs | script temporaneo senza credenziali incorporate, fuori repo e rimosso a fine giro |
+
+Mandato, Emendamento 1, SQL di riallineamento e tre cartelle riservate fuori
+stage/commit. SQL di riallineamento non letto o eseguito. Nessuna modifica a
+src, migration, policy o funzioni; nessun push, merge, deploy. Nessuna
+attivita fuori istruzione: la ripresa si arresta per la precisa eccezione
+cross-customer dell'emendamento. Le verifiche di teardown non sono una
+prosecuzione dell'audit oltre lo stop.
+
+Tempo misurato: **176 s**, 27/9/2026 **05:15:17–05:18:13 Europe/Rome**,
+dalla lettura preparatoria alle prove e al teardown; redazione/commit esclusi.
+Nessun rallentamento bloccante. Build/browser non eseguiti. Diff check,
+stage del solo registro e stato finale Git verificati prima della consegna;
+hash definitivo in chat.
+
+---
+
+## Storico della ripresa precedente
+
 ## Ripresa 27/9: secondo rilievo, audit ancora incompleto
 
 **Da decidere/correggere prima del lancio: i campi economici sono leggibili
