@@ -1,5 +1,290 @@
 # GH-102 — Cosa puo raggiungere un cliente
 
+## Esito vigente dopo Emendamento 2: NO, fuga attraverso Storage
+
+**Non possiamo dare il via libera agli inviti, neppure escludendo il rischio
+accettato dei link inoltrati.** **Osservato, P1:** Luca enumera il bucket
+`pet-avatars` dalla radice, scopre un oggetto tecnico nel percorso del pet
+di Mario e ne scarica il contenuto. **Nessun invito, QR, URL oggetto o UUID
+del destinatario fornito al percorso di enumerazione.** Bastano il normale
+accesso customer e la configurazione pubblica del client Supabase.
+
+La controprova usa esclusivamente un file sintetico, con byte di prova al
+posto di una foto reale. Non e stata letta o pubblicata una fotografia reale.
+Il file replica il percorso staff previsto dalla suite, fuori da `/owner/`;
+non e stato necessario modificare `pets.photo_url` o altre righe del pet.
+Il risultato dimostra l'accessibilita degli oggetti, non quantifica le foto
+reali esposte in produzione: **la produzione non e stata interrogata**.
+
+Questo e un accesso **senza la chiave d'invito**: resta uno stop obbligatorio
+anche con l'Emendamento 2. Dopo il risultato: solo teardown, verifica del
+ripristino e registro. Nessuna correzione applicata. Il vecchio arresto per
+invito inoltrato e superato dalla decisione di Luigi; resta sotto come storico.
+
+### Base, ambiente e metodo
+
+Root `/Users/luigimaisto/Desktop/grooming-hub-web`, worktree `webapp/`.
+Base `c1208810c3e673412d1e004abd0d89b65319c032`, branch `main`.
+Fonti: mandato locale GH-102, Emendamenti 1 e 2, convenzione consegne.
+Unico database: demo `qttpinkslhenxrsbhhhg`. Nessun account nuovo, password
+modificata, migrazione, policy, funzione persistente o codice applicativo
+modificato. Backup non ricercati; materia economica non riesaminata.
+
+Tre livelli distinti di prova, da non confondere:
+
+- **API vive:** login reali delle sonde esistenti; suite RLS invariata,
+  whitelist di 19 colonne, appuntamento pendente, Storage e prove precedenti.
+- **SQL vivo con rollback:** ruolo `authenticated` con claims Mario, oppure
+  `anon`; quattro colonne identitarie e matrice CRUD completa. Non sono nuove
+  sessioni HTTP: sono controprove supplementari delle ACL/RLS e dei trigger.
+  Ogni operazione della matrice viene annullata in una sottotransazione;
+  tutta la fixture e poi annullata con `ROLLBACK`. Nessun DDL persistente.
+- **Browser vivo:** Chromium headless isolato, app locale e Auth/Data demo;
+  sessioni API inserite nel solo contesto temporaneo. Scritture intercettate
+  e vietate, salvo RPC d'invito con token verificato inesistente. Nessuna
+  sessione di Safari o del browser dell'utente utilizzata.
+
+### Prima del lancio, ordine aggiornato
+
+1. **P1, osservato: enumerazione e lettura foto altrui.** Chiudere il percorso
+   Storage, non soltanto nascondere la foto nel QR o nell'interfaccia.
+2. **P2, osservato e gia deciso:** separare gli importi/sconti staff-only
+   (`visits.cost`, `visits.discount_percent`, `services.price_cents`). Valgono
+   le misure precedenti; nessun approfondimento economico aggiunto.
+3. **Misure inviti adottate da Luigi, da completare:** avviso di link personale
+   nel messaggio, visibilita del collegamento per il salone e scollegamento.
+   La verifica SMS resta futura; il rischio del link inoltrato e accettato,
+   non viene riproposto come blocco. Demo: default misurato **3 giorni**;
+   produzione **7 giorni** e dichiarazione dell'Emendamento, non prova Codex.
+4. **Verifiche residue:** completare quanto elencato nei limiti dopo la chiusura
+   Storage. Non trasformare l'assenza di una prova in un difetto dimostrato.
+
+### Prova discriminante Storage
+
+Fixture staff in `pet-avatars/<tenant>/<pet-di-Mario>/<file-sintetico>.png`,
+schema di percorso gia usato dalla suite. Nessun segreto nei log o registro.
+
+| Passo | Esito misurato |
+|---|---|
+| Upload sonda staff | riuscito; un solo oggetto per esecuzione |
+| Listing dalla radice con client anon | **403**, nessun percorso scoperto |
+| Listing dalla radice con sessione Luca | **3 chiamate list**, attraversamento di 2 cartelle, file scoperto |
+| URL costruito dal percorso restituito dal listing | nessun token invito/QR necessario |
+| GET di quell'URL, senza header Authorization | **HTTP 200**, SHA-256 del corpo uguale ai byte della fixture |
+| Teardown staff | oggetto eliminato; rilettura percorso **0** |
+
+Prima esecuzione: il 403 anon ha concluso la sonda e attivato il cleanup.
+Seconda: distinti gli attori, osservata la fuga con Luca; exit 2 intenzionale
+e arresto immediato. Complessivamente due upload sintetici successivi,
+entrambi rimossi. Nessun download di oggetti estranei alla fixture.
+
+**Causa misurata:** policy `Pet avatars public read`, `SELECT TO public`,
+con sola condizione `bucket_id = 'pet-avatars'`. Non distingue tenant, pet,
+proprietario o uso tecnico/pubblico. Il download pubblico resta raggiungibile
+anche senza sessione una volta scoperto il percorso. Il fatto che anon non
+riesca a elencare non protegge dal cliente autenticato che enumera e condivide
+l'URL. Non serve tentare UUID casuali.
+
+**Possibile, non controprovato dopo lo stop:** `client-photos` ha la policy
+analoga `Public can view client photos`; la suite ha gia misurato GET pubblici
+200 con URL noto, ma la scoperta autonoma customer in questo secondo bucket
+non e stata eseguita. Non estendere automaticamente il risultato del primo.
+
+### Soluzione consigliata a Cowork
+
+Separare gli oggetti **tecnici del salone** da quelli **del proprietario
+destinati alla scheda pubblica**. Raccomandazione: bucket privato per le foto
+tecniche, accesso staff controllato dalla membership e URL firmati brevi;
+accesso customer alle sole immagini espressamente previste per il suo pet.
+Nel contenitore pubblico delle immagini QR, niente listing globale per i
+customer: policy SELECT limitate al proprio pet o allo staff autorizzato.
+
+**Togliere soltanto la policy SELECT non basta per le foto tecniche:** un
+oggetto in bucket pubblico puo restare scaricabile a URL noto. La correzione
+deve coprire sia enumerazione sia download, comprese le vecchie URL e la cache.
+Inventariare e trasferire gli oggetti preesistenti mantenendo i riferimenti
+corretti; nessuna cancellazione indiscriminata. Cowork verifica consistenza e
+patrimonio in produzione, fuori dal perimetro di questo audit.
+
+Controprove raccomandate: Luca non enumera ne scarica la foto tecnica di Mario,
+anche conoscendone il percorso; anon non scarica quel file; staff autorizzato
+continua a usarlo; staff di altro tenant e negato; foto owner e QR pubblico
+restano funzionanti secondo il contratto; listing proprio limitato; vecchi
+URL tecnici non piu pubblici; entrambi i bucket e teardown a zero. Aggiornare
+la suite: oggi una prova **si aspetta HTTP 200 pubblico in entrambi i bucket**,
+quindi 60 PASS non certificano la riservatezza delle foto.
+
+### Suite e matrice tabelle
+
+`node scripts/rls-tests/run.mjs`: **60 PASS, 0 FAIL, 0 SKIP**. Include fixture
+positive di isolamento cliente/tenant, promozioni attive/inattive/future,
+note interne, richieste, conferimento/scollegamento e protezione scritture
+Storage. Le prove supplementari non sostituiscono quei risultati.
+
+Inventario demo precedente confermato dalla superficie interrogata: **16**
+tabelle public, tutte RLS; **35** policy public, **14** SECURITY DEFINER con
+search_path, **4** funzioni anon, **23** authenticated. I numeri del prod nel
+mandato non sono misure di questa sessione e non riaprono la questione backup.
+
+Letture API Mario/Luca: conteggi sulle righe persistenti misurati nelle riprese
+precedenti. Scritture: **128 prove SQL** (16 tabelle x 2 ruoli x CRUD) su
+righe presenti, con rollback, integrate dalla suite e dalle API mirate.
+`D` = 42501; `0` = nessuna riga modificata; `1` = operazione eseguita su riga
+propria/fixture e poi annullata. U non significa che tutte le colonne siano
+modificabili: vale il campo provato, con i trigger indicati.
+
+| Tabella | SELECT API Mario/Luca | INSERT customer | UPDATE customer | DELETE customer |
+|---|---:|---|---|---|
+| appointments | 1 / 0, propri | 1, proprio pending | 1, note del proprio pending | 0 |
+| appointment_requests | 0 / 0; fixture propria visibile | duplicato 23505; inserimento valido nella suite | 0 | 0 |
+| contacts | 0 / 0 | D | 0 | 0 |
+| customer_account_unlink_audit | 0 / 0 | D | D | D |
+| customer_invitations | 0 / 0 | D | 0 | 0 |
+| customer_staff_notes | 0 / 0 | D | 0 | 0 |
+| customers | 1 / 1, propri | D | 1, first_name; campi operativi protetti nella suite | 0 |
+| pet_staff_notes | 0 / 0 | D | 0 | 0 |
+| pets | 2 / 0, propri | D | 1, owner_notes; whitelist sotto | 0 |
+| profiles | 1 / 1, propri | 23505 su ID proprio gia esistente | 1, business_name | 0 |
+| promotions | 0 / 0; solo attiva nella suite | D | 0 | 0 |
+| reward_points | 0 / 0; fixture propria visibile | D | 0 | 0 |
+| services | 2 / 2, attivi del tenant | D | 0 | 0 |
+| tenant_memberships | 1 / 1, proprie | D | 0 anche tentando owner | 0 |
+| tenants | 1 / 1, tenant di appartenenza | D | 0 | 0 |
+| visits | 6 / 0, proprie | D | 0 | 0 |
+
+Anon: SELECT/INSERT/UPDATE **42501 su tutte le 16 tabelle**; DELETE 42501
+su 15, **0 righe su tenant_memberships**. Non e una cancellazione riuscita.
+I casi con zero righe iniziali sono stati integrati da fixture positive della
+suite o della matrice SQL; il solo vuoto iniziale non dimostrava isolamento.
+L'INSERT profiles resta limitato dal duplicato: non e una prova di diniego RLS.
+
+**Osservato fuori copertura suite:** resta aperto il percorso legacy di
+INSERT/UPDATE customer su `appointments`, parallelo ad `appointment_requests`.
+Un pending proprio si crea via API e le sue note si aggiornano via SQL.
+Il tentativo API di spostarlo al pet di Luca, anche **senza RETURNING**, e
+respinto **42501** e la riga resta propria. Non e stata provata una fuga da
+questa policy. Raccomandazione di hardening: decidere la dismissione esplicita
+del percorso legacy, non assumere che tutte le scritture passino dalle RPC.
+
+### Whitelist: tutte le 23 colonne
+
+| Colonne provate singolarmente | Metodo | Esito |
+|---|---|---|
+| id, tenant_id, customer_id, owner_user_id | SQL ruolo customer, fixture e rollback | tutte invariate, 1 riga elaborata per tentativo |
+| name, species, breed, birth_date, sex, microchip, weight_kg, neutered, color | API sessione Mario | tutte invariate |
+| photo_url, no_show_score, is_blacklisted, qr_token, created_at, awarded_fidelity_tier | API sessione Mario | tutte invariate |
+| owner_notes, coat_preferences, owner_photo_url | API sessione Mario | valore richiesto applicato |
+| updated_at | API sessione Mario | timestamp server cambia; valore arbitrario richiesto NON applicato |
+
+Nessuna colonna omessa. Inserimento pet proprio via API: **42501**; DELETE
+pet proprio Mario e Luca: **0 righe**, fixture ancora presente fino al teardown
+staff. Quattro chiavi testate in transazione per non rendere irrintracciabile
+una fixture qualora il controllo fallisse: eccezione metodologica dichiarata,
+non presentata come prova HTTP.
+
+### Funzioni, inviti e confine staff
+
+Restano valide le prove vive gia registrate nelle riprese precedenti:
+
+- `respond_appointment_request_slot` e `withdraw_appointment_request` di Luca
+  su richiesta Mario: **42501**, nessun dato restituito, impronta riga invariata.
+- Correzione telefono nell'errore di `accept_customer_invite`: impronta
+  `fcfe2fc99dc56851d5e6f6d308c193fa`, nessun telefono nell'intera risposta.
+- `get_public_pet_card`: 7 token demo validi, 18 chiavi; nessun nome, telefono
+  o indirizzo del proprietario, solo recapito del salone. Foto owner-only.
+  Token null/vuoto/inesistente: null. `get_public_salon_identity`: solo nome
+  e telefono del salone; slug invalido/null: null.
+- `ensure_pet_qr_token` e `prevent_duplicate_pending_appointment_request`:
+  chiamate anon RPC senza argomenti **PGRST202**, non invocabili come normali
+  RPC. Non e una nuova funzione esposta per leggere dati.
+- Generazione QR: UUID v4, **122 bit casuali**, prefisso `ghp_` senza trattini;
+  con 351 token, probabilita per tentativo circa **6,60 x 10^-35**. Stima del
+  generatore, non attestazione della qualita di eventuali token legacy.
+
+| Caso invito | Stato e prova |
+|---|---|
+| inoltrato a customer senza scheda | **osservato e accettato da Luigi**, adozione riuscita nelle prove precedenti |
+| altro customer gia collegato | osservato 23505; verso scheda gia assegnata, errore generico senza telefono |
+| scaduto | osservato GH_INVITE_EXPIRED, anche nella suite |
+| gia usato | fixture marcata usata: stesso utente already_accepted; altro utente GH_INVITE_ALREADY_USED |
+| vero primo riscatto seguito dal secondo sul medesimo link | **non completato**, nuovo stop Storage prima di questa controprova |
+| sessione staff con invito valido | rifiuto API GH_INVITE_STAFF_ACCOUNT, prova precedente |
+| sessione gia presente nel browser | osservato uso automatico della sessione corrente, come sotto |
+
+Browser: Luca e sonda staff, sia `/u/redeem/:token` sia `/portal/invite/:token`,
+invocano la RPC usando il JWT della sessione gia presente senza un nuovo login.
+Token **inesistente**: HTTP 400/P0001 GH_INVITE_NOT_FOUND. Nuovo percorso: 1
+chiamata; legacy: 2 chiamate nel dev server. Non e una prova browser di
+adozione valida o doppio riscatto; quelle chiamate hanno deliberatamente
+evitato effetti sui collegamenti. Il riscatto valido con destinatario diverso
+resta dimostrato a livello API e gia accettato, non viene ripetuto.
+
+| Rotta | Mario | Luca | Sonda staff | Anon |
+|---|---|---|---|---|
+| /dashboard | /u/home | /u/home | /dashboard | /login |
+| /calendar | /u/home | /u/home | /calendar | /login |
+| /contacts | /u/home | /u/home | /contacts | /login |
+
+**Osservato:** 12 navigazioni vive, nessun errore JavaScript non gestito.
+La porta staff e chiusa nell'interfaccia **e** nelle tabelle con ACL/RLS
+misurate; non autorizza pero un via libera globale, per la fuga Storage.
+`getUserProfile` adatta il ruolo dalla membership; `profiles.role` da solo
+non costituisce il ruolo effettivo. Non testata in questa ripresa una modifica
+arbitraria di `profiles.role`, ne tutte le combinazioni dei 23 entry point auth.
+
+### Ripristino, limiti e file
+
+Suite: fixture principali eliminate; rimosse puntualmente anche le **2 nuove
+righe audit** dello scollegamento generate da questo giro, vincolate agli UUID
+nuovi e marker della suite. Le **16 righe audit preesistenti** hanno lo stesso
+insieme di ID prima/dopo. Nessuna cancellazione generale dell'audit.
+
+Sonda extra: 2 pet e 1 appointment temporanei eliminati, customer originali
+identici per impronta prima/dopo. La RPC staff di cancellazione del pending
+ha restituito **23514**; la successiva cancellazione dei soli pet fixture ha
+rimosso l'appointment per cascata, con rilettura a zero. Il dettaglio non viene
+nascosto come se la RPC fosse riuscita. SQL identita/matrice: rollback integrale.
+Storage: entrambi gli oggetti sintetici delle due esecuzioni eliminati.
+
+Controllo finale demo: **7 pet, 90 visite, 7 customer, 8 appuntamenti,
+0 richieste, 0 inviti, 0 oggetti Storage**, identici alla base del giro;
+**0 pet, 0 appuntamenti e 0 oggetti Storage con marker GH-102**.
+Sessioni temporanee, Chromium e Vite chiusi. Nessun dato reale nelle evidenze.
+
+Limiti: produzione non verificata; backup chiusi da Cowork; nessun audit
+esaustivo di tutte le combinazioni RPC, cache/CDN o concorrenza; vero doppio
+riscatto e invito valido end-to-end nel browser ancora da completare dopo la
+chiusura Storage. I test mancanti sono dichiarati, non passati per esclusione.
+Il mandato resta **interrotto per la nuova fuga**, non completato con successo.
+
+| File/artefatto toccato | Destino |
+|---|---|
+| docs/consegne/GH-102-cosa-puo-raggiungere-un-cliente-esito.md | unico file del commit; esito vigente anteposto, storico conservato |
+| /private/tmp/gh102-extra.mjs | sonda temporanea API, eliminata |
+| /private/tmp/gh102-browser.mjs | sonda temporanea browser, eliminata |
+| /private/tmp/gh102-storage.mjs | sonda temporanea Storage, eliminata |
+| /private/tmp/gh102-vite-cache/ | cache generata, eliminata |
+
+Esclusi e immutati: mandato GH-102, entrambi gli emendamenti, SQL di
+riallineamento e migrazione Cowork della sanificazione errore. Non eseguiti
+o inclusi nel commit. Le cartelle `controlli-salone/`, `nomi-da-recuperare/`,
+`qr-gadget/` non sono state lette o incluse. Nessun intervento nel diario.
+
+Il controllo preventivo ha respinto due bozze di sonde **prima** della
+creazione/esecuzione: identita pet con cleanup non garantito e invito valido
+browser con ripristino incompleto. Adeguate separando identita in rollback
+e usando un token inesistente nel browser. Nessun effetto delle bozze respinte.
+Nessuna attivita fuori mandato; nessun push, merge, deploy o build necessaria
+per la sola documentazione. Nessun rallentamento bloccante osservato.
+
+Tempo misurato: **897 s**, 27/9/2026 **05:49:21-06:04:18 Europe/Rome**, da
+inizio ripresa a verifica finale DB; redazione e commit esclusi. Verifica
+`git diff --check` e controllo dello stage prima del commit; hash in chat.
+
+---
+
+## Storico: arresto precedente, superato dall'Emendamento 2
+
 ## Esito vigente: errore sanificato, invito inoltrato riscattabile
 
 **NO al via libera per 320 inviti.** La fuga del telefono nell'errore e
