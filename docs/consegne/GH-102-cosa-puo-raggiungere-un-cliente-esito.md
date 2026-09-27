@@ -1,5 +1,20 @@
 # GH-102 — Cosa puo raggiungere un cliente
 
+## Aggiornamento 27/9: policy staff e listing anonimo chiusi
+
+**Conferma ricevuta da Luigi, non nuova misura Codex:** il 27/9 la policy
+`Pet avatars staff all` e passata da tutti i ruoli ad `authenticated`, prima
+in produzione e poi sul demo. Un chiamante non autenticato che chiede l'elenco
+di `pet-avatars` o `client-photos` riceve **HTTP 200 con 0 elementi**.
+Questo punto non e piu aperto. Il precedente **403** su `pet-avatars`, conservato
+nelle prove storiche sotto, descrive lo stato antecedente alla correzione.
+
+Aggiornato solo questo registro, su base `0b64645`; nessuna interrogazione DB,
+modifica/applicazione della migrazione o verifica autonoma della produzione.
+La conferma riguarda policy e listing anonimo, non certifica le altre
+controprove Storage in produzione ne modifica il rilievo sugli URL pubblici.
+Tempo di questo aggiornamento documentale non misurato.
+
 ## Ripresa conclusiva 27/9: inviti verificati anche nel browser
 
 **Sette controprove browser superate, ripristino integrale verificato.**
@@ -94,8 +109,10 @@ non certificate concorrenza, tutte le combinazioni possibili e stato produzione.
 ## Esito vigente: elenco Storage chiuso sul demo, regressioni assenti
 
 **NO al via libera per il lancio in produzione, allo stato dichiarato.**
-La correzione e verificata **solo sul demo** e Luigi comunica che non e ancora
-in produzione. Il percorso con cui Luca scopriva le foto altrui e ora chiuso.
+Le controprove Codex sono eseguite **solo sul demo**. La precedente indicazione
+di mancato rilascio va letta con l'aggiornamento di Luigi in testa: policy staff
+e listing anonimo sono ora dichiarati corretti anche in produzione.
+Il percorso con cui Luca scopriva le foto altrui e chiuso sul demo.
 Non sono emerse nuove letture/scritture cross-customer nelle controprove.
 
 La garanzia «nessuno vede dati altrui salvo chi riceve un invito inoltrato»
@@ -142,7 +159,7 @@ visita `pet-avatars/<tenant>/<pet>/visits/<visita>/...`.
 | Prova | Risultato osservato |
 |---|---|
 | anon elenca client-photos dalla radice | risposta vuota, 0 file |
-| anon elenca pet-avatars dalla radice | 403, 0 file |
+| anon elenca pet-avatars dalla radice | misura storica: 403, 0 file; dopo la correzione del 27/9 Luigi conferma 200, 0 elementi |
 | Luca elenca entrambi i bucket dalla radice | 0 file in ciascuno, nessun percorso da attraversare |
 | Mario elenca client-photos | 0 file |
 | Mario elenca pet-avatars ricorsivamente | 4 chiamate, **1 solo file: il suo ritratto owner**; 0 tecnici/visita |
@@ -216,9 +233,10 @@ dei materiali con nomi e telefoni reali.
 
 ### Prima del lancio: lista consolidata per Cowork
 
-1. **P1, rilascio mancante:** portare la chiusura del listing in produzione,
-   con le medesime controprove. Stato prod non verificato da Codex; Luigi dice
-   che non e ancora applicata. Nessun invito di massa basato sul solo demo.
+1. **Listing anonimo chiuso per conferma Luigi del 27/9:** policy staff limitata
+   ad authenticated e 200 con elenco vuoto sui due bucket, anche in produzione.
+   Resta distinta la verifica delle altre controprove Storage in produzione
+   (clienti autenticati, upload/rimozione e immagini), non eseguita da Codex.
 2. **P1, riservatezza residua:** URL tecnici noti/storici restano pubblici.
    Per la garanzia stretta servono bucket privati/URL firmati e trattamento
    degli indirizzi preesistenti, oppure una decisione esplicita sul rischio
