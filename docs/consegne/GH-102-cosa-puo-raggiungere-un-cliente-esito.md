@@ -1,5 +1,140 @@
 # GH-102 — Cosa puo raggiungere un cliente
 
+## Esito vigente: errore sanificato, invito inoltrato riscattabile
+
+**NO al via libera per 320 inviti.** La fuga del telefono nell'errore e
+chiusa sul demo, ma il caso precedentemente possibile e ora **osservato**:
+un account customer esistente, ancora senza scheda, riscatta un invito
+indirizzato a un'altra email, adotta la scheda destinataria e ne legge
+telefono e pet. Il solo possesso del link conferisce il collegamento;
+l'identita del destinatario non viene verificata.
+
+Precondizione importante: serve un **link valido inoltrato/intercettato**,
+non basta conoscere l'ID di un customer. Non e un accesso anonimo o
+un'enumerazione libera. Tutti i dati della controprova sono fixture demo,
+non clienti reali. Per questa lettura dei dati della scheda destinata a
+un'altra persona si applica l'arresto dell'Emendamento 1: dopo il risultato,
+solo teardown e documentazione. L'audit restante non e stato completato.
+
+### Prima del lancio, ordine aggiornato
+
+1. **P1, osservato:** riscatto del link da destinatario diverso su scheda non
+   collegata. Stabilire e imporre la verifica del destinatario prima
+   dell'adozione. Il controllo customer gia collegato non copre questo caso.
+2. **P2, osservato:** protezione degli importi/sconti, gia decisa da Luigi;
+   nessuna nuova prova economica in questo giro.
+3. **Verifiche residue, non difetti dimostrati:** completare le prove ancora
+   mancanti elencate sotto prima di certificare l'isolamento complessivo.
+
+La fuga nell'errore e **chiusa**, non resta nell'elenco dei difetti aperti.
+Le precedenti sezioni sono storico e non rappresentano l'esito corrente.
+
+### Correzione Cowork verificata sul demo
+
+Base `08d4fb9`, branch `main`; root e worktree invariati. DB unico
+`qttpinkslhenxrsbhhhg`; nessuna lettura/scrittura del prod. Il riscontro della
+produzione e una dichiarazione di Cowork trasmessa da Luigi, non una prova
+indipendente di questa sessione.
+
+Impronta MD5 viva della definizione `accept_customer_invite(text)`:
+`fcfe2fc99dc56851d5e6f6d308c193fa`, coincide con il prefisso comunicato.
+SHA-256: `58e25c726bede0e4b0f85be75e2ed90ab7a7da4af6e1016d1dfe81ed0257506e`.
+
+Controprova API Luca->invito fresco per scheda Mario gia collegata:
+`P0001`, detail `GH_INVITE_ASSIGNED_ELSEWHERE`, nessun risultato di successo.
+Confronto del telefono con **l'intera risposta serializzata**, inclusi
+message/details/hint: **assente**. Customer/profili/membership originali
+invariati. Prova riuscita in entrambe le esecuzioni mirate del giro.
+
+### Invito inoltrato: risultato discriminante
+
+Fixture creata tramite la RPC staff `add_customer_with_pet`, come nella
+suite: customer con `user_id = null`, email destinataria di Mario, telefono
+sintetico e pet sintetico. Invito con la stessa email destinataria. Il
+telefono e il token vengono mantenuti in memoria, mai riportati negli output.
+
+| Chiamante e stato iniziale | Risultato API | Lettura successiva |
+|---|---|---|
+| Luca, gia collegato alla propria scheda | 23505, riscatto rifiutato | nessuna adozione riuscita |
+| Sonda customer GH-44 esistente, senza scheda/membership | accepted | da 0 a 1 customer visibile, telefono coincidente con fixture destinataria, 1 pet leggibile |
+
+Per la seconda riga, `callerDiffersFromInvitedEmail = true`:
+email della sessione diversa da `customer_email` dell'invito e da quella
+iniziale della scheda. Non e stato creato un account: e la sonda permanente
+gia usata dalla suite. **Osservato:** l'adozione modifica il collegamento e
+rende leggibili i dati prima invisibili. Non e la ripetizione del precedente
+errore telefonico, che resta corretto.
+
+Il caso Luca rifiutato non e una prova sufficiente di sicurezza: dipende
+dall'essere gia collegato, mentre il destinatario errato ancora senza scheda
+supera il percorso. Il rischio riguarda anche una sessione browser customer
+sbagliata prima del primo collegamento. Quest'ultimo scenario resta una
+deduzione dal codice di auto-riscatto gia letto, non una prova browser viva.
+
+### Soluzione consigliata a Cowork
+
+La RPC usa il token come unica prova di diritto alla scheda; legge l'email
+del chiamante per salvarla, ma non verifica che sia il destinatario.
+**Raccomandazione:** vincolare lato server il riscatto a una identita
+destinataria verificata prima di aggiornare customer, pet e membership.
+Per destinatario gia identificato, usare il suo user ID; per primo invito,
+verifica di un canale del destinatario o conferimento esplicito dello staff.
+Non considerare sufficiente confrontare un'email auto-dichiarata senza
+verificarne il possesso. Gestire esplicitamente gli inviti senza email.
+
+Non bastano conferma grafica dell'account, token piu lungo, scadenza piu
+breve o errore generico: un chiamante diretto puo ancora usare la RPC.
+Conservare atomicita, controllo staff, scadenza, idempotenza per lo stesso
+destinatario e rifiuto generico per gli altri. Controprove: destinatario
+verificato riesce; account diverso sia collegato sia non collegato fallisce
+senza leggere o mutare dati; inoltro, doppio uso, scadenza e sessione browser
+sbagliata; zero residui fixture. Nessuna soluzione implementata nell'audit.
+
+### Ripristino, esclusioni e limiti
+
+Due esecuzioni controllate: complessivamente **2 customer, 2 pet, 4 inviti**
+temporanei. Tutti eliminati con rilettura degli ID a zero. Nell'esecuzione
+che ha dimostrato l'adozione, lo scollegamento tramite RPC staff ha rimosso
+la membership temporanea della sonda e prodotto **1 riga di audit**.
+Quella sola riga e stata rimossa tramite SQL demo, vincolato a UUID del
+customer fixture e marker esatto; rilettura finale **0 audit, 0 customer,
+0 pet**. Nessuna cancellazione generale del registro scollegamenti.
+
+Impronte in memoria: customer/profili/membership originali di Mario e Luca
+identici prima/dopo; profilo/membership sonda GH-44 ripristinati esattamente.
+Pet tenant tornati a **7**. Sessioni temporanee chiuse; nessun account nuovo
+o password modificata, nessuna fixture Storage. Exit 2 della seconda sonda:
+arresto intenzionale dopo l'adozione, teardown completato senza errori.
+
+Restano validi i risultati delle riprese precedenti: matrice letture,
+quattro RPC pubbliche, due rifiuti sulle richieste altrui, scaduto/gia usato
+con i limiti dichiarati. Restano **non provati** whitelist colonna per
+colonna, matrice scritture completa, vero doppio riscatto e browser inviti,
+tre rotte staff. Nessuna suite completa lanciata: stop cross-customer.
+Nessuna ulteriore ricerca dei backup, nessun approfondimento economico.
+
+| File toccato | Destino |
+|---|---|
+| docs/consegne/GH-102-cosa-puo-raggiungere-un-cliente-esito.md | unico file del commit, esito corrente anteposto allo storico |
+| /private/tmp/gh102-invite-recheck.mjs | sonda temporanea senza password incorporate; rimossa a fine giro, fuori repo |
+
+La nuova `supabase/migrations/20260927_gh102_invite_error_without_phone.sql`
+corrisponde alla correzione annunciata da Luigi: esclusa, non letta,
+modificata o applicata da Codex. Restano escluse tutte le precedenti
+modifiche/materiali Luigi-Cowork, comprese le tre cartelle riservate.
+Nessuna modifica a src/migration/policy/funzioni, nessun push/merge/deploy.
+La cancellazione puntuale della traccia di audit fixture e dichiarata sopra
+come parte del ripristino, non come correzione del database.
+
+Tempo misurato: **239 s**, 27/9/2026 **05:35:13–05:39:12 Europe/Rome**, da
+inizio verifica a teardown finale; redazione e commit esclusi. Nessun
+rallentamento bloccante. Build/browser non eseguiti; diff check e stage del
+solo registro verificati prima del commit. Hash definitivo in chat.
+
+---
+
+## Storico: precedente arresto Emendamento 1
+
 ## Esito vigente dopo Emendamento 1: NO al via libera
 
 **Non possiamo ancora invitare 320 persone con la garanzia richiesta.**
