@@ -1,5 +1,96 @@
 # GH-102 — Cosa puo raggiungere un cliente
 
+## Ripresa conclusiva 27/9: inviti verificati anche nel browser
+
+**Sette controprove browser superate, ripristino integrale verificato.**
+Chiusa la limitazione sull'adozione valida nel browser dichiarata sotto.
+Resta **NO al via libera alla produzione**: questa prova non cambia i rilievi
+Storage e gli altri prerequisiti di lancio della sezione consolidata seguente.
+Nessuna nuova fuga diversa dall'invito al portatore gia accettato da Luigi.
+
+Root `/Users/luigimaisto/Desktop/grooming-hub-web`, worktree `webapp/`, branch
+`main`, base `a53cef34d0219fc13f70bf63365b2bdc28ba51fc`.
+Autorizzazione nominativa di Luigi: collegamento temporaneo della sonda GH-44
+esistente a customer/pet sintetici, scollegamento e rimozione delle sole nuove
+righe audit. Solo demo `qttpinkslhenxrsbhhhg`; produzione mai letta o scritta.
+
+### Prova osservata
+
+Chromium isolato, applicazione reale servita da Vite locale, sessioni demo
+ottenute con login SDK e predisposte nel browser prima della navigazione.
+Nessun mock della RPC: verificati POST, identita nel JWT, risposta HTTP e UI.
+Richieste estranee al demo bloccate; font Google esclusi intenzionalmente.
+
+| Sessione gia aperta e caso | HTTP / risposta osservata | Esito UI |
+|---|---|---|
+| staff, invito valido | 400 / GH_INVITE_STAFF_ACCOUNT | account personale separato richiesto |
+| Luca, gia collegato a una scheda | 409 / 23505 | errore visibile, fixture non adottata |
+| GH-44, invito realmente scaduto | 400 / GH_INVITE_EXPIRED | nuovo link richiesto |
+| GH-44, invito valido destinato ad altra email | 200 / accepted | navigazione a /u/home |
+| GH-44, stesso invito riaperto | 200 / already_accepted | "E tutto a posto" |
+| GH-44, stesso invito nella rotta legacy | 200 / already_accepted | navigazione a /portal |
+| Luca, invito gia adottato da GH-44 | 400 / GH_INVITE_ALREADY_USED | link gia collegato |
+
+In tutti i casi il JWT e quello della sessione predisposta, senza nuovo login.
+`accepted_by` e `accepted_at` restano identici dopo entrambe le riaperture.
+GH-44 legge la scheda sintetica adottata e il solo telefono fittizio previsto.
+Zero errori JavaScript di pagina nel giro completo. Il caso dell'email diversa
+conferma il rischio al portatore gia accettato, non un aggiramento senza link.
+
+### Ripristino e tentativi
+
+Teardown in `finally`: scollegamento staff mediante RPC, eliminazione puntuale
+dei due inviti, pet e customer sintetici; successivo `finally` MCP atteso elimina
+solo l'audit con marker e telefono della fixture, verificati assenti prima.
+Rimossa **1** riga audit nel giro completo; le **16 preesistenti** sono intatte.
+
+| Tabella | Righe iniziali = finali | MD5 righe ordinate, identico prima/dopo |
+|---|---:|---|
+| customers | 7 | 57fa98572ae0bb6699f7ab816ceacef2 |
+| pets | 7 | 261142030a4a89a5f0fe5080168cd956 |
+| profiles | 6 | 15f1fe6f1021d1a8cb4b096f45e42bb5 |
+| tenant_memberships | 5 | 2736a9f30d4824742417872795acf398 |
+| customer_invitations | 0 | d41d8cd98f00b204e9800998ecf8427e |
+| customer_account_unlink_audit | 16 | bd486ce9dedac163bf5c784a174bca99 |
+
+**Zero residui** della fixture in customer, pet, inviti e audit. Restano
+90 visite, 8 appuntamenti, 0 richieste, 0 oggetti Storage. Nessun account nuovo
+o cambio password; sessioni di test disconnesse localmente, browser/server chiusi.
+Il confronto delle sei tabelle comprende anche le schede Mario/Luca e i profili;
+non pretende che i metadati Auth di ultimo accesso restino invariati dopo login.
+
+Due tentativi preliminari, entrambi ripristinati con le sei impronte identiche:
+il primo conteggiava il font esterno bloccato come violazione del test; il secondo
+preparava `expires_at` in INSERT, ma il trigger lo ricalcola. Corretto il solo
+test con UPDATE della fixture dopo INSERT, come nella suite esistente, e riletta
+la scadenza prima della navigazione. Nel secondo tentativo l'invito era quindi
+valido ed e stato adottato; anche la sua unica riga audit e stata eliminata.
+Nessuna modifica applicativa. Il controllo preventivo del precedente tentativo
+aveva inoltre rifiutato un teardown incompleto sull'audit, prima dell'esecuzione.
+
+### File, limiti e tempi
+
+| File toccato nella ripresa | Destino |
+|---|---|
+| docs/consegne/GH-102-cosa-puo-raggiungere-un-cliente-esito.md | unico file nel commit documentale della ripresa |
+| /private/tmp/gh102-browser-approved.mjs | sonda temporanea, eliminata dopo le prove; mai nel repository |
+| /private/tmp/gh102-browser-vite-cache/ | cache temporanea del solo test, eliminata |
+
+La nuova migrazione Cowork `20260927_gh102_pet_avatars_staff_policy_authenticated_only.sql`
+e stata esclusa dopo conferma esplicita di Luigi: non letta, modificata, applicata
+o staged. Restano esclusi anche mandato, emendamenti, riallineamento demo, altre
+migrazioni Cowork e materiali riservati gia elencati. Nessuna attivita fuori
+dall'autorizzazione; nessun push/merge/deploy. Commit identificabile con
+`git log -1 --format=%H -- docs/consegne/GH-102-cosa-puo-raggiungere-un-cliente-esito.md`.
+
+Tempo misurato del giro completo, incluso teardown e confronto SQL: **21 s**.
+Dalla ripresa delle letture al primo controllo finale: **346 s**, comprendenti
+preparazione e tentativi; pausa di attesa dell'autorizzazione esclusa. Non e una
+misura delle prestazioni dell'app. Build e suite RLS completa non rieseguite:
+nessun codice cambiato, nessun push; valgono solo le prove esplicitate sopra.
+I limiti browser riportati nello storico seguente sono ora superati; rimangono
+non certificate concorrenza, tutte le combinazioni possibili e stato produzione.
+
 ## Esito vigente: elenco Storage chiuso sul demo, regressioni assenti
 
 **NO al via libera per il lancio in produzione, allo stato dichiarato.**
