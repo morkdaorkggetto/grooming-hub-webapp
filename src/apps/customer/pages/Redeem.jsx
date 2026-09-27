@@ -5,6 +5,7 @@ import { supabase } from '../../../shared/supabase/client';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
 import Brandmark from '../../../shared/ui/Brandmark';
 import Icon from '../../../shared/ui/Icon';
+import { customerErrorCode, customerErrorMessage } from '../../../shared/customerErrors';
 import './Redeem.css';
 
 const VIEW_COPY = {
@@ -32,6 +33,12 @@ const VIEW_COPY = {
     body: 'L’invito appartiene a un account già in uso. Accedi con quell’account oppure contattaci.',
     tone: 'warning',
   },
+  assigned: {
+    eyebrow: 'Invito già collegato',
+    title: 'Questo invito è già collegato a un altro account',
+    body: 'Contatta il salone per verificare il collegamento.',
+    tone: 'warning',
+  },
   already: {
     eyebrow: 'Scheda già collegata',
     title: 'È tutto a posto',
@@ -53,11 +60,12 @@ const VIEW_COPY = {
 };
 
 function viewFromError(error) {
-  const message = error?.message || '';
-  if (message.includes('GH_INVITE_NOT_FOUND')) return 'not_found';
-  if (message.includes('GH_INVITE_EXPIRED')) return 'expired';
-  if (message.includes('GH_INVITE_ALREADY_USED')) return 'used';
-  if (message.includes('GH_INVITE_STAFF_ACCOUNT')) return 'staff';
+  const code = customerErrorCode(error);
+  if (code === 'GH_INVITE_NOT_FOUND') return 'not_found';
+  if (code === 'GH_INVITE_EXPIRED') return 'expired';
+  if (code === 'GH_INVITE_ALREADY_USED') return 'used';
+  if (code === 'GH_INVITE_STAFF_ACCOUNT') return 'staff';
+  if (code === 'GH_INVITE_ASSIGNED_ELSEWHERE') return 'assigned';
   return 'error';
 }
 
@@ -131,7 +139,7 @@ export default function Redeem() {
     });
 
     if (inviteError) {
-      setError(inviteError.message || 'Non siamo riusciti a completare l’invito.');
+      setError(customerErrorMessage(inviteError));
       setView(viewFromError(inviteError));
       return;
     }
@@ -183,7 +191,7 @@ export default function Redeem() {
     try {
       const normalizedEmail = email.trim();
       if (password.length < 8) {
-        throw new Error('Scegli una password di almeno 8 caratteri.');
+        throw Object.assign(new Error('Password validation'), { code: 'weak_password' });
       }
 
       const result = authMode === 'signup'
@@ -193,13 +201,13 @@ export default function Redeem() {
       if (result.error) throw result.error;
       const activeUser = result.data?.user;
       if (!result.data?.session || !activeUser?.id) {
-        throw new Error('L’account richiede una conferma non prevista. Contattaci.');
+        throw Object.assign(new Error('Confirmation required'), { code: 'GH_AUTH_CONFIRMATION_REQUIRED' });
       }
 
       attemptedFor.current = `${activeUser.id}:${token}`;
       await completeInvite(activeUser.id);
     } catch (submitError) {
-      setError(submitError.message || 'Accesso non riuscito.');
+      setError(customerErrorMessage(submitError));
       setView('form');
     } finally {
       setSubmitting(false);

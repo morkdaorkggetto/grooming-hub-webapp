@@ -1,0 +1,229 @@
+[
+  {
+    "name": "Nuovo addVisit schema finale",
+    "measured": {
+      "cost": 12.34,
+      "copy": true
+    }
+  },
+  {
+    "name": "Nuovo addVisit",
+    "measured": {
+      "cost": 23.45,
+      "legacyMirror": false
+    }
+  },
+  {
+    "name": "Atteso incassi settimana",
+    "measured": {
+      "today": "2026-09-27",
+      "weekStartValue": "2026-09-21",
+      "baselineWeek": 0,
+      "expectedRevenue": "36 €"
+    }
+  },
+  {
+    "name": "Incassi browser prima contract",
+    "measured": "36 €"
+  },
+  {
+    "name": "Vecchio URL prima bucket privato",
+    "measured": {
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:26:26 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "MISS",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "READY_FOR_CONTRACT",
+    "measured": {
+      "visits": 2,
+      "storage": 1
+    }
+  },
+  {
+    "name": "Incassi browser dopo contract",
+    "measured": "36 €"
+  },
+  {
+    "name": "Nuovo salvataggio dopo contract",
+    "measured": "34,56 EUR"
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 145,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:26:52 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 15309,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:27:07 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 30408,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:27:22 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 45728,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:27:37 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 60922,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:27:52 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 76034,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:28:07 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 91137,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:28:23 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 106270,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:28:38 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 121368,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:28:53 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 136614,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:29:08 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 151754,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:29:23 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Cache campione",
+    "measured": {
+      "elapsedMs": 166907,
+      "status": 200,
+      "headers": {
+        "date": "Sun, 27 Sep 2026 05:29:38 GMT",
+        "cache-control": "public, max-age=3600",
+        "cf-cache-status": "HIT",
+        "age": null,
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "Teardown GH103 browser",
+    "measured": "pet, visite e relativi importi rimossi; oggetti Storage rimossi"
+  }
+]

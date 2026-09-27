@@ -4,6 +4,7 @@ import { useAuth } from '../../../shared/auth/AuthProvider';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
 import Brandmark from '../../../shared/ui/Brandmark';
 import Card from '../../../shared/ui/Card';
+import { customerErrorMessage } from '../../../shared/customerErrors';
 
 /**
  * /u/login — form di accesso customer, Step 5 visual refinement.
@@ -52,7 +53,7 @@ export default function Login() {
     const { error: signInError } = await signIn(email.trim(), password);
     setSubmitting(false);
     if (signInError) {
-      setError(signInError.message || 'Credenziali non valide.');
+      setError(customerErrorMessage(signInError));
       return;
     }
     navigate(redirect, { replace: true });

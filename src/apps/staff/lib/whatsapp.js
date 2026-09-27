@@ -226,7 +226,7 @@ export const getCustomerInviteWhatsAppMessage = (invite = {}) => {
     ? `${durationDays} ${durationDays === 1 ? 'giorno' : 'giorni'}`
     : 'fino alla scadenza indicata';
 
-  return `Ciao! Siamo ${salonName}. ${petArea}: tutti i tuoi pet, lo storico completo delle visite, il prossimo appuntamento e le richieste. Il collegamento vale ${durationText}. ${inviteUrl}`.trim();
+  return `Ciao! Siamo ${salonName}. ${petArea}: tutti i tuoi pet, lo storico completo delle visite, il prossimo appuntamento e le richieste. Il collegamento vale ${durationText}. Il link è personale: non inoltrarlo. ${inviteUrl}`.trim();
 };
 
 export const getCustomerInviteWhatsAppUrl = (invite) =>

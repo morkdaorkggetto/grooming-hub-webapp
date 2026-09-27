@@ -8,7 +8,7 @@ const STAFF_MESSAGES = {
   short: 'La password deve avere almeno 6 caratteri.',
   mismatch: 'Le due password non coincidono.',
   success: 'Password aggiornata con successo. Ora puoi accedere.',
-  updateError: (error) => `Errore aggiornamento password: ${error.message}`,
+  updateError: () => 'Non riusciamo ad aggiornare la password. Riprova tra poco.',
 };
 
 // Extracted from the staff reset page; its defaults preserve the legacy flow.
@@ -83,6 +83,7 @@ export default function usePasswordReset({
       await supabase.auth.signOut();
       setTimeout(() => navigate(loginPath, { replace: true }), 1200);
     } catch (err) {
+      console.warn('Aggiornamento password non riuscito', err);
       setError(messages.updateError(err));
     } finally {
       setLoading(false);

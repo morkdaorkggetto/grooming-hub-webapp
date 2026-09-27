@@ -1,0 +1,182 @@
+[
+  {
+    "name": "Nuovo addVisit schema finale",
+    "measured": {
+      "cost": 12.34,
+      "copy": true
+    }
+  },
+  {
+    "name": "Nuovo addVisit",
+    "measured": {
+      "cost": 23.45,
+      "legacyMirror": false
+    }
+  },
+  {
+    "name": "Atteso incassi settimana",
+    "measured": {
+      "today": "2026-09-27",
+      "weekStartValue": "2026-09-21",
+      "baselineWeek": 0,
+      "expectedRevenue": "36 €"
+    }
+  },
+  {
+    "name": "Incassi browser prima contract",
+    "measured": "36 €"
+  },
+  {
+    "name": "Incassi browser dopo contract",
+    "measured": "36 €"
+  },
+  {
+    "name": "Somma al centesimo",
+    "measured": {
+      "deltaCents": 3579
+    }
+  },
+  {
+    "name": "Nuovo salvataggio dopo contract",
+    "measured": "34,56 EUR"
+  },
+  {
+    "name": "pet-avatars pubblico",
+    "measured": {
+      "kind": "owner",
+      "status": 200
+    }
+  },
+  {
+    "name": "pet-avatars pubblico",
+    "measured": {
+      "kind": "visits",
+      "status": 200
+    }
+  },
+  {
+    "name": "pet-avatars pubblico",
+    "measured": {
+      "kind": "promotions",
+      "status": 200
+    }
+  },
+  {
+    "name": "Firma foto",
+    "measured": "staff consentito; Mario e Luca rifiutati"
+  },
+  {
+    "name": "Foto browser",
+    "measured": {
+      "surface": "client",
+      "rendered": true
+    }
+  },
+  {
+    "name": "Foto browser",
+    "measured": {
+      "surface": "dashboard",
+      "rendered": true
+    }
+  },
+  {
+    "name": "Foto browser",
+    "measured": {
+      "surface": "calendar",
+      "rendered": true
+    }
+  },
+  {
+    "name": "Firma batch",
+    "measured": {
+      "requests": 3,
+      "pathCounts": [
+        1,
+        2,
+        1
+      ]
+    }
+  },
+  {
+    "name": "Catalogo e completamento",
+    "measured": {
+      "catalogCents": 7500,
+      "invalidCost": "22023 senza effetti",
+      "completedCost": 7.89,
+      "repeated": "stesso ID, costo invariato"
+    }
+  },
+  {
+    "name": "Redirect legacy",
+    "measured": [
+      "/portal -> /u/home",
+      "/portal/login -> /u/login",
+      "/portal/invite/gh103-link-test -> /u/redeem/gh103-link-test",
+      "/u/book raggiungibile"
+    ]
+  },
+  {
+    "name": "Rubrica 375px",
+    "measured": {
+      "overflow": false,
+      "target": {
+        "x": 101.15625,
+        "y": 250.84375,
+        "width": 143.265625,
+        "height": 44
+      }
+    }
+  },
+  {
+    "name": "Rubrica 1365px",
+    "measured": {
+      "overflow": false,
+      "target": {
+        "x": 200.65625,
+        "y": 258.640625,
+        "width": 143.265625,
+        "height": 44
+      }
+    }
+  },
+  {
+    "name": "Collegamento di oggi",
+    "measured": "Mario, email demo, data odierna e pet fixture; invito accettato sintetico, nessun account ricollegato"
+  },
+  {
+    "name": "Dalla rubrica allo scollegamento",
+    "measured": "Pulsante raggiunto; non premuto sugli account permanenti"
+  },
+  {
+    "name": "Errore provocato browser (risposta HTTP sostituita)",
+    "measured": {
+      "details": "GH_INVITE_ASSIGNED_ELSEWHERE",
+      "expected": "Questo invito è già collegato a un altro account",
+      "rawAbsent": true
+    }
+  },
+  {
+    "name": "Errore provocato browser (risposta HTTP sostituita)",
+    "measured": {
+      "details": "GH_UNKNOWN",
+      "expected": "Non siamo riusciti a completare l’invito",
+      "rawAbsent": true
+    }
+  },
+  {
+    "name": "Errore provocato browser (risposta HTTP sostituita)",
+    "measured": {
+      "details": "GH_INVITE_EXPIRED",
+      "expected": "Serve un nuovo link",
+      "rawAbsent": true
+    }
+  },
+  {
+    "name": "Errore reale RPC",
+    "measured": "Luca accetta invito del pet gia collegato a Mario: GH_INVITE_ASSIGNED_ELSEWHERE"
+  },
+  {
+    "name": "Teardown GH103 browser",
+    "measured": "pet, visite e relativi importi rimossi; oggetti Storage rimossi"
+  }
+]

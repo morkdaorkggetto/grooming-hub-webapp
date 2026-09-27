@@ -7,6 +7,7 @@ import Eyebrow from '../../../shared/ui/Eyebrow';
 import ImageCropModal from '../../../shared/ui/ImageCropModal';
 import Icon from '../../../shared/ui/Icon';
 import Skeleton from '../../../shared/ui/Skeleton';
+import { customerErrorMessage } from '../../../shared/customerErrors';
 import { usePet } from '../hooks/usePet';
 import { usePetVisits } from '../hooks/usePetVisits';
 import {
@@ -379,7 +380,7 @@ export default function Pet() {
       setActiveSection(null);
       setMode('saved');
     } catch (updateError) {
-      setSaveError(updateError.message || 'Non e stato possibile salvare le modifiche.');
+      setSaveError(customerErrorMessage(updateError, 'Non e stato possibile salvare le modifiche.'));
       setMode('editing');
     }
   };
@@ -405,7 +406,7 @@ export default function Pet() {
       const currentPortrait = await loadOwnerPetPhoto(pet.owner_photo_url, pet.name);
       setPendingOwnerCropFile(currentPortrait);
     } catch (photoError) {
-      setSaveError(photoError.message || 'Non e stato possibile riaprire il ritratto.');
+      setSaveError(customerErrorMessage(photoError, 'Non e stato possibile riaprire il ritratto.'));
     } finally {
       setPhotoUploading(false);
     }
@@ -437,7 +438,7 @@ export default function Pet() {
       setMode('saved');
     } catch (photoError) {
       if (uploadedPath && !photoSaved) await removePetPhoto(uploadedPath).catch(() => {});
-      setSaveError(photoError.message || 'Non e stato possibile salvare la foto.');
+      setSaveError(customerErrorMessage(photoError, 'Non e stato possibile salvare la foto.'));
     } finally {
       setPhotoUploading(false);
     }
@@ -459,7 +460,7 @@ export default function Pet() {
       if (previousPath) await removePetPhoto(previousPath).catch(() => {});
       setMode('saved');
     } catch (photoError) {
-      setSaveError(photoError.message || 'Non e stato possibile togliere la foto.');
+      setSaveError(customerErrorMessage(photoError, 'Non e stato possibile togliere la foto.'));
     } finally {
       setPhotoUploading(false);
     }
@@ -467,7 +468,7 @@ export default function Pet() {
 
   if (authLoading || loading) return <LoadingPage />;
   if (error) {
-    return <MessagePage title="Non riusciamo a caricare la scheda" body={error.message} onRetry={refetch} />;
+    return <MessagePage title="Non riusciamo a caricare la scheda" body={customerErrorMessage(error)} onRetry={refetch} />;
   }
   if (!pet) {
     return <MessagePage title="Pet non trovato o accesso negato" body="La scheda richiesta non e disponibile per questo account." />;

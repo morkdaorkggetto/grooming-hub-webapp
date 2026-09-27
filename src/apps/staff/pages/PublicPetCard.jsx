@@ -131,7 +131,8 @@ export default function PublicPetCard() {
         setPetCard(cardResult.value);
       } else {
         setPetCard(null);
-        setError(cardResult.reason?.message || 'Card cliente non disponibile');
+        console.warn('Cartoncino non disponibile', cardResult.reason);
+        setError('Card cliente non disponibile');
       }
 
       if (active) setLoading(false);

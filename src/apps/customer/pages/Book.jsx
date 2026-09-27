@@ -310,15 +310,10 @@ export default function Book() {
         coatNotes: coatNotes.trim(),
       });
     } catch (error) {
-      if (
-        error.details === 'GH44_OPEN_REQUEST_LIMIT'
-        || /richieste in attesa.*salone/i.test(error.message || '')
-      ) {
-        setSubmitError(error.message);
-      } else if (
-        error.code === '23505'
-        || /gia una richiesta|già una richiesta/i.test(error.message || '')
-      ) {
+      console.warn('Richiesta appuntamento non riuscita', error);
+      if (error.details === 'GH44_OPEN_REQUEST_LIMIT') {
+        setSubmitError('Hai già richieste in attesa presso questo salone. Attendi una risposta prima di inviarne un’altra.');
+      } else if (error.code === '23505') {
         setSubmitError('Per questo pet c’è già una richiesta in attesa.');
       } else {
         setSubmitError('Riprova tra un momento — o scrivici direttamente su WhatsApp, va benissimo uguale.');

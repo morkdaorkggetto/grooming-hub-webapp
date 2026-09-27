@@ -180,7 +180,8 @@ export default function ImageCropModal({
       });
       onConfirm(cropped);
     } catch (err) {
-      setError(err.message || 'Errore durante il ritaglio della foto.');
+      console.warn('Ritaglio foto non riuscito', err);
+      setError('Errore durante il ritaglio della foto. Riprova con un’altra immagine.');
       setSaving(false);
     }
   };

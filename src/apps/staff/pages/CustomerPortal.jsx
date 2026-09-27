@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createCustomerAppointmentRequest, getCustomerPortalData } from '../lib/database';
 import { logout } from '../../../shared/supabase/client';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import { getTenantWhatsAppPhone } from '../../../shared/tenant/contact';
@@ -1130,7 +1129,7 @@ export default function CustomerPortal({ demoPreview = false }) {
     setError('');
 
     try {
-      const loadedClients = demoPreview ? getDemoPortalClients() : (await getCustomerPortalData()).clients || [];
+      const loadedClients = demoPreview ? getDemoPortalClients() : [];
       setClients(loadedClients);
       setActiveClientId((currentId) =>
         loadedClients.some((client) => client.id === currentId)
@@ -1138,7 +1137,8 @@ export default function CustomerPortal({ demoPreview = false }) {
           : loadedClients[0]?.id || ''
       );
     } catch (err) {
-      setError(err.message || 'Non riesco a caricare il portale cliente.');
+      console.warn('Caricamento anteprima cliente', err);
+      setError('Non riesco a caricare il portale cliente.');
     } finally {
       setLoading(false);
     }
@@ -1213,8 +1213,8 @@ export default function CustomerPortal({ demoPreview = false }) {
           )
         );
       } else {
-        await createCustomerAppointmentRequest(clientId, payload);
-        await loadPortal();
+        navigate('/u/book');
+        return false;
       }
       setRequestNoticeByClient((prev) => ({
         ...prev,
@@ -1231,7 +1231,7 @@ export default function CustomerPortal({ demoPreview = false }) {
         ...prev,
         [clientId]: {
           type: 'error',
-          message: err.message || 'Non riesco a inviare la richiesta.',
+          message: 'Non riesco a inviare la richiesta.',
         },
       }));
       return false;

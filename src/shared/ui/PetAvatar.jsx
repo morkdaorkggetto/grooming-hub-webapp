@@ -1,5 +1,6 @@
 import React from 'react';
 import Icon from './Icon';
+import StorageImage from './StorageImage';
 
 export default function PetAvatar({
   name = 'Pet',
@@ -21,7 +22,7 @@ export default function PetAvatar({
       aria-hidden={photo ? undefined : 'true'}
     >
       {photo ? (
-        <img className="gh-avatar__image" src={photo} alt={name} />
+        <StorageImage className="gh-avatar__image" src={photo} alt={name} />
       ) : (
         <Icon name="paw" size={Math.max(16, Math.round(size * 0.48))} />
       )}

@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Vecchio addVisit da git 6c8daa5 sopra atto A",
+    "measured": {
+      "cost": 12.34,
+      "copy": true
+    }
+  },
+  {
+    "name": "Nuovo addVisit sopra atto A",
+    "measured": {
+      "legacyMirror": 23.45
+    }
+  },
+  {
+    "name": "Atteso incassi settimana",
+    "measured": {
+      "today": "2026-09-27",
+      "weekStartValue": "2026-09-21",
+      "baselineWeek": 0,
+      "expectedRevenue": "36 €"
+    }
+  },
+  {
+    "name": "Incassi browser prima contract",
+    "measured": "36 €"
+  },
+  {
+    "name": "Vecchio URL prima bucket privato",
+    "measured": {
+      "status": 200,
+      "headers": {
+        "cache-control": "public, max-age=0",
+        "cf-cache-status": "MISS",
+        "date": "Sun, 27 Sep 2026 05:21:29 GMT",
+        "x-smart-cdn": "true"
+      }
+    }
+  },
+  {
+    "name": "READY_FOR_CONTRACT",
+    "measured": {
+      "visits": 2,
+      "storage": 1
+    }
+  },
+  {
+    "name": "Incassi browser dopo contract",
+    "measured": "36 €"
+  },
+  {
+    "name": "Nuovo salvataggio dopo contract",
+    "measured": "34,56 EUR"
+  },
+  {
+    "name": "Teardown GH103 browser",
+    "measured": "pet, visite e relativi importi rimossi; oggetti Storage rimossi"
+  }
+]

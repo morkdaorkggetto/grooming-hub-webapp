@@ -1,0 +1,20 @@
+[
+  {
+    "elapsedMs": 154,
+    "status": 200,
+    "cache": "HIT"
+  },
+  {
+    "elapsedMs": 5262,
+    "status": 200,
+    "cache": "HIT"
+  },
+  {
+    "elapsedMs": 10517,
+    "status": 400,
+    "cache": "BYPASS"
+  },
+  {
+    "cleanup": "bucket privato, fixture rimossa; pet-avatars non toccato"
+  }
+]

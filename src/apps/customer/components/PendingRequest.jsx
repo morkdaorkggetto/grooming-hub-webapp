@@ -101,6 +101,7 @@ export default function PendingRequest({ request, onResponded }) {
       if (await onResponded() === false) throw new Error('Refresh failed');
     } catch (err) {
       setError(declineAppointmentResponseError(err) || alternativeResponseError(err));
+      console.warn('Risposta alla proposta non riuscita', err);
     } finally {
       inFlight.current = false; setBusy(false);
     }
@@ -123,6 +124,7 @@ export default function PendingRequest({ request, onResponded }) {
       setWithdrawalSucceeded(true);
     } catch (err) {
       setConfirmingWithdrawal(false);
+      console.warn('Ritiro richiesta non riuscito', err);
       setWithdrawalError(
         err?.details === 'GH96_ALREADY_RESOLVED' || err?.details === 'GH96_APPOINTMENT_EXISTS' || err?.code === '23514'
           ? 'Il salone ha già risposto a questa richiesta. Aggiorna la pagina per vedere cosa è cambiato.'

@@ -133,8 +133,9 @@ function toLocalDateValue(date) {
 
 function netRevenue(visits) {
   return (visits || []).reduce((total, visit) => {
-    const gross = Number(visit.cost) || 0;
-    const discount = Number(visit.discount_percent) || 0;
+    const financials = relation(visit.financials);
+    const gross = Number(financials?.cost) || 0;
+    const discount = Number(financials?.discount_percent) || 0;
     return total + gross * (1 - discount / 100);
   }, 0);
 }
@@ -142,11 +143,11 @@ function netRevenue(visits) {
 async function readGh52ReportSnapshot() {
   assert(gh52Baseline, 'Baseline report GH-52 assente');
   const [weekResult, monthResult, linkedVisitResult] = await Promise.all([
-    staff.client.from('visits').select('id, cost, discount_percent')
+    staff.client.from('visits').select('id, financials:visit_financials(cost, discount_percent)')
       .eq('tenant_id', tenantId)
       .gte('date', gh52Baseline.weekStart)
       .lte('date', gh52Baseline.weekEnd),
-    staff.client.from('visits').select('id, cost, discount_percent')
+    staff.client.from('visits').select('id, financials:visit_financials(cost, discount_percent)')
       .eq('tenant_id', tenantId)
       .gte('date', gh52Baseline.monthStart)
       .lte('date', gh52Baseline.monthEnd),
@@ -392,19 +393,10 @@ async function createLucaFixture() {
   });
   assertNoError(noteError, 'Creazione note staff pet Luca');
 
-  const { data: visit, error: visitError } = await staff.client
-    .from('visits')
-    .insert({
-      id: FIXTURE_VISIT_ID,
-      tenant_id: tenantId,
-      pet_id: fixturePet.id,
-      date: '2026-08-21',
-      treatments: `${MARKER} visita isolamento`,
-      cost: 1,
-      discount_percent: 0,
-    })
-    .select('id, pet_id')
-    .single();
+  const { data: visit, error: visitError } = await staff.client.rpc('create_staff_visit', {
+    p_pet_id: fixturePet.id, p_date: '2026-08-21', p_cost: 1,
+    p_treatments: `${MARKER} visita isolamento`,
+  });
   assertNoError(visitError, 'Creazione visita Luca');
   fixtureVisit = visit;
 }
@@ -442,19 +434,10 @@ async function createGh44Fixture() {
   assertNoError(extraPetsError, 'Creazione pet aggiuntivi GH-44');
   extraPets.forEach(({ id }) => gh44PetIds.add(id));
 
-  const { data: visit, error: visitError } = await staff.client
-    .from('visits')
-    .insert({
-      id: 'gh-44-unlink-visit',
-      tenant_id: tenantId,
-      pet_id: createdRow.pet_id,
-      date: '2026-08-30',
-      treatments: '[DEMO GH-44] visita preservazione',
-      cost: 1,
-      discount_percent: 0,
-    })
-    .select('id')
-    .single();
+  const { data: visit, error: visitError } = await staff.client.rpc('create_staff_visit', {
+    p_pet_id: createdRow.pet_id, p_date: '2026-08-30', p_cost: 1,
+    p_treatments: '[DEMO GH-44] visita preservazione',
+  });
   assertNoError(visitError, 'Creazione visita GH-44');
   gh44VisitId = visit.id;
 
@@ -917,12 +900,58 @@ async function main() {
 
   await createLucaFixture();
 
+  await runTest('Dati economici privati GH-103', 'colonne legacy assenti, * senza importi, relazioni invisibili ai customer', async () => {
+    for (const [table, columns] of [['visits', 'cost, discount_percent'], ['services', 'price_cents']]) {
+      const explicit = await mario.client.from(table).select(columns);
+      assert(explicit.error?.code === '42703', `${table}: colonne legacy ancora leggibili`);
+      const all = await mario.client.from(table).select('*');
+      assertNoError(all.error, `SELECT * ${table}`);
+      assert(all.data.length > 0, `${table}: prova vuota`);
+      assert(all.data.every(row => !['cost', 'discount_percent', 'price_cents'].some(key => key in row)), `${table}: importo in *`);
+    }
+    for (const table of ['visit_financials', 'service_financials']) {
+      for (const actor of [mario, luca, foreignStaff]) {
+        const read = await actor.client.from(table).select('*');
+        assertNoError(read.error, `SELECT ${table}`);
+        assert(read.data.length === 0, `${table}: valori economici esposti`);
+      }
+    }
+    const staffValue = await staff.client.from('visit_financials').select('*').eq('visit_id', fixtureVisit.id).single();
+    assertNoError(staffValue.error, 'Importo staff');
+    assert(Number(staffValue.data.cost) === 1, 'Importo fixture non copiato');
+    const write = await mario.client.from('visit_financials').insert({ visit_id: fixtureVisit.id, cost: 99 });
+    assert(forbiddenRlsError(write.error), 'Scrittura economica customer consentita');
+    const rpc = await mario.client.rpc('create_staff_visit', { p_pet_id: marioPet.id, p_date: '2026-09-27', p_cost: 99 });
+    assert(forbiddenRlsError(rpc.error), 'RPC visita consentita al cliente');
+    return '2 colonne/query rifiutate; 2 wildcard puliti; 6 letture vuote; staff 1 EUR; insert e RPC cliente 42501';
+  });
+
+  await runTest('Appuntamento pending diretto cliente GH-103', 'INSERT 42501 e UPDATE proprio pending senza effetto', async () => {
+    const id = `gh103-denied-${crypto.randomUUID()}`;
+    appointmentIds.add(id);
+    const pending = {
+      id, user_id: mario.user.id, tenant_id: tenantId, pet_id: appointmentFixturePet.id,
+      scheduled_at: new Date(Date.now() + 864000000).toISOString(), duration_minutes: 60,
+      status: 'scheduled', approval_status: 'pending', appointment_source: 'customer', requested_by_customer_id: mario.user.id,
+      notes: '[DEMO GH-103] note originali',
+    };
+    const result = await mario.client.from('appointments').insert(pending);
+    assert(forbiddenRlsError(result.error), 'INSERT diretto customer non rifiutato');
+    assertNoError((await staff.client.from('appointments').insert(pending)).error, 'Fixture proprio pending');
+    const update = await mario.client.from('appointments').update({ notes: '[DEMO GH-103] VIOLAZIONE' }).eq('id', id).select('id');
+    assert(forbiddenRlsError(update.error) || (!update.error && update.data.length === 0), 'UPDATE proprio pending consentito');
+    const stored = await staff.client.from('appointments').select('notes').eq('id', id).single();
+    assertNoError(stored.error, 'Rilettura pending staff');
+    assert(stored.data.notes === pending.notes, 'Note proprio pending modificate');
+    return 'INSERT 42501; UPDATE proprio pending rifiutato o 0 righe, note originali invariate';
+  });
+
   const gh45ClientPhotoPath = `${staff.user.id}/${GH45_CLIENT_PHOTO_FILE}`;
   const gh45PetAvatarPath = `${tenantId}/${fixturePet.id}/${GH45_PET_AVATAR_FILE}`;
 
   await runTest(
-    'Storage staff e lettura pubblica GH-45',
-    'staff crea e sostituisce in entrambi i bucket; URL pubblici leggibili senza sessione',
+    'Storage staff e URL pubblici GH-103',
+    'staff crea e sostituisce; client-photos privato, pet-avatars pubblico',
     async () => {
       trackGh45Storage('client-photos', gh45ClientPhotoPath);
       trackGh45Storage('pet-avatars', gh45PetAvatarPath);
@@ -944,10 +973,19 @@ async function main() {
 
         const publicUrl = staff.client.storage.from(bucket).getPublicUrl(objectPath).data.publicUrl;
         const response = await fetch(`${publicUrl}?gh45=${Date.now()}`);
-        assert(response.ok, `Lettura pubblica ${bucket}: HTTP ${response.status}`);
+        assert(response.ok === (bucket === 'pet-avatars'), `Lettura pubblica ${bucket}: HTTP ${response.status}`);
+        if (bucket === 'client-photos') {
+          const { data: signed, error } = await staff.client.storage.from(bucket).createSignedUrl(objectPath, 120);
+          assertNoError(error, 'Firma staff');
+          assert((await fetch(signed.signedUrl)).ok, 'Foto firmata non disponibile');
+          for (const actor of [makeClient(), mario.client, luca.client, foreignStaff.client]) {
+            const denied = await actor.storage.from(bucket).createSignedUrl(objectPath, 120);
+            assert(denied.error && !denied.data?.signedUrl, 'Firma foto concessa fuori salone');
+          }
+        }
       }
 
-      return '2 upload, 2 update, 2 letture pubbliche HTTP 200';
+      return '2 upload/update; pubblico solo pet-avatars; firma solo staff del salone, 4 attori rifiutati';
     }
   );
 
@@ -995,12 +1033,12 @@ async function main() {
         ['client-photos', gh45ClientPhotoPath],
         ['pet-avatars', gh45PetAvatarPath],
       ]) {
-        const publicUrl = staff.client.storage.from(bucket).getPublicUrl(objectPath).data.publicUrl;
-        const response = await fetch(`${publicUrl}?gh45-unlinked=${Date.now()}`);
+        const object = await staff.client.storage.from(bucket).download(objectPath);
+        const response = { ok: !object.error };
         assert(response.ok, `Sonda senza legami ha cancellato ${bucket}`);
       }
 
-      return '4 scritture rifiutate; 2 delete senza effetto; oggetti ancora pubblici';
+      return '4 scritture rifiutate; 2 delete senza effetto; oggetti leggibili dallo staff';
     }
   );
 
@@ -1025,8 +1063,8 @@ async function main() {
         ['client-photos', gh45ClientPhotoPath],
         ['pet-avatars', gh45PetAvatarPath],
       ]) {
-        const publicUrl = staff.client.storage.from(bucket).getPublicUrl(objectPath).data.publicUrl;
-        const response = await fetch(`${publicUrl}?gh45-customer=${Date.now()}`);
+        const object = await staff.client.storage.from(bucket).download(objectPath);
+        const response = { ok: !object.error };
         assert(response.ok, `Mario ha cancellato ${bucket}`);
       }
 
@@ -1375,7 +1413,14 @@ async function main() {
     assert(appointment.approval_status === 'approved', 'Appointment non approvato');
     assert(appointment.appointment_source === 'customer', 'Fonte appointment non customer');
     assert(appointment.requested_by_customer_id === mario.user.id, 'Richiedente appointment non corrisponde');
-    return `${data.appointment_id}, approved`;
+    const update = await mario.client.from('appointments').update({ notes: '[DEMO GH-103] VIOLAZIONE' })
+      .eq('id', data.appointment_id).select('id');
+    if (update.error) assert(forbiddenRlsError(update.error), 'Errore UPDATE inatteso');
+    else assert(update.data.length === 0, 'UPDATE diretto cliente consentito');
+    const reread = await staff.client.from('appointments').select('notes').eq('id', data.appointment_id).single();
+    assertNoError(reread.error, 'Rilettura note');
+    assert(reread.data.notes !== '[DEMO GH-103] VIOLAZIONE', 'Note mutate dal cliente');
+    return `${data.appointment_id}, approved; UPDATE cliente 0 righe/42501, note invariate`;
   });
 
   let gh44ServiceId = null;
@@ -2054,13 +2099,13 @@ try {
     addResult('FAIL', 'Pulizia fixture', '0 residui marker', error.message);
   }
   if (staff?.client) {
-    await staff.client.auth.signOut({ scope: 'global' }).catch(() => {});
+    await staff.client.auth.signOut({ scope: 'local' }).catch(() => {});
   }
   if (gh44?.client) {
-    await gh44.client.auth.signOut({ scope: 'global' }).catch(() => {});
+    await gh44.client.auth.signOut({ scope: 'local' }).catch(() => {});
   }
   if (foreignStaff?.client) {
-    await foreignStaff.client.auth.signOut({ scope: 'global' }).catch(() => {});
+    await foreignStaff.client.auth.signOut({ scope: 'local' }).catch(() => {});
   }
 }
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import ImageCropModal from '../../../shared/ui/ImageCropModal';
+import StorageImage from '../../../shared/ui/StorageImage';
 import ClientQrImage from '../components/ClientQrImage';
 import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {
@@ -102,11 +103,11 @@ function StaffPhotoMedallion({ client, swapped, onSwap }) {
   return (
     <div className="gh-staff-medallion">
       <div className="gh-staff-medallion__main">
-        {main ? <img src={main} alt={`Foto di ${client.name}`} /> : <span>{client.name?.charAt(0)?.toUpperCase() || '?'}</span>}
+        {main ? <StorageImage src={main} alt={`Foto di ${client.name}`} /> : <span>{client.name?.charAt(0)?.toUpperCase() || '?'}</span>}
       </div>
       {side && (
         <button type="button" className="gh-staff-medallion__side" onClick={onSwap} aria-label="Scambia le due foto" title="Scambia le due foto">
-          <img src={side} alt="" />
+          <StorageImage src={side} alt="" />
         </button>
       )}
     </div>
@@ -910,7 +911,7 @@ export default function ClientDetail() {
                   <span className="gh-eyebrow--staff gh-field-label">Foto di riconoscimento</span>
                   {(editForm.photo || editPhotoPreview) && (
                     <div className="gh-edit-photo-preview">
-                      <img src={editPhotoPreview || editForm.photo} alt="Anteprima foto" />
+                      <StorageImage src={editPhotoPreview || editForm.photo} alt="Anteprima foto" />
                       <Button staff variant="danger" icon="trash" onClick={removeEditPhoto} aria-label="Rimuovi foto" />
                     </div>
                   )}

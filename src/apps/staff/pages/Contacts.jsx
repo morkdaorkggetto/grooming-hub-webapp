@@ -85,17 +85,21 @@ export default function Contacts() {
         contact.pet_name?.toLowerCase().includes(query) ||
         contact.owner_name?.toLowerCase().includes(query) ||
         contact.phone?.toLowerCase().includes(query) ||
+        contact.email?.toLowerCase().includes(query) ||
         contact.notes?.toLowerCase().includes(query);
 
       if (!matchesQuery) return false;
       if (activeFilter === 'all') return true;
+      if (activeFilter === 'linked') return Boolean(contact.user_id);
       return contact.status === activeFilter;
-    });
+    }).sort((a, b) => activeFilter === 'linked'
+      ? String(b.linked_at || '').localeCompare(String(a.linked_at || '')) : 0);
   }, [contacts, searchTerm, activeFilter]);
 
   const counts = useMemo(
     () => ({
       all: contacts.length,
+      linked: contacts.filter((contact) => contact.user_id).length,
       lead: contacts.filter((contact) => contact.status === 'lead').length,
       contacted: contacts.filter((contact) => contact.status === 'contacted').length,
       active: contacts.filter((contact) => contact.status === 'active').length,
@@ -172,6 +176,7 @@ export default function Contacts() {
 
   const filters = [
     ['all', 'Tutti', counts.all],
+    ['linked', 'Account collegati', counts.linked],
     ['lead', 'Lead', counts.lead],
     ['contacted', 'Contattati', counts.contacted],
     ['active', 'Clienti', counts.active],
@@ -248,6 +253,10 @@ export default function Contacts() {
                         {selectedPet?.breed?.trim() && <div><dt>Razza</dt><dd>{selectedPet.breed}</dd></div>}
                         <div><dt>Telefono</dt><dd className="gh-num">{contact.phone || 'Non indicato'}</dd></div>
                         <div><dt>Creato il</dt><dd className="gh-num">{new Date(contact.created_at).toLocaleDateString('it-IT')}</dd></div>
+                        {activeFilter === 'linked' && <>
+                          <div><dt>Email account</dt><dd style={{ overflowWrap: 'anywhere' }}>{contact.email || 'Non indicata'}</dd></div>
+                          <div><dt>Collegato il</dt><dd className="gh-num">{contact.linked_at ? new Date(contact.linked_at).toLocaleString('it-IT') : 'Data non disponibile'}</dd></div>
+                        </>}
                       </dl>
                       {contact.notes && <p className="gh-contact-notes gh-pre-wrap">{contact.notes}</p>}
                     </div>

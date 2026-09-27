@@ -148,16 +148,7 @@ export default function App() {
 
           <Route path="/client-card/:qrToken" element={<PublicPetCard />} />
 
-          <Route
-            path="/portal/login"
-            element={
-              user && profile?.role ? (
-                <Navigate to={getDefaultAuthenticatedPath(profile)} replace />
-              ) : (
-                <CustomerLogin currentUser={user} currentRole={profile?.role || null} />
-              )
-            }
-          />
+          <Route path="/portal/login" element={<CustomerLogin />} />
 
           <Route path="/portal/invite/:token" element={<CustomerInvite />} />
 
@@ -172,19 +163,7 @@ export default function App() {
             }
           />
 
-          <Route
-            path="/portal"
-            element={
-              <ProtectedRoute
-                isAuthenticated={!!user}
-                profile={profile}
-                allowedRole="customer"
-                loginPath="/portal/login"
-              >
-                <CustomerPortal />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/portal" element={<Navigate to="/u/home" replace />} />
 
 
           {/* Route protette */}

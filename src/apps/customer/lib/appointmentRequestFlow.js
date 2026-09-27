@@ -23,11 +23,8 @@ export const getWaitingCustomerAge = (request, now = Date.now()) => {
 };
 
 export const declineAppointmentResponseError = (error) => {
-  if (/declared closure/i.test(error?.message || '')) {
-    return 'Quel giorno il salone è chiuso. Scegli un’altra data.';
-  }
-  if (/must be in the future/i.test(error?.message || '')) {
-    return 'Scegli una data futura per la tua nuova disponibilità.';
+  if (error?.code === '22023') {
+    return 'Controlla la nuova disponibilità: scegli una data futura e una fascia in cui il salone è aperto.';
   }
   return null;
 };

@@ -26,10 +26,10 @@ const STAFF_ROLES = ['owner', 'staff'];
 export const RECENT_WITHDRAWN_REQUEST_DAYS = 5;
 const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 
-const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, service_id, date, treatments, issues, cost, discount_percent, photo_url, created_at, updated_at, service:services(id, name))`;
+const PET_SELECT = `*, staff_notes:pet_staff_notes(notes), customer:customers(id, tenant_id, user_id, first_name, last_name, email, phone, marketing_opt_in, acquisition_source, relationship_status, created_at, updated_at, staff_notes:customer_staff_notes(notes)), visits(id, pet_id, tenant_id, appointment_id, service_id, date, treatments, issues, financials:visit_financials(cost, discount_percent), photo_url, created_at, updated_at, service:services(id, name))`;
 const APPOINTMENT_SELECT = `id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, external_calendar, service_id, created_at, updated_at, service:services(id, name, duration_minutes), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const APPOINTMENT_REQUEST_SELECT = `id, tenant_id, customer_user_id, pet_id, service_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, declared_pet_age, status, appointment_id, withdrawn_at, staff_responded_at, proposed_alternatives, alternatives_round, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at, created_at, updated_at, service:services(id, name, duration_minutes), appointment:appointments(id, scheduled_at, duration_minutes, status, approval_status), pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, birth_date, customer:customers(id, user_id, first_name, last_name, email, phone))`;
-const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, appointment_id, date, treatments, issues, cost, created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
+const CALENDAR_VISIT_SELECT = `id, pet_id, tenant_id, appointment_id, date, treatments, issues, financials:visit_financials(cost, discount_percent), created_at, updated_at, pet:pets(id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone))`;
 const CALENDAR_PET_SELECT = `id, tenant_id, customer_id, owner_user_id, name, breed, photo_url, no_show_score, is_blacklisted, customer:customers(id, user_id, first_name, last_name, email, phone)`;
 const PROMOTION_SELECT = 'id, tenant_id, title, body, image_url, valid_from, valid_to, cta_label, cta_url, display_order, is_active, created_at';
 
@@ -53,6 +53,8 @@ const getPublicAppOrigin = () =>
   PUBLIC_APP_URL ? PUBLIC_APP_URL.replace(/\/+$/, '') : window.location.origin;
 
 const relation = (value) => (Array.isArray(value) ? value[0] || null : value || null);
+
+const mapVisit = (row) => ({ ...row, ...relation(row.financials) });
 
 export const APPOINTMENT_REQUEST_STAFF_ACTION = Object.freeze({
   NEEDS_RESPONSE: 'needs_response',
@@ -150,7 +152,7 @@ const mapPet = (row) => {
     ? { ...rawCustomer, operator_notes: customerStaffNotes }
     : null;
   const internalNotes = relation(row.staff_notes)?.notes || null;
-  const visits = [...(row.visits || [])].sort((a, b) =>
+  const visits = (row.visits || []).map(mapVisit).sort((a, b) =>
     String(b.date || '').localeCompare(String(a.date || ''))
   );
   return {
@@ -219,7 +221,7 @@ const mapLegacyAppointmentRequest = (row) => withAppointmentRequestStaffAction({
 const mapCalendarVisit = (row) => {
   if (!row) return null;
   const pet = mapPet(relation(row.pet));
-  return { ...row, pet, client: pet };
+  return { ...mapVisit(row), pet, client: pet };
 };
 
 const getMemberships = async (userId) => {
@@ -256,7 +258,6 @@ const requireContext = async (roles, tenantId = null) => {
 };
 
 const requireStaff = (tenantId = null) => requireContext(STAFF_ROLES, tenantId);
-const requireCustomer = (tenantId = null) => requireContext(['customer'], tenantId);
 
 const getPetById = async (petId, tenantId = null) => {
   let query = supabase.from('pets').select(PET_SELECT).eq('id', petId);
@@ -545,48 +546,7 @@ export const unlinkCustomerAccount = async (customerId) => {
   return data;
 };
 
-export const acceptCustomerPortalInvite = async (token) => {
-  const { data, error } = await supabase.rpc('accept_customer_invite', { p_token: token });
-  if (error) throw new Error(`Non riesco ad accettare l'invito: ${error.message}`);
-  return data;
-};
 
-export const getCustomerPortalData = async () => {
-  try {
-    const { user, tenantId } = await requireCustomer();
-    const { data: customers, error: customerError } = await supabase
-      .from('customers').select('id').eq('tenant_id', tenantId).eq('user_id', user.id);
-    if (customerError) throw customerError;
-    const customerIds = (customers || []).map(({ id }) => id);
-    if (!customerIds.length) return { clients: [] };
-    const { data, error } = await supabase
-      .from('pets').select(PET_SELECT).eq('tenant_id', tenantId).in('customer_id', customerIds);
-    if (error) throw error;
-    const pets = (data || []).map(mapPet);
-    const ids = pets.map(({ id }) => id);
-    if (!ids.length) return { clients: [] };
-    const lookback = new Date(Date.now() - 60 * 86400000).toISOString();
-    const [{ data: appointments, error: appointmentError }, { data: points, error: pointsError }] = await Promise.all([
-      supabase.from('appointments').select('id, pet_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes').in('pet_id', ids).gte('scheduled_at', lookback).order('scheduled_at'),
-      supabase.from('reward_points').select('id, pet_id, points, reason, note, created_at').in('pet_id', ids).order('created_at', { ascending: false }),
-    ]);
-    if (appointmentError) throw appointmentError;
-    if (pointsError) throw pointsError;
-    return { clients: pets.map((pet) => {
-      const petAppointments = (appointments || []).filter(({ pet_id }) => pet_id === pet.id);
-      const rewardPoints = (points || []).filter(({ pet_id }) => pet_id === pet.id);
-      return {
-        ...pet,
-        appointments: petAppointments,
-        nextAppointment: petAppointments.find((item) => item.approval_status === 'approved' && item.status === 'scheduled' && new Date(item.scheduled_at) >= new Date()) || null,
-        rewardPoints,
-        rewardPointsTotal: rewardPoints.reduce((sum, item) => sum + Number(item.points || 0), 0),
-      };
-    }) };
-  } catch (error) {
-    throw new Error(`Non riesco a caricare il portale cliente: ${error.message}`);
-  }
-};
 
 export const getAllPets = async (tenantId = null, filters = {}) => {
   try {
@@ -698,6 +658,12 @@ export const getCustomerDirectory = async () => {
     .order('created_at', { ascending: false });
   if (error) throw new Error(`Non riesco a caricare la rubrica contatti: ${error.message}`);
 
+  const { data: invitations, error: invitationError } = await supabase
+    .from('customer_invitations').select('pet_id, accepted_by, accepted_at')
+    .eq('tenant_id', tenantId).not('accepted_at', 'is', null)
+    .order('accepted_at', { ascending: false });
+  if (invitationError) throw new Error('Non riesco a caricare gli account collegati.');
+
   return (data || []).map((customer) => {
     const operatorNotes = relation(customer.staff_notes)?.notes || null;
     const pets = [...(customer.pets || [])].sort((a, b) =>
@@ -711,6 +677,9 @@ export const getCustomerDirectory = async () => {
     return {
       ...customer,
       operator_notes: operatorNotes,
+      linked_at: customer.user_id ? invitations?.find((invite) =>
+        invite.accepted_by === customer.user_id && pets.some((pet) => pet.id === invite.pet_id)
+      )?.accepted_at || null : null,
       owner_name: customerName(customer),
       notes: visibleNotes,
       source: customer.acquisition_source || 'manual',
@@ -949,12 +918,12 @@ export const addVisit = async (petId, input) => {
       .maybeSingle();
     if (serviceError || !service) throw new Error('Il servizio scelto non è disponibile');
   }
-  const { data, error } = await supabase.from('visits').insert({
-    id: generateId(), pet_id: petId, tenant_id: tenantId, date: input.date,
-    treatments: input.treatments || null, issues: input.issues || null,
-    cost: Number.parseFloat(input.cost), discount_percent: input.discount_percent || 0,
-    service_id: serviceId,
-  }).select('id').single();
+  const { data, error } = await supabase.rpc('create_staff_visit', {
+    p_pet_id: petId, p_date: input.date,
+    p_treatments: input.treatments || null, p_issues: input.issues || null,
+    p_cost: Number.parseFloat(input.cost), p_discount_percent: input.discount_percent || 0,
+    p_service_id: serviceId,
+  });
   if (error) throw new Error(`Non riesco ad aggiungere la visita: ${error.message}`);
   const photoUploadError = await attachOptionalVisitPhoto({
     tenantId,
@@ -1003,7 +972,7 @@ export const getVisitFormContext = async (appointmentId = null) => {
 
   const [servicesResult, appointmentResult] = await Promise.all([
     supabase.from('services')
-      .select('id, name, duration_minutes, price_cents, is_active, display_order')
+      .select('id, name, duration_minutes, financials:service_financials(price_cents), is_active, display_order')
       .eq('tenant_id', tenantId)
       .order('display_order')
       .order('name'),
@@ -1020,7 +989,7 @@ export const getVisitFormContext = async (appointmentId = null) => {
   const appointmentServiceId = appointmentResult.data?.service_id || null;
   return {
     appointment: appointmentResult.data,
-    services: (servicesResult.data || []).filter(
+    services: (servicesResult.data || []).map((service) => ({ ...service, ...relation(service.financials) })).filter(
       (service) => service.is_active || service.id === appointmentServiceId
     ),
   };
@@ -1125,24 +1094,6 @@ export const addAppointment = async (input) => {
   return data.id;
 };
 
-export const createCustomerAppointmentRequest = async (petId, input = {}) => {
-  assertDemoWriteAllowed();
-  const { user, tenantId } = await requireCustomer();
-  if (!input.date || !input.time) throw new Error('Data e ora sono obbligatorie');
-  const scheduledAt = new Date(`${input.date}T${input.time}`);
-  if (Number.isNaN(scheduledAt.getTime())) throw new Error('Data o ora non valide');
-  const duration = Number(input.duration_minutes) || 60;
-  if (duration <= 0 || duration > 480) throw new Error('Durata richiesta non valida');
-  const pet = await getPetById(petId, tenantId);
-  const { data, error } = await supabase.from('appointments').insert({
-    id: generateId(), user_id: pet.owner_user_id, pet_id: petId, tenant_id: tenantId,
-    scheduled_at: scheduledAt.toISOString(), duration_minutes: duration,
-    status: 'scheduled', approval_status: 'pending', appointment_source: 'customer',
-    requested_by_customer_id: user.id, notes: input.notes?.trim() || null,
-  }).select('id, user_id, pet_id, tenant_id, scheduled_at, duration_minutes, status, approval_status, appointment_source, requested_by_customer_id, notes, created_at').single();
-  if (error) throw new Error(`Non riesco a inviare la richiesta appuntamento: ${error.message}`);
-  return data;
-};
 
 export const getAppointments = async (filters = {}) => {
   const { tenantId } = await requireStaff();
@@ -1672,7 +1623,7 @@ export const getRevenueReportData = async ({ from = null, to = null } = {}) => {
   if (Boolean(from) !== Boolean(to)) throw new Error('Intervallo report incompleto');
   const { tenantId } = await requireStaff();
   let query = supabase.from('visits').select(`
-    id, pet_id, tenant_id, date, treatments, issues, cost, discount_percent,
+    id, pet_id, tenant_id, date, treatments, issues, financials:visit_financials(cost, discount_percent),
     pet:pets(id, name, breed, photo_url, customer:customers(id, first_name, last_name, phone))
   `).eq('tenant_id', tenantId);
   if (from && to) query = query.gte('date', from).lte('date', to);
@@ -1680,6 +1631,6 @@ export const getRevenueReportData = async ({ from = null, to = null } = {}) => {
   if (error) throw new Error(`Non riesco a caricare il report incassi: ${error.message}`);
   return (data || []).map((visit) => {
     const pet = mapPet(relation(visit.pet));
-    return { ...visit, pet, client: pet };
+    return { ...mapVisit(visit), pet, client: pet };
   });
 };
