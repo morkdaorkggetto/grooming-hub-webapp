@@ -1,5 +1,181 @@
 # GH-102 — Cosa puo raggiungere un cliente
 
+## Esito vigente: elenco Storage chiuso sul demo, regressioni assenti
+
+**NO al via libera per il lancio in produzione, allo stato dichiarato.**
+La correzione e verificata **solo sul demo** e Luigi comunica che non e ancora
+in produzione. Il percorso con cui Luca scopriva le foto altrui e ora chiuso.
+Non sono emerse nuove letture/scritture cross-customer nelle controprove.
+
+La garanzia «nessuno vede dati altrui salvo chi riceve un invito inoltrato»
+resta inoltre piu stretta della configurazione richiesta: **anche un URL
+pubblico di foto e una chiave al portatore**. Chi possiede un indirizzo esatto
+puo tuttora scaricare l'immagine. E il comportamento esplicitamente richiesto
+per questa ripresa, non una nuova regressione o un nuovo tentativo di
+enumerazione. Non equivale pero a rendere private le foto tecniche, soprattutto
+per gli URL storici gia esposti menzionati da Cowork nel file SQL.
+
+La verifica preliminare richiesta e **superata**. Audit proseguito secondo
+l'Emendamento 2; chiusa anche la prova del vero doppio riscatto, con il limite
+browser dichiarato sotto. Questa sezione sostituisce come esito corrente il
+precedente arresto Storage, che rimane conservato nello storico.
+
+### Perimetro e correzione verificata
+
+Root `/Users/luigimaisto/Desktop/grooming-hub-web`, worktree `webapp/`.
+Base `9a5f332aca8fcd9a5cf000f506d5ca776a7826d8`, branch `main`.
+DB unico `qttpinkslhenxrsbhhhg`; nessuna lettura/scrittura della produzione.
+Nessun account nuovo, password cambiata, codice applicativo o schema modificato.
+
+Letto, **non applicato/modificato/staged**, il file Cowork annunciato da Luigi:
+`supabase/migrations/20260927_gh102_storage_no_listing.sql`.
+SHA-256: `ba2c7673cf9ddc8b99beabef99fe268615926ee7effe7b62cb1e2b84bfc27a77`.
+Misura viva demo: **0** delle tre vecchie policy SELECT larghe; **2** nuove
+policy ristrette presenti, con definizioni coerenti con il file.
+
+Precisazione sul requisito «il cliente non elenca i bucket»: non esiste piu
+l'elenco globale/altrui, ma la policy nuova permette intenzionalmente al
+proprietario di leggere **la propria cartella owner**, anche per poter togliere
+il ritratto. Il test non nasconde questa eccezione: Mario vede il proprio file,
+non quelli tecnici. Non e stato misurato un divieto assoluto di ogni `.list()`.
+
+### Controprove Storage richieste
+
+API vive con sonde staff, Mario, Luca e client anon. Un pet sintetico collegato
+alla scheda demo Mario e una visita sintetica; **4 PNG validi da 1x1 pixel**,
+nessuna foto reale. Percorsi identici alle convenzioni applicative/suite:
+ritratto `pet-avatars/<tenant>/<pet>/owner/...`, riconoscimento
+`client-photos/<staff>/<pet>-...`, riconoscimento legacy in `pet-avatars`,
+visita `pet-avatars/<tenant>/<pet>/visits/<visita>/...`.
+
+| Prova | Risultato osservato |
+|---|---|
+| anon elenca client-photos dalla radice | risposta vuota, 0 file |
+| anon elenca pet-avatars dalla radice | 403, 0 file |
+| Luca elenca entrambi i bucket dalla radice | 0 file in ciascuno, nessun percorso da attraversare |
+| Mario elenca client-photos | 0 file |
+| Mario elenca pet-avatars ricorsivamente | 4 chiamate, **1 solo file: il suo ritratto owner**; 0 tecnici/visita |
+| GET dei 4 URL pubblici noti, senza Authorization | 4 HTTP 200; hash dei byte identico alla fixture |
+| decoding browser con contesto staff | 4/4 immagini caricate, naturalWidth/Height 1x1 |
+| decoding browser con contesto Mario | 4/4 immagini caricate, naturalWidth/Height 1x1 |
+| Mario carica e toglie il proprio ritratto | upload riuscito, remove restituisce 1 oggetto, rilettura staff 0 |
+| staff carica e toglie riconoscimento attuale e legacy | entrambi riusciti, 1 oggetto rimosso per caso, riletture 0 |
+| staff carica e toglie foto visita | riuscito, 1 oggetto rimosso, rilettura 0 |
+| associazioni DB della fixture | owner_photo_url, photo_url del pet e photo_url visita impostati e poi riportati a null dagli attori previsti |
+
+Il browser e Chromium isolato: immagini caricate realmente dagli URL demo in
+due contesti con le rispettive sessioni. E una prova del rendering/decoding
+degli asset, **non** un click-test completo delle schermate Pet/Visita. Non sono
+stati usati Safari, il browser dell'utente o file fotografici personali.
+I caricamenti/rimozioni sono chiamate vive SDK con le convenzioni del codice
+letto, non mock. Per il caso cliente sono usati i permessi di Mario, non staff.
+
+### Prosecuzione: doppio invito reale con rollback
+
+Eseguito sul demo il primo e il secondo riscatto della **stessa** fixture di
+invito, mediante la funzione viva `accept_customer_invite`, in un'unica
+transazione SQL. Ruolo `authenticated`, claims della sonda GH-44 esistente;
+customer, pet, invito e collegamento esclusivamente temporanei. Alla fine
+`ROLLBACK`, senza creare account o lasciare audit di scollegamento.
+
+| Passo | Esito |
+|---|---|
+| primo riscatto | accepted |
+| secondo riscatto | already_accepted |
+| identita e data di accettazione | stesso customer, stesso pet, accepted_at invariato |
+| impronta customer + pet + invito dopo il secondo | invariata |
+| cardinalita nella transazione | 1 customer e 1 membership della sonda, nessun duplicato |
+| altro utente dopo il primo riscatto | P0001, GH_INVITE_ALREADY_USED |
+| stato dopo rollback | 0 customer e 0 membership della sonda GH-44 |
+
+Il token della fixture era destinato a un'altra email: e il caso al portatore
+**gia accettato da Luigi**, non un nuovo rilievo. La verifica e SQL con ruolo e
+claims, non un doppio POST HTTP o una sequenza browser completa.
+
+**Limite e motivo:** il controllo preventivo ha respinto prima della creazione
+ed esecuzione la bozza di test browser con adozione valida: il teardown avrebbe
+coinvolto customer, pet, membership e una riga audit, con rischio di ripristino
+parziale. Usata l'alternativa atomicamente reversibile sopra. Nessuna bozza
+respinta ha prodotto effetti. Resta non eseguito il percorso completo di
+adozione valida nel browser; per provarlo serve un piano di ripristino approvato
+che copra anche audit e identita, oppure una verifica presidiata di Luigi.
+
+Il comportamento con sessione gia aperta e invece **osservato nel browser**
+nella ripresa precedente: entrambe le pagine d'invito invocano la RPC con il
+JWT corrente, senza nuovo login, su token inesistente. Il riscatto inoltrato
+valido era gia osservato via API. Le tre evidenze sono distinte: non vengono
+spacciate per un unico test end-to-end.
+
+### Quadro finale delle cinque domande
+
+| Domanda | Consegna consolidata |
+|---|---|
+| letture/scritture per tabella | matrice delle 16 tabelle, API reali e 128 prove SQL con rollback, nella sezione precedente |
+| whitelist pet | tutte le 23 colonne provate; solo 3 valori client ammessi, updated_at server; nessun cambiamento in questa ripresa |
+| quattro funzioni anon e token QR | prove gia registrate: output limitato, due trigger non invocabili via RPC; generatore a 122 bit |
+| cinque casi invito | inoltrato accettato; account gia collegato/scaduto/usato misurati; vero doppio riscatto completato ora; browser con limite esplicito sopra |
+| confine staff/customer | 12 navigazioni vive gia registrate; rifiuto UI e ACL/RLS, non solo porta grafica |
+
+Le RPC sulle richieste altrui erano gia misurate: respond/withdraw da Luca su
+Mario rifiutate 42501, riga invariata. La suite completa precedente resta
+**60 PASS, 0 FAIL, 0 SKIP**; non e stata rilanciata in questa ripresa per
+duplicare le prove. Le regressioni delle policy appena cambiate sono quelle
+vive e mirate riportate sopra. Nessuna ulteriore ricerca dei backup o lettura
+dei materiali con nomi e telefoni reali.
+
+### Prima del lancio: lista consolidata per Cowork
+
+1. **P1, rilascio mancante:** portare la chiusura del listing in produzione,
+   con le medesime controprove. Stato prod non verificato da Codex; Luigi dice
+   che non e ancora applicata. Nessun invito di massa basato sul solo demo.
+2. **P1, riservatezza residua:** URL tecnici noti/storici restano pubblici.
+   Per la garanzia stretta servono bucket privati/URL firmati e trattamento
+   degli indirizzi preesistenti, oppure una decisione esplicita sul rischio
+   residuo distinto dall'invito inoltrato. La richiesta di mantenere funzionanti
+   gli URL pubblici in questa ripresa non certifica che le foto siano private.
+3. **P2, gia deciso da Luigi:** proteggere costi, sconti e prezzi accessibili
+   nelle SELECT customer. Nessuna nuova esplorazione economica.
+4. **Mitigazioni inviti adottate:** messaggio personale, visibilita del legame
+   per lo staff e scollegamento; verifica SMS futura. Rischio inoltro accettato.
+5. **Hardening/limiti, non nuove fughe osservate:** decidere il destino delle
+   scritture legacy su appointments; completare adozione valida nel browser
+   quando il ripristino e approvato. Non attestata la totalita di combinazioni
+   RPC, cache, concorrenza o qualita dei token legacy.
+
+La proposta tecnica del giro precedente sui bucket privati rimane valida;
+questa migrazione risolve l'enumerazione, **non la implementa**. Nessuna
+correzione aggiuntiva eseguita da Codex.
+
+### Pulizia, file e tempi
+
+Ripristino verificato: **7 pet, 90 visite, 7 customer, 8 appuntamenti,
+0 richieste, 0 inviti, 0 oggetti Storage, 16 righe audit**, come all'inizio.
+**0 fixture GH-102** in pet, visite e customer; sonda GH-44 senza customer
+o membership, come prima. Impronta delle schede Mario/Luca invariata dopo la
+sonda Storage. Le quattro rimozioni sono state verificate dallo staff, non
+assunte riuscite dal solo status HTTP. SQL inviti interamente annullato.
+Sessioni e Chromium chiusi, script temporaneo eliminato.
+
+| File toccato | Destino |
+|---|---|
+| docs/consegne/GH-102-cosa-puo-raggiungere-un-cliente-esito.md | unico file del commit; esito aggiornato e storico conservato |
+| /private/tmp/gh102-storage-regression.mjs | sonda temporanea senza credenziali incorporate, eliminata |
+
+Gli incarichi/emendamenti e tutti e tre i SQL Cowork restano immutati e fuori
+stage/commit; il nuovo SQL Storage e stato soltanto letto. Escluse e non lette
+`controlli-salone/`, `nomi-da-recuperare/`, `qr-gadget/`. Diario non toccato.
+Nessuna attivita fuori mandato, nessun push/merge/deploy. Build non eseguita:
+nessuna modifica applicativa e nessun rilascio richiesto.
+
+Tempo misurato **448 s**, 27/9/2026 **06:13:05-06:20:33 Europe/Rome**, da
+inizio verifica a controllo finale DB; redazione/commit esclusi. Nessun
+rallentamento bloccante. Diff check e stage del solo registro verificati;
+hash definitivo comunicato in chat.
+
+---
+
+## Storico: arresto Storage precedente alla correzione demo
+
 ## Esito vigente dopo Emendamento 2: NO, fuga attraverso Storage
 
 **Non possiamo dare il via libera agli inviti, neppure escludendo il rischio
