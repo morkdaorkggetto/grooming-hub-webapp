@@ -1,6 +1,169 @@
 # GH-102 — Cosa puo raggiungere un cliente
 
-## Esito: interruzione motivata, lancio non validato
+## Ripresa 27/9: secondo rilievo, audit ancora incompleto
+
+**Da decidere/correggere prima del lancio: i campi economici sono leggibili
+dal cliente attraverso la Data API.** Con login reale Mario, senza passare
+dalla UI, `visits.select('cost,discount_percent')` restituisce **6 righe,
+6 importi positivi e 1 sconto positivo**. `services.select('price_cents')`
+restituisce **2 righe, entrambe con prezzo positivo**. Nessun valore monetario
+o identificativo personale e riportato qui.
+
+**Osservato:** accesso diretto ai dati economici, contrario alla decisione
+«Nessun prezzo lato customer, mai» in `design_handoff_customer_app/00-ERRATA.md`,
+voce 3, e al contratto GH-09. **Non osservato:** lettura di visite o dati
+personali appartenenti ad altri clienti. Non equiparo questi due rischi.
+Se Luigi intendeva la decisione come solo vincolo grafico, serve dichiararlo:
+la riservatezza degli importi, oggi, non e garantita dal database.
+
+Il mandato impone l'arresto al primo buco: **nuova interruzione dopo le prove
+di lettura**, nessuna riparazione. Non posso dare un via libera agli inviti:
+il rilievo richiede una decisione e restano da completare scritture e inviti.
+
+### Riallineamento e perimetro della ripresa
+
+- Base `943de921a56256b4ed22e9fcafa85d67ddb5b892`, branch `main`.
+- Root/worktree invariati; solo demo `qttpinkslhenxrsbhhhg`.
+- Le sei impronte demo/prod sono **verificate da Cowork, secondo Luigi**:
+  non le presento come confronto indipendente effettuato da Codex sul prod.
+- **Osservato sul demo:** `get_public_pet_card` ora seleziona
+  `p.owner_photo_url AS photo_url`, senza fallback salone; il campo
+  `awarded_fidelity_tier` esiste. Il blocco precedente e superato.
+- Il file `supabase/demo-riallineamento-2026-09-27.sql` e di Luigi/Cowork,
+  gia eseguito da Luigi: non letto, modificato, rieseguito o messo in stage.
+- Domanda backup **chiusa da Cowork in produzione per istruzione di Luigi**:
+  nessuna ricerca o verifica specifica nella ripresa. Le misure precedenti
+  rimangono sotto come storico, non come nuova attivita.
+- Inventario demo: 16 tabelle tutte con RLS, 35 policy, 14 SECURITY DEFINER,
+  4 funzioni eseguibili da anon, 23 da authenticated.
+
+### Matrice di lettura viva
+
+Richieste `select('*', {count:'exact'}).limit(1000)` con tre client separati:
+Mario, Luca e anon senza sessione. Tutti i conteggi restituiti coincidono con
+le righe ricevute: nessuna pagina troncata. Password caricate da `.env.local`
+in memoria, nessun token o valore di riga nei log. Sonda staff esistente
+usata solo per ottenere i token QR demo in memoria.
+
+| Tabella | Mario: righe | Luca: righe | Anon | Scritture cliente/anon |
+|---|---:|---:|---|---|
+| appointments | 1 | 0 | 42501 | non provate |
+| appointment_requests | 0 | 0 | 42501 | non provate |
+| contacts | 0 | 0 | 42501 | non provate |
+| customer_account_unlink_audit | 0 | 0 | 42501 | non provate |
+| customer_invitations | 0 | 0 | 42501 | non provate |
+| customer_staff_notes | 0 | 0 | 42501 | non provate |
+| customers | 1 | 1 | 42501 | non provate |
+| pet_staff_notes | 0 | 0 | 42501 | non provate |
+| pets | 2 | 0 | 42501 | non provate |
+| profiles | 1 | 1 | 42501 | non provate |
+| promotions | 0 | 0 | 42501 | non provate |
+| reward_points | 0 | 0 | 42501 | non provate |
+| services | 2 | 2 | 42501 | non provate |
+| tenant_memberships | 1 | 1 | 42501 | non provate |
+| tenants | 1 | 1 | 42501 | non provate |
+| visits | 6 | 0 | 42501 | non provate |
+
+**Escluso nel campione letto:** righe di customers/profiles/membership con
+utente diverso dal login; pet non appartenenti ai customer del login;
+visite/appuntamenti/punti riferiti a pet estranei; richieste di altro utente.
+Controlli effettuati sugli identificativi, senza stamparli. **Limite:** Luca
+non ha pet e varie tabelle restituiscono zero righe senza fixture positive;
+questi zeri non provano da soli tutti i casi negativi richiesti dal mandato.
+Gli errori anon 42501 attestano il rifiuto, non distinguono da soli ACL di
+tabella da permessi mancanti sulle funzioni usate nelle policy.
+
+Le risposte includono anche colonne di servizio (`no_show_score`,
+`is_blacklisted`, `tenants.settings`): visibilita osservata, classificazione
+di riservatezza da chiarire, non un ulteriore buco dichiarato senza requisito.
+
+### Quattro funzioni pubbliche
+
+| Funzione | Prova HTTP anon | Esito |
+|---|---|---|
+| get_public_pet_card | 7 token esistenti | 7 successi, medesime 18 chiavi dello storico; photo uguale a owner_photo_url |
+| get_public_pet_card | null, stringa vuota, token inesistente | 3 risposte null senza errore |
+| get_public_salon_identity | slug demo valido | solo businessName e salonPhone |
+| get_public_salon_identity | slug inesistente e null | risposta null |
+| ensure_pet_qr_token | RPC senza parametri | PGRST202, nessun risultato |
+| prevent_duplicate_pending_appointment_request | RPC senza parametri | PGRST202, nessun risultato |
+
+**Escluso nel percorso HTTP provato:** invocazione diretta dei due trigger
+come RPC. Non e una prova SQL con SET ROLE, ne una prova delle operazioni
+INSERT che attivano quei trigger. I grant EXECUTE da soli non attestano una
+RPC utilizzabile. La correzione foto e verificata sulla definizione viva e
+sui dati esistenti, non con nuove fixture fotografiche.
+
+La generazione osservata nel trigger usa `ghp_` + UUID v4 casuale senza
+trattini: **122 bit casuali**, circa 5,32 x 10^36 combinazioni. Assumendo 351
+token generati cosi, probabilita per tentativo casuale circa 6,60 x 10^-35.
+Questo calcolo non certifica token legacy assegnati manualmente e non
+protegge dalla condivisione di un QR valido. Nessun brute force eseguito.
+
+### Causa e proposta a Cowork
+
+`src/apps/customer/hooks/usePetVisits.js:25` omette correttamente cost e
+discount_percent. GH-09 aveva verificato query e DOM, non il divieto di
+lettura diretta. La policy `visits_customer_select` limita **le righe**, non
+le colonne: il cliente puo cambiare la select. Lo stesso accade con
+`services_customer_select_active` e `price_cents`. Non serve una service key:
+la normale sessione cliente basta. La prova mirata ha richiesto proprio le
+sole colonne economiche e ha ricevuto valori, non soltanto nomi di campo.
+
+**Raccomandazione:** prima formalizzare se il requisito e di riservatezza,
+come suggerisce il testo vigente. Se confermato, separare i dati economici
+in relazioni staff-only con RLS, seguendo il modello gia usato per le note
+interne; mantenere sulle relazioni customer solo le informazioni autorizzate.
+Il nuovo mandato deve censire e adattare scritture visita, completamento
+appuntamento, report/incassi e catalogo staff; deve conservare atomicita e
+valori esistenti, con prove di riconciliazione prima/dopo. Nessuna migration
+o bozza eseguibile e stata prodotta da questo audit.
+
+Alternativa da valutare se la separazione risultasse troppo invasiva: negare
+la lettura diretta delle colonne a `authenticated` e fornire percorsi staff
+protetti. Staff e cliente condividono quel ruolo Postgres, quindi non basta
+una revoca indiscriminata: rompe anche il gestionale. Una view/proiezione
+customer **senza revocare il percorso alla tabella sorgente non chiude nulla**.
+
+Controprove minime del futuro intervento: select esplicita dei tre campi
+economici e select `*` negate/depurate lato cliente; incassi staff immutati;
+storico e catalogo customer ancora funzionanti; RLS cross-customer e
+cross-tenant; nessuna fuga via join, view o RPC. Solo dopo riprendere GH-102.
+
+### Residui, file e tempi della ripresa
+
+Suite RLS non eseguita: arresto sul rilievo in lettura, senza scritture.
+Restano **non provati** whitelist colonna per colonna, creazione/cancellazione,
+modifiche dirette, RPC su richieste altrui, cinque casi invito e rotte staff.
+Le definizioni lette non sostituiscono quelle controprove. Nessuna prova
+browser o build: niente modifiche applicative o rilascio.
+
+| File toccato nella ripresa | Destino |
+|---|---|
+| docs/consegne/GH-102-cosa-puo-raggiungere-un-cliente-esito.md | unico file del commit; nuovo esito anteposto, storico conservato |
+| /private/tmp/gh102-read.mjs | sonda locale temporanea di sola lettura, senza credenziali incorporate; fuori repo, rimossa a fine giro |
+
+Le tre cartelle riservate e il mandato restano esclusi come nella prima
+consegna; si aggiunge il SQL di riallineamento autorizzato in chat. Nessun
+dato reale acquisito da quelle cartelle, nessuna interrogazione del prod.
+Fixture create: **0**, residui di fixture di questo giro: **0 per assenza di
+scritture applicative**. Tutte le sessioni Auth di prova sono state chiuse;
+sonde permanenti preservate. Nessuna riparazione o attivita fuori istruzione.
+
+Due tentativi iniziali non hanno prodotto prove: import del client corretto
+tramite risoluzione del package e DNS bloccato nel sandbox. Il secondo
+problema e stato superato con esecuzione autorizzata fuori sandbox; i login
+successivi di Mario, Luca e staff sono riusciti. Non e un guasto Supabase
+ne un rallentamento del Mac.
+
+Tempo misurato dall'avvio della ripresa alla chiusura delle prove: **185 s**,
+27/9/2026 **05:00:51–05:03:56 Europe/Rome**; redazione e commit esclusi.
+Verifiche finali previste/eseguite prima del commit: diff check, stage del
+solo registro, confronto dello stato Git. Hash definitivo comunicato in chat.
+
+---
+
+## Storico: prima interruzione (superata dal riallineamento)
 
 **Prima degli inviti va risolta una divergenza di sicurezza sul demo:**
 `get_public_pet_card(text)`, eseguibile senza autenticazione, contiene ancora
