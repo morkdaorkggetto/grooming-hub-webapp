@@ -576,7 +576,7 @@ export default function ClientDetail() {
           </div>
         </Panel>
 
-        <Panel className="gh-next-appointments" title="Prossimo appuntamento">
+        <Panel className="gh-next-appointments" eyebrow="Agenda" title="Prossimo appuntamento">
           {client.upcomingAppointments?.length ? (
             <ul className="gh-next-appointments__list" aria-label="Appuntamenti in agenda">
               {client.upcomingAppointments.map((appointment) => (
@@ -584,8 +584,8 @@ export default function ClientDetail() {
                   <Link className="gh-next-appointments__link" to={`/calendar?date=${getRomeDate(appointment.scheduled_at)}`}>
                     <Icon name="calendar" size={20} />
                     <span className="gh-next-appointments__copy">
-                      <strong>{formatUpcomingDate(appointment.scheduled_at)}</strong>
-                      <span>{appointment.service?.name || 'Servizio non specificato'}</span>
+                      <strong className="gh-body gh-num">{formatUpcomingDate(appointment.scheduled_at)}</strong>
+                      <span className="gh-meta">{appointment.service?.name || 'Servizio non specificato'}</span>
                     </span>
                     <Icon name="chevron" size={18} />
                   </Link>
@@ -594,7 +594,7 @@ export default function ClientDetail() {
             </ul>
           ) : (
             <div className="gh-next-appointments__empty">
-              <p>Nessun appuntamento in agenda</p>
+              <p className="gh-body">Nessun appuntamento in agenda</p>
               <Button staff variant="secondary" icon="calendar" onClick={() => navigate(`/calendar?clientId=${clientId}`)}>
                 Appuntamento
               </Button>
@@ -607,8 +607,8 @@ export default function ClientDetail() {
                   <li key={`${request.request_kind}-${request.id}`}>
                     <Link className="gh-next-appointments__link" to="/requests">
                       <span className="gh-next-appointments__copy">
-                        <strong>Richiesta · {REQUEST_ACTION_LABELS[request.staff_action]}</strong>
-                        <span>{request.staff_action === 'needs_booking'
+                        <strong className="gh-body">Richiesta · {REQUEST_ACTION_LABELS[request.staff_action]}</strong>
+                        <span className="gh-meta gh-num">{request.staff_action === 'needs_booking'
                           ? `${formatVisitDate(request.chosen_date)} alle ${String(request.chosen_time || '').slice(0, 5)}`
                           : request.desired_date
                             ? formatVisitDate(request.desired_date)

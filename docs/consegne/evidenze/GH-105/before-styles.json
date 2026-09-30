@@ -1,0 +1,254 @@
+{
+  "measuredAt": "2026-09-30T15:15:21.681Z",
+  "method": "Exact JSX panel fragments, real StaffKit and CSS; synthetic local data; all external network blocked. Body references reproduce existing gh-body and gh-body strong markup (notes/invitation), absent from reliability panel.",
+  "results": [
+    {
+      "width": 375,
+      "empty": true,
+      "actual": {
+        "eyebrow": null,
+        "empty": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "24px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "date": null,
+        "service": null,
+        "request": null
+      },
+      "reference": {
+        "eyebrow": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "9.5px",
+          "fontWeight": "700",
+          "lineHeight": "12.35px",
+          "color": "rgb(127, 111, 115)"
+        },
+        "meta": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "11.5px",
+          "fontWeight": "400",
+          "lineHeight": "16.1px",
+          "color": "rgb(127, 111, 115)"
+        },
+        "body": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "18.85px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "strong": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "700",
+          "lineHeight": "18.85px",
+          "color": "rgb(43, 37, 37)"
+        }
+      },
+      "targets": [
+        {
+          "width": 135.890625,
+          "height": 46
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "empty": false,
+      "actual": {
+        "eyebrow": null,
+        "empty": null,
+        "date": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "lineHeight": "24px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "service": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "24px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "request": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "lineHeight": "24px",
+          "color": "rgb(43, 37, 37)"
+        }
+      },
+      "reference": {
+        "eyebrow": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "9.5px",
+          "fontWeight": "700",
+          "lineHeight": "12.35px",
+          "color": "rgb(127, 111, 115)"
+        },
+        "meta": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "11.5px",
+          "fontWeight": "400",
+          "lineHeight": "16.1px",
+          "color": "rgb(127, 111, 115)"
+        },
+        "body": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "18.85px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "strong": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "700",
+          "lineHeight": "18.85px",
+          "color": "rgb(43, 37, 37)"
+        }
+      },
+      "targets": [
+        {
+          "width": 321,
+          "height": 100
+        },
+        {
+          "width": 321,
+          "height": 76
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "width": 1365,
+      "empty": true,
+      "actual": {
+        "eyebrow": null,
+        "empty": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "24px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "date": null,
+        "service": null,
+        "request": null
+      },
+      "reference": {
+        "eyebrow": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "9.5px",
+          "fontWeight": "700",
+          "lineHeight": "12.35px",
+          "color": "rgb(127, 111, 115)"
+        },
+        "meta": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "11.5px",
+          "fontWeight": "400",
+          "lineHeight": "16.1px",
+          "color": "rgb(127, 111, 115)"
+        },
+        "body": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "18.85px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "strong": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "700",
+          "lineHeight": "18.85px",
+          "color": "rgb(43, 37, 37)"
+        }
+      },
+      "targets": [
+        {
+          "width": 141.890625,
+          "height": 44
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "width": 1365,
+      "empty": false,
+      "actual": {
+        "eyebrow": null,
+        "empty": null,
+        "date": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "lineHeight": "24px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "service": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "24px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "request": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "lineHeight": "24px",
+          "color": "rgb(43, 37, 37)"
+        }
+      },
+      "reference": {
+        "eyebrow": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "9.5px",
+          "fontWeight": "700",
+          "lineHeight": "12.35px",
+          "color": "rgb(127, 111, 115)"
+        },
+        "meta": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "11.5px",
+          "fontWeight": "400",
+          "lineHeight": "16.1px",
+          "color": "rgb(127, 111, 115)"
+        },
+        "body": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "18.85px",
+          "color": "rgb(43, 37, 37)"
+        },
+        "strong": {
+          "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "700",
+          "lineHeight": "18.85px",
+          "color": "rgb(43, 37, 37)"
+        }
+      },
+      "targets": [
+        {
+          "width": 532,
+          "height": 76
+        },
+        {
+          "width": 532,
+          "height": 76
+        }
+      ],
+      "overflow": false
+    }
+  ]
+}

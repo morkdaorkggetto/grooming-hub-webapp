@@ -1,0 +1,220 @@
+{
+  "startedAt": "2026-09-30T15:19:53.698Z",
+  "finishedAt": "2026-09-30T15:20:28.855Z",
+  "passed": true,
+  "results": [
+    {
+      "name": "Empty",
+      "value": "AGENDA\nProssimo appuntamento\n\nNessun appuntamento in agenda\n\nAppuntamento"
+    },
+    {
+      "name": "Empty layout",
+      "value": {
+        "width": 375,
+        "documentWidth": 375,
+        "buttonWidth": 135.890625,
+        "buttonHeight": 46,
+        "overflow": false
+      }
+    },
+    {
+      "name": "Empty layout",
+      "value": {
+        "width": 1365,
+        "documentWidth": 1365,
+        "buttonWidth": 141.890625,
+        "buttonHeight": 44,
+        "overflow": false
+      }
+    },
+    {
+      "name": "Empty booking action",
+      "value": "existing clientId opens Nuovo appuntamento with the same pet; no save"
+    },
+    {
+      "name": "Load milliseconds (3 interleaved samples)",
+      "value": {
+        "before": [
+          473,
+          407,
+          483
+        ],
+        "after": [
+          522,
+          482,
+          439
+        ]
+      }
+    },
+    {
+      "name": "Tomorrow",
+      "value": {
+        "text": "1 ottobre 2026 alle ore 09:00\nBagno",
+        "calendarDay": "giovedì 1 ottobre"
+      }
+    },
+    {
+      "name": "Three",
+      "value": {
+        "database": 3,
+        "rendered": 3,
+        "text": "1 ottobre 2026 alle ore 09:00\nBagno\n2 ottobre 2026 alle ore 10:00\nBagno\n3 ottobre 2026 alle ore 11:00\nBagno",
+        "ordered": true
+      }
+    },
+    {
+      "name": "Today and exclusions",
+      "value": {
+        "shown": 4,
+        "morning": true,
+        "excluded": [
+          "yesterday",
+          "cancelled",
+          "no_show",
+          "completed",
+          "same-owner-other-pet",
+          "rejected"
+        ],
+        "absenceHistory": 1
+      }
+    },
+    {
+      "name": "Request concordance",
+      "value": {
+        "action": "needs_response",
+        "detail": "Richiesta · Da rispondere\n07 ott 2026 · Bagno",
+        "dashboard": "[DEMO GH-104] Ritorno · 07/10 · da rispondere",
+        "closedRequestsExcluded": 3
+      }
+    },
+    {
+      "name": "Request concordance",
+      "value": {
+        "action": "waiting_customer",
+        "detail": "Richiesta · In attesa della persona\n07 ott 2026 · Bagno",
+        "dashboard": "RISPOSTE ATTESE\n1 persona deve ancora rispondere\nVedi richieste\n[DEMO GH-104] Ritorno · proposto il 30/09 alle 17:20 · da 0 ore · 08/10 alle 09:00 · 09/10 alle 10:00",
+        "closedRequestsExcluded": 3
+      }
+    },
+    {
+      "name": "Request concordance",
+      "value": {
+        "action": "needs_booking",
+        "detail": "Richiesta · Da prenotare\n08 ott 2026 alle 09:00 · Bagno",
+        "dashboard": "[DEMO GH-104] Ritorno · 08/10 alle 09:00 · da prenotare",
+        "closedRequestsExcluded": 3
+      }
+    },
+    {
+      "name": "Request destination",
+      "value": "/requests"
+    },
+    {
+      "name": "Identity Appuntamento",
+      "value": {
+        "clientId": true,
+        "petSelected": true,
+        "saved": false
+      }
+    },
+    {
+      "name": "Invalid date",
+      "value": {
+        "invalid": "bad",
+        "opens": "mercoledì 30 settembre"
+      }
+    },
+    {
+      "name": "Invalid date",
+      "value": {
+        "invalid": "2026-02-30",
+        "opens": "mercoledì 30 settembre"
+      }
+    },
+    {
+      "name": "Layout",
+      "value": {
+        "viewport": 375,
+        "documentWidth": 375,
+        "overflow": 0,
+        "targets": [
+          {
+            "width": 321,
+            "height": 81.78125
+          },
+          {
+            "width": 321,
+            "height": 62.9375
+          },
+          {
+            "width": 321,
+            "height": 62.9375
+          },
+          {
+            "width": 321,
+            "height": 62.9375
+          },
+          {
+            "width": 321,
+            "height": 62.9375
+          }
+        ],
+        "truncated": false,
+        "contentRight": 300,
+        "fabLeft": 304
+      }
+    },
+    {
+      "name": "Layout",
+      "value": {
+        "viewport": 1365,
+        "documentWidth": 1365,
+        "overflow": 0,
+        "targets": [
+          {
+            "width": 912,
+            "height": 62.9375
+          },
+          {
+            "width": 912,
+            "height": 62.9375
+          },
+          {
+            "width": 912,
+            "height": 62.9375
+          },
+          {
+            "width": 912,
+            "height": 62.9375
+          },
+          {
+            "width": 912,
+            "height": 62.9375
+          }
+        ],
+        "truncated": false,
+        "contentRight": 1138.5,
+        "fabLeft": 1294
+      }
+    },
+    {
+      "name": "Browser errors",
+      "value": []
+    },
+    {
+      "name": "Cleanup",
+      "value": {
+        "created": {
+          "pets": 2,
+          "appointments": 10,
+          "requests": 4
+        },
+        "remaining": {
+          "pets": 0,
+          "appointments": 0,
+          "appointment_requests": 0
+        }
+      }
+    }
+  ]
+}
