@@ -77,6 +77,12 @@ const toLocalDateString = (date) => {
   return `${year}-${month}-${day}`;
 };
 const todayString = () => toLocalDateString(new Date());
+const getQueryDay = (value) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return todayString();
+  const date = new Date(`${value}T12:00:00`);
+  return !Number.isNaN(date.getTime()) && toLocalDateString(date) === value
+    ? value : todayString();
+};
 const addDays = (dateString, amount) => {
   const date = new Date(`${dateString}T12:00:00`);
   date.setDate(date.getDate() + amount);
@@ -216,16 +222,26 @@ export default function Calendar() {
   const navigate = useNavigate();
   const { tenant } = useTenant();
   const [searchParams] = useSearchParams();
+  const queryDate = searchParams.get('date');
+  const appliedQueryDateRef = useRef(queryDate);
   const openedQueryClientRef = useRef('');
   const latestWeekLoadRef = useRef(0);
   const searchIndexRequestRef = useRef(null);
   const visitIndexRequestRef = useRef(null);
   const [searchIndex, setSearchIndex] = useState({ appointments: [], error: '', ready: false });
   const [visitIndex, setVisitIndex] = useState({ visits: [], error: '', ready: false });
-  const [calendarMode, setCalendarMode] = useState('week');
-  const [weekStart, setWeekStart] = useState(() => startOfWeek(todayString()));
+  const [calendarMode, setCalendarMode] = useState(() => queryDate !== null ? 'day' : 'week');
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(getQueryDay(queryDate)));
   const weekEnd = addDays(weekStart, 6);
-  const [selectedDay, setSelectedDay] = useState(todayString());
+  const [selectedDay, setSelectedDay] = useState(() => getQueryDay(queryDate));
+  useEffect(() => {
+    if (appliedQueryDateRef.current === queryDate) return;
+    appliedQueryDateRef.current = queryDate;
+    const day = getQueryDay(queryDate);
+    setSelectedDay(day);
+    setWeekStart(startOfWeek(day));
+    setCalendarMode(queryDate !== null ? 'day' : 'week');
+  }, [queryDate]);
   const [data, setData] = useState({ appointments: [], requests: [], visits: [], openBookings: [] });
   const [petOptions, setPetOptions] = useState([]);
   const [petsLoaded, setPetsLoaded] = useState(false);

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
 import ImageCropModal from '../../../shared/ui/ImageCropModal';
 import StorageImage from '../../../shared/ui/StorageImage';
+import Icon from '../../../shared/ui/Icon';
 import ClientQrImage from '../components/ClientQrImage';
 import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {
@@ -28,6 +29,7 @@ import {
   deleteVisit,
   getClientById,
   getClientPromos,
+  getRomeDate,
   removeVisitPhoto,
   setPetAwardedFidelityTier,
   setClientBlacklistStatus,
@@ -46,6 +48,17 @@ import {
   getCustomerInviteWhatsAppMessage,
   getCustomerInviteWhatsAppUrl,
 } from '../lib/whatsapp';
+import './ClientDetail.css';
+
+const REQUEST_ACTION_LABELS = {
+  needs_response: 'Da rispondere',
+  waiting_customer: 'In attesa della persona',
+  needs_booking: 'Da prenotare',
+};
+
+const formatUpcomingDate = (value) => new Intl.DateTimeFormat('it-IT', {
+  dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Rome',
+}).format(new Date(value));
 
 const REWARD_REASON_LABELS = {
   visit: 'Visita',
@@ -561,6 +574,53 @@ export default function ClientDetail() {
               </p>
             </div>
           </div>
+        </Panel>
+
+        <Panel className="gh-next-appointments" title="Prossimo appuntamento">
+          {client.upcomingAppointments?.length ? (
+            <ul className="gh-next-appointments__list" aria-label="Appuntamenti in agenda">
+              {client.upcomingAppointments.map((appointment) => (
+                <li key={appointment.id}>
+                  <Link className="gh-next-appointments__link" to={`/calendar?date=${getRomeDate(appointment.scheduled_at)}`}>
+                    <Icon name="calendar" size={20} />
+                    <span className="gh-next-appointments__copy">
+                      <strong>{formatUpcomingDate(appointment.scheduled_at)}</strong>
+                      <span>{appointment.service?.name || 'Servizio non specificato'}</span>
+                    </span>
+                    <Icon name="chevron" size={18} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="gh-next-appointments__empty">
+              <p>Nessun appuntamento in agenda</p>
+              <Button staff variant="secondary" icon="calendar" onClick={() => navigate(`/calendar?clientId=${clientId}`)}>
+                Appuntamento
+              </Button>
+            </div>
+          )}
+          {client.openRequests?.length > 0 && (
+            <div className="gh-next-appointments__requests">
+              <ul className="gh-next-appointments__list" aria-label="Richieste aperte">
+                {client.openRequests.map((request) => (
+                  <li key={`${request.request_kind}-${request.id}`}>
+                    <Link className="gh-next-appointments__link" to="/requests">
+                      <span className="gh-next-appointments__copy">
+                        <strong>Richiesta · {REQUEST_ACTION_LABELS[request.staff_action]}</strong>
+                        <span>{request.staff_action === 'needs_booking'
+                          ? `${formatVisitDate(request.chosen_date)} alle ${String(request.chosen_time || '').slice(0, 5)}`
+                          : request.desired_date
+                            ? formatVisitDate(request.desired_date)
+                            : formatUpcomingDate(request.scheduled_at)} · {request.service?.name || 'Servizio non specificato'}</span>
+                      </span>
+                      <Icon name="chevron" size={18} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </Panel>
 
         {promo.count > 0 && (

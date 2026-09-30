@@ -1224,15 +1224,15 @@ export const getCalendarWeekData = async ({ from, to, includeSearchIndex = false
   };
 };
 
-export const getPendingAppointmentRequests = async () => {
-  const { tenantId } = await requireStaff();
+const readPendingAppointmentRequests = async (tenantId, petId = null) => {
+  const forPet = (query) => petId ? query.eq('pet_id', petId) : query;
   const [structuredResult, legacyResult] = await Promise.all([
-    supabase.from('appointment_requests').select(APPOINTMENT_REQUEST_SELECT)
+    forPet(supabase.from('appointment_requests').select(APPOINTMENT_REQUEST_SELECT)
       .eq('tenant_id', tenantId).eq('status', 'pending')
-      .order('created_at', { ascending: false }),
-    supabase.from('appointments').select(APPOINTMENT_SELECT)
+      .order('created_at', { ascending: false })),
+    forPet(supabase.from('appointments').select(APPOINTMENT_SELECT)
       .eq('tenant_id', tenantId).eq('approval_status', 'pending')
-      .eq('appointment_source', 'customer').order('created_at', { ascending: false }),
+      .eq('appointment_source', 'customer').order('created_at', { ascending: false })),
   ]);
   if (structuredResult.error) {
     throw new Error(`Non riesco a caricare le nuove richieste: ${structuredResult.error.message}`);
@@ -1244,6 +1244,11 @@ export const getPendingAppointmentRequests = async () => {
     ...(structuredResult.data || []).map(mapAppointmentRequest),
     ...(legacyResult.data || []).map(mapLegacyAppointmentRequest),
   ].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+};
+
+export const getPendingAppointmentRequests = async () => {
+  const { tenantId } = await requireStaff();
+  return readPendingAppointmentRequests(tenantId);
 };
 
 export const getAppointmentRequestsForStaff = async () => {
@@ -1403,18 +1408,63 @@ export const getClientPromos = (client) => {
   return { count, discount: 0, message: count ? `${10 - count} visite per lo sconto!` : '' };
 };
 
+export const getRomeDate = (value = new Date()) => {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date(value)).map(({ type, value: part }) => [type, part]));
+  return `${parts.year}-${parts.month}-${parts.day}`;
+};
+
+export const getRomeDayStart = (value = new Date()) => {
+  const midnight = Date.parse(`${getRomeDate(value)}T00:00:00Z`);
+  const wallClock = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  });
+  let instant = midnight;
+  // Resolve Rome's midnight, not the current UTC offset (which can change that day).
+  for (let pass = 0; pass < 2; pass += 1) {
+    const p = Object.fromEntries(wallClock.formatToParts(new Date(instant))
+      .map(({ type, value: part }) => [type, part]));
+    const displayed = Date.parse(`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}Z`);
+    instant += midnight - displayed;
+  }
+  return new Date(instant).toISOString();
+};
+
+const readUpcomingPetAppointments = async (tenantId, petId) => {
+  const from = getRomeDayStart();
+  const rows = [];
+  let total;
+  do {
+    const { data, error, count } = await supabase.from('appointments')
+      .select(APPOINTMENT_SELECT, { count: 'exact' })
+      .eq('pet_id', petId).eq('tenant_id', tenantId)
+      .eq('status', 'scheduled').eq('approval_status', 'approved')
+      .gte('scheduled_at', from).order('scheduled_at').order('id')
+      .range(rows.length, rows.length + 999);
+    if (error) throw error;
+    total = count ?? data.length;
+    if (!data.length && rows.length < total) throw new Error('Agenda incompleta: ricarica la scheda');
+    rows.push(...data);
+  } while (rows.length < total);
+  return rows.map(mapAppointment);
+};
+
 export const getClientById = async (petId) => {
   try {
     const user = await getCurrentUser();
     if (!user) throw new Error('Utente non autenticato');
     const profile = await getUserProfile(user.id);
     const pet = await getPetById(petId, profile?.tenant_id || null);
-    const [pointsResult, absencesResult] = await Promise.all([
+    const [pointsResult, absencesResult, upcomingAppointments, openRequests] = await Promise.all([
       supabase.from('reward_points').select('*')
         .eq('pet_id', petId).eq('tenant_id', pet.tenant_id).order('created_at', { ascending: false }),
       supabase.from('appointments').select('id, scheduled_at, status')
         .eq('pet_id', petId).eq('tenant_id', pet.tenant_id).eq('status', 'no_show')
         .order('scheduled_at', { ascending: false }),
+      readUpcomingPetAppointments(pet.tenant_id, petId),
+      readPendingAppointmentRequests(pet.tenant_id, petId),
     ]);
     if (pointsResult.error) throw pointsResult.error;
     if (absencesResult.error) throw absencesResult.error;
@@ -1423,6 +1473,8 @@ export const getClientById = async (petId) => {
       rewardPoints: pointsResult.data || [],
       rewardPointsTotal: (pointsResult.data || []).reduce((sum, item) => sum + Number(item.points || 0), 0),
       noShowAppointments: absencesResult.data || [],
+      upcomingAppointments,
+      openRequests,
     };
   } catch (error) {
     throw new Error(`Non riesco a caricare il pet: ${error.message}`);

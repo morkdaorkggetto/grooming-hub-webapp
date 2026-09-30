@@ -1,0 +1,66 @@
+.gh-next-appointments__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.gh-next-appointments__list > li + li,
+.gh-next-appointments__requests {
+  border-top: 1px solid var(--color-border);
+}
+
+.gh-next-appointments__requests {
+  margin-top: 16px;
+  padding-top: 8px;
+}
+
+.gh-next-appointments__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 12px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.gh-next-appointments__link:hover,
+.gh-next-appointments__link:focus-visible {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.gh-next-appointments__link > svg {
+  flex-shrink: 0;
+}
+
+.gh-next-appointments__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.gh-next-appointments__empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gh-next-appointments__empty p {
+  margin: 0;
+}
+
+.gh-next-appointments__empty button {
+  min-height: 44px;
+}
+
+@media (max-width: 600px) {
+  .gh-next-appointments__link,
+  .gh-next-appointments__empty {
+    padding-right: 48px;
+  }
+}
