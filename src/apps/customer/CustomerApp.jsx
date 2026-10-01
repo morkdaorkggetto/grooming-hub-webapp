@@ -7,6 +7,8 @@ import Forgot from './pages/Forgot';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Pet from './pages/Pet';
+import PetCard from './pages/PetCard';
+import CardShortcut from './pages/CardShortcut';
 import Promotions from './pages/Promotions';
 import Redeem from './pages/Redeem';
 import ResetPassword from './pages/ResetPassword';
@@ -54,6 +56,8 @@ export default function CustomerApp() {
         <Route path="/home" element={<Home />} />
         <Route path="/promotions" element={<Promotions />} />
         <Route path="/pet/:petId" element={<Pet />} />
+        <Route path="/card/:petId" element={<PetCard />} />
+        <Route path="/card" element={<CardShortcut />} />
         <Route path="/book" element={<Book />} />
       </Route>
 

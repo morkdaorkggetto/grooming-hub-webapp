@@ -1,0 +1,99 @@
+{
+  "pass": 62,
+  "fail": 0,
+  "skip": 0,
+  "all18BaselineMeasuresEqual": true,
+  "auditFixtureRowsRemoved": 2,
+  "tables": [
+    {
+      "name": "pets",
+      "count": 7,
+      "business_md5": "b4c159115785896853f56c651cef99ae"
+    },
+    {
+      "name": "visits",
+      "count": 90,
+      "business_md5": "0f1e5ecd9c08465538cfc37dcd94b8ed"
+    },
+    {
+      "name": "customers",
+      "count": 7,
+      "business_md5": "3fbac0f2850ed3c49053863f5e48951a"
+    },
+    {
+      "name": "appointments",
+      "count": 8,
+      "business_md5": "99ef0262ec58d4880a4f159c2a96ad57"
+    },
+    {
+      "name": "appointment_requests",
+      "count": 0,
+      "business_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "promotions",
+      "count": 3,
+      "business_md5": "32234437533245217a075f7dc3a61e88"
+    },
+    {
+      "name": "reward_points",
+      "count": 0,
+      "business_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "customer_invitations",
+      "count": 0,
+      "business_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "pet_staff_notes",
+      "count": 5,
+      "business_md5": "b7dd213a94a3a4ec2d6000ef2fcf5c37"
+    },
+    {
+      "name": "customer_staff_notes",
+      "count": 0,
+      "business_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "tenant_memberships",
+      "count": 5,
+      "business_md5": "8aabe83320c5f3853d52c082d96a4aaf"
+    },
+    {
+      "name": "profiles",
+      "count": 6,
+      "business_md5": "3ef064d7323742131d5b16690632c859"
+    },
+    {
+      "name": "tenants",
+      "count": 2,
+      "business_md5": "873efadd4f2c888be26bc54c561ba414"
+    },
+    {
+      "name": "visit_financials",
+      "count": 90,
+      "business_md5": "3ac0551756d01c9a355874e2a3cb2b3b"
+    },
+    {
+      "name": "service_financials",
+      "count": 2,
+      "business_md5": "2479dd92149e395188937c1a7bd612c6"
+    },
+    {
+      "name": "customer_account_unlink_audit",
+      "count": 16,
+      "business_md5": "67e83daa5cc7bad657f8fae8bdee640c"
+    },
+    {
+      "name": "storage.objects",
+      "count": 0,
+      "business_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "auth.users.count",
+      "count": 6,
+      "business_md5": null
+    }
+  ]
+}

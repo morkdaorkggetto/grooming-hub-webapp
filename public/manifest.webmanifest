@@ -8,6 +8,9 @@
   "display": "standalone",
   "theme_color": "#6f9792",
   "background_color": "#f2ece9",
+  "shortcuts": [
+    { "name": "La tessera", "short_name": "La tessera", "url": "/u/card" }
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   getFidelityTierSnapshot,
-} from '../lib/fidelity';
+} from '../../../shared/lib/fidelity';
 import { FidelityBadge, PetAvatar, StateTag } from './StaffKit';
 
 /**

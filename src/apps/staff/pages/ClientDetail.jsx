@@ -36,7 +36,7 @@ import {
   unlinkCustomerAccount,
   updateClient,
 } from '../lib/database';
-import { getFidelityTierSnapshot, getStaffFidelityTierReason } from '../lib/fidelity';
+import { getFidelityTierSnapshot, getStaffFidelityTierReason } from '../../../shared/lib/fidelity';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import {
   getClientCardCode,

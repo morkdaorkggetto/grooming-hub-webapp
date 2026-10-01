@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useRequireCustomer } from '../../../shared/auth/useRequireCustomer';
 import { useAuth } from '../../../shared/auth/AuthProvider';
 import { useTenant } from '../../../shared/tenant/TenantProvider';
@@ -9,7 +9,7 @@ import { useNextAppointment } from '../hooks/useNextAppointment';
 import { usePromotions } from '../hooks/usePromotions';
 import { useCurrentCustomer } from '../hooks/useCurrentCustomer';
 import { useAppointmentRequests } from '../hooks/useAppointmentRequests';
-import { useRewardPoints } from '../hooks/useRewardPoints';
+import PetCardStrip from '../components/PetCardStrip';
 import PendingRequest from '../components/PendingRequest';
 import { currentAlternativeResponse, isRecentlyConfirmed } from '../lib/appointmentResponses';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
@@ -106,16 +106,19 @@ function PetAvatar({ name, photoUrl, size = 56 }) {
 }
 
 export default function Home() {
+  const { hash } = useLocation();
   const { loading: authLoading } = useRequireCustomer();
   const { user } = useAuth();
   const { tenant } = useTenant();
   const { customer } = useCurrentCustomer();
 
   const { data: pets, loading: petsLoading } = usePets();
+  useEffect(() => {
+    if (hash === '#tessere' && !petsLoading) document.getElementById('tessere')?.scrollIntoView();
+  }, [hash, petsLoading]);
   const { data: nextAppt, appointments: upcomingAppointments, loading: apptLoading } = useNextAppointment();
   const { data: promos, loading: promosLoading } = usePromotions();
   const { data: requests, loading: requestsLoading, error: requestsError, refetch: refetchRequests } = useAppointmentRequests();
-  const { total: rewardPoints, loading: pointsLoading } = useRewardPoints();
 
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 720 : false
@@ -407,17 +410,13 @@ export default function Home() {
             <PendingRequest key={request.id} request={request} onResponded={refetchRequests} />
           ))}
 
-          {pointsLoading ? (
+          {petsLoading ? (
             <SkeletonCard />
-          ) : (
-            <Card padding={20}>
-              <Eyebrow style={{ marginBottom: 12 }}>Punti</Eyebrow>
-              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 500 }}>{rewardPoints} punti</div>
-              <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
-                Si accumulano con le visite e con gli eventuali movimenti che annotiamo per te.
-              </p>
-            </Card>
-          )}
+          ) : hasPets ? (
+            <div id="tessere" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {(pets || []).map(pet => <PetCardStrip key={pet.id} pet={pet} />)}
+            </div>
+          ) : null}
 
           {/* MINI PROMOS card — silenzioso se 0 */}
           {!promosLoading && visiblePromos.length > 0 && (

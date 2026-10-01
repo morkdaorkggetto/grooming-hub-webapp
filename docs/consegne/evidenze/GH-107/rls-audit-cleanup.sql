@@ -1,0 +1,2 @@
+-- Solo le due righe di audit generate dalla suite GH-107 sul demo il 1/10.
+delete from public.customer_account_unlink_audit where id in ('578f7ee2-b69e-4972-bf1c-1d8e84ade67f','fcadeb78-34cf-4afe-aab3-e06b08c88899') and customer_id='32a4722e-b544-46ea-b91a-4c58c9cd6f94' and customer_label='[DEMO GH-44] Ada Scollegamento' and customer_phone='+393339904400' and performed_by_user_id='0b33da67-01cd-43f5-8f6b-301084c0c001' and created_at>='2026-10-01T10:43:01Z' returning id;

@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-01T09:55:21.974Z",
+  "project": "qttpinkslhenxrsbhhhg",
+  "proof": "actual staff getClientById + customer readPetCard, independent authenticated sessions; actual React renderers, pre-composition",
+  "rows": [
+    {
+      "visits": 3,
+      "expected": "base",
+      "staff": "base",
+      "customer": "base",
+      "staffRendered": true,
+      "customerRendered": true,
+      "bronzeThreshold": 4
+    },
+    {
+      "visits": 4,
+      "expected": "bronze",
+      "staff": "bronze",
+      "customer": "bronze",
+      "staffRendered": true,
+      "customerRendered": true,
+      "bronzeThreshold": 4
+    },
+    {
+      "visits": 12,
+      "expected": "silver",
+      "staff": "silver",
+      "customer": "silver",
+      "staffRendered": true,
+      "customerRendered": true,
+      "bronzeThreshold": 4
+    },
+    {
+      "visits": 36,
+      "expected": "gold",
+      "staff": "gold",
+      "customer": "gold",
+      "staffRendered": true,
+      "customerRendered": true,
+      "bronzeThreshold": 4
+    }
+  ]
+}

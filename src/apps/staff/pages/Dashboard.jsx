@@ -24,7 +24,7 @@ import {
   getPendingAppointmentRequests,
   summarizePendingAppointmentRequests,
 } from '../lib/database';
-import { getFidelityTierSnapshot } from '../lib/fidelity';
+import { getFidelityTierSnapshot } from '../../../shared/lib/fidelity';
 import { getWaitingCustomerAge } from '../../customer/lib/appointmentRequestFlow';
 
 const formatProposalMoment = (value) => {

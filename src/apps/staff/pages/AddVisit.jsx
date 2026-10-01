@@ -10,7 +10,7 @@ import {
   SkeletonRow,
 } from '../components/StaffKit';
 import { addVisit, completeAppointmentWithVisit, getClientById } from '../lib/database';
-import { getFidelityTierSnapshot } from '../lib/fidelity';
+import { getFidelityTierSnapshot } from '../../../shared/lib/fidelity';
 
 export default function AddVisit() {
   const { clientId } = useParams();

@@ -1,0 +1,7 @@
+{
+  "method": "Apple Vision VNDetectBarcodesRequest, QR symbology",
+  "command": "swift docs/consegne/evidenze/GH-107/decode-qr.swift docs/consegne/evidenze/GH-107/qr-customer.png docs/consegne/evidenze/GH-107/qr-cartoncino.png docs/consegne/evidenze/GH-107/qr-banco.png",
+  "files": ["qr-customer.png", "qr-cartoncino.png", "qr-banco.png"],
+  "decodedForEach": "http://127.0.0.1:4178/client-card/ghp_gh107_probe_4",
+  "result": "3/3 equal; URL not opened; same untouched QR generator at 300 and 900 pixels"
+}

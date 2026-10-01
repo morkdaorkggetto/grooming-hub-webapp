@@ -1,0 +1,382 @@
+{
+  "project": "qttpinkslhenxrsbhhhg",
+  "command": "GH_RLS_EXPECTED_PROJECT_REF=qttpinkslhenxrsbhhhg GH_RLS_SUITE_LABEL=GH-107 node scripts/rls-tests/run.mjs",
+  "suite_sha256": "863906ca515a713e13896d4eb0a21ce5268bb023d555e74b6e182139ce35ee7c",
+  "pass": 62,
+  "fail": 0,
+  "skip": 0,
+  "tests": [
+    {
+      "status": "PASS",
+      "test": "Login sonda staff",
+      "expected": "sessione API disponibile",
+      "measured": "user 0b33da67-01cd-43f5-8f6b-301084c0c001"
+    },
+    {
+      "status": "PASS",
+      "test": "Login Mario",
+      "expected": "sessione API disponibile",
+      "measured": "user 578ab8db-6388-4cab-aa1d-58c5b0fb6bb0"
+    },
+    {
+      "status": "PASS",
+      "test": "Login Luca",
+      "expected": "sessione API disponibile",
+      "measured": "user f55684e5-6d1d-48b9-acc7-7c0e4b3aaf15"
+    },
+    {
+      "status": "PASS",
+      "test": "Login sonda customer GH-44",
+      "expected": "sessione API disponibile",
+      "measured": "user 0b33da67-01cd-43f5-8f6b-301084c0c044"
+    },
+    {
+      "status": "PASS",
+      "test": "Login staff tenant estraneo GH-49",
+      "expected": "sessione API disponibile",
+      "measured": "user 0b33da67-01cd-43f5-8f6b-301084c0c049"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff legge baseline pet",
+      "expected": "7 pet nel tenant",
+      "measured": "7 pet"
+    },
+    {
+      "status": "PASS",
+      "test": "Promozioni staff crea, modifica, disattiva e riordina GH-49",
+      "expected": "3 promozioni nel tenant con ordine 10/20/30 e una sola visibile ora",
+      "measured": "3 create, 1 modifica, 1 disattivazione, ordine 10/20/30"
+    },
+    {
+      "status": "PASS",
+      "test": "Promozioni customer rispettano stato e finestra GH-49",
+      "expected": "solo la promozione attiva e in finestra e visibile",
+      "measured": "1 visibile: [DEMO GH-49] Attiva modificata"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff fuori tenant non vede ne modifica promozioni GH-49",
+      "expected": "0 righe visibili, 0 righe modificate e riordino rifiutato",
+      "measured": "0 lette, 0 modificate, RPC 42501"
+    },
+    {
+      "status": "PASS",
+      "test": "Portale customer legge il proprio nucleo",
+      "expected": "1 customer e 2 pet di Mario",
+      "measured": "1 customer, 2 pet"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff legge e scrive note riservate",
+      "expected": "marker presenti in entrambe le tabelle",
+      "measured": "2 marker scritti e riletti"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non legge note riservate",
+      "expected": "0 note pet e 0 note customer",
+      "measured": "0 note pet, 0 note customer"
+    },
+    {
+      "status": "PASS",
+      "test": "Portale customer non incorpora note riservate",
+      "expected": "2 pet con relazioni note vuote",
+      "measured": "2 pet, 0 relazioni note"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non scrive note riservate",
+      "expected": "due rifiuti RLS",
+      "measured": "2 rifiuti 42501/RLS"
+    },
+    {
+      "status": "PASS",
+      "test": "Colonne note legacy rimosse",
+      "expected": "operator_notes e internal_notes assenti",
+      "measured": "2 errori 42703"
+    },
+    {
+      "status": "PASS",
+      "test": "Dati economici privati GH-103",
+      "expected": "colonne legacy assenti, * senza importi, relazioni invisibili ai customer",
+      "measured": "2 colonne/query rifiutate; 2 wildcard puliti; 6 letture vuote; staff 1 EUR; insert e RPC cliente 42501"
+    },
+    {
+      "status": "PASS",
+      "test": "Appuntamento pending diretto cliente GH-103",
+      "expected": "INSERT 42501 e UPDATE proprio pending senza effetto",
+      "measured": "INSERT 42501; UPDATE proprio pending rifiutato o 0 righe, note originali invariate"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage staff e URL pubblici GH-103",
+      "expected": "staff crea e sostituisce; client-photos privato, pet-avatars pubblico",
+      "measured": "2 upload/update; pubblico solo pet-avatars; firma solo staff del salone, 4 attori rifiutati"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage utente senza legami GH-45",
+      "expected": "nessuna scrittura o cancellazione in client-photos e pet-avatars",
+      "measured": "4 scritture rifiutate; 2 delete senza effetto; oggetti leggibili dallo staff"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage customer non proprietario GH-45",
+      "expected": "Mario non sostituisce o cancella oggetti staff in nessuno dei due bucket",
+      "measured": "2 update rifiutati; 2 delete senza effetto; oggetti invariati"
+    },
+    {
+      "status": "PASS",
+      "test": "Invito con durata tenant GH-45",
+      "expected": "expires_at memorizzato a 3 giorni anche se il chiamante propone 30 giorni",
+      "measured": "259200.003 secondi (3 giorni)"
+    },
+    {
+      "status": "PASS",
+      "test": "Inviti scaduto e gia usato GH-45",
+      "expected": "GH_INVITE_EXPIRED e GH_INVITE_ALREADY_USED restano distinti",
+      "measured": "GH_INVITE_EXPIRED / GH_INVITE_ALREADY_USED"
+    },
+    {
+      "status": "PASS",
+      "test": "Fixture customer GH-44 collegata",
+      "expected": "customer usa-e-getta, 4 pet, 1 visita e membership customer",
+      "measured": "customer collegato, 4 pet e 1 visita"
+    },
+    {
+      "status": "PASS",
+      "test": "Isolamento Mario -> Luca",
+      "expected": "0 customer, 0 pet e 0 visite di Luca",
+      "measured": "0 customer, 0 pet, 0 visite"
+    },
+    {
+      "status": "PASS",
+      "test": "Isolamento Luca -> Mario",
+      "expected": "0 customer, 0 pet e 0 visite di Mario",
+      "measured": "0 customer, 0 pet, 0 visite"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non vede la sonda",
+      "expected": "0 membership e 0 profili staff",
+      "measured": "0 membership, 0 profili"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non legge campi direttorio altrui",
+      "expected": "0 customer altrui con status o source",
+      "measured": "0 customer altrui"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non modifica campi direttorio propri",
+      "expected": "relationship_status e acquisition_source invariati",
+      "measured": "invariati (active, manual)"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non chiama RPC staff",
+      "expected": "SQLSTATE 42501 e 0 scritture",
+      "measured": "42501, 0 customer"
+    },
+    {
+      "status": "PASS",
+      "test": "Mario invia richiesta appuntamento",
+      "expected": "richiesta pending sul proprio pet",
+      "measured": "b766dabe-5a34-42ef-a2ff-5726fe12ff26, pending"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff legge richiesta Mario",
+      "expected": "1 richiesta con campi strutturati",
+      "measured": "1 richiesta strutturata"
+    },
+    {
+      "status": "PASS",
+      "test": "Luca non vede richiesta Mario",
+      "expected": "0 richieste",
+      "measured": "0 richieste"
+    },
+    {
+      "status": "PASS",
+      "test": "Mario non cambia stato richiesta",
+      "expected": "0 righe aggiornate, stato pending",
+      "measured": "0 righe, pending"
+    },
+    {
+      "status": "PASS",
+      "test": "Luca non invia richiesta per pet Mario",
+      "expected": "SQLSTATE 42501",
+      "measured": "42501"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff converte richiesta atomicamente",
+      "expected": "request approved e appointment collegato",
+      "measured": "9032c816-3ca4-466a-96bd-b62fddf38c90, approved; UPDATE cliente 0 righe/42501, note invariate"
+    },
+    {
+      "status": "PASS",
+      "test": "Tetto richieste aperte per customer",
+      "expected": "3 pending su pet distinti; quarta rifiutata dal database",
+      "measured": "3 pending su 3 pet, quarta 23514/GH44_OPEN_REQUEST_LIMIT"
+    },
+    {
+      "status": "PASS",
+      "test": "Chiusura richiesta libera il tetto",
+      "expected": "una rejected, richiesta successiva accettata",
+      "measured": "1 rejected, nuova pending accettata"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non scollega account",
+      "expected": "sonda GH-44 non scollega se stessa ne Mario",
+      "measured": "2 rifiuti 42501, audit invisibile, legame fixture invariato"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff scollega e nuovo invito ricollega",
+      "expected": "account e dati preservati, invisibilita immediata, nuovo riscatto riuscito",
+      "measured": "0 dati visibili dopo unlink; 4 pet e 1 visite preservati; audit staff; nuovo invito ok"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer protegge microchip",
+      "expected": "valore invariato",
+      "measured": "invariato (null)"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer protegge name",
+      "expected": "valore invariato",
+      "measured": "invariato (Luna)"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer protegge photo_url",
+      "expected": "valore invariato",
+      "measured": "invariato (null)"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer consente owner_notes",
+      "expected": "marker scritto e ripristinabile",
+      "measured": "marker scritto"
+    },
+    {
+      "status": "PASS",
+      "test": "Whitelist customer consente coat_preferences",
+      "expected": "preferenze scritte e ripristinabili",
+      "measured": "preferenze scritte"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff continua a sostituire photo_url GH-49",
+      "expected": "foto staff aggiornata, leggibile e ripristinata",
+      "measured": "update staff, HTTP 200, ripristino originale"
+    },
+    {
+      "status": "PASS",
+      "test": "Ritratto owner non sovrascrive foto salone GH-50",
+      "expected": "owner_photo_url scritto; photo_url invariato",
+      "measured": "ritratto owner presente; URL salone identico al valore pre-update customer"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non scrive visits.photo_url GH-50",
+      "expected": "valore visita invariato",
+      "measured": "invariato (null)"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff allega e rimuove foto visita GH-50",
+      "expected": "foto persistita, leggibile e rimossa",
+      "measured": "persistita, HTTP 200, colonna null, oggetto rimosso"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non vede foto di pet altrui GH-50",
+      "expected": "0 pet e 0 visite",
+      "measured": "0 pet e 0 visite"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non scrive nello spazio visite GH-50",
+      "expected": "HTTP 403",
+      "measured": "HTTP 403"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage customer sul pet proprio",
+      "expected": "upload, update e delete riusciti",
+      "measured": "upload, update e delete riusciti"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage customer sul pet altrui",
+      "expected": "HTTP 403",
+      "measured": "HTTP 403"
+    },
+    {
+      "status": "PASS",
+      "test": "Storage customer su tenant estraneo",
+      "expected": "HTTP 403",
+      "measured": "HTTP 403"
+    },
+    {
+      "status": "PASS",
+      "test": "Fixture appuntamento assenza GH-52",
+      "expected": "programmato nella settimana corrente; report misurati",
+      "measured": "0 visite / EUR 0.00 settimana; 0 visite / EUR 0.00 mese"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non segna assenza GH-52",
+      "expected": "RPC 42501 e stato invariato",
+      "measured": "42501, 0 righe dirette, scheduled"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff segna assenza datata GH-52",
+      "expected": "no_show, -1, zero visite e incassi invariati",
+      "measured": "2026-10-01T01:00:00+00:00; score -1; 0 visite; EUR 0.00 invariati"
+    },
+    {
+      "status": "PASS",
+      "test": "Doppio segna assenza GH-52",
+      "expected": "stato no_show e punteggio ancora -1",
+      "measured": "score -1"
+    },
+    {
+      "status": "PASS",
+      "test": "Customer non annulla assenza GH-52",
+      "expected": "RPC 42501 e assenza invariata",
+      "measured": "42501, no_show"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff annulla assenza GH-52",
+      "expected": "scheduled, punteggio e report ripristinati",
+      "measured": "scheduled; score 0; settimana e mese invariati"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff aggiorna campo staff-only",
+      "expected": "nota pet modificata",
+      "measured": "marker scritto"
+    },
+    {
+      "status": "PASS",
+      "test": "Staff fuori tenant",
+      "expected": "0 righe da un secondo tenant reale",
+      "measured": "0 pet"
+    },
+    {
+      "status": "PASS",
+      "test": "Pulizia fixture",
+      "expected": "0 residui marker",
+      "measured": "0 pet, 0 visite, 0 customer, 0 richieste, 0 note pet, 0 note customer, 0 promozioni, 0 appuntamenti GH-52"
+    }
+  ]
+}

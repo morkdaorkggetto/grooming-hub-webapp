@@ -1,0 +1,59 @@
+{
+  "at": "2026-10-01T10:46:58.248Z",
+  "results": [
+    {
+      "test": "login Mario e ritorno alla tessera richiesta",
+      "pass": true
+    },
+    {
+      "test": "manifest reale dedicato al pet",
+      "start_url": "http://127.0.0.1:4178/u/card/00000000-0000-4000-8107-000000000004",
+      "pass": true
+    },
+    {
+      "test": "tessera con dati demo",
+      "visits": 3,
+      "tier": "none",
+      "pass": true
+    },
+    {
+      "test": "tessera con dati demo",
+      "visits": 4,
+      "tier": "bronze",
+      "pass": true
+    },
+    {
+      "test": "tessera con dati demo",
+      "visits": 12,
+      "tier": "silver",
+      "pass": true
+    },
+    {
+      "test": "tessera con dati demo",
+      "visits": 36,
+      "tier": "gold",
+      "pass": true
+    },
+    {
+      "test": "manifest ripristinato su navigazione SPA",
+      "pass": true
+    },
+    {
+      "test": "Home, tessera Bronzo e banco reale",
+      "pass": true
+    },
+    {
+      "test": "shortcut multi-pet porta alle tessere Home",
+      "pass": true
+    },
+    {
+      "test": "caricamento, errore simulato senza tessera parziale e riprova",
+      "pass": true
+    },
+    {
+      "test": "Luca non riceve la tessera di Mario",
+      "pass": true
+    }
+  ],
+  "pageErrors": []
+}
