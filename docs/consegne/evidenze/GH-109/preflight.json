@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-02T04:14:50.253Z",
+  "source": "/Users/luigimaisto/Desktop/grooming-hub-web/webapp/src/apps/customer/pages/Home.jsx",
+  "environment": "local synthetic, no database",
+  "cases": [
+    {
+      "name": "rejected alone",
+      "rejectedReturned": 1,
+      "rejectedVisibleToday": 1
+    },
+    {
+      "name": "rejected and newer pending, same pet",
+      "rejectedReturned": 1,
+      "rejectedVisibleToday": 0
+    },
+    {
+      "name": "rejected and next appointment",
+      "rejectedReturned": 1,
+      "rejectedVisibleToday": 0
+    },
+    {
+      "name": "two rejected",
+      "rejectedReturned": 2,
+      "rejectedVisibleToday": 1
+    }
+  ],
+  "proposalResponseHelper": "PASS",
+  "conclusion": "The set of rejected rows and the set of visible reschedule actions differ. No persisted supersession rule established by this test."
+}
