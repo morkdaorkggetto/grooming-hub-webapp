@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>CD-11 · La tessera apre l'app</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+html,body{margin:0;padding:0;background:#f0eee9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#root{width:100vw;height:100vh;overflow:hidden}
+em{font-style:italic}
+a{color:var(--color-link)}a:hover{color:var(--color-primary-hover)}
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><rect x="70" y="22" width="100" height="18" rx="5" fill="#efe3de"/><rect x="70" y="46" width="100" height="82" rx="10" fill="#fbf6f3"/><rect x="92" y="58" width="56" height="10" rx="5" fill="#2b2525"/><g fill="#6f9792"><rect x="80" y="96" width="18" height="14" rx="3"/><rect x="101" y="96" width="18" height="14" rx="3"/><rect x="122" y="96" width="18" height="14" rx="3"/></g><rect x="143" y="96" width="18" height="14" rx="3" fill="#fff" stroke="#6f9792"/></svg>
+</template>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+<script type="text/babel" src="cd01-cal-note.jsx"></script>
+<script type="text/babel" src="cd04-card-kit.jsx"></script>
+<script type="text/babel" src="cd09-tessera-kit.jsx"></script>
+<script type="text/babel" src="cd10-tessera-kit.jsx"></script>
+<script type="text/babel" src="cd11-home-kit.jsx"></script>
+<script type="text/babel" src="cd11-home-note.jsx"></script>
+<script type="text/babel" data-presets="react">
+const C = ({ children }) => <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>;
+const RUMBA = { pet: 'Rumba', breed: 'Meticcio', done: 3, of: 4, dal: '6 marzo 2026' };
+const LUNA = { pet: 'Luna', breed: 'Barboncino', tier: 'bronze', done: 6, of: 12, win: 24, carry: true, foto: true };
+const App = () => (
+  <DesignCanvas>
+    <DCSection id="cd11-misure" title="CD-11 · Prima gli effetti, misurati" subtitle="Ora che la tessera è la cima della Home, sotto c’è la barra (64px) che in CD-10 non c’era. La domanda che conta: «Mostra al banco» resta nel primo schermo?">
+      <DCArtboard id="misure" label="Il primo schermo, su tre telefoni" width={1280} height={560}><CD11_Misure/></DCArtboard>
+    </DCSection>
+    <DCSection id="cd11-uno" title="CD-11 · Un cane solo: l’app si apre sulla tessera" subtitle="La tessera è la cima della Home. Barra a tre voci con Home accesa, testata senza «indietro». Quando c’è qualcosa da fare, l’avviso sta sopra la tessera e fa direttamente il gesto: non c’è una scheda più in basso che lo ripete.">
+      <DCArtboard id="niente" label="375 × 812 · niente da fare — come CD-10, invito sotto il pulsante" width={455} height={880}><C><HomeUno s={RUMBA} invito/></C></DCArtboard>
+      <DCArtboard id="data" label="375 × 812 · la data chiesta non è disponibile" width={455} height={880}><C><HomeUno s={RUMBA} items={['data']}/></C></DCArtboard>
+      <DCArtboard id="orari" label="375 × 812 · il salone ha proposto altri orari" width={455} height={880}><C><HomeUno s={RUMBA} items={['orari']}/></C></DCArtboard>
+      <DCArtboard id="due" label="375 × 812 · due richieste insieme — un avviso solo" width={455} height={880}><C><HomeUno s={RUMBA} items={['data', 'orari']}/></C></DCArtboard>
+      <DCArtboard id="f-data" label="375 × 812 · tocco sull’avviso: si sceglie la data, subito" width={455} height={880}><C><HomeUno s={RUMBA} items={['data']} foglio="data"/></C></DCArtboard>
+      <DCArtboard id="f-orari" label="375 × 812 · tocco sull’avviso: i due orari proposti" width={455} height={880}><C><HomeUno s={RUMBA} items={['orari']} foglio="orari"/></C></DCArtboard>
+      <DCArtboard id="f-due" label="375 × 812 · tocco sull’avviso con due richieste" width={455} height={880}><C><HomeUno s={RUMBA} items={['data', 'orari']} foglio="due"/></C></DCArtboard>
+    </DCSection>
+    <DCSection id="cd11-limiti" title="CD-11 · Dove la misura non regge" subtitle="La riga rossa è la fine del primo schermo. Su 667 con un avviso il pulsante va sotto, ma il QR (ora toccabile) resta sopra.">
+      <DCArtboard id="se" label="375 × 667 · un avviso: pulsante 31px sotto, QR sopra" width={455} height={740}><C><HomeUno s={RUMBA} items={['data']} h={667} piega/></C></DCArtboard>
+      <DCArtboard id="luna" label="375 × 812 · ritratto e livello: il pulsante tocca la barra" width={455} height={880}><C><HomeUno s={LUNA} piega/></C></DCArtboard>
+    </DCSection>
+    <DCSection id="cd11-piu" title="CD-11 · Più cani: la Home, all’altezza delle tessere" subtitle="Prima le richieste da fare, poi le strisce, poi il resto. Qui l’avviso non serve: le schede da fare sono già la prima cosa.">
+      <DCArtboard id="piu" label="375 × 812 · due cani, una richiesta da fare" width={455} height={880}><C><HomePiu cani={[RUMBA, LUNA]} items={[['data', 'Rumba']]}/></C></DCArtboard>
+      <DCArtboard id="piu0" label="375 × 812 · due cani, niente da fare" width={455} height={880}><C><HomePiu cani={[RUMBA, LUNA]}/></C></DCArtboard>
+    </DCSection>
+    <DCSection id="cd11-ragioni" title="CD-11 · Le ragioni" subtitle="La testata e la barra, l’avviso, cosa non torna.">
+      <DCArtboard id="scelta" label="La tessera è la cima della Home" width={1280} height={600}><CD11_Scelta/></DCArtboard>
+      <DCArtboard id="avviso" label="L’avviso" width={1280} height={620}><CD11_Avviso/></DCArtboard>
+      <DCArtboard id="nontorna" label="Cosa non torna · campi" width={1280} height={680}><CD11_NonTorna/></DCArtboard>
+    </DCSection>
+    <DCPostIt x={44} y={44} width={330}>
+      <strong>CD-11 · La tessera apre l’app</strong><br/><br/>
+      <strong>La tessera è la cima della Home</strong>, non una pagina davanti. Così la barra resta a tre voci con Home accesa e la testata perde l’«indietro» senza sostituirlo.<br/><br/>
+      <strong>L’avviso</strong>: una riga warning sopra la tessera, solo il gesto. <strong>Il tocco fa il gesto</strong>: si apre un foglio con la scelta, e la scheda in fondo alla Home non c’è più. Più d’uno insieme = un avviso solo col numero. Non ha la ×.<br/><br/>
+      <strong>Misurato sul rendering:</strong> su 667 con l’avviso «Mostra al banco» va 31px sotto la barra. Il QR sulla tessera ora si tocca e resta nel primo schermo.<br/><br/>
+      <strong>Più cani:</strong> richieste da fare, poi strisce, poi il resto.
+    </DCPostIt>
+  </DesignCanvas>
+);
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
