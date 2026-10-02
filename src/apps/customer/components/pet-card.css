@@ -88,7 +88,10 @@ button.pet-card-qr { cursor: pointer; }
 .pet-card-actions { margin-top: 12px; text-align: center; }
 .pet-card-actions > .gh-btn { width: 100%; min-height: 54px; }
 .pet-card-actions > .pet-card-show { height: 54px; padding: 0 12px; gap: 10px; white-space: nowrap; border: 0; border-radius: 14px; background: var(--color-primary-hover); color: #fbf6f3; font-size: 19px; font-weight: 700; }
-.pet-card-actions > .pet-card-show:not(:disabled) { opacity: 1; }
+.pet-card-actions > .pet-card-show:not(:disabled) {
+  opacity: 1;
+  transition-property: background-color, border-color;
+}
 .pet-card-show > strong { font-size: inherit; font-weight: 700; }
 .pet-card-show > svg { flex-shrink: 0; }
 .pet-card-actions .gh-meta { margin-top: 5px; }

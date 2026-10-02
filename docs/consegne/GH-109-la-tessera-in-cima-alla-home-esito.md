@@ -1,5 +1,31 @@
 # GH-109 — La tessera in cima alla Home
 
+## Supplemento: pulsante sbiadito, 2/10 ore 08:13 CEST
+
+Richiesta diretta di Luigi dopo la consegna. Base `7916591995c6c4f91c3ed0f1f38133b421171e26`; canone 1.2 invariato, riletto. **Difetto transitorio confermato**, gia presente in GH-108, non nuova sovrascrittura cromatica della Home: la transizione globale di opacity dura 150ms e sopravvive all'abilitazione del pulsante. Il vecchio test aspettava solo `disabled=false`; non misurava lo stile del fotogramma salvato. Non e possibile attribuire retroattivamente un valore computed al PNG storico.
+
+Prova mirata prima del fix: Home e CustomerNav reali, risposte degli hook sintetiche locali, nessun database. `node docs/consegne/evidenze/GH-109/button-probe.mjs before` sulla base non corretta: primo frame con QR presente, `disabled=false`, `opacity=0.6`, sfondo `rgb(94, 133, 128)`, tutti gli antenati opacity1; 19 campioni abilitati ma sbiaditi. Evidenza `button-before.json`. Il comando before va ripetuto sul CSS della base dichiarata; non reintroduce il difetto nel prodotto.
+
+Fix circoscritto: quando abilitato, il pulsante non anima l'opacita. Non basta ritardare lo screenshot per rispettare il contratto «pieno in ogni stato non disabilitato». Dopo: `node docs/consegne/evidenze/GH-109/button-probe.mjs after`, 0 campioni abilitati sbiaditi, opacity1 in riposo/hover/focus/pressione, colore invariato; caricamento disabilitato ancora misurato a0.6. Console senza errori. `npm run build`:183 moduli,1.35s; soli avvisi Browserslist/chunk gia presenti. `git diff --check` passa.
+
+Schermate nuove con suffisso `-corrected`: riproduzione della **Home reale con dati sintetici locali**, non nuova prova RLS/demo. Tre visite su sei, proposta aperta; originale conservato. Nessuna modifica a regole, QR, geometria, dati o credenziali. Nessuna suite cloud necessaria per questa correzione CSS. Autodenuncia: la precedente evidenza non garantiva lo stato visivo stabile del pulsante.
+
+Tabella esaustiva del supplemento (percorsi relativi alla root `/Users/luigimaisto/Desktop/grooming-hub-web/webapp/`):
+
+| File | Atto |
+|---|---|
+| `src/apps/customer/components/pet-card.css` | Esclude la transizione opacity nello stato abilitato |
+| `docs/consegne/GH-109-la-tessera-in-cima-alla-home-esito.md` | Questo supplemento; storico conservato |
+| `docs/consegne/evidenze/GH-109/browser.mjs` | Asserzione computed opacity1, non solo disabled=false |
+| `docs/consegne/evidenze/GH-109/button-probe.jsx` | Montaggio Home e layout reali per la prova isolata |
+| `docs/consegne/evidenze/GH-109/button-probe.mjs` | Mock locali degli hook, campioni computed, quattro stati, cattura |
+| `docs/consegne/evidenze/GH-109/button-before.json` | Misura prima della correzione |
+| `docs/consegne/evidenze/GH-109/button-after.json` | Misura dopo la correzione |
+| `docs/consegne/evidenze/GH-109/proposal-375x812-corrected.png` | Schermata Home rifatta |
+| `docs/consegne/evidenze/GH-109/cd11-proposal-375x812-corrected.png` | Confronto rifatto, origine locale dichiarata |
+
+Il manifest SHA della consegna precedente resta la fotografia del commit di base, non di questo supplemento. File di Cowork e cartelle private ancora esclusi, nessuna produzione/demo letta o scritta, nessun push/deploy. Fuori istruzione: nessuno.
+
 **Ripresa del 2/10: implementazione consegnata, nessun push/deploy.** Il checkpoint iniziale, conservato in fondo, e superato dalla decisione nominativa di Luigi: rifiuto da fare solo in assenza di qualsiasi richiesta successiva per lo stesso pet, anche approved/withdrawn; piu proposte pending senza risposta corrente. Estensione autorizzata a hook richieste e helper condiviso.
 
 **Limite dichiarato del collaudo:** due/tre pending per lo stesso pet sono impedite dal trigger vivo. Queste cardinalita sono provate soltanto come composizione UI simulata; nessun vincolo e stato aggirato. Scelta, rifiuto, nuova prenotazione, ritiro, multi-pet e isolamento Mario/Luca sono prove vive sul demo.

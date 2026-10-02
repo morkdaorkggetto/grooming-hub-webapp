@@ -44,6 +44,7 @@ try {
   await page.waitForURL('**/u/home');
   if (mode !== 'multi') {
     await page.waitForFunction(() => document.querySelector('.pet-card-show')?.disabled === false);
+    assert.equal(await page.locator('.pet-card-show').evaluate(e => getComputedStyle(e).opacity), '1');
     assert.equal(await page.locator('.pet-card-back').count(), 0);
     assert.equal(await page.locator('.pet-card-strip').count(), 0);
     assert.equal(await page.getByText(/Bentornato/).count(), 0);
