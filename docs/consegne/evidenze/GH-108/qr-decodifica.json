@@ -1,0 +1,6 @@
+{
+  "command": "swift docs/consegne/evidenze/GH-107/decode-qr.swift docs/consegne/evidenze/GH-108/qr-banco.png docs/consegne/evidenze/GH-108/qr-cartoncino.png docs/consegne/evidenze/GH-108/qr-customer.png",
+  "exitCode": 0,
+  "files": ["qr-banco.png", "qr-cartoncino.png", "qr-customer.png"],
+  "decodedEach": "http://127.0.0.1:4178/client-card/ghp_gh107_probe_4"
+}

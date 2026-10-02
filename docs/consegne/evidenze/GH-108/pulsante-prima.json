@@ -1,0 +1,153 @@
+{
+  "at": "2026-10-02T02:40:16.099Z",
+  "results": [
+    {
+      "width": 375,
+      "state": "rest",
+      "background": "rgb(111, 151, 146)",
+      "color": "rgb(251, 246, 243)",
+      "opacity": "1",
+      "height": 64.9375,
+      "hover": false,
+      "focus": false,
+      "parents": [
+        {
+          "tag": "DIV",
+          "class": "pet-card-actions",
+          "opacity": "1"
+        },
+        {
+          "tag": "MAIN",
+          "class": "pet-card-page",
+          "opacity": "1"
+        },
+        {
+          "tag": "DIV",
+          "class": "",
+          "opacity": "1"
+        },
+        {
+          "tag": "BODY",
+          "class": "",
+          "opacity": "1"
+        },
+        {
+          "tag": "HTML",
+          "class": "",
+          "opacity": "1"
+        }
+      ]
+    },
+    {
+      "width": 375,
+      "state": "hover",
+      "background": "rgb(94, 133, 128)",
+      "color": "rgb(251, 246, 243)",
+      "opacity": "1",
+      "height": 64.9375,
+      "hover": true,
+      "focus": false,
+      "parents": [
+        {
+          "tag": "DIV",
+          "class": "pet-card-actions",
+          "opacity": "1"
+        },
+        {
+          "tag": "MAIN",
+          "class": "pet-card-page",
+          "opacity": "1"
+        },
+        {
+          "tag": "DIV",
+          "class": "",
+          "opacity": "1"
+        },
+        {
+          "tag": "BODY",
+          "class": "",
+          "opacity": "1"
+        },
+        {
+          "tag": "HTML",
+          "class": "",
+          "opacity": "1"
+        }
+      ]
+    },
+    {
+      "width": 1365,
+      "state": "rest",
+      "background": "rgb(111, 151, 146)",
+      "color": "rgb(251, 246, 243)",
+      "opacity": "1",
+      "height": 64.9375,
+      "hover": false,
+      "focus": false,
+      "parents": [
+        {
+          "tag": "DIV",
+          "class": "pet-card-actions",
+          "opacity": "1"
+        },
+        {
+          "tag": "MAIN",
+          "class": "pet-card-page",
+          "opacity": "1"
+        },
+        {
+          "tag": "DIV",
+          "class": "",
+          "opacity": "1"
+        },
+        {
+          "tag": "BODY",
+          "class": "",
+          "opacity": "1"
+        },
+        {
+          "tag": "HTML",
+          "class": "",
+          "opacity": "1"
+        }
+      ]
+    },
+    {
+      "width": 1365,
+      "state": "hover",
+      "background": "rgb(94, 133, 128)",
+      "color": "rgb(251, 246, 243)",
+      "opacity": "1",
+      "height": 64.9375,
+      "hover": true,
+      "focus": false,
+      "parents": [
+        {
+          "tag": "DIV",
+          "class": "pet-card-actions",
+          "opacity": "1"
+        },
+        {
+          "tag": "MAIN",
+          "class": "pet-card-page",
+          "opacity": "1"
+        },
+        {
+          "tag": "DIV",
+          "class": "",
+          "opacity": "1"
+        },
+        {
+          "tag": "BODY",
+          "class": "",
+          "opacity": "1"
+        },
+        {
+          "tag": "HTML",
+          "class": "",
+          "opacity": "1"
+        }
+      ]
+    }
+  ]
+}

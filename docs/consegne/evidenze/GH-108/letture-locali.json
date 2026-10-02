@@ -1,0 +1,138 @@
+{
+  "at": "2026-10-02T02:53:02.533Z",
+  "kind": "local query mock, no RLS claim",
+  "visits": 1201,
+  "points": 1001,
+  "paginatedCalls": [
+    {
+      "table": "pets",
+      "filters": [
+        [
+          "tenant_id",
+          "test-tenant"
+        ],
+        [
+          "id",
+          "test-pet"
+        ]
+      ],
+      "columns": "id, name, breed, owner_photo_url, qr_token, awarded_fidelity_tier"
+    },
+    {
+      "table": "visits",
+      "filters": [
+        [
+          "tenant_id",
+          "test-tenant"
+        ],
+        [
+          "pet_id",
+          "test-pet"
+        ]
+      ],
+      "columns": "id, date",
+      "order": "id",
+      "range": [
+        0,
+        499
+      ]
+    },
+    {
+      "table": "visits",
+      "filters": [
+        [
+          "tenant_id",
+          "test-tenant"
+        ],
+        [
+          "pet_id",
+          "test-pet"
+        ]
+      ],
+      "columns": "id, date",
+      "order": "id",
+      "range": [
+        500,
+        999
+      ]
+    },
+    {
+      "table": "visits",
+      "filters": [
+        [
+          "tenant_id",
+          "test-tenant"
+        ],
+        [
+          "pet_id",
+          "test-pet"
+        ]
+      ],
+      "columns": "id, date",
+      "order": "id",
+      "range": [
+        1000,
+        1499
+      ]
+    },
+    {
+      "table": "reward_points",
+      "filters": [
+        [
+          "tenant_id",
+          "test-tenant"
+        ],
+        [
+          "pet_id",
+          "test-pet"
+        ]
+      ],
+      "columns": "points",
+      "order": "id",
+      "range": [
+        0,
+        499
+      ]
+    },
+    {
+      "table": "reward_points",
+      "filters": [
+        [
+          "tenant_id",
+          "test-tenant"
+        ],
+        [
+          "pet_id",
+          "test-pet"
+        ]
+      ],
+      "columns": "points",
+      "order": "id",
+      "range": [
+        500,
+        999
+      ]
+    },
+    {
+      "table": "reward_points",
+      "filters": [
+        [
+          "tenant_id",
+          "test-tenant"
+        ],
+        [
+          "pet_id",
+          "test-pet"
+        ]
+      ],
+      "columns": "points",
+      "order": "id",
+      "range": [
+        1000,
+        1499
+      ]
+    }
+  ],
+  "missingPetNoChildRead": true,
+  "laterPageErrorNotPartialSuccess": true
+}

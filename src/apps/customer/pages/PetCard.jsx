@@ -14,20 +14,19 @@ import PetCardBank from '../components/PetCardBank';
 export function PetCardContent({ pet, snapshot, qr }) {
   const copy = petCardCopy(pet, snapshot);
   return <article className="pet-card-surface" data-pet-card data-tier={snapshot.currentTier?.key || 'none'} aria-label={`La tessera di ${pet.name}`}>
-    <Eyebrow style={{ justifyContent: 'center', color: 'var(--color-primary)', marginBottom: 14 }}>GROOMING HUB</Eyebrow>
+    <Eyebrow style={{ justifyContent: 'center', color: 'var(--color-primary)', marginBottom: 20, lineHeight: 1 }}>GROOMING HUB</Eyebrow>
     <div className="pet-card-identity">
       <CardPortrait pet={pet} tier={snapshot.currentTier?.key} />
       <div><h1 className="gh-stat-num">{pet.name}</h1>{pet.breed && <p className="gh-body">{pet.breed}</p>}</div>
       <CardTier tier={snapshot.currentTier} />
     </div>
-    <div className="pet-card-divider" />
     <div className="pet-card-story">
       <p className="gh-area-title">{copy.title}</p>
       {copy.detail && <p className="gh-body">{copy.detail}</p>}
     </div>
     {snapshot.nextTier && <VisitStamps tier={snapshot.nextTier} />}
     <div className="pet-card-foot">
-      {copy.rule && <p className="gh-meta">{copy.rule}</p>}
+      {copy.rule && <div className="pet-card-rule gh-meta"><p>{copy.rule}</p>{copy.windowRule && <p>{copy.windowRule}</p>}</div>}
       {snapshot.hasRewardPoints && <p className="gh-meta">
         {snapshot.nextTier ? `C’è anche un’altra strada: ${snapshot.nextTier.pointsRequired} punti. ` : ''}
         {snapshot.nextTier ? `${pet.name} ne ha ${snapshot.rewardPointsTotal}.` : `${pet.name} ha ${snapshot.rewardPointsTotal} punti.`}
@@ -41,12 +40,11 @@ function InstallHint() {
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const android = /Android/.test(navigator.userAgent);
   return <aside className="pet-card-install">
-    <Icon name="qr" size={24} style={{ color: 'var(--color-primary)' }} />
-    <div className="gh-meta"><strong>Tienila a portata.</strong>{' '}
-      {ios ? 'Su iPhone: apri questa tessera in Safari, tocca Condividi e Aggiungi alla schermata Home.'
+    <Icon name="tessera" size={22} stroke={1.8} style={{ color: 'var(--color-primary)' }} />
+    <div className="gh-meta"><strong>Tienila a portata.</strong> Aggiungila alla schermata Home.</div>
+    {(ios || android) && <p className="gh-meta">{ios ? 'Su iPhone: apri questa tessera in Safari, tocca Condividi e Aggiungi alla schermata Home.'
         : android ? 'Su Android: aggiungi l’app alla schermata Home dal menu di Chrome. Tieni premuta l’icona e scegli La tessera.'
-        : 'Apri questa tessera sul telefono per aggiungerla alla schermata Home.'}
-    </div>
+        : ''}</p>}
   </aside>;
 }
 
@@ -70,8 +68,7 @@ export function PetCardView({ pet, snapshot }) {
     <PetCardContent pet={pet} snapshot={snapshot} qr={qr} />
     <div className="pet-card-actions">
       <button type="button" className="gh-btn gh-btn--primary pet-card-show" disabled={!qr} onClick={() => setBank(true)}>
-        <span className="gh-body"><Icon name="qr" /><strong>Mostra al banco</strong></span>
-        <span className="gh-meta">il codice a tutto schermo, da far leggere a noi</span>
+        <Icon name="qr" size={20} stroke={2} /><strong>Mostra al banco</strong>
       </button>
       {(qrError || !pet.qr_token) && <p role="status" className="gh-meta">Il codice non è disponibile. Riprova ricaricando la tessera.</p>}
     </div>
@@ -80,15 +77,20 @@ export function PetCardView({ pet, snapshot }) {
   </>;
 }
 
+export function PetCardHeader() {
+  return <header className="pet-card-header">
+    <Link to="/u/home" className="gh-btn gh-btn--outline pet-card-back" aria-label="Torna alla Home" title="Torna alla Home"><Icon name="chevron-left" size={20} stroke={2} /></Link>
+    <p className="gh-area-title">ZavaRoby pet station</p>
+    <span aria-hidden="true" />
+  </header>;
+}
+
 export default function PetCard() {
   const { petId } = useParams();
   const { user, loading: authLoading } = useRequireCustomer();
   const { data, snapshot, loading, error, refetch } = usePetCard(petId);
   return <main className="pet-card-page">
-    <header className="pet-card-header">
-      <Link to="/u/home" className="gh-btn gh-btn--outline pet-card-back" aria-label="Torna alla Home" title="Torna alla Home"><Icon name="chevron-left" /></Link>
-      <p className="gh-area-title">ZavaRoby pet station</p>
-    </header>
+    <PetCardHeader />
     {authLoading || loading || !user ? <div role="status" aria-label="Caricamento tessera"><Skeleton height={380} /></div>
       : error ? <div role="alert" className="gh-body">Non riusciamo a leggere la tessera. <button className="gh-btn gh-btn--outline" onClick={refetch}>Riprova</button></div>
       : !data ? <p className="gh-body">Tessera non disponibile.</p>

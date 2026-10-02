@@ -126,6 +126,7 @@ const PATHS = {
       <path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20v1" />
     </g>
   ),
+  tessera: <g><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="13.5" y="9" width="4.5" height="4.5" rx=".6"/><path d="M6.5 10h4M6.5 13.5h2.5"/></g>,
   trash: (
     <g>
       <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />

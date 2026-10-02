@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-02T02:52:59.337Z",
+  "wakeLockMocks": [
+    {
+      "mode": "absent",
+      "requests": 0,
+      "releases": 0
+    },
+    {
+      "mode": "rejected",
+      "requests": 1,
+      "releases": 0
+    },
+    {
+      "mode": "granted",
+      "requests": 1,
+      "releases": 1
+    },
+    {
+      "mode": "pending",
+      "requests": 1,
+      "releases": 1
+    }
+  ],
+  "portraitErrorFallback": "PASS",
+  "longNameNoOverflow": "PASS",
+  "qrPixelColors": [
+    "255,255,255",
+    "0,0,0"
+  ],
+  "errors": []
+}

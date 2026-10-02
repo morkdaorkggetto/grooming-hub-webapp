@@ -1,0 +1,454 @@
+{
+  "at": "2026-10-02T02:54:46.042Z",
+  "geometry": [
+    {
+      "width": 320,
+      "photo": false,
+      "column": 320,
+      "columnCenter": 160,
+      "margin": 12,
+      "paddingX": 16,
+      "paddingY": 24,
+      "headerHeight": 56,
+      "headerColumns": "44px 208px 44px",
+      "headingCenter": 160,
+      "headingFont": "17px",
+      "back": {
+        "width": 44,
+        "height": 44,
+        "radius": "12px",
+        "icon": 20
+      },
+      "brandToIdentity": 20,
+      "portraitToName": null,
+      "nameToBreed": 4,
+      "identityToTitle": 24,
+      "titleToDetail": 6,
+      "detailToStamps": 16,
+      "stampsToRule": 12,
+      "ruleToQr": 20,
+      "cardToButton": 12,
+      "buttonToInvite": 12,
+      "portrait": null,
+      "button": {
+        "height": 54,
+        "font": "19px",
+        "weight": "700",
+        "radius": "14px",
+        "background": "rgb(94, 133, 128)",
+        "color": "rgb(251, 246, 243)",
+        "opacity": "1",
+        "labelHeight": 19,
+        "nowrap": "nowrap",
+        "overflow": false
+      },
+      "qr": {
+        "image": 76,
+        "padding": "6px",
+        "radius": "10px"
+      },
+      "circles": [],
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "photo": true,
+      "column": 320,
+      "columnCenter": 160,
+      "margin": 12,
+      "paddingX": 16,
+      "paddingY": 24,
+      "headerHeight": 56,
+      "headerColumns": "44px 208px 44px",
+      "headingCenter": 160,
+      "headingFont": "17px",
+      "back": {
+        "width": 44,
+        "height": 44,
+        "radius": "12px",
+        "icon": 20
+      },
+      "brandToIdentity": 20,
+      "portraitToName": 14,
+      "nameToBreed": 4,
+      "identityToTitle": 24,
+      "titleToDetail": 6,
+      "detailToStamps": 16,
+      "stampsToRule": 12,
+      "ruleToQr": 20,
+      "cardToButton": 12,
+      "buttonToInvite": 12,
+      "portrait": {
+        "width": 88,
+        "height": 88,
+        "radius": "18px"
+      },
+      "button": {
+        "height": 54,
+        "font": "19px",
+        "weight": "700",
+        "radius": "14px",
+        "background": "rgb(94, 133, 128)",
+        "color": "rgb(251, 246, 243)",
+        "opacity": "1",
+        "labelHeight": 19,
+        "nowrap": "nowrap",
+        "overflow": false
+      },
+      "qr": {
+        "image": 76,
+        "padding": "6px",
+        "radius": "10px"
+      },
+      "circles": [],
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "photo": false,
+      "column": 375,
+      "columnCenter": 187.5,
+      "margin": 16,
+      "paddingX": 20,
+      "paddingY": 24,
+      "headerHeight": 56,
+      "headerColumns": "44px 255px 44px",
+      "headingCenter": 187.5,
+      "headingFont": "18px",
+      "back": {
+        "width": 44,
+        "height": 44,
+        "radius": "12px",
+        "icon": 20
+      },
+      "brandToIdentity": 20,
+      "portraitToName": null,
+      "nameToBreed": 4,
+      "identityToTitle": 24,
+      "titleToDetail": 6,
+      "detailToStamps": 16,
+      "stampsToRule": 12,
+      "ruleToQr": 20,
+      "cardToButton": 12,
+      "buttonToInvite": 12,
+      "portrait": null,
+      "button": {
+        "height": 54,
+        "font": "19px",
+        "weight": "700",
+        "radius": "14px",
+        "background": "rgb(94, 133, 128)",
+        "color": "rgb(251, 246, 243)",
+        "opacity": "1",
+        "labelHeight": 19,
+        "nowrap": "nowrap",
+        "overflow": false
+      },
+      "qr": {
+        "image": 76,
+        "padding": "6px",
+        "radius": "10px"
+      },
+      "circles": [],
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "photo": true,
+      "column": 375,
+      "columnCenter": 187.5,
+      "margin": 16,
+      "paddingX": 20,
+      "paddingY": 24,
+      "headerHeight": 56,
+      "headerColumns": "44px 255px 44px",
+      "headingCenter": 187.5,
+      "headingFont": "18px",
+      "back": {
+        "width": 44,
+        "height": 44,
+        "radius": "12px",
+        "icon": 20
+      },
+      "brandToIdentity": 20,
+      "portraitToName": 14,
+      "nameToBreed": 4,
+      "identityToTitle": 24,
+      "titleToDetail": 6,
+      "detailToStamps": 16,
+      "stampsToRule": 12,
+      "ruleToQr": 20,
+      "cardToButton": 12,
+      "buttonToInvite": 12,
+      "portrait": {
+        "width": 88,
+        "height": 88,
+        "radius": "18px"
+      },
+      "button": {
+        "height": 54,
+        "font": "19px",
+        "weight": "700",
+        "radius": "14px",
+        "background": "rgb(94, 133, 128)",
+        "color": "rgb(251, 246, 243)",
+        "opacity": "1",
+        "labelHeight": 19,
+        "nowrap": "nowrap",
+        "overflow": false
+      },
+      "qr": {
+        "image": 76,
+        "padding": "6px",
+        "radius": "10px"
+      },
+      "circles": [],
+      "overflow": false
+    },
+    {
+      "width": 1365,
+      "photo": false,
+      "column": 390,
+      "columnCenter": 682.5,
+      "margin": 16,
+      "paddingX": 20,
+      "paddingY": 24,
+      "headerHeight": 56,
+      "headerColumns": "44px 270px 44px",
+      "headingCenter": 682.5,
+      "headingFont": "18px",
+      "back": {
+        "width": 44,
+        "height": 44,
+        "radius": "12px",
+        "icon": 20
+      },
+      "brandToIdentity": 20,
+      "portraitToName": null,
+      "nameToBreed": 4,
+      "identityToTitle": 24,
+      "titleToDetail": 6,
+      "detailToStamps": 16,
+      "stampsToRule": 12,
+      "ruleToQr": 20,
+      "cardToButton": 12,
+      "buttonToInvite": 12,
+      "portrait": null,
+      "button": {
+        "height": 54,
+        "font": "19px",
+        "weight": "700",
+        "radius": "14px",
+        "background": "rgb(94, 133, 128)",
+        "color": "rgb(251, 246, 243)",
+        "opacity": "1",
+        "labelHeight": 19,
+        "nowrap": "nowrap",
+        "overflow": false
+      },
+      "qr": {
+        "image": 76,
+        "padding": "6px",
+        "radius": "10px"
+      },
+      "circles": [],
+      "overflow": false
+    },
+    {
+      "width": 1365,
+      "photo": true,
+      "column": 390,
+      "columnCenter": 682.5,
+      "margin": 16,
+      "paddingX": 20,
+      "paddingY": 24,
+      "headerHeight": 56,
+      "headerColumns": "44px 270px 44px",
+      "headingCenter": 682.5,
+      "headingFont": "18px",
+      "back": {
+        "width": 44,
+        "height": 44,
+        "radius": "12px",
+        "icon": 20
+      },
+      "brandToIdentity": 20,
+      "portraitToName": 14,
+      "nameToBreed": 4,
+      "identityToTitle": 24,
+      "titleToDetail": 6,
+      "detailToStamps": 16,
+      "stampsToRule": 12,
+      "ruleToQr": 20,
+      "cardToButton": 12,
+      "buttonToInvite": 12,
+      "portrait": {
+        "width": 88,
+        "height": 88,
+        "radius": "18px"
+      },
+      "button": {
+        "height": 54,
+        "font": "19px",
+        "weight": "700",
+        "radius": "14px",
+        "background": "rgb(94, 133, 128)",
+        "color": "rgb(251, 246, 243)",
+        "opacity": "1",
+        "labelHeight": 19,
+        "nowrap": "nowrap",
+        "overflow": false
+      },
+      "qr": {
+        "image": 76,
+        "padding": "6px",
+        "radius": "10px"
+      },
+      "circles": [],
+      "overflow": false
+    }
+  ],
+  "tiles": [
+    {
+      "total": 4,
+      "width": 343,
+      "rowTops": [
+        723.125
+      ],
+      "height": 44,
+      "ticks": false
+    },
+    {
+      "total": 5,
+      "width": 343,
+      "rowTops": [
+        723.125
+      ],
+      "height": 44,
+      "ticks": false
+    },
+    {
+      "total": 6,
+      "width": 343,
+      "rowTops": [
+        723.125
+      ],
+      "height": 44,
+      "ticks": false
+    },
+    {
+      "total": 8,
+      "width": 343,
+      "rowTops": [
+        723.125,
+        765.125
+      ],
+      "height": 36,
+      "ticks": false
+    },
+    {
+      "total": 12,
+      "width": 343,
+      "rowTops": [
+        723.125,
+        765.125
+      ],
+      "height": 36,
+      "ticks": false
+    },
+    {
+      "total": 36,
+      "width": 343,
+      "rowTops": [
+        723.125,
+        741.125
+      ],
+      "height": 14,
+      "ticks": true
+    }
+  ],
+  "chipGap": 12,
+  "portraitBorder": {
+    "width": "1px",
+    "color": "rgb(205, 127, 50)"
+  },
+  "states": [
+    {
+      "query": "date=2026-11-06T12:00:00Z",
+      "count": 4,
+      "title": "La prossima è quella del Bronzo.",
+      "rule": "Ogni visita da noi è un timbro."
+    },
+    {
+      "query": "date=2026-11-07T12:00:00Z",
+      "count": 5,
+      "title": "La prossima è la quarta.",
+      "rule": "Ogni visita da noi è un timbro."
+    },
+    {
+      "query": "date=2027-03-06T12:00:00Z",
+      "count": 6,
+      "title": null,
+      "rule": "Ogni visita da noi è un timbro.\n\nContano le visite degli ultimi 12 mesi."
+    },
+    {
+      "query": "visits=4",
+      "count": 12,
+      "title": "Nina è Bronzo.",
+      "rule": "Ogni visita da noi è un timbro.\n\nContano le visite degli ultimi 24 mesi."
+    },
+    {
+      "query": "visits=12",
+      "count": 36,
+      "title": "Nina è Argento.",
+      "rule": "Ogni visita da noi è un timbro.\n\nContano le visite degli ultimi 36 mesi."
+    },
+    {
+      "query": "visits=36",
+      "count": 0,
+      "title": "Nina è Oro.",
+      "rule": "Il livello più alto della tessera."
+    }
+  ],
+  "buttonStates": [
+    {
+      "state": "rest",
+      "background": "rgb(94, 133, 128)",
+      "opacity": "1"
+    },
+    {
+      "state": "hover",
+      "background": "rgb(94, 133, 128)",
+      "opacity": "1"
+    },
+    {
+      "state": "focus",
+      "background": "rgb(94, 133, 128)",
+      "opacity": "1"
+    }
+  ],
+  "contrast": 3.8070572182313738,
+  "devices": [
+    {
+      "device": "desktop",
+      "text": "Tienila a portata. Aggiungila alla schermata Home."
+    },
+    {
+      "device": "iPhone",
+      "text": "Tienila a portata. Aggiungila alla schermata Home.\n\nSu iPhone: apri questa tessera in Safari, tocca Condividi e Aggiungi alla schermata Home."
+    },
+    {
+      "device": "Android",
+      "text": "Tienila a portata. Aggiungila alla schermata Home.\n\nSu Android: aggiungi l’app alla schermata Home dal menu di Chrome. Tieni premuta l’icona e scegli La tessera."
+    }
+  ],
+  "comparisons": [
+    "320-senza-foto",
+    "320-foto",
+    "375-senza-foto",
+    "375-foto",
+    "1365-senza-foto",
+    "1365-foto"
+  ],
+  "errors": []
+}

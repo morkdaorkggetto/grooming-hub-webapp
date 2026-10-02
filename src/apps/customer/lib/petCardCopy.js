@@ -12,17 +12,18 @@ export function petCardCopy(pet, snapshot) {
       rule: 'Il livello più alto della tessera.',
     };
   }
-  const { visitsInWindow: done, visitsRequired: total, label, monthsWindow, projected, historyStart } = nextTier;
+  const { visitsInWindow: done, visitsRequired: total, label, monthsWindow, projected } = nextTier;
   const destination = label === 'Argento' ? 'l’Argento' : label === 'Oro' ? 'l’Oro' : `il ${label}`;
-  const period = projected
-    ? `dal ${new Date(`${historyStart}T12:00:00Z`).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'long' })}`
-    : `degli ultimi ${monthsWindow} mesi`;
+  const lastStep = !currentTier && done === total - 1;
   return {
     title: currentTier ? `${pet.name} è ${currentTier.label}.`
+      : lastStep ? 'La prossima è quella del Bronzo.'
       : done * 2 === total ? `A metà strada verso il ${label}.`
       : `La prossima è la ${ordinal(done + 1)}.`,
     detail: currentTier ? `Verso ${destination}: ${done} visite di ${total}.`
+      : lastStep ? `${done} visite fatte, ne basta una.`
       : `Il ${label} arriva alla ${ordinal(total)} visita.`,
-    rule: `Ogni visita da noi è un timbro · contano quelle ${period}.`,
+    rule: 'Ogni visita da noi è un timbro.',
+    windowRule: projected ? '' : `Contano le visite degli ultimi ${monthsWindow} mesi.`,
   };
 }

@@ -1,0 +1,165 @@
+{
+  "at": "2026-10-02T02:52:43.598Z",
+  "kind": "local synthetic component bank, not authenticated route or RLS",
+  "states": [
+    {
+      "query": "visits=0",
+      "expected": "none",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nLa prossima è la prima.\n\nIl Bronzo arriva alla sesta visita.\n\n1\n2\n3\n4\n5\n6\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 12 mesi.",
+      "staffText": "Scheda cliente\n\nNina\nBase"
+    },
+    {
+      "query": "visits=1",
+      "expected": "none",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nLa prossima è la seconda.\n\nIl Bronzo arriva alla sesta visita.\n\n2\n3\n4\n5\n6\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 12 mesi.",
+      "staffText": "Scheda cliente\n\nNina\nBase"
+    },
+    {
+      "query": "visits=3",
+      "expected": "none",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nA metà strada verso il Bronzo.\n\nIl Bronzo arriva alla sesta visita.\n\n4\n5\n6\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 12 mesi.",
+      "staffText": "Scheda cliente\n\nNina\nBase"
+    },
+    {
+      "query": "visits=6",
+      "expected": "bronze",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nBronzo\n\nNina è Bronzo.\n\nVerso l’Argento: 6 visite di 12.\n\n7\n8\n9\n10\n11\n12\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 24 mesi.",
+      "staffText": "Scheda cliente\n\nNina\nBronzo"
+    },
+    {
+      "query": "visits=12",
+      "expected": "silver",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nArgento\n\nNina è Argento.\n\nVerso l’Oro: 12 visite di 36.\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 36 mesi.",
+      "staffText": "Scheda cliente\n\nNina\nArgento"
+    },
+    {
+      "query": "visits=41",
+      "expected": "gold",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nOro\n\nNina è Oro.\n\n41 visite da noi negli ultimi tre anni.\n\nIl livello più alto della tessera.",
+      "staffText": "Scheda cliente\n\nNina\nOro"
+    },
+    {
+      "query": "visits=0&award=bronze",
+      "expected": "bronze",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nBronzo\n\nNina è Bronzo.\n\nVerso l’Argento: 0 visite di 12.\n\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 24 mesi.",
+      "staffText": "Scheda cliente\n\nNina\nBronzo"
+    },
+    {
+      "query": "visits=0&points=250",
+      "expected": "silver",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nArgento\n\nNina è Argento.\n\nVerso l’Oro: 0 visite di 36.\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 36 mesi.\n\nC’è anche un’altra strada: 500 punti. Nina ne ha 250.",
+      "staffText": "Scheda cliente\n\nNina\nArgento"
+    },
+    {
+      "query": "visits=3&project",
+      "expected": "none",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nLa prossima è quella del Bronzo.\n\n3 visite fatte, ne basta una.\n\n4\n\nOgni visita da noi è un timbro.",
+      "staffText": "Scheda cliente\n\nNina\nBase"
+    },
+    {
+      "query": "visits=4&project",
+      "expected": "bronze",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nBronzo\n\nNina è Bronzo.\n\nVerso l’Argento: 4 visite di 12.\n\n5\n6\n7\n8\n9\n10\n11\n12\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 24 mesi.",
+      "staffText": "Scheda cliente\n\nNina\nBronzo"
+    },
+    {
+      "query": "visits=12&project",
+      "expected": "silver",
+      "text": "GROOMING HUB\nNina\n\nShih Tzu\n\nArgento\n\nNina è Argento.\n\nVerso l’Oro: 12 visite di 36.\n\nOgni visita da noi è un timbro.\n\nContano le visite degli ultimi 36 mesi.",
+      "staffText": "Scheda cliente\n\nNina\nArgento"
+    }
+  ],
+  "geometry": [
+    {
+      "width": 320,
+      "cardColumn": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 700.265625
+      },
+      "button": {
+        "x": 12,
+        "y": 511.484375,
+        "width": 296,
+        "height": 54
+      }
+    },
+    {
+      "width": 375,
+      "cardColumn": {
+        "x": 0,
+        "y": 0,
+        "width": 375,
+        "height": 659.125
+      },
+      "button": {
+        "x": 16,
+        "y": 487.734375,
+        "width": 343,
+        "height": 54
+      }
+    },
+    {
+      "width": 1365,
+      "cardColumn": {
+        "x": 487.5,
+        "y": 0,
+        "width": 390,
+        "height": 659.125
+      },
+      "button": {
+        "x": 503.5,
+        "y": 487.734375,
+        "width": 358,
+        "height": 54
+      }
+    }
+  ],
+  "bankQr": {
+    "x": 37.5,
+    "y": 255.65625,
+    "width": 300,
+    "height": 300
+  },
+  "bankFocusAndEscape": "PASS",
+  "manifest": {
+    "id": "http://127.0.0.1:4178/u/card/local-synthetic",
+    "name": "La tessera di Nina",
+    "short_name": "Nina",
+    "lang": "it",
+    "start_url": "http://127.0.0.1:4178/u/card/local-synthetic",
+    "scope": "http://127.0.0.1:4178/u/",
+    "display": "standalone",
+    "theme_color": "#6f9792",
+    "background_color": "#f2ece9",
+    "shortcuts": [
+      {
+        "name": "La tessera",
+        "url": "http://127.0.0.1:4178/u/card/local-synthetic"
+      }
+    ],
+    "icons": [
+      {
+        "src": "http://127.0.0.1:4178/icons/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "http://127.0.0.1:4178/icons/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "http://127.0.0.1:4178/icons/icon-maskable-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
+    ]
+  },
+  "qrExpected": "http://127.0.0.1:4178/client-card/ghp_gh107_probe_4",
+  "pageErrors": []
+}
