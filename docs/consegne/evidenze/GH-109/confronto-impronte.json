@@ -1,0 +1,105 @@
+{
+  "measuredAt": "2026-10-02T04:28:27.980Z",
+  "source": "/Users/luigimaisto/Desktop/grooming-hub-web/webapp/docs/incarichi/GH-107-impronte-produzione.md",
+  "sourceSha256": "a7d5a2d6019f7b9053e5a1d08e00adf5270baf132ae53eba04887f85aa74409e",
+  "production": {
+    "declaredRows": 271,
+    "tableRows": 271,
+    "declaredMd5": "9b84214d27393f2b0f7ac65c6c35b5e6",
+    "tableMd5InGivenOrder": "9b84214d27393f2b0f7ac65c6c35b5e6"
+  },
+  "demo": {
+    "rows": 254,
+    "md5InQueryOrder": "06f3a372e14ba984a62276258561d9a4"
+  },
+  "onlyProduction": [
+    {
+      "kind": "column",
+      "name": "public.gh78_customer_phone_backup.backed_up_at",
+      "md5": "0cc7b4e4e9016fa6dd48aa4441dc5de2"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh78_customer_phone_backup.customer_id",
+      "md5": "ef9a73da94819c894171c7834d1d9a72"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh78_customer_phone_backup.normalized_phone",
+      "md5": "a5df5d9758ea418f9ae2f3fe351f6065"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh78_customer_phone_backup.original_phone",
+      "md5": "a5df5d9758ea418f9ae2f3fe351f6065"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh78_customer_phone_backup.tenant_id",
+      "md5": "ef9a73da94819c894171c7834d1d9a72"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh95_customer_name_backup.backed_up_at",
+      "md5": "fa22a6ae33d0f0c2ec384edfd1123919"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh95_customer_name_backup.first_name",
+      "md5": "d981342b282643b55296caa470fcd913"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh95_customer_name_backup.id",
+      "md5": "cda5af75a62b616d07fefb4abf8c6e3a"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh95_customer_name_backup.last_name",
+      "md5": "d981342b282643b55296caa470fcd913"
+    },
+    {
+      "kind": "column",
+      "name": "public.gh95_customer_name_backup.phone",
+      "md5": "d981342b282643b55296caa470fcd913"
+    },
+    {
+      "kind": "column",
+      "name": "public.pets_breed_backup_gh70.breed_originale",
+      "md5": "d981342b282643b55296caa470fcd913"
+    },
+    {
+      "kind": "column",
+      "name": "public.pets_breed_backup_gh70.pet_id",
+      "md5": "ef9a73da94819c894171c7834d1d9a72"
+    },
+    {
+      "kind": "column",
+      "name": "public.pets_breed_backup_gh70.salvato_il",
+      "md5": "0cc7b4e4e9016fa6dd48aa4441dc5de2"
+    },
+    {
+      "kind": "column",
+      "name": "public.services.price_cents",
+      "md5": "3b45aee833ce7b00c5116f796c848246"
+    },
+    {
+      "kind": "column",
+      "name": "public.visits.cost",
+      "md5": "6a8be3eb6d44a1cb2ec049918cabf32b"
+    },
+    {
+      "kind": "column",
+      "name": "public.visits.discount_percent",
+      "md5": "47f9c5e6c22536b3047e4fa299723c44"
+    },
+    {
+      "kind": "function",
+      "name": "public.gh103_finance_bridge()",
+      "md5": "bc62652be087008365c615bee911012d"
+    }
+  ],
+  "onlyDemo": [],
+  "changed": [],
+  "identical": 254
+}

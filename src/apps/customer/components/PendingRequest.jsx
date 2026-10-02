@@ -46,7 +46,9 @@ const contactStyle = {
   textDecoration: 'none',
 };
 
-export default function PendingRequest({ request, onResponded }) {
+export default function PendingRequest({ request, onResponded, embedded = false }) {
+  const Wrapper = embedded ? 'div' : Card;
+  const wrapperProps = embedded ? { className: 'pet-card-request-content' } : { padding: 20 };
   const navigate = useNavigate();
   const { tenant } = useTenant();
   const [saved, setSaved] = useState(null);
@@ -122,6 +124,7 @@ export default function PendingRequest({ request, onResponded }) {
       }
       setConfirmingWithdrawal(false);
       setWithdrawalSucceeded(true);
+      if (embedded) await onResponded();
     } catch (err) {
       setConfirmingWithdrawal(false);
       console.warn('Ritiro richiesta non riuscito', err);
@@ -137,7 +140,7 @@ export default function PendingRequest({ request, onResponded }) {
 
   if (withdrawalSucceeded) {
     return (
-      <Card padding={20}>
+      <Wrapper {...wrapperProps}>
         <Eyebrow style={{ marginBottom: 12 }}>Richiesta appuntamento</Eyebrow>
         <p role="status" style={textStyle}>Richiesta ritirata. Per ora è tutto.</p>
         <Button
@@ -147,17 +150,19 @@ export default function PendingRequest({ request, onResponded }) {
         >
           Scegli un’altra data
         </Button>
-      </Card>
+      </Wrapper>
     );
   }
 
   return (
-    <Card padding={20}>
+    <Wrapper {...wrapperProps}>
+      {!embedded && <>
       <Eyebrow style={{ marginBottom: 12 }}>Richiesta appuntamento</Eyebrow>
       <div style={{ marginBottom: 12 }}><StatusBadge status="scheduled" approvalStatus="pending" compact /></div>
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 500, textTransform: 'capitalize' }}>{day(current.desired_date)}</div>
       <p style={textStyle}>{current.pet?.name || 'Il tuo pet'} · {current.service?.name || 'Indicazione non disponibile'} · {getBookingTimePreferenceLabel(current.time_preference, 'Nessuna preferenza') || 'Nessuna preferenza'}</p>
       <p style={{ ...textStyle, fontSize: 13 }}>Inviata il {new Date(request.created_at).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
+      </>}
       {canWithdraw ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }}>
           <p style={textStyle}>Puoi ancora correggerla: appena ti rispondiamo, l’orario è fissato.</p>
@@ -247,6 +252,6 @@ export default function PendingRequest({ request, onResponded }) {
           </> : null}
         </div>
       ) : null}
-    </Card>
+    </Wrapper>
   );
 }

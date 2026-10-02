@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-02T05:23:21.392Z",
+  "mode": "multi",
+  "inventoryFilter": "synthetic fixture pets only",
+  "requestSimulation": false,
+  "measures": [],
+  "rpc": [],
+  "errors": [],
+  "pass": true
+}

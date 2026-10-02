@@ -1,0 +1,138 @@
+{
+  "at": "2026-10-02T05:05:12.331Z",
+  "mode": "proposal",
+  "inventoryFilter": "synthetic fixture pets only; all other calls live demo",
+  "measures": [
+    {
+      "width": 375,
+      "height": 812,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 343,
+        "height": 56
+      },
+      "alert": {
+        "top": 60,
+        "bottom": 116,
+        "width": 343,
+        "height": 56
+      },
+      "card": {
+        "top": 128,
+        "bottom": 558.671875,
+        "width": 343,
+        "height": 430.671875
+      },
+      "qr": {
+        "top": 443.671875,
+        "bottom": 533.671875,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 570.671875,
+        "bottom": 624.671875,
+        "width": 343,
+        "height": 54
+      },
+      "nav": {
+        "top": 725,
+        "bottom": 812,
+        "width": 375,
+        "height": 87
+      },
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "height": 667,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 343,
+        "height": 56
+      },
+      "alert": {
+        "top": 60,
+        "bottom": 116,
+        "width": 343,
+        "height": 56
+      },
+      "card": {
+        "top": 128,
+        "bottom": 558.671875,
+        "width": 343,
+        "height": 430.671875
+      },
+      "qr": {
+        "top": 443.671875,
+        "bottom": 533.671875,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 570.671875,
+        "bottom": 624.671875,
+        "width": 343,
+        "height": 54
+      },
+      "nav": {
+        "top": 580,
+        "bottom": 667,
+        "width": 375,
+        "height": 87
+      },
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 296,
+        "height": 56
+      },
+      "alert": {
+        "top": 60,
+        "bottom": 116,
+        "width": 296,
+        "height": 56
+      },
+      "card": {
+        "top": 128,
+        "bottom": 582.421875,
+        "width": 296,
+        "height": 454.421875
+      },
+      "qr": {
+        "top": 467.421875,
+        "bottom": 557.421875,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 594.421875,
+        "bottom": 648.421875,
+        "width": 296,
+        "height": 54
+      },
+      "nav": {
+        "top": 481,
+        "bottom": 568,
+        "width": 320,
+        "height": 87
+      },
+      "overflow": false
+    }
+  ],
+  "rpc": [
+    {
+      "function": "respond_appointment_request_slot",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "pass": true
+}

@@ -1,0 +1,118 @@
+{
+  "at": "2026-10-02T04:59:53.039Z",
+  "mode": "none",
+  "inventoryFilter": "synthetic fixture pets only; all other calls live demo",
+  "measures": [
+    {
+      "width": 375,
+      "height": 812,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 343,
+        "height": 56
+      },
+      "alert": null,
+      "card": {
+        "top": 60,
+        "bottom": 490.671875,
+        "width": 343,
+        "height": 430.671875
+      },
+      "qr": {
+        "top": 375.671875,
+        "bottom": 465.671875,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 502.671875,
+        "bottom": 556.671875,
+        "width": 343,
+        "height": 54
+      },
+      "nav": {
+        "top": 725,
+        "bottom": 812,
+        "width": 375,
+        "height": 87
+      },
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "height": 667,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 343,
+        "height": 56
+      },
+      "alert": null,
+      "card": {
+        "top": 60,
+        "bottom": 490.671875,
+        "width": 343,
+        "height": 430.671875
+      },
+      "qr": {
+        "top": 375.671875,
+        "bottom": 465.671875,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 502.671875,
+        "bottom": 556.671875,
+        "width": 343,
+        "height": 54
+      },
+      "nav": {
+        "top": 580,
+        "bottom": 667,
+        "width": 375,
+        "height": 87
+      },
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 296,
+        "height": 56
+      },
+      "alert": null,
+      "card": {
+        "top": 60,
+        "bottom": 514.421875,
+        "width": 296,
+        "height": 454.421875
+      },
+      "qr": {
+        "top": 399.421875,
+        "bottom": 489.421875,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 526.421875,
+        "bottom": 580.421875,
+        "width": 296,
+        "height": 54
+      },
+      "nav": {
+        "top": 481,
+        "bottom": 568,
+        "width": 320,
+        "height": 87
+      },
+      "overflow": false
+    }
+  ],
+  "rpc": [],
+  "errors": [],
+  "pass": true
+}

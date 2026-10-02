@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-02T05:32:12.878Z",
+  "mode": "two",
+  "visualOnly": true,
+  "inventoryFilter": "synthetic fixture pets only",
+  "requestSimulation": "UI only: duplicated read response, no RPC; live trigger rejects this cardinality",
+  "measures": [],
+  "rpc": [],
+  "errors": [],
+  "pass": true
+}

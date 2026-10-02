@@ -1,0 +1,2 @@
+-- Solo le due righe sintetiche create dalla suite GH-109 del 2/10.
+delete from public.customer_account_unlink_audit where id in ('19e0d1cd-445c-4867-bf46-32f7df2471eb','0ccb52e8-8857-4bad-88c5-cb60f945ee04') and customer_id='0e79585c-1c43-46ac-ae87-e60577ab726d' and customer_label='[DEMO GH-44] Ada Scollegamento' and performed_by_user_id='0b33da67-01cd-43f5-8f6b-301084c0c001' and created_at >= '2026-10-02T04:28:27Z' returning id;

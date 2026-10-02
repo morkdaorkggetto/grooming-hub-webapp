@@ -1,0 +1,12 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import '../../../../src/index.css';
+import '../../../../src/shared/tokens/tokens.css';
+import '../../../../src/apps/staff/styles/gh15-staff.css';
+window.React = React;
+for (const file of ['shared-ui.jsx', 'gh15-ed-kit.jsx', 'cd04-card-kit.jsx', 'cd09-tessera-kit.jsx', 'cd10-tessera-kit.jsx']) await import(/* @vite-ignore */ '/docs/consegne/CD-10-consegna/' + file);
+await import('/docs/consegne/CD-11-consegna/cd11-home-kit.jsx');
+const q = new URLSearchParams(location.search);
+window.DEV11.w = innerWidth;
+const s = { pet: 'Nina', breed: 'Shih Tzu', foto: q.has('portrait'), tier: q.has('portrait') ? 'bronze' : null, done: 3, of: 4, win: 12, dal: true };
+createRoot(document.getElementById('root')).render(React.createElement(window.HomeUno, { s, h: innerHeight, invito: true, items: q.has('alert') ? ['orari'] : [] }));

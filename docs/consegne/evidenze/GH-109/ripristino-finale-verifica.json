@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-02T05:42:56.897Z",
+  "fixtureCounts": [
+    {
+      "pets": 0,
+      "visits": 0,
+      "requests": 0
+    }
+  ],
+  "baselineAggregateCount": 18,
+  "baselineIdentical": true,
+  "secondVisualPassRestored": true
+}

@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-02T05:05:44.127Z",
+  "mode": "decline",
+  "inventoryFilter": "synthetic fixture pets only; all other calls live demo",
+  "measures": [],
+  "rpc": [
+    {
+      "function": "respond_appointment_request_slot",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "pass": true
+}

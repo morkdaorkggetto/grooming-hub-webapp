@@ -1,0 +1,135 @@
+{
+  "at": "2026-10-02T05:36:54.621Z",
+  "mode": "portrait",
+  "visualOnly": true,
+  "inventoryFilter": "synthetic fixture pets only",
+  "requestSimulation": false,
+  "measures": [
+    {
+      "width": 375,
+      "height": 812,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 343,
+        "height": 56
+      },
+      "alert": {
+        "top": 60,
+        "bottom": 116,
+        "width": 343,
+        "height": 56
+      },
+      "card": {
+        "top": 128,
+        "bottom": 724.265625,
+        "width": 343,
+        "height": 596.265625
+      },
+      "qr": {
+        "top": 609.265625,
+        "bottom": 699.265625,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 736.265625,
+        "bottom": 790.265625,
+        "width": 343,
+        "height": 54
+      },
+      "nav": {
+        "top": 725,
+        "bottom": 812,
+        "width": 375,
+        "height": 87
+      },
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "height": 667,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 343,
+        "height": 56
+      },
+      "alert": {
+        "top": 60,
+        "bottom": 116,
+        "width": 343,
+        "height": 56
+      },
+      "card": {
+        "top": 128,
+        "bottom": 724.265625,
+        "width": 343,
+        "height": 596.265625
+      },
+      "qr": {
+        "top": 609.265625,
+        "bottom": 699.265625,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 736.265625,
+        "bottom": 790.265625,
+        "width": 343,
+        "height": 54
+      },
+      "nav": {
+        "top": 580,
+        "bottom": 667,
+        "width": 375,
+        "height": 87
+      },
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "header": {
+        "top": 0,
+        "bottom": 56,
+        "width": 296,
+        "height": 56
+      },
+      "alert": {
+        "top": 60,
+        "bottom": 116,
+        "width": 296,
+        "height": 56
+      },
+      "card": {
+        "top": 128,
+        "bottom": 724.265625,
+        "width": 296,
+        "height": 596.265625
+      },
+      "qr": {
+        "top": 609.265625,
+        "bottom": 699.265625,
+        "width": 90,
+        "height": 90
+      },
+      "button": {
+        "top": 736.265625,
+        "bottom": 790.265625,
+        "width": 296,
+        "height": 54
+      },
+      "nav": {
+        "top": 481,
+        "bottom": 568,
+        "width": 320,
+        "height": 87
+      },
+      "overflow": false
+    }
+  ],
+  "rpc": [],
+  "errors": [],
+  "pass": true
+}

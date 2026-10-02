@@ -1,0 +1,3 @@
+-- GH-109, solo demo. Prima proposta sintetica.
+insert into public.appointment_requests(id,tenant_id,customer_user_id,pet_id,service_id,desired_date,coat_condition_codes,staff_responded_at,proposed_alternatives,alternatives_round)
+values('00000000-0000-4000-8109-000000000101','8ad7489b-15f9-44f5-8d50-cc89506c3ac9','578ab8db-6388-4cab-aa1d-58c5b0fb6bb0','00000000-0000-4000-8109-000000000001','5766bf6f-bb6f-4635-b60d-3b0544cdb71c','2026-10-05',array['clean_long'],now(),'[{"date":"2026-10-06","time":"09:00","time_preference":"morning"},{"date":"2026-10-07","time":"15:00","time_preference":"afternoon"}]',1);

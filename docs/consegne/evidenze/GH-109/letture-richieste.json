@@ -1,0 +1,87 @@
+{
+  "at": "2026-10-02T05:26:13.842Z",
+  "historyRows": 1201,
+  "lastStatus": "withdrawn",
+  "historyCalls": [
+    {
+      "table": "appointment_requests",
+      "orders": [
+        [
+          "created_at",
+          {
+            "ascending": false
+          }
+        ],
+        [
+          "id",
+          {
+            "ascending": false
+          }
+        ]
+      ],
+      "columns": "id, pet_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, status, appointment_id, withdrawn_at, staff_responded_at, proposed_alternatives, alternatives_round, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at, created_at, service:services(id, name), pet:pets(id, name)",
+      "filter": [
+        "tenant_id",
+        "test-tenant"
+      ],
+      "range": [
+        0,
+        499
+      ]
+    },
+    {
+      "table": "appointment_requests",
+      "orders": [
+        [
+          "created_at",
+          {
+            "ascending": false
+          }
+        ],
+        [
+          "id",
+          {
+            "ascending": false
+          }
+        ]
+      ],
+      "columns": "id, pet_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, status, appointment_id, withdrawn_at, staff_responded_at, proposed_alternatives, alternatives_round, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at, created_at, service:services(id, name), pet:pets(id, name)",
+      "filter": [
+        "tenant_id",
+        "test-tenant"
+      ],
+      "range": [
+        500,
+        999
+      ]
+    },
+    {
+      "table": "appointment_requests",
+      "orders": [
+        [
+          "created_at",
+          {
+            "ascending": false
+          }
+        ],
+        [
+          "id",
+          {
+            "ascending": false
+          }
+        ]
+      ],
+      "columns": "id, pet_id, desired_date, time_preference, coat_condition_codes, coat_condition_notes, status, appointment_id, withdrawn_at, staff_responded_at, proposed_alternatives, alternatives_round, chosen_date, chosen_time, chosen_time_preference, customer_response, customer_responded_at, created_at, service:services(id, name), pet:pets(id, name)",
+      "filter": [
+        "tenant_id",
+        "test-tenant"
+      ],
+      "range": [
+        1000,
+        1499
+      ]
+    }
+  ],
+  "legacyFilter": "PASS",
+  "laterPageError": "PASS"
+}

@@ -1,0 +1,51 @@
+{
+  "at": "2026-10-02T05:05:17.271Z",
+  "dateUnderTest": "2026-10-01T12:00:00.000Z",
+  "legacySnapshotsIdentical": 308,
+  "invalidProjectionCases": 8,
+  "matureHistoryThreshold": 6,
+  "cases": [
+    {
+      "visits": 0,
+      "level": "base",
+      "threshold": 4
+    },
+    {
+      "visits": 1,
+      "level": "base",
+      "threshold": 4
+    },
+    {
+      "visits": 3,
+      "level": "base",
+      "threshold": 4
+    },
+    {
+      "visits": 4,
+      "level": "bronze",
+      "threshold": 4
+    },
+    {
+      "visits": 12,
+      "level": "silver",
+      "threshold": 4
+    },
+    {
+      "visits": 36,
+      "level": "gold",
+      "threshold": 4
+    }
+  ],
+  "changes": [
+    {
+      "date": "2026-11-07",
+      "threshold": 5
+    },
+    {
+      "date": "2027-01-07",
+      "threshold": 6
+    }
+  ],
+  "manualAndPoints": "PASS",
+  "monthConvention": "calendar anniversaries; fractional month between anniversaries; Europe/Rome day"
+}

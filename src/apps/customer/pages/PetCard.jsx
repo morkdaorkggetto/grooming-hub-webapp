@@ -11,7 +11,7 @@ import { petCardCopy } from '../lib/petCardCopy';
 import { CardPortrait, CardTier, VisitStamps } from '../components/PetCardParts';
 import PetCardBank from '../components/PetCardBank';
 
-export function PetCardContent({ pet, snapshot, qr }) {
+export function PetCardContent({ pet, snapshot, qr, onShowBank }) {
   const copy = petCardCopy(pet, snapshot);
   return <article className="pet-card-surface" data-pet-card data-tier={snapshot.currentTier?.key || 'none'} aria-label={`La tessera di ${pet.name}`}>
     <Eyebrow style={{ justifyContent: 'center', color: 'var(--color-primary)', marginBottom: 20, lineHeight: 1 }}>GROOMING HUB</Eyebrow>
@@ -31,7 +31,9 @@ export function PetCardContent({ pet, snapshot, qr }) {
         {snapshot.nextTier ? `C’è anche un’altra strada: ${snapshot.nextTier.pointsRequired} punti. ` : ''}
         {snapshot.nextTier ? `${pet.name} ne ha ${snapshot.rewardPointsTotal}.` : `${pet.name} ha ${snapshot.rewardPointsTotal} punti.`}
       </p>}
-      {qr && <div className="pet-card-qr"><img src={qr} alt={`QR della scheda pubblica di ${pet.name}`} /></div>}
+      {qr && (onShowBank
+        ? <button type="button" className="pet-card-qr" onClick={onShowBank} aria-label="Mostra il QR al banco"><img src={qr} alt={`QR della scheda pubblica di ${pet.name}`} /></button>
+        : <div className="pet-card-qr"><img src={qr} alt={`QR della scheda pubblica di ${pet.name}`} /></div>)}
     </div>
   </article>;
 }
@@ -65,7 +67,7 @@ export function PetCardView({ pet, snapshot }) {
     return () => { live = false; };
   }, [pet.qr_token]);
   return <>
-    <PetCardContent pet={pet} snapshot={snapshot} qr={qr} />
+    <PetCardContent pet={pet} snapshot={snapshot} qr={qr} onShowBank={() => setBank(true)} />
     <div className="pet-card-actions">
       <button type="button" className="gh-btn gh-btn--primary pet-card-show" disabled={!qr} onClick={() => setBank(true)}>
         <Icon name="qr" size={20} stroke={2} /><strong>Mostra al banco</strong>
@@ -77,9 +79,9 @@ export function PetCardView({ pet, snapshot }) {
   </>;
 }
 
-export function PetCardHeader() {
+export function PetCardHeader({ back = true }) {
   return <header className="pet-card-header">
-    <Link to="/u/home" className="gh-btn gh-btn--outline pet-card-back" aria-label="Torna alla Home" title="Torna alla Home"><Icon name="chevron-left" size={20} stroke={2} /></Link>
+    {back ? <Link to="/u/home" className="gh-btn gh-btn--outline pet-card-back" aria-label="Torna alla Home" title="Torna alla Home"><Icon name="chevron-left" size={20} stroke={2} /></Link> : <span aria-hidden="true" />}
     <p className="gh-area-title">ZavaRoby pet station</p>
     <span aria-hidden="true" />
   </header>;

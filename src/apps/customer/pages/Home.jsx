@@ -10,6 +10,10 @@ import { usePromotions } from '../hooks/usePromotions';
 import { useCurrentCustomer } from '../hooks/useCurrentCustomer';
 import { useAppointmentRequests } from '../hooks/useAppointmentRequests';
 import PetCardStrip from '../components/PetCardStrip';
+import PetCardHome from '../components/PetCardHome';
+import PetCardRequests from '../components/PetCardRequests';
+import { PetCardHeader } from './PetCard';
+import { customerActions } from '../lib/customerActions';
 import PendingRequest from '../components/PendingRequest';
 import { currentAlternativeResponse, isRecentlyConfirmed } from '../lib/appointmentResponses';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
@@ -20,24 +24,7 @@ import Skeleton from '../../../shared/ui/Skeleton';
 import StatusBadge from '../../../shared/ui/StatusBadge';
 import { buildWhatsAppUrl } from '../../staff/lib/whatsapp';
 
-/**
- * /u/home — Dashboard customer reale.
- *
- * Step 6.5: rimossi Brandmark interno (ora nel TopNav globale via
- * CustomerNav), bottone "Esci" (ora nel dropdown avatar), CTA standalone
- * "Guarda le promozioni" (ora link Promozioni nel TopNav). Saluto editoriale
- * ora usa customers.first_name via useCurrentCustomer (fix del placeholder
- * email-derived di Step 6).
- *
- * Composizione:
- *   - Eyebrow "BENTORNATO, {nome}"
- *   - Hero editoriale Fraunces:
- *       se nextAppt → "La giornata di *{pet}* inizia *{giorno}*."
- *       altrimenti  → "Bentornato, *{nome}*."
- *   - CTA primary "Prenota un nuovo appuntamento" + secondary "Vedi scheda pet"
- *   - Card row: Pet card / Next appt card / Mini-promo (top 3, silenzioso se 0)
- *   - Empty states (decisione 9 Gate 2 sui pet)
- */
+// One pet opens with its full card; multiple pets open with actions and card strips.
 
 const DAY_FMT = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 const TIME_FMT = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' });
@@ -118,7 +105,7 @@ export default function Home() {
   }, [hash, petsLoading]);
   const { data: nextAppt, appointments: upcomingAppointments, loading: apptLoading } = useNextAppointment();
   const { data: promos, loading: promosLoading } = usePromotions();
-  const { data: requests, loading: requestsLoading, error: requestsError, refetch: refetchRequests } = useAppointmentRequests();
+  const { data: requests, history, loading: requestsLoading, error: requestsError, refetch: refetchRequests } = useAppointmentRequests({ includeHistory: true });
 
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 720 : false
@@ -133,8 +120,11 @@ export default function Home() {
   const firstPet = pets && pets.length > 0 ? pets[0] : null;
   const hasPets = pets && pets.length > 0;
   const visiblePromos = (promos || []).slice(0, 3);
-  const pendingRequest = requests.find((request) => request.status === 'pending') || null;
-  const rejectedRequest = requests.find((request) => request.status === 'rejected') || null;
+  const actions = customerActions(history);
+  const actionIds = new Set(actions.map(item => item.request.id));
+  const quietRequests = requests.filter(request => request.status === 'pending' && !actionIds.has(request.id));
+  const pendingRequest = quietRequests[0] || null;
+  const singlePet = pets?.length === 1;
   const pendingPetIds = new Set(requests.filter((request) => request.status === 'pending').map((request) => request.pet_id));
   const bookingPet = pets?.find((pet) => !pendingPetIds.has(pet.id)) || null;
   const salonWhatsAppUrl = buildWhatsAppUrl(
@@ -148,7 +138,7 @@ export default function Home() {
   const requestPetName = pendingRequest?.pet?.name || 'il tuo pet';
 
   // Loading state generale
-  if (authLoading || !user) {
+  if (authLoading || petsLoading || !user) {
     return (
       <main style={pageStyle}>
         <BackgroundDecor />
@@ -164,9 +154,17 @@ export default function Home() {
   }
 
   return (
-    <main style={pageStyle}>
+    <main style={{ ...pageStyle, ...(hasPets ? { padding: '0 0 28px' } : {}) }}>
       <BackgroundDecor />
-      <div style={{ ...containerStyle, position: 'relative', zIndex: 1 }}>
+      {hasPets && <section id="tessere" className="pet-card-page pet-card-home-top">
+        <PetCardHeader back={false} />
+        <PetCardRequests items={actions} single={singlePet} onResponded={refetchRequests} />
+        {singlePet ? <PetCardHome petId={firstPet.id} /> : <div className="pet-card-home-strips">
+          {pets.map(pet => <PetCardStrip key={pet.id} pet={pet} />)}
+        </div>}
+      </section>}
+      <div style={{ ...containerStyle, position: 'relative', zIndex: 1, ...(hasPets ? { padding: '24px' } : {}) }}>
+        {!singlePet && <>
         {/* Eyebrow */}
         <Eyebrow withRule style={{ marginBottom: 14 }}>
           {`Bentornato${greeting ? ', ' + greeting : ''}`}
@@ -210,6 +208,7 @@ export default function Home() {
           </>
         )}
 
+        </>}
         {/* CTA row — solo prenota + scheda pet (logout/promozioni ora nel TopNav) */}
         <div
           style={{
@@ -384,16 +383,6 @@ export default function Home() {
             </Card>
           ) : pendingRequest ? (
             <PendingRequest key={pendingRequest.id} request={pendingRequest} onResponded={refetchRequests} />
-          ) : rejectedRequest ? (
-            <Card padding={20}>
-              <Eyebrow style={{ marginBottom: 12 }}>Richiesta da riprogrammare</Eyebrow>
-              <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
-                La data chiesta per {rejectedRequest.pet?.name || 'il tuo pet'} non è disponibile. Scegli un’altra data e riproviamo.
-              </p>
-              <Link to={`/u/book?petId=${rejectedRequest.pet_id}`} style={{ textDecoration: 'none' }}>
-                <span style={secondaryBtnStyle}>Scegli un’altra data</span>
-              </Link>
-            </Card>
           ) : (
             <Card padding={20}>
               <Eyebrow style={{ marginBottom: 12 }}>Prossimo appuntamento</Eyebrow>
@@ -406,17 +395,9 @@ export default function Home() {
             </Card>
           )}
 
-          {requests.filter((request) => request.status === 'pending' && (nextAppt || request.id !== pendingRequest?.id)).map((request) => (
+          {quietRequests.filter((request) => nextAppt || request.id !== pendingRequest?.id).map((request) => (
             <PendingRequest key={request.id} request={request} onResponded={refetchRequests} />
           ))}
-
-          {petsLoading ? (
-            <SkeletonCard />
-          ) : hasPets ? (
-            <div id="tessere" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {(pets || []).map(pet => <PetCardStrip key={pet.id} pet={pet} />)}
-            </div>
-          ) : null}
 
           {/* MINI PROMOS card — silenzioso se 0 */}
           {!promosLoading && visiblePromos.length > 0 && (

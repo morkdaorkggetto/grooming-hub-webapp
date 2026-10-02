@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-02T04:50:55.340Z",
+  "results": [
+    "rifiuto ultimo",
+    "successiva pending",
+    "successiva rejected",
+    "successiva approved",
+    "successiva withdrawn",
+    "successiva accepted",
+    "altro pet non sopprime il rifiuto",
+    "attesa del salone",
+    "proposta senza risposta",
+    "risposta corrente accettata",
+    "risposta corrente rifiutata",
+    "nuovo giro dopo risposta",
+    "vecchia scelta non piu proposta",
+    "nessuna azione",
+    "ordine indipendente"
+  ],
+  "titles": "PASS"
+}
