@@ -193,7 +193,7 @@ export default function Dashboard() {
 
   const statItems = [
     {
-      label: 'Clienti attivi',
+      label: 'Pet in Archivio',
       value: clients.length,
       helper: `${reliableClients} con score positivo`,
     },

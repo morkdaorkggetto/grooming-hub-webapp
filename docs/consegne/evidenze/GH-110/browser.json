@@ -1,0 +1,147 @@
+{
+  "at": "2026-10-17T04:15:29.911Z",
+  "demo": "qttpinkslhenxrsbhhhg.supabase.co",
+  "baseline": "same source with sole label replaced to base text in browser response",
+  "before": [
+    {
+      "label": "Clienti attivi",
+      "value": "7",
+      "helper": "3 con score positivo"
+    },
+    {
+      "label": "Storico visite",
+      "value": "90",
+      "helper": "3 clienti fidelizzati"
+    },
+    {
+      "label": "Blacklist",
+      "value": "1",
+      "helper": "1 da monitorare"
+    }
+  ],
+  "after": [
+    {
+      "label": "Pet in Archivio",
+      "value": "7",
+      "helper": "3 con score positivo"
+    },
+    {
+      "label": "Storico visite",
+      "value": "90",
+      "helper": "3 clienti fidelizzati"
+    },
+    {
+      "label": "Blacklist",
+      "value": "1",
+      "helper": "1 da monitorare"
+    }
+  ],
+  "screens": [
+    {
+      "viewport": 375,
+      "cells": [
+        {
+          "label": "Pet in Archivio",
+          "transform": "uppercase",
+          "width": 293,
+          "textWidth": 111.453125,
+          "inside": true,
+          "overflow": false,
+          "cell": {
+            "left": 28,
+            "right": 347,
+            "top": 560.125,
+            "bottom": 646.96875
+          }
+        },
+        {
+          "label": "Storico visite",
+          "transform": "uppercase",
+          "width": 293,
+          "textWidth": 105.296875,
+          "inside": true,
+          "overflow": false,
+          "cell": {
+            "left": 28,
+            "right": 347,
+            "top": 646.96875,
+            "bottom": 734.8125
+          }
+        },
+        {
+          "label": "Blacklist",
+          "transform": "uppercase",
+          "width": 293,
+          "textWidth": 71.578125,
+          "inside": true,
+          "overflow": false,
+          "cell": {
+            "left": 28,
+            "right": 347,
+            "top": 734.8125,
+            "bottom": 822.65625
+          }
+        }
+      ]
+    },
+    {
+      "viewport": 1365,
+      "cells": [
+        {
+          "label": "Pet in Archivio",
+          "transform": "uppercase",
+          "width": 120.828125,
+          "textWidth": 111.453125,
+          "inside": true,
+          "overflow": false,
+          "cell": {
+            "left": 796.984375,
+            "right": 943.8125,
+            "top": 292.984375,
+            "bottom": 379.828125
+          }
+        },
+        {
+          "label": "Storico visite",
+          "transform": "uppercase",
+          "width": 119.828125,
+          "textWidth": 105.296875,
+          "inside": true,
+          "overflow": false,
+          "cell": {
+            "left": 943.8125,
+            "right": 1090.640625,
+            "top": 292.984375,
+            "bottom": 379.828125
+          }
+        },
+        {
+          "label": "Blacklist",
+          "transform": "uppercase",
+          "width": 119.828125,
+          "textWidth": 71.578125,
+          "inside": true,
+          "overflow": false,
+          "cell": {
+            "left": 1090.640625,
+            "right": 1237.46875,
+            "top": 292.984375,
+            "bottom": 379.828125
+          }
+        }
+      ]
+    }
+  ],
+  "readEndpoints": [
+    "/rest/v1/tenant_memberships",
+    "/rest/v1/profiles",
+    "/rest/v1/tenants",
+    "/rest/v1/appointment_requests",
+    "/rest/v1/appointments",
+    "/rest/v1/promotions",
+    "/rest/v1/pets"
+  ],
+  "blocked": [],
+  "errors": [],
+  "pass": true
+}
