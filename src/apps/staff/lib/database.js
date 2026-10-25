@@ -1671,17 +1671,41 @@ export const reorderStaffPromotions = async (orderedIds) => {
   if (error) throw new Error(`Non riesco a riordinare le promozioni: ${error.message}`);
 };
 
+const readVisitPages = async (tenantId, selection, { from = null, to = null } = {}) => {
+  const rows = [];
+  let total;
+  do {
+    let query = supabase.from('visits').select(selection, { count: 'exact' }).eq('tenant_id', tenantId);
+    if (from && to) query = query.gte('date', from).lte('date', to);
+    const { data, error, count } = await query.order('date').order('id')
+      .range(rows.length, rows.length + 999);
+    if (error) throw error;
+    if (count == null) throw new Error('Conteggio delle visite non disponibile');
+    total = count;
+    if (!data.length && rows.length < total) throw new Error('Lettura delle visite incompleta');
+    rows.push(...data);
+  } while (rows.length < total);
+  return rows;
+};
+
+export const getCalendarVisitIndex = async () => {
+  const { tenantId } = await requireStaff();
+  return readVisitPages(tenantId, 'pet_id, date');
+};
+
 export const getRevenueReportData = async ({ from = null, to = null } = {}) => {
   if (Boolean(from) !== Boolean(to)) throw new Error('Intervallo report incompleto');
   const { tenantId } = await requireStaff();
-  let query = supabase.from('visits').select(`
+  let data;
+  try {
+    data = await readVisitPages(tenantId, `
     id, pet_id, tenant_id, date, treatments, issues, financials:visit_financials(cost, discount_percent),
     pet:pets(id, name, breed, photo_url, customer:customers(id, first_name, last_name, phone))
-  `).eq('tenant_id', tenantId);
-  if (from && to) query = query.gte('date', from).lte('date', to);
-  const { data, error } = await query.order('date');
-  if (error) throw new Error(`Non riesco a caricare il report incassi: ${error.message}`);
-  return (data || []).map((visit) => {
+  `, { from, to });
+  } catch (error) {
+    throw new Error(`Non riesco a caricare il report incassi: ${error.message}`);
+  }
+  return data.map((visit) => {
     const pet = mapPet(relation(visit.pet));
     return { ...mapVisit(visit), pet, client: pet };
   });

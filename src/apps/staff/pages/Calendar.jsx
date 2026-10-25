@@ -41,8 +41,8 @@ import {
   createCalendarCustomerPet,
   deleteAppointment,
   getCalendarPetOptions,
+  getCalendarVisitIndex,
   getCalendarWeekData,
-  getRevenueReportData,
   getVisitFormContext,
   resolveAppointmentRequest,
   updateAppointmentApproval,
@@ -228,8 +228,9 @@ export default function Calendar() {
   const latestWeekLoadRef = useRef(0);
   const searchIndexRequestRef = useRef(null);
   const visitIndexRequestRef = useRef(null);
+  const automaticVisitRetryUsedRef = useRef(false);
   const [searchIndex, setSearchIndex] = useState({ appointments: [], error: '', ready: false });
-  const [visitIndex, setVisitIndex] = useState({ visits: [], error: '', ready: false });
+  const [visitIndex, setVisitIndex] = useState({ visits: [], error: '', ready: false, retrying: false });
   const [calendarMode, setCalendarMode] = useState(() => queryDate !== null ? 'day' : 'week');
   const [weekStart, setWeekStart] = useState(() => startOfWeek(getQueryDay(queryDate)));
   const weekEnd = addDays(weekStart, 6);
@@ -298,6 +299,26 @@ export default function Calendar() {
     if (abandonedCreatedPet) setSuccess('Pet creato. L’appuntamento non è stato salvato.');
   };
 
+  const loadVisitIndex = useCallback(() => {
+    if (visitIndexRequestRef.current) return visitIndexRequestRef.current;
+    setVisitIndex((current) => ({ ...current, retrying: current.ready && Boolean(current.error) }));
+    const request = getCalendarVisitIndex()
+      .then((visits) => setVisitIndex({ visits, error: '', ready: true, retrying: false }))
+      .catch((loadError) => {
+        console.error('Calendar visit index failed:', loadError?.constructor?.name || typeof loadError,
+          loadError?.message || String(loadError), loadError);
+        setVisitIndex({
+          visits: [],
+          error: 'Non riesco a distinguere le lavorazioni negli appuntamenti passati.',
+          ready: true,
+          retrying: false,
+        });
+      })
+      .finally(() => { visitIndexRequestRef.current = null; });
+    visitIndexRequestRef.current = request;
+    return request;
+  }, []);
+
   const loadWeek = useCallback(async () => {
     const requestId = latestWeekLoadRef.current + 1;
     latestWeekLoadRef.current = requestId;
@@ -312,21 +333,13 @@ export default function Calendar() {
         () => ({ appointments: [], error: 'Non riesco a cercare fuori settimana. Ricarica la pagina per riprovare.', ready: true })
       );
     }
-    if (!visitIndexRequestRef.current) {
-      visitIndexRequestRef.current = getRevenueReportData().then(
-        (visits) => ({ visits, error: '', ready: true }),
-        () => ({ visits: [], error: 'Non riesco a distinguere le lavorazioni negli appuntamenti passati.', ready: true })
-      );
-    }
     try {
-      const [nextData, initialIndex, initialVisits] = await Promise.all([
+      const [nextData, initialIndex] = await Promise.all([
         weekRequest,
         searchIndexRequestRef.current,
-        visitIndexRequestRef.current,
       ]);
       if (requestId !== latestWeekLoadRef.current) return;
       setData(nextData);
-      setVisitIndex(initialVisits);
       setSearchIndex((current) => {
         const index = current.ready ? current : initialIndex;
         const outsideWeek = index.appointments.filter((item) => {
@@ -350,6 +363,22 @@ export default function Calendar() {
     loadWeek();
     return () => { latestWeekLoadRef.current += 1; };
   }, [loadWeek]);
+  useEffect(() => { void loadVisitIndex(); }, [loadVisitIndex]);
+  useEffect(() => {
+    if (!visitIndex.error) return undefined;
+    const retryWhenAvailable = () => {
+      if (automaticVisitRetryUsedRef.current || visitIndex.retrying
+        || document.visibilityState !== 'visible' || !navigator.onLine) return;
+      automaticVisitRetryUsedRef.current = true;
+      void loadVisitIndex();
+    };
+    document.addEventListener('visibilitychange', retryWhenAvailable);
+    window.addEventListener('online', retryWhenAvailable);
+    return () => {
+      document.removeEventListener('visibilitychange', retryWhenAvailable);
+      window.removeEventListener('online', retryWhenAvailable);
+    };
+  }, [visitIndex.error, visitIndex.retrying, loadVisitIndex]);
   useEffect(() => {
     if (selectedDay < weekStart || selectedDay > weekEnd) setSelectedDay(weekStart);
   }, [selectedDay, weekEnd, weekStart]);
@@ -976,7 +1005,21 @@ export default function Calendar() {
           summary={planningSummary}
         />
         {visitIndex.error ? (
-          <div className="gh-calendar-notice gh-calendar-notice--error" role="alert">{visitIndex.error}</div>
+          <div className="gh-calendar-notice gh-calendar-notice--error" role="alert">
+            <div className="gh-inline-actions">
+              <span>{visitIndex.retrying ? 'Riprovo a leggere le lavorazioni negli appuntamenti passati...' : visitIndex.error}</span>
+              <Button
+                staff
+                variant="outline"
+                disabled={visitIndex.retrying}
+                style={{ minHeight: 44 }}
+                onClick={() => {
+                  automaticVisitRetryUsedRef.current = false;
+                  void loadVisitIndex();
+                }}
+              >Riprova</Button>
+            </div>
+          </div>
         ) : null}
         {searchIndex.ready && visitIndex.ready && !visitIndex.error && pastScheduledAppointments.length ? (
           <Panel
