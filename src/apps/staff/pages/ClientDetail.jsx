@@ -27,6 +27,7 @@ import {
   createCustomerPortalInvite,
   deleteClient,
   deleteVisit,
+  getAppointmentForVisit,
   getClientById,
   getClientPromos,
   getRomeDate,
@@ -263,10 +264,24 @@ export default function ClientDetail() {
   };
 
   const handleDeleteVisit = async (visitId) => {
-    if (!window.confirm('Sei sicuro di voler eliminare questa visita?')) return;
     try {
+      const visit = client?.visits?.find((item) => item.id === visitId);
+      let confirmation = 'Sei sicuro di voler eliminare questa visita?';
+      if (visit?.appointment_id) {
+        const appointment = await getAppointmentForVisit(visit.appointment_id);
+        if (appointment.pet_id !== clientId) throw new Error('La visita non appartiene a questo appuntamento.');
+        const day = new Intl.DateTimeFormat('it-IT', {
+          timeZone: 'Europe/Rome', dateStyle: 'long',
+        }).format(new Date(appointment.scheduled_at));
+        confirmation = `Eliminare questa visita? L'appuntamento del ${day} tornerà da completare.`;
+      }
+      if (!window.confirm(confirmation)) return;
       await deleteVisit(visitId, clientId);
-      loadClient();
+      await loadClient();
+      navigate(location.pathname, {
+        replace: true,
+        state: { ...location.state, visitCompletedWithAppointment: false, visitPhotoUploadError: null },
+      });
     } catch (err) {
       setError(err.message);
     }

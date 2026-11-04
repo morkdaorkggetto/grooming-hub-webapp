@@ -124,6 +124,9 @@ const normalizePhoneIt = (value) => {
 };
 
 const throwAppointmentWriteError = (error, fallback) => {
+  if (error?.details === 'GH112_APPOINTMENT_IN_FUTURE') {
+    throw new Error('Questo appuntamento è di un giorno che non è ancora arrivato.');
+  }
   if (
     error?.details === 'GH37_APPOINTMENT_CAPACITY' ||
     /postazioni sono tutte occupate/i.test(error?.message || '')
@@ -949,7 +952,7 @@ export const completeAppointmentWithVisit = async (appointmentId, input) => {
     p_cost: Number(input.cost),
     p_service_id: input.service_id || null,
   });
-  if (error) throw new Error(`Non riesco a chiudere lavorazione e appuntamento: ${error.message}`);
+  if (error) throwAppointmentWriteError(error, 'Non riesco a chiudere lavorazione e appuntamento');
   const visitId = data?.id || data;
   const petId = data?.pet_id;
   const photoUploadError = petId
@@ -1007,7 +1010,10 @@ export const deleteVisit = async (visitId, petId) => {
     .eq('tenant_id', tenantId)
     .single();
   if (visitError) throw new Error(`Non riesco a leggere la visita: ${visitError.message}`);
-  const { error } = await supabase.from('visits').delete().eq('id', visitId).eq('tenant_id', tenantId);
+  const { error } = await supabase.rpc('delete_staff_visit_reopen_appointment', {
+    p_visit_id: visitId,
+    p_pet_id: petId,
+  });
   if (error) throw new Error(`Non riesco a eliminare la visita: ${error.message}`);
   const photoPath = publicStoragePath(visit.photo_url, PET_AVATARS_BUCKET);
   if (photoPath) await supabase.storage.from(PET_AVATARS_BUCKET).remove([photoPath]);
@@ -1338,6 +1344,11 @@ const getStaffAppointment = async (appointmentId, tenantId) => {
     .eq('id', appointmentId).eq('tenant_id', tenantId).single();
   if (error) throw error;
   return data;
+};
+
+export const getAppointmentForVisit = async (appointmentId) => {
+  const { tenantId } = await requireStaff();
+  return getStaffAppointment(appointmentId, tenantId);
 };
 
 export const updateAppointmentStatus = async (appointmentId, status) => {

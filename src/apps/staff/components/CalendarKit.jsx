@@ -195,9 +195,6 @@ function UnplacedItems({ items, onOpen }) {
 const petOptionLabel = (pet) =>
   [pet.name, pet.breed, pet.owner || 'proprietario non indicato'].filter(Boolean).join(' · ');
 
-const normalizePetOptionText = (value) =>
-  String(value || '').trim().toLocaleLowerCase('it');
-
 export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate }) {
   const listId = useId();
   const selected = options.find((pet) => pet.id === selectedId) || null;
@@ -249,10 +246,12 @@ export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate })
       moveActive(-1);
       return;
     }
-    if (event.key === 'Enter' && open && activeIndex >= 0) {
+    if (event.key === 'Enter' && open) {
       event.preventDefault();
-      if (activeIndex < matches.length) choosePet(matches[activeIndex]);
-      else chooseCreate();
+      if (activeIndex >= 0) {
+        if (activeIndex < matches.length) choosePet(matches[activeIndex]);
+        else chooseCreate();
+      }
       return;
     }
     if (event.key === 'Escape' && open) {
@@ -284,24 +283,14 @@ export function CalendarPetCombobox({ options, selectedId, onSelect, onCreate })
           autoComplete="off"
           onFocus={() => {
             setOpen(true);
-            setActiveIndex(optionCount ? 0 : -1);
+            setActiveIndex(-1);
           }}
           onChange={(event) => {
             const nextQuery = event.target.value;
-            const normalizedNextQuery = normalizePetOptionText(nextQuery);
-            const selectedStillDescribed = selected && normalizedNextQuery
-              && normalizePetOptionText(selectedLabel).startsWith(normalizedNextQuery);
-            const exactMatches = options.filter((pet) =>
-              normalizePetOptionText(pet.name) === normalizedNextQuery
-              || normalizePetOptionText(petOptionLabel(pet)) === normalizedNextQuery
-            );
-            const resolvedPet = selectedStillDescribed
-              ? selected
-              : exactMatches.length === 1 ? exactMatches[0] : null;
             setQuery(nextQuery);
-            onSelect(resolvedPet?.id || '');
-            setOpen(!resolvedPet);
-            setActiveIndex(resolvedPet ? -1 : 0);
+            onSelect('');
+            setOpen(true);
+            setActiveIndex(-1);
           }}
           onKeyDown={handleKeyDown}
         />

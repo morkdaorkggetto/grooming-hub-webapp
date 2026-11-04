@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getAppointments,
+  getRomeDate,
   updateAppointmentApproval,
   updateAppointmentStatus,
 } from '../lib/database';
@@ -196,7 +197,8 @@ export default function DailyAppointments() {
     )}`;
     const isPendingRequest = appointment.approval_status === 'pending';
     const canMarkCompleted =
-      appointment.approval_status === 'approved' && appointment.status === 'scheduled';
+      appointment.approval_status === 'approved' && appointment.status === 'scheduled'
+      && getRomeDate(new Date(appointment.scheduled_at)) <= getRomeDate();
 
     return (
       <Panel key={appointment.id} className={`gh-appointment-card gh-appointment-card--${tone}`}>

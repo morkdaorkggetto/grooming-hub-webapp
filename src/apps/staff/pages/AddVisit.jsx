@@ -5,11 +5,12 @@ import VisitForm, { createEmptyVisitForm } from '../components/VisitForm';
 import {
   Hero,
   HeroButton,
+  ErrorState,
   Panel,
   PetAvatar,
   SkeletonRow,
 } from '../components/StaffKit';
-import { addVisit, completeAppointmentWithVisit, getClientById } from '../lib/database';
+import { addVisit, completeAppointmentWithVisit, getAppointmentForVisit, getClientById, getRomeDate } from '../lib/database';
 import { getFidelityTierSnapshot } from '../../../shared/lib/fidelity';
 
 export default function AddVisit() {
@@ -19,6 +20,7 @@ export default function AddVisit() {
   const [searchParams] = useSearchParams();
   const appointmentId = searchParams.get('appointmentId') || '';
   const [client, setClient] = useState(null);
+  const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -26,14 +28,20 @@ export default function AddVisit() {
 
   useEffect(() => {
     loadClient();
-  }, [clientId]);
+  }, [clientId, appointmentId]);
 
   const loadClient = async () => {
     setLoading(true);
     setError('');
+    setClient(null);
+    setAppointment(null);
     try {
-      const data = await getClientById(clientId);
-      setClient(data);
+      const [pet, linkedAppointment] = await Promise.all([
+        getClientById(clientId),
+        appointmentId ? getAppointmentForVisit(appointmentId) : Promise.resolve(null),
+      ]);
+      setClient(pet);
+      setAppointment(linkedAppointment);
     } catch (err) {
       setError(err.message || 'Errore nel caricamento cliente');
     } finally {
@@ -44,6 +52,13 @@ export default function AddVisit() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+
+    if (appointmentId && (!appointment || appointment.pet_id !== clientId
+      || appointment.status !== 'scheduled' || appointment.approval_status !== 'approved'
+      || getRomeDate(new Date(appointment.scheduled_at)) > getRomeDate())) {
+      setError('Questo appuntamento non può essere chiuso da qui.');
+      return;
+    }
 
     if (!formData.date) {
       setError('La data è obbligatoria');
@@ -97,6 +112,17 @@ export default function AddVisit() {
   }
 
   const fidelity = client ? getFidelityTierSnapshot(client, tenant?.settings) : null;
+  const futureAppointment = appointment && getRomeDate(new Date(appointment.scheduled_at)) > getRomeDate();
+  const appointmentUnavailable = appointmentId && (
+    !appointment || appointment.pet_id !== clientId
+    || appointment.status !== 'scheduled' || appointment.approval_status !== 'approved'
+  );
+  const appointmentDate = appointment && new Intl.DateTimeFormat('it-IT', {
+    timeZone: 'Europe/Rome', day: 'numeric', month: 'long', year: 'numeric',
+  }).format(new Date(appointment.scheduled_at));
+  const appointmentTime = appointment && new Intl.DateTimeFormat('it-IT', {
+    timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit',
+  }).format(new Date(appointment.scheduled_at));
 
   return (
     <div className="gh-page">
@@ -129,13 +155,18 @@ export default function AddVisit() {
           </Panel>
         )}
 
-        {appointmentId ? (
+        {appointment && !appointmentUnavailable && !futureAppointment ? (
           <div className="gh-success-state" role="status">
-            Questa lavorazione nasce dall’appuntamento: salvandola, visita e appuntamento verranno chiusi insieme.
+            {client?.name} · {client?.breed || 'Razza non indicata'} · {client?.owner || 'Proprietario non indicato'}
+            {' · '}{appointmentDate} ore {appointmentTime}. Visita e appuntamento si chiudono insieme.
           </div>
         ) : null}
 
-        <Panel eyebrow="Storico cliente" title="Registra visita">
+        {futureAppointment ? (
+          <ErrorState title="Appuntamento non chiudibile" body="Questo appuntamento è di un giorno che non è ancora arrivato." />
+        ) : appointmentUnavailable || !client ? (
+          <ErrorState title="Appuntamento non disponibile" body={error || 'Questo appuntamento non è disponibile per questo pet.'} />
+        ) : <Panel eyebrow="Storico cliente" title="Registra visita">
           <VisitForm
             value={formData}
             onChange={setFormData}
@@ -146,7 +177,7 @@ export default function AddVisit() {
             appointmentId={appointmentId}
             submitLabel={appointmentId ? 'Salva e chiudi appuntamento' : 'Salva visita'}
           />
-        </Panel>
+        </Panel>}
       </main>
     </div>
   );

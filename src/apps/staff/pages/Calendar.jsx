@@ -43,6 +43,7 @@ import {
   getCalendarPetOptions,
   getCalendarVisitIndex,
   getCalendarWeekData,
+  getRomeDate,
   getVisitFormContext,
   resolveAppointmentRequest,
   updateAppointmentApproval,
@@ -1185,7 +1186,8 @@ export default function Calendar() {
             <Button staff variant="outline" icon="calendar" onClick={() => window.open(getGoogleCalendarUrl(selectedItem), '_blank', 'noopener,noreferrer')}>Google</Button>
             <Button staff variant="outline" icon="calendar" onClick={() => downloadIcs(selectedItem)}>Apple</Button>
             <Button staff variant="outline" icon="user" onClick={() => navigate(`/client/${selectedItem.pet_id}`)}>Apri cliente</Button>
-            {selectedItem.status === 'scheduled' ? (
+            {selectedItem.status === 'scheduled'
+              && getRomeDate(new Date(selectedItem.scheduled_at)) <= getRomeDate() ? (
               <Button staff variant="success" icon="pencil" onClick={() => navigate(`/client/${selectedItem.pet_id}/add-visit?appointmentId=${selectedItem.id}`)}>
                 Registra lavorazione
               </Button>
