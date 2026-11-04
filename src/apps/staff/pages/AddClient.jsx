@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ImageCropModal from '../../../shared/ui/ImageCropModal';
-import { addCustomerWithPet, addPetToCustomer } from '../lib/database';
+import { addCustomerWithPet, addPetToCustomer, findCustomerByPhone } from '../lib/database';
 import { isSupportedImageFile } from '../lib/imageFiles';
 import { Button, ErrorState, Field, Hero, HeroButton, Panel } from '../components/StaffKit';
 
@@ -14,6 +14,7 @@ export default function AddClient() {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [existingCustomer, setExistingCustomer] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     breed: '',
@@ -90,9 +91,39 @@ export default function AddClient() {
     setPendingCropFile(null);
   };
 
-  /**
-   * Invia il form
-   */
+  const petDataFromForm = () => ({
+    name: formData.name,
+    breed: formData.breed,
+    internal_notes: formData.notes,
+    photoFile,
+    sex: import.meta.env.DEV && new URLSearchParams(location.search).get('gh05ForcePetError') === '1' ? 'x' : null,
+  });
+
+  const handleAddPetToExisting = async () => {
+    if (!existingCustomer || !formData.name.trim()) {
+      setError('Inserisci il nome del pet prima di aggiungerlo.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const current = await findCustomerByPhone(formData.phone);
+      if (current?.id !== existingCustomer.id || current.pets?.length) {
+        setExistingCustomer(null);
+        throw new Error('La scheda associata a questo telefono è cambiata. Controlla di nuovo il proprietario prima di salvare.');
+      }
+      const created = await addPetToCustomer(current.id, petDataFromForm());
+      if (created.photoUploadError) {
+        window.alert(`Pet aggiunto. La foto non è stata caricata: ${created.photoUploadError}`);
+      }
+      navigate(`/client/${created.pet_id}`);
+    } catch (err) {
+      setError(err.message || 'Non riesco ad aggiungere il pet al proprietario.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -117,15 +148,18 @@ export default function AddClient() {
       const ownerParts = formData.owner.trim().split(/\s+/);
       const firstName = ownerParts.length === 1 ? ownerParts[0] : ownerParts.slice(0, -1).join(' ');
       const lastName = ownerParts.length === 1 ? null : ownerParts.at(-1);
-      const forcePetError =
-        import.meta.env.DEV && new URLSearchParams(location.search).get('gh05ForcePetError') === '1';
-      const petData = {
-        name: formData.name,
-        breed: formData.breed,
-        internal_notes: formData.notes,
-        photoFile,
-        sex: forcePetError ? 'x' : null,
-      };
+      const petData = petDataFromForm();
+      if (!customerConversion) {
+        const existing = await findCustomerByPhone(formData.phone);
+        if (existing) {
+          if (!existing.pets?.length) {
+            setExistingCustomer(existing);
+            return;
+          }
+          const ownerName = [existing.first_name, existing.last_name].filter(Boolean).join(' ');
+          throw new Error(`Questo telefono è già di ${ownerName}, che ha una scheda pet. Apri la sua scheda dalla rubrica per aggiungerne un altro.`);
+        }
+      }
       const created = customerConversion
         ? await addPetToCustomer(customerConversion.customerId, petData)
         : await addCustomerWithPet(
@@ -182,13 +216,20 @@ export default function AddClient() {
               <p className="gh-body">Stai aggiungendo il pet dichiarato <strong>{customerConversion.petName || 'senza nome'}</strong>. Dopo il salvataggio il customer resterà lo stesso e passerà allo stato attivo.</p>
             </div>
           )}
+          {existingCustomer && !customerConversion && (
+            <div className="gh-add-client-context" role="status">
+              <span className="gh-eyebrow--staff">Proprietario già presente</span>
+              <p className="gh-body">Il telefono appartiene a <strong>{[existingCustomer.first_name, existingCustomer.last_name].filter(Boolean).join(' ')}</strong>, che non ha pet nella scheda. Se è la stessa persona, aggiungi il pet a questo proprietario senza crearne uno nuovo.</p>
+              <Button staff type="button" variant="outline" disabled={loading} onClick={handleAddPetToExisting}>Aggiungi pet a questo proprietario</Button>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="gh-add-client-form">
             <section className="gh-add-client-section">
               <h2 className="gh-panel-title">Padrone</h2>
               <div className="gh-add-client-grid">
-                <div><Field label="Proprietario *" id="owner" placeholder="Nome del proprietario" value={formData.owner} onChange={(e) => setFormData({ ...formData, owner: e.target.value })} required disabled={loading || Boolean(customerConversion)} /><p className="gh-meta">Campo obbligatorio</p></div>
-                <div><Field label="Telefono *" id="phone" type="tel" placeholder="Es. 333 123 4567" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required disabled={loading || Boolean(customerConversion)} /><p className="gh-meta">Campo obbligatorio</p></div>
+                <div><Field label="Proprietario *" id="owner" placeholder="Nome del proprietario" value={formData.owner} onChange={(e) => { setExistingCustomer(null); setFormData({ ...formData, owner: e.target.value }); }} required disabled={loading || Boolean(customerConversion)} /><p className="gh-meta">Campo obbligatorio</p></div>
+                <div><Field label="Telefono *" id="phone" type="tel" placeholder="Es. 333 123 4567" value={formData.phone} onChange={(e) => { setExistingCustomer(null); setFormData({ ...formData, phone: e.target.value }); }} required disabled={loading || Boolean(customerConversion)} /><p className="gh-meta">Campo obbligatorio</p></div>
               </div>
             </section>
 
@@ -220,7 +261,7 @@ export default function AddClient() {
             </section>
 
             <div className="gh-add-client-actions">
-              <Button staff type="submit" wide loading={loading}>{customerConversion ? '✅ Aggiungi pet' : '✅ Salva Cliente'}</Button>
+              <Button staff type="submit" wide loading={loading} disabled={Boolean(existingCustomer)}>{customerConversion ? '✅ Aggiungi pet' : '✅ Salva Cliente'}</Button>
               <Button staff type="button" wide variant="outline" disabled={loading} onClick={handleCancel}>Annulla</Button>
             </div>
           </form>

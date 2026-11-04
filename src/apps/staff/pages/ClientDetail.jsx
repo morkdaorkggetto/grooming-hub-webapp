@@ -30,6 +30,7 @@ import {
   getAppointmentForVisit,
   getClientById,
   getClientPromos,
+  getPetDeletionImpact,
   getRomeDate,
   removeVisitPhoto,
   setPetAwardedFidelityTier,
@@ -329,9 +330,27 @@ export default function ClientDetail() {
   };
 
   const handleDeleteClient = async () => {
-    if (!window.confirm('Eliminerai il cliente e tutte le sue visite. Sei sicuro?')) return;
     try {
-      await deleteClient(clientId);
+      setError('');
+      const appointments = await getPetDeletionImpact(clientId);
+      const now = Date.now();
+      const future = appointments.filter((item) => item.status !== 'cancelled'
+        && new Date(item.scheduled_at).getTime() > now);
+      if (future.length) {
+        setError(`Non puoi eliminare ${client.name}: ha appuntamenti futuri attivi il ${future.map((item) => formatUpcomingDate(item.scheduled_at)).join(', ')}. Annullali o spostali prima.`);
+        return;
+      }
+      const visitCount = client.visits?.length || 0;
+      const visitPhotoCount = client.visits?.filter((visit) => visit.photo_url).length || 0;
+      const message = `Eliminare la scheda di ${client.name}?\n\n` +
+        `Si perderanno ${visitCount} visite, ${appointments.length} appuntamenti passati o annullati, ` +
+        `${visitPhotoCount} foto delle visite${client.photo ? ' e la foto di riconoscimento' : ''}. ` +
+        'Il cliente resterà nella rubrica. Questa operazione non si può annullare.';
+      if (!window.confirm(message)) return;
+      const result = await deleteClient(clientId);
+      if (result.photoCleanupError) {
+        window.alert(`Scheda eliminata, ma la foto di riconoscimento non è stata rimossa dallo spazio di archiviazione: ${result.photoCleanupError}`);
+      }
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);

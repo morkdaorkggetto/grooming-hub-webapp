@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Modal from '../../../shared/ui/Modal';
 import {
+  deleteAppointment,
   getAppointments,
   getRomeDate,
   updateAppointmentApproval,
@@ -80,6 +82,7 @@ export default function DailyAppointments() {
   const [success, setSuccess] = useState('');
   const [updatingId, setUpdatingId] = useState('');
   const [whatsappDraft, setWhatsappDraft] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
 
   const loadAppointments = async () => {
     setLoading(true);
@@ -190,6 +193,42 @@ export default function DailyAppointments() {
     }
   };
 
+  const handleCancel = async () => {
+    if (!cancelTarget) return;
+    setError('');
+    setSuccess('');
+    try {
+      setUpdatingId(cancelTarget.id);
+      if (cancelTarget.appointment_source === 'operator' && !cancelTarget.requested_by_customer_id) {
+        await deleteAppointment(cancelTarget.id);
+      } else {
+        await updateAppointmentStatus(cancelTarget.id, 'cancelled');
+      }
+      setCancelTarget(null);
+      setSuccess('Appuntamento annullato: resta visibile fra gli annullati.');
+      await loadAppointments();
+    } catch (cancelError) {
+      setError(cancelError.message || 'Non riesco ad annullare l’appuntamento.');
+    } finally {
+      setUpdatingId('');
+    }
+  };
+
+  const handleRestore = async (appointment) => {
+    setError('');
+    setSuccess('');
+    try {
+      setUpdatingId(appointment.id);
+      await updateAppointmentStatus(appointment.id, 'scheduled');
+      setSuccess('Appuntamento ripristinato nel suo orario.');
+      await loadAppointments();
+    } catch (restoreError) {
+      setError(restoreError.message || 'Non riesco a ripristinare l’appuntamento.');
+    } finally {
+      setUpdatingId('');
+    }
+  };
+
   const renderAppointmentRow = (appointment) => {
     const tone = getAppointmentTone(appointment);
     const timeRange = `${formatTimeOnly(appointment.scheduled_at)} - ${formatTimeOnly(
@@ -245,6 +284,16 @@ export default function DailyAppointments() {
                 {appointment.status === 'no_show' ? (
                   <Button staff variant="outline" onClick={() => handleAbsence(appointment, false)} disabled={updatingId === appointment.id}>
                     {updatingId === appointment.id ? 'Aggiorno...' : 'Annulla assenza'}
+                  </Button>
+                ) : null}
+                {appointment.approval_status === 'approved' && appointment.status === 'scheduled' ? (
+                  <Button staff variant="danger" onClick={() => setCancelTarget(appointment)} disabled={updatingId === appointment.id}>
+                    Annulla appuntamento
+                  </Button>
+                ) : null}
+                {appointment.approval_status === 'approved' && appointment.status === 'cancelled' ? (
+                  <Button staff variant="outline" onClick={() => handleRestore(appointment)} disabled={updatingId === appointment.id}>
+                    {updatingId === appointment.id ? 'Ripristino...' : 'Ripristina programmato'}
                   </Button>
                 ) : null}
               </>
@@ -316,6 +365,21 @@ export default function DailyAppointments() {
           )}
         </section>
       </main>
+      {cancelTarget ? (
+        <Modal title="Annulla appuntamento" narrow closeDisabled={Boolean(updatingId)}
+          onClose={() => setCancelTarget(null)}
+          footer={<>
+            <Button staff variant="ghost" disabled={Boolean(updatingId)} onClick={() => setCancelTarget(null)}>Torna indietro</Button>
+            <Button staff variant="danger" loading={Boolean(updatingId)} onClick={handleCancel}>Conferma annullamento</Button>
+          </>}>
+          <p className="gh-body">
+            Annulli l&apos;appuntamento di <strong>{cancelTarget.client?.name || 'questo pet'}</strong> di{' '}
+            {formatLongDate(toLocalDateString(new Date(cancelTarget.scheduled_at)))} alle {formatTimeOnly(cancelTarget.scheduled_at)}?
+            Resterà visibile fra gli annullati.
+          </p>
+          {error ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{error}</p> : null}
+        </Modal>
+      ) : null}
     </div>
   );
 }

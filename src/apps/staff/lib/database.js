@@ -138,13 +138,13 @@ const throwAppointmentWriteError = (error, fallback) => {
 
 const throwAppointmentDeleteError = (error) => {
   const messages = {
-    GH58_APPOINTMENT_COMPLETED: 'Un appuntamento completato conserva una lavorazione vera e non si elimina.',
-    GH58_APPOINTMENT_NO_SHOW: 'Prima usa «Annulla assenza»: il punto torna al pet e poi potrai eliminare la riga.',
-    GH58_APPOINTMENT_CUSTOMER_SOURCE: 'Questo appuntamento nasce da una richiesta del cliente: usa «Annulla appuntamento» per conservarne la storia.',
-    GH58_APPOINTMENT_VISIT_LINKED: 'Questo appuntamento ha una lavorazione collegata e non si elimina.',
+    GH58_APPOINTMENT_COMPLETED: 'Un appuntamento completato conserva una lavorazione vera e non si può annullare.',
+    GH58_APPOINTMENT_NO_SHOW: 'Prima usa «Annulla assenza», poi potrai annullare l’appuntamento.',
+    GH58_APPOINTMENT_CUSTOMER_SOURCE: 'Questo appuntamento nasce da una richiesta del cliente: annullalo dalla sua scheda.',
+    GH58_APPOINTMENT_VISIT_LINKED: 'Questo appuntamento ha una lavorazione collegata e non si può annullare.',
   };
   if (messages[error?.details]) throw new Error(messages[error.details]);
-  throw new Error(`Non riesco a eliminare l'appuntamento: ${error?.message || 'errore sconosciuto'}`);
+  throw new Error(`Non riesco ad annullare l'appuntamento: ${error?.message || 'errore sconosciuto'}`);
 };
 
 const mapPet = (row) => {
@@ -694,6 +694,20 @@ export const getCustomerDirectory = async () => {
   });
 };
 
+export const findCustomerByPhone = async (phone) => {
+  const { tenantId } = await requireStaff();
+  const normalizedPhone = normalizePhoneIt(phone);
+  if (!normalizedPhone) return null;
+  const { data, error } = await supabase
+    .from('customers')
+    .select('id, first_name, last_name, phone, pets(id, name)')
+    .eq('tenant_id', tenantId)
+    .eq('phone', normalizedPhone)
+    .limit(1);
+  if (error) throw new Error(`Non riesco a verificare il telefono: ${error.message}`);
+  return data?.[0] || null;
+};
+
 export const upsertCustomerLead = async (leadData) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
@@ -783,6 +797,11 @@ export const addCustomerWithPet = async (tenantId, customerData, petData) => {
     if (!created?.customer_id || !created?.pet_id) throw new Error('Identificativi creati non disponibili');
     return { ...created, ...(await applyPhoto(user.id, created.pet_id, petData.photoFile)) };
   } catch (error) {
+    if (error?.code === '23505' && /customers_tenant_phone_unique/.test(error.message || '')) {
+      const conflict = new Error('Questo telefono è già associato a un proprietario. Controlla la sua scheda e aggiungi lì il pet.');
+      conflict.code = 'CUSTOMER_PHONE_CONFLICT';
+      throw conflict;
+    }
     throw new Error(`Non riesco ad aggiungere customer e pet: ${error.message}`);
   }
 };
@@ -902,9 +921,29 @@ export const deleteClient = async (petId) => {
   assertDemoWriteAllowed();
   const { tenantId } = await requireStaff();
   const pet = await getPetById(petId, tenantId);
-  if (pet.photo_url) await deletePhoto(pet.photo_url);
   const { error } = await supabase.from('pets').delete().eq('id', petId).eq('tenant_id', tenantId);
+  if (error?.details === 'GH113_FUTURE_APPOINTMENTS') {
+    throw new Error('Il pet ha appuntamenti futuri attivi. Annullali o spostali prima di eliminare la scheda.');
+  }
   if (error) throw new Error(`Non riesco a eliminare il pet: ${error.message}`);
+  if (!pet.photo_url) return { photoCleanupError: null };
+  try {
+    await deletePhoto(pet.photo_url);
+    return { photoCleanupError: null };
+  } catch (photoError) {
+    return { photoCleanupError: photoError.message || 'errore sconosciuto' };
+  }
+};
+
+export const getPetDeletionImpact = async (petId) => {
+  const { tenantId } = await requireStaff();
+  const { data, error } = await supabase.from('appointments')
+    .select('id, scheduled_at, status')
+    .eq('tenant_id', tenantId)
+    .eq('pet_id', petId)
+    .order('scheduled_at');
+  if (error) throw new Error(`Non riesco a verificare l'agenda del pet: ${error.message}`);
+  return data || [];
 };
 
 export const addVisit = async (petId, input) => {

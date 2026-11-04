@@ -218,6 +218,16 @@ function trackGh45Storage(bucket, objectPath) {
   gh45StoragePaths.add(`${bucket}\n${objectPath}`);
 }
 
+async function cancelFutureAppointmentsForFixturePets(petIds) {
+  if (!petIds.length) return;
+  const { error } = await staff.client.from('appointments')
+    .update({ status: 'cancelled' })
+    .in('pet_id', petIds)
+    .gt('scheduled_at', new Date().toISOString())
+    .neq('status', 'cancelled');
+  assertNoError(error, 'Annullamento appuntamenti futuri dei soli pet fixture');
+}
+
 async function cleanupStaleFixtures() {
   const [petNoteCleanup, customerNoteCleanup] = await Promise.all([
     staff.client.from('pet_staff_notes').delete().ilike('notes', `${MARKER}%`),
@@ -252,7 +262,7 @@ async function cleanupStaleFixtures() {
 
   const { data: staleAbsence, error: staleAbsenceReadError } = await staff.client
     .from('appointments')
-    .select('id, status')
+    .select('id, status, tenant_id')
     .eq('id', GH52_APPOINTMENT_ID)
     .maybeSingle();
   assertNoError(staleAbsenceReadError, 'Lettura assenza GH-52 pregressa');
@@ -267,7 +277,18 @@ async function cleanupStaleFixtures() {
     const { error } = await staff.client.rpc('delete_staff_appointment', {
       p_appointment_id: GH52_APPOINTMENT_ID,
     });
-    assertNoError(error, 'Pulizia appuntamento GH-52 pregresso');
+    assertNoError(error, 'Annullamento appuntamento GH-52 pregresso');
+    const { data: cleanupPet, error: cleanupPetError } = await staff.client.from('pets')
+      .insert({
+        name: `${MARKER} cleanup GH-52`, tenant_id: staleAbsence.tenant_id,
+        owner_user_id: staff.user.id,
+      }).select('id').single();
+    assertNoError(cleanupPetError, 'Pet temporaneo per pulizia GH-52');
+    const { error: moveError } = await staff.client.from('appointments')
+      .update({ pet_id: cleanupPet.id }).eq('id', GH52_APPOINTMENT_ID);
+    assertNoError(moveError, 'Spostamento GH-52 annullato su pet temporaneo');
+    const { error: cleanupError } = await staff.client.from('pets').delete().eq('id', cleanupPet.id);
+    assertNoError(cleanupError, 'Pulizia fisica GH-52 via cascata pet');
   }
 
   const { data: markedPets, error: petReadError } = await staff.client
@@ -275,6 +296,8 @@ async function cleanupStaleFixtures() {
     .select('id, tenant_id')
     .ilike('name', `${MARKER}%`);
   assertNoError(petReadError, 'Lettura fixture pregresse');
+
+  await cancelFutureAppointmentsForFixturePets((markedPets || []).map((pet) => pet.id));
 
   for (const pet of markedPets || []) {
     await removeStoragePath(
@@ -502,7 +525,12 @@ async function cleanupCurrentRun() {
         const { error } = await staff.client.rpc('delete_staff_appointment', {
           p_appointment_id: GH52_APPOINTMENT_ID,
         });
-        if (error) cleanupErrors.push(`appuntamento GH-52: ${error.message}`);
+        if (error) cleanupErrors.push(`annullamento GH-52: ${error.message}`);
+        else if (appointmentFixturePet?.id) {
+          const { error: moveError } = await staff.client.from('appointments')
+            .update({ pet_id: appointmentFixturePet.id }).eq('id', GH52_APPOINTMENT_ID);
+          if (moveError) cleanupErrors.push(`spostamento GH-52 su pet fixture: ${moveError.message}`);
+        }
       }
     }
     if (gh44InvitationIds.size) {
@@ -577,14 +605,17 @@ async function cleanupCurrentRun() {
       if (error) cleanupErrors.push(`visita GH-44: ${error.message}`);
     }
     if (fixturePet?.id) {
+      await cancelFutureAppointmentsForFixturePets([fixturePet.id]);
       const { error } = await staff.client.from('pets').delete().eq('id', fixturePet.id);
       if (error) cleanupErrors.push(`pet: ${error.message}`);
     }
     if (appointmentFixturePet?.id) {
+      await cancelFutureAppointmentsForFixturePets([appointmentFixturePet.id]);
       const { error } = await staff.client.from('pets').delete().eq('id', appointmentFixturePet.id);
       if (error) cleanupErrors.push(`pet booking Mario: ${error.message}`);
     }
     if (gh44PetIds.size) {
+      await cancelFutureAppointmentsForFixturePets([...gh44PetIds]);
       const { error } = await staff.client.from('pets').delete().in('id', [...gh44PetIds]);
       if (error) cleanupErrors.push(`pet GH-44: ${error.message}`);
     }
@@ -682,6 +713,44 @@ async function main() {
       `Attesi ${EXPECTED_BASELINE_PETS} pet, misurati ${data.length}`
     );
     return `${data.length} pet`;
+  });
+
+  await runTest('GH-113 registro staff e isolamento tenant', 'staff vede; customer, anon e altro tenant vedono 0', async () => {
+    const anon = makeClient();
+    const [own, customer, anonymous, otherTenant] = await Promise.all([
+      staff.client.from('appointment_events').select('id, tenant_id, appointment_id').eq('tenant_id', tenantId).limit(1),
+      mario.client.from('appointment_events').select('id').eq('tenant_id', tenantId),
+      anon.from('appointment_events').select('id').eq('tenant_id', tenantId),
+      foreignStaff.client.from('appointment_events').select('id').eq('tenant_id', tenantId),
+    ]);
+    assertNoError(own.error, 'Lettura audit staff');
+    assert(own.data.length === 1, 'Staff non vede il registro del proprio tenant');
+    for (const [label, result] of [['Mario', customer], ['anon', anonymous], ['altro tenant', otherTenant]]) {
+      if (result.error) assert(forbiddenRlsError(result.error), `${label}: errore inatteso ${result.error.message}`);
+      else assert(result.data.length === 0, `${label} ha letto ${result.data.length} eventi`);
+    }
+    return 'staff 1 riga; Mario/anon/altro tenant 0';
+  });
+
+  await runTest('GH-113 registro append-only per ruoli app', 'INSERT/UPDATE/DELETE rifiutati per staff, customer e anon', async () => {
+    const { data: event, error: readError } = await staff.client.from('appointment_events')
+      .select('id, tenant_id, appointment_id, pet_id, pet_name').eq('tenant_id', tenantId).limit(1).single();
+    assertNoError(readError, 'Evento audit di prova');
+    const roles = [['staff', staff.client], ['customer', mario.client], ['anon', makeClient()]];
+    for (const [label, client] of roles) {
+      const [insertResult, updateResult, deleteResult] = await Promise.all([
+        client.from('appointment_events').insert({
+          action: 'UPDATE', appointment_id: event.appointment_id, tenant_id: event.tenant_id,
+          pet_id: event.pet_id, pet_name: event.pet_name,
+        }),
+        client.from('appointment_events').update({ pet_name: 'alterato' }).eq('id', event.id),
+        client.from('appointment_events').delete().eq('id', event.id),
+      ]);
+      for (const [operation, result] of [['INSERT', insertResult], ['UPDATE', updateResult], ['DELETE', deleteResult]]) {
+        assert(forbiddenRlsError(result.error), `${label} ${operation} non rifiutato: ${result.error?.message || 'successo'}`);
+      }
+    }
+    return '9 scritture rifiutate';
   });
 
   await runTest(

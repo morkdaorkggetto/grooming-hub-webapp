@@ -267,7 +267,7 @@ export default function Calendar() {
   const [detailForm, setDetailForm] = useState({ date: '', time: '', durationMinutes: DEFAULT_DURATION });
   const [modalError, setModalError] = useState('');
   const [modalSuccess, setModalSuccess] = useState('');
-  const [deleteError, setDeleteError] = useState('');
+  const [cancelError, setCancelError] = useState('');
   const [workPetId, setWorkPetId] = useState('');
   const [calendarSearchValue, setCalendarSearchValue] = useState('');
   const bookingSchedule = useMemo(
@@ -294,7 +294,7 @@ export default function Calendar() {
   const closeModal = () => {
     const abandonedCreatedPet = modal === 'manual' && Boolean(manualCreatedPetId);
     clearModalFeedback();
-    setDeleteError('');
+    setCancelError('');
     setModal(null);
     setManualCreatedPetId('');
     if (abandonedCreatedPet) setSuccess('Pet creato. L’appuntamento non è stato salvato.');
@@ -897,22 +897,26 @@ export default function Calendar() {
     } catch (saveError) { showModalError(saveError.message || 'Non riesco ad aggiornare lo stato'); }
     finally { setSaving(false); }
   };
-  const openDeleteConfirmation = () => {
+  const openCancelConfirmation = () => {
     clearModalFeedback();
-    setDeleteError('');
-    setModal('delete');
+    setCancelError('');
+    setModal('cancel');
   };
-  const confirmDelete = async () => {
+  const confirmCancel = async () => {
     if (!selectedItem) return;
-    setSaving(true); setDeleteError(''); setSuccess('');
+    setSaving(true); setCancelError(''); setSuccess('');
     try {
-      await deleteAppointment(selectedItem.id);
-      closeModal();
-      setSelectedItem(null);
-      setSuccess('Appuntamento eliminato: la riga inserita per errore non fa più parte della storia.');
+      if (selectedItem.appointment_source === 'operator' && !selectedItem.requested_by_customer_id) {
+        await deleteAppointment(selectedItem.id);
+      } else {
+        await updateAppointmentStatus(selectedItem.id, 'cancelled');
+      }
+      setSelectedItem((current) => ({ ...current, status: 'cancelled' }));
+      setModal('detail');
+      setSuccess('Appuntamento annullato: resta visibile fra gli annullati.');
       await loadWeek();
-    } catch (deleteFailure) {
-      setDeleteError(deleteFailure.message || "Non riesco a eliminare l'appuntamento.");
+    } catch (cancelFailure) {
+      setCancelError(cancelFailure.message || "Non riesco ad annullare l'appuntamento.");
     } finally {
       setSaving(false);
     }
@@ -1202,8 +1206,8 @@ export default function Calendar() {
             {selectedItem.status === 'no_show' ? (
               <Button staff variant="outline" onClick={() => changeStatus('scheduled')}>Annulla assenza</Button>
             ) : null}
-            {selectedItem.status !== 'no_show' ? (
-              <Button staff variant="danger" disabled={selectedItem.status === 'cancelled'} onClick={() => changeStatus('cancelled')}>Annulla appuntamento</Button>
+            {selectedItem.status === 'scheduled' ? (
+              <Button staff variant="danger" onClick={openCancelConfirmation}>Annulla appuntamento</Button>
             ) : null}
             {selectedItem.status === 'cancelled' ? (
               <Button staff variant="ghost" disabled={Boolean(restoreBlockMessage)} onClick={() => changeStatus('scheduled')}>
@@ -1211,25 +1215,15 @@ export default function Calendar() {
               </Button>
             ) : null}
           </div>
-          {selectedItem.status !== 'completed'
-            && selectedItem.appointment_source === 'operator'
-            && !selectedItem.requested_by_customer_id ? (
-              <div className="gh-calendar-form-stack">
-                <p className="gh-calendar-form-helper">Solo se questa riga è stata inserita per errore.</p>
-                <div className="gh-inline-actions">
-                  <Button staff variant="ghost" onClick={openDeleteConfirmation}>Elimina</Button>
-                </div>
-              </div>
-            ) : null}
         </form>
       </Modal>}
 
-      {modal === 'delete' && selectedItem && <Modal title="Elimina appuntamento" narrow closeDisabled={saving} onClose={() => { setDeleteError(''); setModal('detail'); }} footer={<><Button staff variant="ghost" disabled={saving} onClick={() => { setDeleteError(''); setModal('detail'); }}>Torna indietro</Button><Button staff variant="danger" loading={saving} onClick={confirmDelete}>Elimina definitivamente</Button></>}>
+      {modal === 'cancel' && selectedItem && <Modal title="Annulla appuntamento" narrow closeDisabled={saving} onClose={() => { setCancelError(''); setModal('detail'); }} footer={<><Button staff variant="ghost" disabled={saving} onClick={() => { setCancelError(''); setModal('detail'); }}>Torna indietro</Button><Button staff variant="danger" loading={saving} onClick={confirmCancel}>Conferma annullamento</Button></>}>
         <div className="gh-calendar-form-stack">
-          <p className="gh-body"><strong>Elimini l&apos;appuntamento di {selectedItem.petName} di {formatFullDayLabel(toLocalDateString(new Date(selectedItem.scheduled_at)))} alle {formatTime(selectedItem.scheduled_at)}?</strong></p>
-          <p className="gh-body">Sparisce del tutto. Se invece il cliente ha disdetto, usa «Annulla appuntamento»: resta come fatto.</p>
+          <p className="gh-body"><strong>Annulli l&apos;appuntamento di {selectedItem.petName} di {formatFullDayLabel(toLocalDateString(new Date(selectedItem.scheduled_at)))} alle {formatTime(selectedItem.scheduled_at)}?</strong></p>
+          <p className="gh-body">Resterà visibile fra gli annullati e potrai ripristinarlo se il posto è libero.</p>
           {savingMessage ? <p className="gh-calendar-form-helper" role="status">{savingMessage}</p> : null}
-          {deleteError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{deleteError}</p> : null}
+          {cancelError ? <p className="gh-calendar-notice gh-calendar-notice--error" role="alert">{cancelError}</p> : null}
         </div>
       </Modal>}
     </div>
