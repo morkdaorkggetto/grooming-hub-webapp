@@ -260,6 +260,17 @@ export default function Book() {
     && hasCoatCondition
     && (!needsDeclaredAge || declaredAge.trim())
   );
+  const missingFields = [
+    !petId && { label: 'il pet', target: 'gh-book-pet-step' },
+    needsDeclaredAge && !declaredAge.trim() && { label: `l’età di ${selectedPet.name}`, target: 'declared-pet-age' },
+    !serviceId && { label: 'cosa serve', target: 'gh-book-service-step' },
+    (!desiredDate || selectedDateClosure.isClosed) && { label: selectedDateClosure.isClosed ? 'un’altra data' : 'la data', target: 'gh-book-date-step' },
+    isTimePreferenceClosed(timePreference, selectedDateClosure) && { label: 'un’altra fascia', target: 'gh-book-date-step' },
+    !hasCoatCondition && { label: 'come sta il pelo', target: 'gh-book-coat-step' },
+  ].filter(Boolean);
+  const missingMessage = missingFields.length
+    ? `Manca: ${missingFields.map((field) => field.label).join(', ')}.`
+    : '';
   const isDirty = !submission && Boolean(
     (petId && petId !== requestedPetId)
     || serviceId
@@ -287,6 +298,13 @@ export default function Book() {
     const closure = getDateClosure(value, bookingSchedule);
     setDesiredDate(value);
     setTimePreference((current) => isTimePreferenceClosed(current, closure) ? '' : current);
+  };
+
+  const goToFirstMissing = () => {
+    const target = document.getElementById(missingFields[0]?.target);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.focus({ preventScroll: true });
   };
 
   const handleSubmit = async (event) => {
@@ -343,7 +361,7 @@ export default function Book() {
   ) : '';
 
   return (
-    <main className="gh-book-page">
+    <main className="gh-book-page gh-book-form-page">
       <BackgroundDecor />
       <div className="gh-book-shell">
         <header className="gh-book-header">
@@ -370,7 +388,7 @@ export default function Book() {
         ) : (
           <form className="gh-book-layout" onSubmit={handleSubmit}>
             <div className="gh-book-form-column">
-              <section className="gh-book-step">
+              <section className="gh-book-step" id="gh-book-pet-step" tabIndex={-1}>
                 <StepHead number="1" title="Per chi?" />
                 <div className="gh-book-pet-grid">
                   {pets.map((pet) => <PetChoice key={pet.id} pet={pet} selected={pet.id === petId} onClick={() => setPetId(pet.id)} />)}
@@ -396,7 +414,7 @@ export default function Book() {
                 ) : null}
               </section>
 
-              <section className="gh-book-step">
+              <section className="gh-book-step" id="gh-book-service-step" tabIndex={-1}>
                 <StepHead number="2" title="Cosa serve?" hint="In negozio decidiamo insieme i dettagli." />
                 <div className="gh-book-service-grid">
                   {services.map((service, index) => (
@@ -406,7 +424,7 @@ export default function Book() {
                 <p className="gh-book-duration-note">Il cane resta con noi qualche ora. Ti scriviamo appena è pronto.</p>
               </section>
 
-              <section className="gh-book-step">
+              <section className="gh-book-step" id="gh-book-date-step" tabIndex={-1}>
                 <StepHead number="3" title="Quando ti andrebbe bene?" />
                 <DesiredDateStrip dates={dateOptions} value={desiredDate} onChange={handleDateChange} />
                 <p className="gh-book-date-hint">È la data che <em>preferiresti</em> — la confermiamo noi insieme all’orario.</p>
@@ -433,7 +451,7 @@ export default function Book() {
                 ) : null}
               </section>
 
-              <section className="gh-book-step">
+              <section className="gh-book-step" id="gh-book-coat-step" tabIndex={-1}>
                 <StepHead number="4" title={`Come sta il pelo di ${selectedPet?.name || 'chi ci porterai'}?`} hint="Ci aiuta a prepararci — poi lo guardiamo insieme all’arrivo." />
                 <div className="gh-book-chip-row" aria-label="Condizioni del manto">
                   {COAT_CONDITIONS.map((item) => (
@@ -462,17 +480,19 @@ export default function Book() {
                 <SummaryRow label="Data desiderata" value={desiredDate ? formatDesiredDate(desiredDate) : ''} />
                 <SummaryRow label="Manto" value={selectedCoatLabels.join(', ') || coatNotes.trim()} />
                 <p className="gh-book-summary-message">Ti rispondiamo noi su WhatsApp con giorno e ora — di solito in pochi minuti.</p>
-                <button className="gh-book-submit" type="submit" disabled={!canSubmit || submitting}>
+                {missingMessage ? <p className="gh-book-summary-message gh-book-missing" id="gh-book-desktop-missing" aria-live="polite">{missingMessage}</p> : null}
+                <button className="gh-book-submit" type={canSubmit ? 'submit' : 'button'} aria-disabled={!canSubmit || submitting} aria-describedby={missingMessage ? 'gh-book-desktop-missing' : undefined} disabled={submitting} onClick={!canSubmit ? goToFirstMissing : undefined}>
                   {submitting ? 'Invio in corso…' : 'Invia la richiesta'}
                 </button>
               </Card>
             </aside>
 
-            {canSubmit ? (
-              <button className="gh-book-mobile-submit" type="submit" disabled={submitting}>
+            <div className="gh-book-mobile-action">
+              {missingMessage ? <p className="gh-book-summary-message gh-book-missing" id="gh-book-mobile-missing" aria-live="polite">{missingMessage}</p> : null}
+              <button className="gh-book-mobile-submit" type={canSubmit ? 'submit' : 'button'} aria-disabled={!canSubmit || submitting} aria-describedby={missingMessage ? 'gh-book-mobile-missing' : undefined} disabled={submitting} onClick={!canSubmit ? goToFirstMissing : undefined}>
                 {submitting ? 'Invio in corso…' : 'Invia la richiesta'}
               </button>
-            ) : null}
+            </div>
           </form>
         )}
       </div>

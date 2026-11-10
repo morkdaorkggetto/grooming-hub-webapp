@@ -219,6 +219,7 @@
 .gh-book-summary-row > span { color: var(--color-text-secondary); }
 .gh-book-summary-row > strong { text-align: right; overflow-wrap: anywhere; }
 .gh-book-summary-message { margin: 18px 0; color: var(--color-text-secondary); font-size: 12.5px; line-height: 1.55; }
+.gh-book-missing { margin: 0 0 10px; }
 
 .gh-book-submit,
 .gh-book-mobile-submit,
@@ -239,7 +240,10 @@
 
 .gh-book-submit { width: 100%; background: var(--color-primary); color: white; }
 .gh-book-submit:disabled,
-.gh-book-mobile-submit:disabled { cursor: not-allowed; opacity: 0.55; }
+.gh-book-mobile-submit:disabled,
+.gh-book-submit[aria-disabled='true'],
+.gh-book-mobile-submit[aria-disabled='true'] { opacity: 0.55; }
+.gh-book-mobile-action { display: none; }
 .gh-book-mobile-submit { display: none; }
 
 .gh-book-error {
@@ -309,6 +313,7 @@
 
 @media (max-width: 640px) {
   .gh-book-page { padding: 34px 16px 172px; }
+  .gh-book-form-page { padding-bottom: 300px; }
   .gh-book-header { margin-bottom: 34px; }
   .gh-book-header h1,
   .gh-book-result h1 { font-size: 30px; }
@@ -328,13 +333,21 @@
   .gh-book-choice-copy small { font-size: 10px; }
   .gh-book-summary-column { display: none; }
 
-  .gh-book-mobile-submit {
+  .gh-book-mobile-action {
     position: fixed;
     left: 16px;
     right: 16px;
     bottom: 92px;
-    width: calc(100% - 32px);
     z-index: 35;
+    display: block;
+  }
+  .gh-book-mobile-action .gh-book-missing {
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    background: var(--color-surface-main);
+  }
+  .gh-book-mobile-submit {
+    width: 100%;
     display: inline-flex;
     background: var(--color-primary);
     color: white;
@@ -349,5 +362,5 @@
   .gh-book-service-grid { gap: 6px; }
   .gh-book-choice { padding: 8px; }
   .gh-book-choice[aria-pressed='true'] { padding: 7px; }
-  .gh-book-mobile-submit { left: 12px; right: 12px; width: calc(100% - 24px); }
+  .gh-book-mobile-action { left: 12px; right: 12px; }
 }
