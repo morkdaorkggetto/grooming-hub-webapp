@@ -163,6 +163,13 @@
 .gh-book-date-hint,
 .gh-book-time-hint { margin: 10px 0 0; color: var(--color-text-secondary); font-size: 12.5px; line-height: 1.5; }
 .gh-book-time-hint { margin-top: 7px; }
+#gh-book-date-step .gh-book-step-head { margin-bottom: 10px; }
+#gh-book-date-step .gh-book-date-hint { margin: 0 0 10px; }
+#gh-book-date-step .gh-book-notes-label { margin: 10px 0 0; }
+#gh-book-date-step .gh-book-chip-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+#gh-book-date-step .gh-book-chip { min-width: 0; min-height: 54px; padding: 6px 4px; border-radius: 12px; white-space: normal; text-align: center; }
+#gh-book-date-step .gh-book-chip[aria-pressed='true'] { border: 2px solid var(--color-primary); background: var(--gh-tint); color: var(--color-text-primary); }
+#gh-book-date-step .gh-date-calendar__selection { margin: 9px 0 0; }
 
 .gh-book-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 

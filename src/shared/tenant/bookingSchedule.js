@@ -7,6 +7,7 @@ const WEEKDAYS = [
   'friday',
   'saturday',
 ];
+const DATE_VALUE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const BOOKING_TIME_WINDOWS = Object.freeze({
   morning: Object.freeze({
@@ -88,12 +89,25 @@ const parseDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const isValidClosedDate = (value) => {
+  if (typeof value !== 'string' || !DATE_VALUE.test(value)) return false;
+  const date = parseDate(value);
+  return date !== null && date.getFullYear() === Number(value.slice(0, 4))
+    && date.getMonth() + 1 === Number(value.slice(5, 7))
+    && date.getDate() === Number(value.slice(8, 10));
+};
+
 export const getBookingSchedule = (settings) => {
   const schedule = settings?.booking_schedule;
   const closedWeekdays = Array.isArray(schedule?.closed_weekdays)
     ? schedule.closed_weekdays.filter((day) => WEEKDAYS.includes(day))
     : [];
   const configuredPreferences = schedule?.closed_time_preferences;
+  const maxMonthsAhead = Number.isInteger(schedule?.max_months_ahead) && schedule.max_months_ahead > 0
+    ? schedule.max_months_ahead : 2;
+  const closedDates = Array.isArray(schedule?.closed_dates)
+    ? [...new Set(schedule.closed_dates.filter(isValidClosedDate))]
+    : [];
   const closedTimePreferences = {};
 
   if (configuredPreferences && typeof configuredPreferences === 'object') {
@@ -105,7 +119,7 @@ export const getBookingSchedule = (settings) => {
     });
   }
 
-  return { closedWeekdays, closedTimePreferences };
+  return { closedWeekdays, closedTimePreferences, closedDates, maxMonthsAhead };
 };
 
 export const getDateClosure = (value, schedule) => {
@@ -115,7 +129,8 @@ export const getDateClosure = (value, schedule) => {
   }
 
   const weekday = WEEKDAYS[date.getDay()];
-  const isClosed = schedule.closedWeekdays.includes(weekday);
+  const dateValue = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const isClosed = schedule.closedWeekdays.includes(weekday) || schedule.closedDates?.includes(dateValue);
   const closedTimePreferences = isClosed
     ? [...TIME_PREFERENCES]
     : schedule.closedTimePreferences[weekday] || [];

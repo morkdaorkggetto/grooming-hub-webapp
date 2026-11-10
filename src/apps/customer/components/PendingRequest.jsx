@@ -10,14 +10,13 @@ import {
   isTimePreferenceClosed,
 } from '../../../shared/tenant/bookingSchedule';
 import Card from '../../../shared/ui/Card';
-import DesiredDateStrip from '../../../shared/ui/DesiredDateStrip';
+import DesiredDateCalendar from '../../../shared/ui/DesiredDateStrip';
 import Eyebrow from '../../../shared/ui/Eyebrow';
 import Button from '../../../shared/ui/Button';
 import StatusBadge from '../../../shared/ui/StatusBadge';
 import { buildWhatsAppUrl } from '../../staff/lib/whatsapp';
 import BookingTimePreferenceChips from './BookingTimePreferenceChips';
 import { alternativeResponseError, currentAlternativeResponse } from '../lib/appointmentResponses';
-import { createBookingDateOptions } from '../lib/bookingDates';
 import {
   canDeclineAppointmentAlternatives,
   declineAppointmentResponseError,
@@ -70,10 +69,6 @@ export default function PendingRequest({ request, onResponded, embedded = false 
     () => getBookingSchedule(tenant?.settings),
     [tenant?.settings]
   );
-  const dateOptions = useMemo(() => createBookingDateOptions().map((item) => {
-    const closure = getDateClosure(item.date, bookingSchedule);
-    return { ...item, disabled: closure.isClosed, unavailableLabel: closure.label };
-  }), [bookingSchedule]);
   const selectedDateClosure = getDateClosure(newDesiredDate, bookingSchedule);
   const canDecline = canDeclineAppointmentAlternatives(current);
   const canWithdraw = current.status === 'pending' && !current.appointment_id;
@@ -193,10 +188,11 @@ export default function PendingRequest({ request, onResponded, embedded = false 
             <>
               <p style={textStyle}>Quando ti andrebbe bene invece?</p>
               <p style={textStyle}>Se vuoi, indica una nuova data: aiuta il salone a proporti orari più adatti.</p>
-              <div style={{ marginInline: -3 }}>
-                <DesiredDateStrip
-                  dates={dateOptions}
+              <div className="gh-pending-date-calendar" style={{ marginInline: -3 }}>
+                <DesiredDateCalendar
+                  schedule={bookingSchedule}
                   value={newDesiredDate}
+                  embedded
                   onChange={(value) => {
                     const closure = getDateClosure(value, bookingSchedule);
                     setNewDesiredDate(value);

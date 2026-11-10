@@ -18,7 +18,7 @@ import {
 } from '../../../shared/tenant/bookingSchedule';
 import BackgroundDecor from '../../../shared/ui/BackgroundDecor';
 import Card from '../../../shared/ui/Card';
-import DesiredDateStrip from '../../../shared/ui/DesiredDateStrip';
+import DesiredDateCalendar from '../../../shared/ui/DesiredDateStrip';
 import Eyebrow from '../../../shared/ui/Eyebrow';
 import Icon from '../../../shared/ui/Icon';
 import Skeleton from '../../../shared/ui/Skeleton';
@@ -34,7 +34,7 @@ import { usePets } from '../hooks/usePets';
 import { useAppointmentRequests } from '../hooks/useAppointmentRequests';
 import { useOpenPetAppointments } from '../hooks/useOpenPetAppointments';
 import { getBookingServices, submitAppointmentRequest } from '../lib/booking';
-import { createBookingDateOptions, getBookingFullPeriod } from '../lib/bookingDates';
+import { getBookingFullPeriod } from '../lib/bookingDates';
 import './Book.css';
 
 const UNSAVED_MESSAGE = 'Hai una richiesta non inviata. Vuoi davvero lasciare la pagina?';
@@ -204,14 +204,6 @@ export default function Book() {
     () => getBookingSchedule(tenant?.settings),
     [tenant?.settings]
   );
-  const dateOptions = useMemo(() => createBookingDateOptions().map((item) => {
-    const closure = getDateClosure(item.date, bookingSchedule);
-    return {
-      ...item,
-      disabled: closure.isClosed,
-      unavailableLabel: closure.label,
-    };
-  }), [bookingSchedule]);
   const requestedPetId = searchParams.get('petId') || '';
   const selectedPet = pets.find((pet) => pet.id === petId) || null;
   const selectedOpenBooking = useMemo(
@@ -426,8 +418,19 @@ export default function Book() {
 
               <section className="gh-book-step" id="gh-book-date-step" tabIndex={-1}>
                 <StepHead number="3" title="Quando ti andrebbe bene?" />
-                <DesiredDateStrip dates={dateOptions} value={desiredDate} onChange={handleDateChange} />
-                <p className="gh-book-date-hint">È la data che <em>preferiresti</em> — la confermiamo noi insieme all’orario.</p>
+                <p className="gh-book-date-hint">È un desiderio: l’ora te la conferma il salone su WhatsApp.</p>
+                <DesiredDateCalendar schedule={bookingSchedule} value={desiredDate} onChange={handleDateChange} />
+                {daysAhead !== null && daysAhead < 7 ? (
+                  <WarmNotice title="Sei un po’ a corto di preavviso.">
+                    La richiesta parte lo stesso — faremo il possibile per trovarti spazio, e ti diciamo subito su WhatsApp come siamo messi.
+                  </WarmNotice>
+                ) : null}
+                {fullPeriod ? (
+                  <WarmNotice icon="bell" title={`Periodo pieno (${fullPeriod}):`}>
+                    stanno arrivando più richieste del solito, quindi potremmo metterci un po’ di più a risponderti. Mandala comunque — le leggiamo tutte.
+                  </WarmNotice>
+                ) : null}
+                <p className="gh-book-notes-label">Mattina o pomeriggio?</p>
                 <BookingTimePreferenceChips
                   value={timePreference}
                   closure={selectedDateClosure}
@@ -439,16 +442,6 @@ export default function Book() {
                   </p>
                 ) : null}
                 <p className="gh-book-time-hint">L’orario preciso lo concordiamo noi su WhatsApp.</p>
-                {daysAhead !== null && daysAhead < 7 ? (
-                  <WarmNotice title="Sei un po’ a corto di preavviso.">
-                    La richiesta parte lo stesso — faremo il possibile per trovarti spazio, e ti diciamo subito su WhatsApp come siamo messi.
-                  </WarmNotice>
-                ) : null}
-                {fullPeriod ? (
-                  <WarmNotice icon="bell" title={`Periodo pieno (${fullPeriod}):`}>
-                    stanno arrivando più richieste del solito, quindi potremmo metterci un po’ di più a risponderti. Mandala comunque — le leggiamo tutte.
-                  </WarmNotice>
-                ) : null}
               </section>
 
               <section className="gh-book-step" id="gh-book-coat-step" tabIndex={-1}>
