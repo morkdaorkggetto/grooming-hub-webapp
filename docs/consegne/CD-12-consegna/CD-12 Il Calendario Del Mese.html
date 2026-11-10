@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>CD-12 · Il calendario del mese</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+html,body{margin:0;padding:0;background:#f0eee9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#root{width:100vw;height:100vh;overflow:hidden}
+em{font-style:italic}
+a{color:var(--color-link)}a:hover{color:var(--color-primary-hover)}
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="160" fill="#6f9792"/><rect x="66" y="30" width="108" height="100" rx="12" fill="#fbf6f3"/><rect x="92" y="40" width="56" height="9" rx="4.5" fill="#2b2525"/><g fill="#cfc1c4"><circle cx="80" cy="66" r="4"/><circle cx="94" cy="66" r="4"/><circle cx="108" cy="66" r="4"/><circle cx="122" cy="66" r="4"/><circle cx="136" cy="66" r="4"/><circle cx="150" cy="66" r="4"/><circle cx="80" cy="82" r="4"/><circle cx="94" cy="82" r="4"/><circle cx="122" cy="82" r="4"/><circle cx="136" cy="82" r="4"/><circle cx="150" cy="82" r="4"/><circle cx="80" cy="98" r="4"/><circle cx="94" cy="98" r="4"/><circle cx="108" cy="98" r="4"/><circle cx="122" cy="98" r="4"/><circle cx="136" cy="98" r="4"/><circle cx="150" cy="98" r="4"/></g><circle cx="108" cy="82" r="7" fill="#5e8580"/></svg>
+</template>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="shared-ui.jsx"></script>
+<script type="text/babel" src="gh15-ed-kit.jsx"></script>
+<script type="text/babel" src="gh15-ed-riferimenti.jsx"></script>
+<script type="text/babel" src="cd01-cal-note.jsx"></script>
+<script type="text/babel" src="cd12-calendario-kit.jsx"></script>
+<script type="text/babel" src="cd12-calendario-note.jsx"></script>
+<script type="text/babel" data-presets="react">
+const C = ({ children }) => <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: '#f0eee9' }}>{children}</div>;
+const D = (m, d, y = 2026) => new Date(y, m, d);
+const App = () => (
+  <DesignCanvas>
+    <DCSection id="cd12-casi" title="CD-12 · Il calendario del mese, a 375" subtitle="Oggi è martedì 10 novembre. Un mese per volta, frecce ai lati, fino a 2 mesi da oggi. Tutti i giorni che si possono chiedere hanno lo stesso aspetto: non è un sistema di posti liberi.">
+      <DCArtboard id="apre" label="si apre · novembre, niente ancora scelto" width={455} height={880}><C><Passo3 y={2026} m={10} manca="il giorno"/></C></DCArtboard>
+      <DCArtboard id="lun" label="lunedì 16 · solo pomeriggio, e poco preavviso" width={455} height={880}><C><Passo3 y={2026} m={10} scelto={D(10, 16)} fascia="pom"/></C></DCArtboard>
+      <DCArtboard id="pieno" label="dicembre · martedì 22, periodo pieno" width={455} height={880}><C><Passo3 y={2026} m={11} scelto={D(11, 22)} manca="la fascia"/></C></DCArtboard>
+      <DCArtboard id="limite" label="gennaio · il mese limite, freccia spenta" width={455} height={880}><C><Passo3 y={2027} m={0} scelto={D(0, 8, 2027)} fascia="ug"/></C></DCArtboard>
+      <DCArtboard id="fine" label="il 26 novembre · si apre già su dicembre" width={455} height={880}><C><Passo3 y={2026} m={11} oggi={D(10, 26)} manca="il giorno"/></C></DCArtboard>
+    </DCSection>
+    <DCSection id="cd12-posti" title="CD-12 · Il secondo posto, e il banco largo" subtitle="Lo stesso calendario nel foglio «Scegli un’altra data» (Home di CD-11 e PendingRequest), e a 1365 nella colonna del modulo accanto al riepilogo.">
+      <DCArtboard id="foglio" label="375 · foglio «Scegli un’altra data»" width={455} height={880}><C><Foglio12 y={2026} m={10} scelto={D(10, 27)} fascia="mat" motivo="La data chiesta non è disponibile."/></C></DCArtboard>
+      <DCArtboard id="desk" label="1365 · il passo 3 nella colonna del modulo" width={1365} height={970}><Desktop12 y={2026} m={10} scelto={D(10, 20)} fascia="pom"/></DCArtboard>
+    </DCSection>
+    <DCSection id="cd12-ragioni" title="CD-12 · Prima → dopo, e le ragioni" subtitle="I valori, le decisioni, cosa non torna.">
+      <DCArtboard id="pd" label="Prima → dopo" width={1280} height={560}><CD12_PrimaDopo/></DCArtboard>
+      <DCArtboard id="rag" label="Le decisioni" width={1280} height={820}><CD12_Ragioni/></DCArtboard>
+      <DCArtboard id="nt" label="Cosa non torna · campi" width={1280} height={640}><CD12_NonTorna/></DCArtboard>
+    </DCSection>
+    <DCPostIt x={44} y={44} width={330}>
+      <strong>CD-12 · Il calendario del mese</strong><br/><br/>
+      <strong>Un mese per volta</strong>, sei righe fisse, frecce 44×44. Fino a 2 mesi da oggi, dalle impostazioni del salone.<br/><br/>
+      <strong>Non sembra un sistema di posti liberi:</strong> tutti i giorni chiedibili hanno lo stesso aspetto. Le regole stanno una volta sotto la griglia. Dentro la griglia c’è solo il punto del periodo pieno.<br/><br/>
+      <strong>Primo mese:</strong> il corrente, il dopo se nel corrente restano meno di 7 giorni.<br/><br/>
+      <strong>Due posti:</strong> il passo 3 e il foglio «Scegli un’altra data».<br/><br/>
+      <strong>Cosa non torna, n. 2:</strong> il 10 gennaio è domenica. La riga del limite deve dire l’ultimo giorno chiedibile.
+    </DCPostIt>
+  </DesignCanvas>
+);
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
