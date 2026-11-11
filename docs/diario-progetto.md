@@ -270,7 +270,7 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 
 **Aperto**:
 - Controprova visiva di Luigi nell'app cliente: l'8 dicembre spento e la legenda che lo dice.
-- `GH-117` da eseguire (Codex), poi verifica della regia e prova di Luigi sul telefono. Non misurati: larghezza vera delle fasce nel riquadro, iPhone.
+- `GH-117` consegnato da Codex alle 08:15 (commit `d352877`) e verificato dalla regia alle 08:18: nel commit solo i sei file del perimetro e il registro; le cinque impronte dei file del gestionale invariate; le sei stringhe dell'invariante rieseguite identiche (`node`, import di `bookingSchedule.js`); «Non disponibile» resta solo nel passo 4. **Scoperta di Codex:** le fasce nel riquadro non sono larghe 303px ma 335px nel foglio della tessera e 285px nella Card Home, dove a «Pomeriggio» scelto restano 8,37px di margine. Non verificato da nessuno: l'app vera con accesso, e l'iPhone. Incompletezza accettata: «scelta tolta senza avviso». Manca il push di Luigi, poi la sua prova sul telefono, soprattutto nella Card Home.
 - Rinviati da Luigi l'11/11: atto B di `GH-103` e il controllo dei giorni di festa nel database (`GH-118`).
 - `closed_dates` non è controllata dal database (vedi «Passaggio di consegne», punto 2).
 - Atto B di `GH-103`: aspetta il sì di Luigi.
