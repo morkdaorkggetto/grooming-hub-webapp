@@ -16,9 +16,8 @@
 .gh-date-calendar--embedded .gh-date-calendar__panel { padding: 0; border: 0; border-radius: 0; }
 .pet-card-request-content .gh-date-calendar__arrow { min-height: 0 !important; }
 .pet-card-request-content .gh-date-calendar__cell { min-height: 0 !important; }
-.gh-pending-date-calendar + .gh-book-chip-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.gh-pending-date-calendar + .gh-book-chip-row .gh-book-chip { min-width: 0; min-height: 54px; padding: 6px 4px; border-radius: 12px; white-space: normal; text-align: center; }
-.gh-pending-date-calendar + .gh-book-chip-row .gh-book-chip[aria-pressed='true'] { border: 2px solid var(--color-primary); background: var(--gh-tint); color: var(--color-text-primary); }
+.gh-pending-date-calendar + .gh-book-time-preference-block .gh-book-time-preference-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.gh-pending-date-calendar + .gh-book-time-preference-block .gh-book-chip[aria-pressed='true'] { border: 2px solid var(--color-primary-hover); padding: 5px 3px; background: var(--gh-tint); color: var(--color-text-primary); }
 .gh-date-calendar__head { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 4px; }
 .gh-date-calendar__arrow { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-main); color: var(--color-text-primary); cursor: pointer; }
 .gh-date-calendar__arrow:disabled { opacity: .35; cursor: default; }

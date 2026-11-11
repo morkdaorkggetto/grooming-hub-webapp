@@ -155,7 +155,7 @@ export default function PendingRequest({ request, onResponded, embedded = false 
       <Eyebrow style={{ marginBottom: 12 }}>Richiesta appuntamento</Eyebrow>
       <div style={{ marginBottom: 12 }}><StatusBadge status="scheduled" approvalStatus="pending" compact /></div>
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 500, textTransform: 'capitalize' }}>{day(current.desired_date)}</div>
-      <p style={textStyle}>{current.pet?.name || 'Il tuo pet'} · {current.service?.name || 'Indicazione non disponibile'} · {getBookingTimePreferenceLabel(current.time_preference, 'Nessuna preferenza') || 'Nessuna preferenza'}</p>
+      <p style={textStyle}>{current.pet?.name || 'Il tuo pet'} · {current.service?.name || 'Indicazione non disponibile'} · {getBookingTimePreferenceLabel(current.time_preference) || 'Nessuna preferenza'}</p>
       <p style={{ ...textStyle, fontSize: 13 }}>Inviata il {new Date(request.created_at).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
       </>}
       {canWithdraw ? (
@@ -180,7 +180,7 @@ export default function PendingRequest({ request, onResponded, embedded = false 
               <p role="status" style={textStyle}>
                 {response === 'accepted'
                   ? `Hai scelto ${slotLabel({ date: current.chosen_date, time: current.chosen_time, time_preference: current.chosen_time_preference })}. Ora tocca al salone confermare l'appuntamento.`
-                  : `Hai indicato ${day(current.desired_date)}${current.time_preference ? `, ${getBookingTimePreferenceLabel(current.time_preference, 'senza preferenza oraria')}` : ''}. Ora tocca al salone proporti un’alternativa.`}
+                  : `Hai indicato ${day(current.desired_date)}${current.time_preference ? `, ${getBookingTimePreferenceLabel(current.time_preference, 'senza preferenza oraria').replace(/^./, (letter) => letter.toLocaleLowerCase('it-IT'))}` : ''}. Ora tocca al salone proporti un’alternativa.`}
               </p>
               <Button variant="ghost" style={buttonStyle} disabled={busy} onClick={() => setEditing(true)}>Cambia risposta</Button>
             </>
@@ -206,9 +206,6 @@ export default function PendingRequest({ request, onResponded, embedded = false 
                 closure={selectedDateClosure}
                 onChange={(value) => { setNewTimePreference(value); setError(''); }}
               />
-              {selectedDateClosure.label && !selectedDateClosure.isClosed ? (
-                <p role="status" style={textStyle}>{selectedDateClosure.label}. Per quel giorno scegli un’altra preferenza.</p>
-              ) : null}
               <Button
                 variant="ghost"
                 style={buttonStyle}

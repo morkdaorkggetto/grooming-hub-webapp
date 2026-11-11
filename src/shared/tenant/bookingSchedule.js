@@ -16,6 +16,7 @@ export const BOOKING_TIME_WINDOWS = Object.freeze({
     start: '09:00',
     end: '13:00',
     closedLabel: 'Mattina chiusa',
+    closedState: 'chiusa',
   }),
   afternoon: Object.freeze({
     value: 'afternoon',
@@ -23,6 +24,7 @@ export const BOOKING_TIME_WINDOWS = Object.freeze({
     start: '13:00',
     end: '19:00',
     closedLabel: 'Pomeriggio chiuso',
+    closedState: 'chiuso',
   }),
 });
 
@@ -32,7 +34,7 @@ const TIME_PREFERENCE_ALIASES = {
   indifferente: 'flexible',
 };
 
-const formatRangeHour = (value) => String(Number(value.split(':')[0]));
+export const formatRangeHour = (value) => String(Number(value.split(':')[0]));
 const toMinutes = (value) => {
   const match = String(value || '').match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return null;

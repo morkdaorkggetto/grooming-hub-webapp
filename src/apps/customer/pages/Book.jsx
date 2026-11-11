@@ -430,17 +430,11 @@ export default function Book() {
                     stanno arrivando più richieste del solito, quindi potremmo metterci un po’ di più a risponderti. Mandala comunque — le leggiamo tutte.
                   </WarmNotice>
                 ) : null}
-                <p className="gh-book-notes-label">Mattina o pomeriggio?</p>
                 <BookingTimePreferenceChips
                   value={timePreference}
                   closure={selectedDateClosure}
                   onChange={setTimePreference}
                 />
-                {selectedDateClosure.label && !selectedDateClosure.isClosed ? (
-                  <p className="gh-book-availability-note" role="status">
-                    {selectedDateClosure.label}. Per quel giorno scegli un’altra preferenza.
-                  </p>
-                ) : null}
                 <p className="gh-book-time-hint">L’orario preciso lo concordiamo noi su WhatsApp.</p>
               </section>
 
