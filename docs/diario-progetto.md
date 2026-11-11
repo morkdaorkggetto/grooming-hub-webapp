@@ -8,7 +8,74 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 ## Stato attuale
 
-*Aggiornato il 19 settembre 2026.*
+*Aggiornato l'11 novembre 2026 da Cowork, a chiusura di una sessione lunga (dal 27/9 all'11/11). Il racconto completo è nella cronologia, voce «19 settembre – 11 novembre 2026».*
+
+> # Il salone usa lo strumento ogni giorno, e il primo cliente vero ha provato a prenotare.
+>
+> Da settembre a novembre: sicurezza dei dati prima di aprire gli inviti (`GH-102`/`GH-103`), la tessera del cane (`GH-107` → `GH-109`), e poi una serie di incidenti al banco che hanno portato a **un'agenda che non perde niente** (`GH-112`/`GH-113`, con registro degli appuntamenti). Il 9/11 il primo cliente invitato non riusciva a prenotare: risolto con `GH-115` (pulsante sempre visibile) e `GH-116` (calendario del mese, fino a 2 mesi).
+
+**Produzione** (`azgehoseiojodltcttfb`, salone `0211c475-…`), misurata il 4/11: 400 proprietari, 431 cani, 604 appuntamenti. Canone adottato: **1.3** (`~/Desktop/_metodo/CANONE.md`).
+
+**Ultimo commit pubblicato:** `184323f` (GH-116 e consegna CD-12), con push e deploy fatti da Luigi.
+
+### Passaggio di consegne — da qui riparte la prossima sessione
+
+Le cose aperte, in ordine di urgenza:
+
+1. **Atto B di `GH-103`** (`supabase/migrations/20260927052224_gh103_finance_contract.sql`): toglie dal prodotto le vecchie colonne `visits.cost`, `visits.discount_percent` e `services.price_cents`, e il ponte `gh103_finance_bridge()`. **Verificato da Cowork il 4/11, tutto in ordine:**
+   - nelle 24 ore precedenti nessuna richiesta leggeva le vecchie colonne;
+   - nel codice nessun riferimento alle vecchie colonne;
+   - nessuna vista dipende dalle vecchie colonne;
+   - `create_staff_visit` regge con e senza;
+   - copie allineate, 0 differenze.
+
+   **Aspetta solo il sì di Luigi.** Prima di applicarlo, rifare la verifica sui registri delle 24 ore. Applicarlo fuori dall'orario in cui il salone registra visite: l'atto blocca le tabelle per un istante.
+2. **Giorni di chiusura per le feste.** Chiedere a Davide se il salone è chiuso l'8, il 25 e il 26 dicembre, l'1 e il 6 gennaio. Poi un atto di Cowork scrive le date in `tenants.settings.booking_schedule.closed_dates` (elenco `YYYY-MM-DD`), e il calendario le spegne da solo. La chiave `max_months_ahead` non è impostata: vale 2 di default.
+3. **Controllo giornaliero del prodotto.** Va creato da Luigi nella sezione «Scheduled», perché da Cowork locale non si possono più creare attività programmate. Orario: dal lunedì al sabato alle 6:00. Istruzioni pronte in `~/Desktop/grooming-hub-web/controlli-giornalieri/ISTRUZIONI-ATTIVITA.md`, con le impronte aggiornate dopo GH-113.
+4. **Prova di Claude Design dentro Cowork.** Il progetto «grooming HUB» è stato spostato da Claude Design standalone a Claude, come artifact, l'11/11; il sito standalone chiude il 14/12. Claude Design online non vede le cartelle locali. Verificare se una sessione Cowork nuova ha lo strumento per creare artifact di tipo Design: se sì, i prossimi incarichi `CD-` si fanno lì, con la root collegata.
+5. **Audit `GH-114`**, dopo qualche giorno di registro `appointment_events` attivo. L'allegato con le misure è pronto: `docs/incarichi/GH-114-misure-del-prodotto.md`.
+6. **`GH-106` (prestazione in omaggio)**: il mandato esiste ma va riallineato alle funzioni cambiate da GH-112/113 (`complete_appointment_with_visit`).
+7. **File fuori dal repository**, intenzionalmente fuori da `salva.sh`:
+   - `supabase/rollback/`;
+   - gli atti sui dati `20261104_gh112_reopen_leo_labrador.sql` e `20261104_gh113_restore_vittoria_pet_card.sql`;
+   - tre migrazioni `20260927_gh102_*`;
+   - `supabase/demo-riallineamento-2026-09-27.sql`.
+
+   Da decidere se farli entrare con un commit dedicato. Gli atti sui dati contengono ID e un nome di battesimo, niente di più.
+8. **Per Davide:**
+   - Zac (30/10) e Dudù (8/9): appuntamenti chiusi senza visita;
+   - 2 proprietari di prova senza cani (`+39Alfredo3`, `+395555`), da cancellare o no;
+   - 122 proprietari con un numero al posto del nome;
+   - Fred, primo cliente invitato: senza data di nascita, gli viene chiesta l'età.
+9. **Rinviati da Luigi:** la chiave di proiezione del Bronzo (`fidelity_projection`) nel prodotto; i punti aperti §6 del canone.
+
+**Impronte di riferimento nel prodotto** (MD5 di `pg_get_functiondef`, 4/11 dopo GH-113):
+
+| Funzione | MD5 |
+|---|---|
+| `complete_appointment_with_visit` | `e11fb064…` |
+| `set_staff_appointment_status` | `e3ed83d0…` |
+| `delete_staff_visit_reopen_appointment` | `980489a4…` |
+| `enforce_appointment_workstation_capacity` | `ee50b77d…` |
+| `delete_staff_appointment` | `ba643d96…` |
+| `gh113_capture_appointment_event` | `bcedc248…` |
+| `gh113_guard_pet_delete_with_future_appointments` | `e69ebf0f…` |
+
+I valori completi sono in `supabase/rollback/gh113-prima-degli-atti.md` e nelle istruzioni del controllo giornaliero.
+
+**Regole di lavoro fissate con Luigi in questa sessione:**
+
+- **Comandi per il Terminale sempre completi**, mai «lancia salva.sh». Ricordare che `salva.sh` include solo `docs/` e le cartelle di design, e fa push di tutti i commit locali.
+- **Git solo con `--no-optional-locks`**: un `git status` di Cowork ha lasciato due volte `.git/index.lock`.
+- **Gli atti nel prodotto li applica Cowork**, uno alla volta e con autorizzazione esplicita di Luigi per ciascuno. Prima misura e salva lo stato precedente in `supabase/rollback/`; dopo prova con un utente simulato in una transazione annullata.
+- **I mandati dichiarano sempre le tre categorie di accesso al database:** lettura del demo, dati di prova sul demo, prodotto.
+- **Prima di prescrivere, misurare.** Le contraddizioni nei mandati di questa sessione sono nate tutte da regole scritte senza leggere il codice o il database.
+- **Non serve più aprire il Finder** a ogni consegna: solo se Luigi lo chiede.
+- **Si scrive in italiano.**
+
+---
+
+## Stato al 19 settembre 2026 (superato, conservato per storia)
 
 > # Il giro si chiude dentro l'app. Quello che manca non è più codice.
 >
@@ -179,6 +246,60 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 ---
 
 ## Cronologia
+
+### 19 settembre – 11 novembre 2026 — Dalla sicurezza dei dati all'agenda che non perde niente (GH-97 → GH-116, CD-10 → CD-12)
+
+**Attori**: Luigi, Davide e Roby al banco, Cowork, Codex, Claude Design.
+
+*Voce scritta a posteriori l'11/11 da Cowork, su una sessione lunga e già compressa. Il dettaglio vive nei registri `docs/consegne/GH-…-esito.md` e negli incarichi: qui c'è il filo.*
+
+**Fine settembre — affidabilità e sicurezza prima degli inviti.**
+
+- **Agenda e versione dell'app.** `GH-97` (ritirare una richiesta) e `GH-98` (il lavoro lasciato aperto in agenda si vede). `GH-99`: l'app sa di essere una versione vecchia. `GH-100`: indagine su dove si perde un appuntamento, cinque famiglie di cause. `GH-101`: il salvataggio non fallisce in silenzio.
+- **`GH-102`, audit di cosa può raggiungere un cliente.** Ne è nato `GH-103`: i dati economici diventano solo per lo staff, con le tabelle `visit_financials` e `service_financials`, spostati in due atti. **L'atto A è applicato, l'atto B è ancora sospeso.** Poi le foto di riconoscimento private (bucket `client-photos`), gli inviti personali, gli errori grezzi nascosti e il vecchio `/portal` dismesso. Il bucket va reso privato dal pannello, non via SQL, altrimenti la cache CDN non si invalida: verificato con il vecchio URL che risponde 400.
+- **Incidente.** Luigi ha eseguito per errore un file di rollback nel SQL Editor; Cowork ha riapplicato la funzione. **Lezione:** i file di ritorno indietro non si presentano mai in modo ambiguo, e a Luigi si danno sempre comandi completi.
+
+**Il canone diventa universale.** Nasce `~/Desktop/_metodo/` con `CANONE.md` (versioni 1.0 → 1.3), lo storico, i modelli e la skill per Codex (METODO-01/02). Il canone vale solo per i progetti che lo dichiarano nelle loro `ISTRUZIONI.md`. Regole entrate in questo periodo:
+
+- audit prima dei passaggi delicati;
+- impronte con l'algoritmo dichiarato;
+- le tre categorie di accesso al database nei mandati.
+
+**Ottobre — la tessera del cane e il calendario.**
+
+- **La tessera.** `GH-104`: la scheda sa quando torna il cane. `GH-105`: il riquadro parla come la scheda. `GH-107`: la tessera del cane, con due correzioni del mandato (Argento e la chiave delle impostazioni). Claude Design l'ha rivista in `CD-10`, «troppi cerchi», da cui `GH-108`; con `CD-11` e `GH-109` la tessera apre l'app.
+- **Il calendario staff.** `GH-110`: il contatore diventa «Pet in Archivio». `GH-111`: il calendario carica le visite a pagine, oltre il limite di 1000 righe, e riprova se fallisce.
+
+**Inizio novembre — gli incidenti al banco.**
+
+- **Fiocco**: prenotato nel mese sbagliato.
+- **Leo**: il 3/11 è stato chiuso il Leo sbagliato; la visita è stata cancellata ma l'appuntamento è rimasto «completato». Riaperto con un atto.
+- **I chihuahua di Vittoria**: il 4/11 alle 9:07 la scheda è stata eliminata, e a cascata l'appuntamento di venerdì. Vittoria è rimasta senza cani e invisibile, e il suo numero bloccava la ricreazione della scheda (409). Scheda ricreata con un atto.
+
+Ne sono nati due mandati:
+
+- **`GH-112`:** non si chiude un appuntamento futuro, e cancellare una visita riapre l'appuntamento. Tolto anche il completamento automatico che sceglieva da solo il primo risultato.
+- **`GH-113`:** il registro `appointment_events`, in sola aggiunta e scritto da trigger. «Elimina» diventa «Annulla» con ripristino; un cane con appuntamenti futuri non si può eliminare; un proprietario senza cani viene riconosciuto. Applicato nel prodotto il 4/11 e provato con Davide la sera stessa: annulla, ripristina, e dal registro si legge chi e quando.
+
+**Il primo cliente vero (9–10/11).** Il proprietario di Fred ha attivato l'app dall'invito, ma non trovava il pulsante per prenotare: sul telefono non esisteva finché mancava un campo, e gli mancava l'età del cane. Ne sono nati due mandati:
+
+- **`GH-115`:** il pulsante resta grigio, dice cosa manca e porta al campo.
+- **`GH-116`:** nasce da `CD-12`. Sul telefono la striscia mostrava solo una settimana: ora c'è il calendario del mese, fino a **2 mesi**. L'orizzonte è un'impostazione del salone, scelta da Davide che voleva più libertà, con le osservazioni di Cowork su incertezza, assenze e limite delle 3 richieste. Pubblicati entrambi.
+
+**Errori di Cowork in questo periodo**, dichiarati:
+
+- **contraddizioni nei mandati:** GH-103, GH-105, GH-107 e GH-110 chiedevano cose incompatibili con il perimetro o con un vincolo del database;
+- **affermazioni sbagliate:** «Argento e Oro irraggiungibili», sbagliato; «nessun cane eliminato» nel caso dei chihuahua, perché la prima ricerca nei registri non aveva trovato il DELETE; i 5 contatti orfani presentati come cani persi, poi rettificato;
+- **un comando inutile:** un `salva.sh` per file fuori da `docs/`;
+- **blocchi di git:** due `index.lock` lasciati da `git status`.
+
+**Lezione trasversale:** *misurare prima di prescrivere*. Ogni contraddizione è nata da una regola scritta senza leggere il codice o il database.
+
+**Claude Design si sposta.** L'11/11 il progetto «grooming HUB» è passato da Claude Design standalone a Claude, come artifact; prima è stato scaricato l'archivio del progetto. Le consegne CD-02 → CD-12 restano sul Mac in `~/Desktop/grooming-hub-web/Prototipo/`; da CD-10 sono anche nel repository, in `docs/consegne/`.
+
+**Prossimo passo**: vedi «Passaggio di consegne» in cima al diario.
+
+---
 
 ### 14–19 settembre 2026 — Le cose che il salone chiede usandola (GH-93 → GH-96, e la bonifica dei nomi)
 
@@ -1685,3 +1806,5 @@ Azione manuale richiesta a Luigi (1 minuto): Vercel Dashboard → progetto `groo
 - **13 maggio 2026** — Step 5 della roadmap fast-track: rifinitura visiva customer app basata sui pattern estratti dai prototipi del bundle Design (cartella `reference/`). Fraunces, Eyebrow, Brandmark, BackgroundDecor, Icon vocabulary, Card upgraded. Tre pagine restylate (`/u/login`, `/u/home`, `/u/promotions`) + stub `/u/forgot`. Nona entry. Più: hotfix routing top-level (`/` → `/u/login`) + navigazione minima customer (CTA Home → Promotions + link "Torna alla home"). Decima entry. Più: calibrazioni post-test (Brandmark cliccabile, H1 unico "Promozioni del momento", foto Unsplash placeholder sulle promo) e consegna preview customer al salone — URL definitivo `29dw1o8av`. Branch `feat/customer-app` pushata su `origin` con 18 commit. Undicesima entry — consegna del giorno.
 
 - **20 maggio 2026** — Primo riscontro positivo dal salone («soddisfatti dell'interfaccia») + decisione collaterale foto Unsplash promosse a scelta finale Fase 1 + avvio Step 6 (Dashboard customer reale). Aggiornata sezione 10 di `flussi-operativi-salone.md`. Dodicesima entry.
+
+- **11 novembre 2026** — Lo «Stato attuale» è stato riscritto con il passaggio di consegne per la sessione successiva; quello del 19 settembre è stato archiviato. Aggiunta la voce di cronologia «19 settembre – 11 novembre 2026» (GH-97 → GH-116, CD-10 → CD-12, canone 1.3).
