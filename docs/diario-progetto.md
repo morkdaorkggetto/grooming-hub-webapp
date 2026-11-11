@@ -16,7 +16,7 @@ Documento gestito da Cowork secondo la skill `grooming-hub-saas`.
 
 **Produzione** (`azgehoseiojodltcttfb`, salone `0211c475-…`), misurata il 4/11: 400 proprietari, 431 cani, 604 appuntamenti. Canone adottato: **1.3** (`~/Desktop/_metodo/CANONE.md`).
 
-**Ultimo commit pubblicato:** `184323f` (GH-116 e consegna CD-12), con push e deploy fatti da Luigi.
+**Ultimo commit che cambia il prodotto:** `075f2fc` (GH-116, calendario mensile), con push e deploy fatti da Luigi. I commit successivi toccano solo `docs/`: l'11/11 alle 06:33 `origin/main` era a `02a490c` (misurato con `git ls-remote origin main`).
 
 ### Passaggio di consegne — da qui riparte la prossima sessione
 

@@ -24,3 +24,8 @@ grooming-app/
 # Vercel CLI local link (project metadata, non versionato)
 .vercel/
 .vercel
+
+# Materiali per il salone con dati personali: MAI nel repository (ISTRUZIONI.md)
+controlli-salone/
+nomi-da-recuperare/
+qr-gadget/
