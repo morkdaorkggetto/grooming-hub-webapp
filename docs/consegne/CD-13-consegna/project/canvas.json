@@ -1,0 +1,80 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-11T06:09:21Z"
+ },
+ "title": "CD-13 · Come si leggono le fasce",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 375,
+   "h": 656,
+   "title": "Prenotazione · passo 3, un lunedì"
+  },
+  "Riquadro.dc.html": {
+   "x": 455,
+   "y": 0,
+   "w": 375,
+   "h": 804,
+   "title": "Riquadro «Scegli un’altra data»"
+  },
+  "Stati-prenotazione.dc.html": {
+   "x": 910,
+   "y": 0,
+   "w": 375,
+   "h": 1202,
+   "title": "Stati · prenotazione (colonne da 111,7)"
+  },
+  "Stati-riquadro.dc.html": {
+   "x": 1365,
+   "y": 0,
+   "w": 375,
+   "h": 1283,
+   "title": "Stati · riquadro (colonne da 95,7)"
+  },
+  "Prima-dopo.dc.html": {
+   "x": 0,
+   "y": 1403,
+   "w": 790,
+   "h": 436,
+   "title": "Prima → dopo, un lunedì"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Riquadro.dc.html",
+  "Stati-prenotazione.dc.html",
+  "Stati-riquadro.dc.html",
+  "Prima-dopo.dc.html"
+ ],
+ "notes": {
+  "titolo": {
+   "x": 0,
+   "y": -300,
+   "text": "CD-13 · Come si leggono le fasce",
+   "kind": "title1",
+   "maxW": 1740
+  },
+  "sintesi": {
+   "x": -440,
+   "y": 0,
+   "w": 360,
+   "text": "Due righe per pulsante: il nome, e sotto l’orario. Nel giorno in cui una fascia è chiusa, la seconda riga dice «chiusa» al posto dell’orario.\n\nLa chiusura si dice due volte, non tre: come regola nella legenda del calendario, come stato nel pulsante. La frase sotto le fasce compare solo quando una scelta è stata tolta.\n\n«Per me è uguale» non cambia mai.\n\nIl titolo «Mattina o pomeriggio? (facoltativo)» va in tutti e due i posti.\n\nMisure, frasi e cosa non torna: CD-13-handoff.md."
+  }
+ },
+ "designSystems": [
+  {
+   "title": "Grooming Hub",
+   "namespace": "groominghub",
+   "artifact": "https://claude.ai/artifact/Q1XXHLBwnSL6Yn1SJGfBuV",
+   "version": "1794376076-d217",
+   "copiedAt": "2026-11-11T06:09:21Z"
+  }
+ ]
+}

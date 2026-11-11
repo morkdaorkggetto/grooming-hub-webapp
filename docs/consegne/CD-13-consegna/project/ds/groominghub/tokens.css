@@ -1,0 +1,58 @@
+/* Grooming Hub — generated from tokens.json */
+:root {
+  --color-primary: #6f9792;
+  --color-primary-hover: #5e8580;
+  --color-secondary: #67383f;
+  --color-secondary-hover: #562d33;
+  --color-bg-main: #f2ece9;
+  --color-surface-main: #fbf6f3;
+  --color-surface-soft: #f3ece8;
+  --color-surface-muted: #e5d7d8;
+  --color-header: #6f9792;
+  --color-border: #cfc1c4;
+  --color-text-primary: #2b2525;
+  --color-text-secondary: #7f6f73;
+  --color-placeholder: #a58f95;
+  --color-link: #5e8580;
+  --color-success-text: #4f8b67;
+  --color-whatsapp: var(--color-success-text);
+  --color-success-bg: #e3f0e7;
+  --color-danger-text: #b85e69;
+  --color-danger-bg: #f8e6e9;
+  --color-warning-bg: #efe3de;
+  --color-warning-border: #c8a89f;
+  --color-warning-text: #7f5d60;
+  --color-demo-banner-bg: #2b2525;
+  --color-demo-banner-text: #fbf6f3;
+  --gh-bridge: #f7f1ea;
+  --gh-border-60: rgba(207, 193, 196, 0.6);
+  --gh-border-35: rgba(207, 193, 196, 0.35);
+  --color-primary-alpha-06: rgba(111, 151, 146, 0.06);
+  --color-primary-alpha-08: rgba(111, 151, 146, 0.08);
+  --color-primary-alpha-16: rgba(111, 151, 146, 0.16);
+  --color-primary-alpha-22: rgba(111, 151, 146, 0.22);
+  --color-primary-alpha-35: rgba(111, 151, 146, 0.35);
+  --color-border-alpha-12: rgba(207, 193, 196, 0.12);
+  --tier-bronze: #cd7f32;
+  --tier-silver: #94a3b8;
+  --tier-gold: #d4a017;
+  --gh-bar-peak: var(--color-primary-alpha-16);
+  --gh-bar: var(--color-primary-alpha-08);
+  --gh-trend-off: var(--color-primary-alpha-22);
+  --gh-band-off: var(--color-primary-alpha-35);
+  --gh-tint: var(--color-primary-alpha-06);
+  --gh-absent: var(--color-border-alpha-12);
+  --shadow-sm: 0 1px 2px rgba(43, 37, 37, 0.04);
+  --shadow-md: 0 4px 16px rgba(43, 37, 37, 0.06);
+  --shadow-lg: 0 12px 32px rgba(43, 37, 37, 0.1);
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 28px;
+  --r-full: 999px;
+  --font-size-pet-hero: 56px;
+  --font-size-pet-hero-mobile: 40px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+}
+.gh-eyebrow { font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.22em; }

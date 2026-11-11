@@ -1,0 +1,3018 @@
+{
+ "Main.dc.html": {
+  "sistema": {
+   "h": 635.75,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    }
+   ],
+   "oggi": [],
+   "cal": {
+    "w": 351
+   }
+  },
+  "roboto": {
+   "h": 635.75,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    }
+   ],
+   "oggi": [],
+   "cal": {
+    "w": 351
+   }
+  }
+ },
+ "Riquadro.dc.html": {
+  "sistema": {
+   "h": 783.25,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "true",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.94
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    }
+   ],
+   "oggi": [],
+   "cal": {
+    "w": 309
+   }
+  },
+  "roboto": {
+   "h": 783.25,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "true",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 65.16
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    }
+   ],
+   "oggi": [],
+   "cal": {
+    "w": 309
+   }
+  }
+ },
+ "Stati-prenotazione.dc.html": {
+  "sistema": {
+   "h": 1182,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "1",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "2",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "3",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "4",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "stato",
+         "t": "chiuso",
+         "n": 1,
+         "w": 37.13
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "5",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "true",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.94
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "6",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "true",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.97
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "7",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "tolta": {
+      "n": 2,
+      "h": 34
+     },
+     "blocco": 122
+    }
+   ],
+   "oggi": []
+  },
+  "roboto": {
+   "h": 1182,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "1",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "2",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "3",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "4",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "stato",
+         "t": "chiuso",
+         "n": 1,
+         "w": 34.25
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "5",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "true",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 65.16
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "6",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "true",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.75
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "7",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "tolta": {
+      "n": 2,
+      "h": 34
+     },
+     "blocco": 122
+    }
+   ],
+   "oggi": []
+  }
+ },
+ "Stati-riquadro.dc.html": {
+  "sistema": {
+   "h": 1263,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "1",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "2",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "3",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "4",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "stato",
+         "t": "chiuso",
+         "n": 1,
+         "w": 37.13
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "5",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 28.11
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "true",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.94
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "6",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "true",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.97
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "7",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "tolta": {
+      "n": 2,
+      "h": 34
+     },
+     "blocco": 122
+    }
+   ],
+   "oggi": []
+  },
+  "roboto": {
+   "h": 1199,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "1",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "2",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "3",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "4",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "stato",
+         "t": "chiuso",
+         "n": 1,
+         "w": 34.25
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "5",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "ore",
+         "t": "9–13",
+         "n": 1,
+         "w": 27
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "true",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 65.16
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "6",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "true",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.75
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "7",
+     "dove": "",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "tolta": {
+      "n": 2,
+      "h": 34
+     },
+     "blocco": 122
+    }
+   ],
+   "oggi": []
+  }
+ },
+ "Prima-dopo.dc.html": {
+  "sistema": {
+   "h": 415.14,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "",
+     "dove": "book",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "",
+     "dove": "riq",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 45.25
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 36.72
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 69.11
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 35.56
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 51.52
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 222.61,
+      "h": 18
+     },
+     "blocco": 80
+    }
+   ],
+   "oggi": [
+    {
+     "dove": "book",
+     "w": 351,
+     "h": 54,
+     "p": [
+      {
+       "t": "Mattina (9–13)",
+       "w": 111.66,
+       "h": 54,
+       "righeEtichetta": 1,
+       "righeTot": 3,
+       "esce": false
+      },
+      {
+       "t": "Pomeriggio (13–19)",
+       "w": 111.67,
+       "h": 54,
+       "righeEtichetta": 2,
+       "righeTot": 2,
+       "esce": false
+      },
+      {
+       "t": "Per me è uguale",
+       "w": 111.66,
+       "h": 54,
+       "righeEtichetta": 1,
+       "righeTot": 1,
+       "esce": false
+      }
+     ]
+    },
+    {
+     "dove": "riq",
+     "w": 303,
+     "h": 54,
+     "p": [
+      {
+       "t": "Mattina (9–13)",
+       "w": 95.66,
+       "h": 54,
+       "righeEtichetta": 1,
+       "righeTot": 3,
+       "esce": false
+      },
+      {
+       "t": "Pomeriggio (13–19)",
+       "w": 95.67,
+       "h": 54,
+       "righeEtichetta": 2,
+       "righeTot": 2,
+       "esce": false
+      },
+      {
+       "t": "Per me è uguale",
+       "w": 95.66,
+       "h": 54,
+       "righeEtichetta": 2,
+       "righeTot": 2,
+       "esce": false
+      }
+     ]
+    }
+   ]
+  },
+  "roboto": {
+   "h": 414.14,
+   "scrollW": 1000,
+   "fraunces": true,
+   "gruppi": [
+    {
+     "w": 351,
+     "h": 54,
+     "stato": "",
+     "dove": "book",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.67,
+       "h": 54,
+       "utile": 101.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 111.66,
+       "h": 54,
+       "utile": 101.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    },
+    {
+     "w": 303,
+     "h": 54,
+     "stato": "",
+     "dove": "riq",
+     "p": [
+      {
+       "f": "mat",
+       "pressed": "false",
+       "dis": true,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Mattina",
+         "n": 1,
+         "w": 43
+        },
+        {
+         "k": "stato",
+         "t": "chiusa",
+         "n": 1,
+         "w": 33.92
+        }
+       ]
+      },
+      {
+       "f": "pom",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.67,
+       "h": 54,
+       "utile": 85.67,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Pomeriggio",
+         "n": 1,
+         "w": 64.89
+        },
+        {
+         "k": "ore",
+         "t": "13–19",
+         "n": 1,
+         "w": 33.53
+        }
+       ]
+      },
+      {
+       "f": "ug",
+       "pressed": "false",
+       "dis": false,
+       "w": 95.66,
+       "h": 54,
+       "utile": 85.66,
+       "esce": false,
+       "righe": [
+        {
+         "k": "nome",
+         "t": "Per me / è uguale",
+         "n": 2,
+         "w": 47.59
+        }
+       ]
+      }
+     ],
+     "titolo": {
+      "n": 1,
+      "w": 206.38,
+      "h": 18
+     },
+     "blocco": 80
+    }
+   ],
+   "oggi": [
+    {
+     "dove": "book",
+     "w": 351,
+     "h": 54,
+     "p": [
+      {
+       "t": "Mattina (9–13)",
+       "w": 111.66,
+       "h": 54,
+       "righeEtichetta": 1,
+       "righeTot": 3,
+       "esce": false
+      },
+      {
+       "t": "Pomeriggio (13–19)",
+       "w": 111.67,
+       "h": 54,
+       "righeEtichetta": 2,
+       "righeTot": 2,
+       "esce": false
+      },
+      {
+       "t": "Per me è uguale",
+       "w": 111.66,
+       "h": 54,
+       "righeEtichetta": 1,
+       "righeTot": 1,
+       "esce": false
+      }
+     ]
+    },
+    {
+     "dove": "riq",
+     "w": 303,
+     "h": 54,
+     "p": [
+      {
+       "t": "Mattina (9–13)",
+       "w": 95.66,
+       "h": 54,
+       "righeEtichetta": 1,
+       "righeTot": 3,
+       "esce": false
+      },
+      {
+       "t": "Pomeriggio (13–19)",
+       "w": 95.67,
+       "h": 54,
+       "righeEtichetta": 2,
+       "righeTot": 2,
+       "esce": false
+      },
+      {
+       "t": "Per me è uguale",
+       "w": 95.66,
+       "h": 54,
+       "righeEtichetta": 2,
+       "righeTot": 2,
+       "esce": false
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

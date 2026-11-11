@@ -30,7 +30,7 @@ Le cose aperte, in ordine di urgenza:
    - copie allineate, 0 differenze.
 
    **Aspetta solo il sì di Luigi.** Prima di applicarlo, rifare la verifica sui registri delle 24 ore. Applicarlo fuori dall'orario in cui il salone registra visite: l'atto blocca le tabelle per un istante.
-2. **Giorni di chiusura per le feste — FATTO l'11/11.** Davide ha confermato a Luigi le cinque date (8, 25 e 26 dicembre 2026, 1 e 6 gennaio 2027). Atto `supabase/migrations/20261111_gh116_closed_dates_feste_2026.sql`, applicato da Cowork alle 06:50 con il sì di Luigi; `closed_dates` riletto alle 06:51 con le cinque date, il resto delle impostazioni invariato. **Resta aperto:** `closed_dates` la legge solo il calendario dell'app cliente; nel database 2 funzioni controllano `closed_weekdays` e nessuna `closed_dates`, quindi il salone può ancora proporre come alternativa un giorno di festa. Eventuale `GH-117`, da decidere. La chiave `max_months_ahead` non è impostata: vale 2 di default.
+2. **Giorni di chiusura per le feste — FATTO l'11/11.** Davide ha confermato a Luigi le cinque date (8, 25 e 26 dicembre 2026, 1 e 6 gennaio 2027). Atto `supabase/migrations/20261111_gh116_closed_dates_feste_2026.sql`, applicato da Cowork alle 06:50 con il sì di Luigi; `closed_dates` riletto alle 06:51 con le cinque date, il resto delle impostazioni invariato. **Resta aperto:** `closed_dates` la legge solo il calendario dell'app cliente; nel database 2 funzioni controllano `closed_weekdays` e nessuna `closed_dates`, quindi il salone può ancora proporre come alternativa un giorno di festa. Eventuale `GH-118`, rinviato da Luigi l'11/11 (il numero `GH-117` è andato alle fasce orarie). La chiave `max_months_ahead` non è impostata: vale 2 di default.
 3. **Controllo giornaliero del prodotto.** Va creato da Luigi nella sezione «Scheduled», perché da Cowork locale non si possono più creare attività programmate. Orario: dal lunedì al sabato alle 6:00. Istruzioni pronte in `~/Desktop/grooming-hub-web/controlli-giornalieri/ISTRUZIONI-ATTIVITA.md`, con le impronte aggiornate dopo GH-113.
 4. **Prova di Claude Design dentro Cowork.** Il progetto «grooming HUB» è stato spostato da Claude Design standalone a Claude, come artifact, l'11/11; il sito standalone chiude il 14/12. Claude Design online non vede le cartelle locali. Verificare se una sessione Cowork nuova ha lo strumento per creare artifact di tipo Design: se sì, i prossimi incarichi `CD-` si fanno lì, con la root collegata.
 5. **Audit `GH-114`**, dopo qualche giorno di registro `appointment_events` attivo. L'allegato con le misure è pronto: `docs/incarichi/GH-114-misure-del-prodotto.md`.
@@ -72,6 +72,7 @@ I valori completi sono in `supabase/rollback/gh113-prima-degli-atti.md` e nelle 
 - **Prima di prescrivere, misurare.** Le contraddizioni nei mandati di questa sessione sono nate tutte da regole scritte senza leggere il codice o il database.
 - **Non serve più aprire il Finder** a ogni consegna: solo se Luigi lo chiede.
 - **Si scrive in italiano.**
+- **Ogni messaggio che affida un incarico si chiude con il prompt da incollare** (dall'11/11): uno per la chat UI e uno per Codex quando interviene, con l'azione, la posizione del file e la sua impronta. Può essere breve: il compito è nell'incarico.
 
 ---
 
@@ -255,6 +256,7 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 - Le tre cartelle con dati personali (`controlli-salone/`, `nomi-da-recuperare/`, `qr-gadget/`) entrano in `.gitignore`: prima le teneva fuori solo `salva.sh`.
 - La UI non la compone più Claude Design standalone ma una chat Cowork dedicata, con gli artifact di tipo Design; questa chat fa la regia.
 - I giorni di festa confermati da Davide si scrivono nel prodotto.
+- Il passaggio delle consegne di composizione agli artifact Design è una decisione di Luigi (l'handoff di `CD-13`, §0, la attribuisce alla regia).
 
 **Lavori completati**:
 - Ripresa in sola lettura (06:30): canone 1.3 coincidente con `ISTRUZIONI.md`; 7 impronte su 7 uguali a quelle del passaggio di consegne (MD5 di `pg_get_functiondef`, 06:31); connettore Supabase e tipo Design disponibili.
@@ -262,8 +264,14 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 - Commit `17a2129` (`.gitignore` e riga dell'ultimo commit nel diario), push di Luigi, verificato con `git ls-remote origin main` alle 06:45.
 - Atto sulle feste applicato alle 06:50: cinque date in `tenants.settings.booking_schedule.closed_dates`. Prima: chiave assente, 0 appuntamenti e 0 richieste in quelle date, `md5(settings::text)` `c3276b73…`. Dopo: `41cac37f…`, e tolta la chiave nuova l'impronta torna `c3276b73…`. Stato precedente in `supabase/rollback/gh116-closed-dates-prima-dell-atto.md`.
 
+- Primo giro completo Regia → UI → Regia con gli artifact Design, sulle etichette delle fasce orarie lasciate aperte da `GH-116`. `CD-13` scritto alle 06:56 dopo aver misurato il codice: l'etichetta lunga nasce in `bookingSchedule.js` e va in undici posti, tre nel gestionale. La chat UI ha consegnato alle 07:28 in `Prototipo/CD-13-consegna/` (tavola Design e handoff). Verifica della regia alle 07:30: impronte, 8 file su 8 uguali all'artifact, zero esadecimali, 54 token uguali alle fonti, misure a 375px rifatte in Chrome, 11 contrasti ricalcolati. Nessuno scostamento. Consegna copiata in `docs/consegne/CD-13-consegna/`.
+- Il design system «Grooming Hub» (artifact, creato dalla chat UI su decisione di Luigi) verificato dalla regia prima di `CD-13`: 59 righe su 59 uguali alle due fonti CSS.
+- `GH-117` scritto alle 07:35 per Codex: pulsanti su due righe, titolo «(facoltativo)» nei due posti, fascia scelta con i tre scostamenti da `GH-116` firmati da Luigi, due frasi di `PendingRequest`. Fuori, per decisione di Luigi («quelli che non richiedono uno sforzo enorme di UI»): la frase «abbiamo tolto la tua preferenza».
+
 **Aperto**:
 - Controprova visiva di Luigi nell'app cliente: l'8 dicembre spento e la legenda che lo dice.
+- `GH-117` da eseguire (Codex), poi verifica della regia e prova di Luigi sul telefono. Non misurati: larghezza vera delle fasce nel riquadro, iPhone.
+- Rinviati da Luigi l'11/11: atto B di `GH-103` e il controllo dei giorni di festa nel database (`GH-118`).
 - `closed_dates` non è controllata dal database (vedi «Passaggio di consegne», punto 2).
 - Atto B di `GH-103`: aspetta il sì di Luigi.
 
