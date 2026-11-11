@@ -30,7 +30,7 @@ Le cose aperte, in ordine di urgenza:
    - copie allineate, 0 differenze.
 
    **Aspetta solo il sì di Luigi.** Prima di applicarlo, rifare la verifica sui registri delle 24 ore. Applicarlo fuori dall'orario in cui il salone registra visite: l'atto blocca le tabelle per un istante.
-2. **Giorni di chiusura per le feste.** Chiedere a Davide se il salone è chiuso l'8, il 25 e il 26 dicembre, l'1 e il 6 gennaio. Poi un atto di Cowork scrive le date in `tenants.settings.booking_schedule.closed_dates` (elenco `YYYY-MM-DD`), e il calendario le spegne da solo. La chiave `max_months_ahead` non è impostata: vale 2 di default.
+2. **Giorni di chiusura per le feste — FATTO l'11/11.** Davide ha confermato a Luigi le cinque date (8, 25 e 26 dicembre 2026, 1 e 6 gennaio 2027). Atto `supabase/migrations/20261111_gh116_closed_dates_feste_2026.sql`, applicato da Cowork alle 06:50 con il sì di Luigi; `closed_dates` riletto alle 06:51 con le cinque date, il resto delle impostazioni invariato. **Resta aperto:** `closed_dates` la legge solo il calendario dell'app cliente; nel database 2 funzioni controllano `closed_weekdays` e nessuna `closed_dates`, quindi il salone può ancora proporre come alternativa un giorno di festa. Eventuale `GH-117`, da decidere. La chiave `max_months_ahead` non è impostata: vale 2 di default.
 3. **Controllo giornaliero del prodotto.** Va creato da Luigi nella sezione «Scheduled», perché da Cowork locale non si possono più creare attività programmate. Orario: dal lunedì al sabato alle 6:00. Istruzioni pronte in `~/Desktop/grooming-hub-web/controlli-giornalieri/ISTRUZIONI-ATTIVITA.md`, con le impronte aggiornate dopo GH-113.
 4. **Prova di Claude Design dentro Cowork.** Il progetto «grooming HUB» è stato spostato da Claude Design standalone a Claude, come artifact, l'11/11; il sito standalone chiude il 14/12. Claude Design online non vede le cartelle locali. Verificare se una sessione Cowork nuova ha lo strumento per creare artifact di tipo Design: se sì, i prossimi incarichi `CD-` si fanno lì, con la root collegata.
 5. **Audit `GH-114`**, dopo qualche giorno di registro `appointment_events` attivo. L'allegato con le misure è pronto: `docs/incarichi/GH-114-misure-del-prodotto.md`.
@@ -246,6 +246,31 @@ Dal 1° settembre in poi il lavoro è **correzione a caldo di quella vista**, gu
 ---
 
 ## Cronologia
+
+### 11 novembre 2026 — Sessione nuova: ripresa misurata, e le feste entrano nel calendario
+
+**Attori**: Luigi, Cowork, Davide (per le date).
+
+**Decisioni prese**:
+- Le tre cartelle con dati personali (`controlli-salone/`, `nomi-da-recuperare/`, `qr-gadget/`) entrano in `.gitignore`: prima le teneva fuori solo `salva.sh`.
+- La UI non la compone più Claude Design standalone ma una chat Cowork dedicata, con gli artifact di tipo Design; questa chat fa la regia.
+- I giorni di festa confermati da Davide si scrivono nel prodotto.
+
+**Lavori completati**:
+- Ripresa in sola lettura (06:30): canone 1.3 coincidente con `ISTRUZIONI.md`; 7 impronte su 7 uguali a quelle del passaggio di consegne (MD5 di `pg_get_functiondef`, 06:31); connettore Supabase e tipo Design disponibili.
+- Skill `canone-operativo` rigenerata dalla 1.3 e skill `grooming-hub-saas` aggiornata (lavoro su `main`, Codex, chat UI).
+- Commit `17a2129` (`.gitignore` e riga dell'ultimo commit nel diario), push di Luigi, verificato con `git ls-remote origin main` alle 06:45.
+- Atto sulle feste applicato alle 06:50: cinque date in `tenants.settings.booking_schedule.closed_dates`. Prima: chiave assente, 0 appuntamenti e 0 richieste in quelle date, `md5(settings::text)` `c3276b73…`. Dopo: `41cac37f…`, e tolta la chiave nuova l'impronta torna `c3276b73…`. Stato precedente in `supabase/rollback/gh116-closed-dates-prima-dell-atto.md`.
+
+**Aperto**:
+- Controprova visiva di Luigi nell'app cliente: l'8 dicembre spento e la legenda che lo dice.
+- `closed_dates` non è controllata dal database (vedi «Passaggio di consegne», punto 2).
+- Atto B di `GH-103`: aspetta il sì di Luigi.
+
+**Prossimo passo**:
+- Vedi «Passaggio di consegne».
+
+---
 
 ### 19 settembre – 11 novembre 2026 — Dalla sicurezza dei dati all'agenda che non perde niente (GH-97 → GH-116, CD-10 → CD-12)
 
